@@ -9,12 +9,55 @@ import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import InfoCard from "../components/InfoCard"
 import { Smartphone } from "lucide-react"
+import StickyFooter from "../components/StickyFooter"
+
+const DEFAULT_MATERIAL_WEBHOOK_ENDPOINT =
+  "https://hub.aureatech.io/webhook-test/primeirospassos-envio-material"
+
+function isValidHttpUrl(value) {
+  if (!value) return false
+  try {
+    const parsed = new URL(value)
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
+async function sendTrafficMaterialWebhook(endpoint, url) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Material webhook failed: ${response.status}`)
+  }
+}
 
 export default function Etapa5() {
-  const { userData, goNext, updateUserData } = useOnboarding()
+  const { updateUserData } = useOnboarding()
 
   const [trafficChoice, setTrafficChoice] = useState(null)
   const [completed, setCompleted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const configuredTrafficMaterialUrl = String(
+    import.meta.env.VITE_TRAFFIC_MATERIAL_URL || ""
+  ).trim()
+  const configuredMaterialWebhookEndpoint = String(
+    import.meta.env.VITE_TRAFFIC_MATERIAL_WEBHOOK_ENDPOINT || ""
+  ).trim()
+  const materialWebhookEndpoint = isValidHttpUrl(configuredMaterialWebhookEndpoint)
+    ? configuredMaterialWebhookEndpoint
+    : DEFAULT_MATERIAL_WEBHOOK_ENDPOINT
+  const fallbackMaterialUrl =
+    typeof window !== "undefined" ? String(window.location.href || "").trim() : ""
+  const trafficMaterialUrl = isValidHttpUrl(configuredTrafficMaterialUrl)
+    ? configuredTrafficMaterialUrl
+    : fallbackMaterialUrl
 
   // ── Completed ──
   if (completed) {
@@ -200,6 +243,9 @@ export default function Etapa5() {
         {/* Option: Yes */}
         <motion.button
           onClick={() => setTrafficChoice("yes")}
+          role="radio"
+          aria-checked={trafficChoice === "yes"}
+          aria-label="Sim, quero receber as 10 superdicas de tráfego pago"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -264,6 +310,9 @@ export default function Etapa5() {
         {/* Option: No */}
         <motion.button
           onClick={() => setTrafficChoice("no")}
+          role="radio"
+          aria-checked={trafficChoice === "no"}
+          aria-label="Agora não, quero seguir para a próxima etapa"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -309,14 +358,45 @@ export default function Etapa5() {
       </motion.div>
 
       {/* NavButtons */}
-      <NavButtons
-        onNext={() => {
-          updateUserData({ trafficChoice })
-          setCompleted(true)
-        }}
-        nextLabel="Concluir e avançar"
-        nextDisabled={!trafficChoice}
-      />
+      <StickyFooter>
+        <NavButtons
+          onNext={async () => {
+            if (isSubmitting) return
+            setIsSubmitting(true)
+            try {
+              updateUserData({ trafficChoice })
+              if (trafficChoice === "yes") {
+                if (!isValidHttpUrl(configuredMaterialWebhookEndpoint)) {
+                  console.warn(
+                    "[onboarding][etapa5] VITE_TRAFFIC_MATERIAL_WEBHOOK_ENDPOINT missing/invalid, using default webhook endpoint"
+                  )
+                }
+                if (!isValidHttpUrl(configuredTrafficMaterialUrl)) {
+                  console.warn(
+                    "[onboarding][etapa5] VITE_TRAFFIC_MATERIAL_URL missing/invalid, using current page URL fallback"
+                  )
+                }
+                if (isValidHttpUrl(trafficMaterialUrl)) {
+                  try {
+                    await sendTrafficMaterialWebhook(materialWebhookEndpoint, trafficMaterialUrl)
+                  } catch (error) {
+                    console.error("[onboarding][etapa5] failed to trigger material webhook", error)
+                  }
+                } else {
+                  console.warn(
+                    "[onboarding][etapa5] skipped material webhook due to missing valid URL payload"
+                  )
+                }
+              }
+              setCompleted(true)
+            } finally {
+              setIsSubmitting(false)
+            }
+          }}
+          nextLabel={isSubmitting ? "Enviando..." : "Concluir e avançar"}
+          nextDisabled={!trafficChoice || isSubmitting}
+        />
+      </StickyFooter>
     </PageLayout>
   )
 }
