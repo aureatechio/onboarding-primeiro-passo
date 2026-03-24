@@ -28,7 +28,84 @@ SPA Vite + React do fluxo “Primeiro Passo” da Acelerai.
 - Não reverter para `#E63333` nem tons antigos de CTA.
 - Manter `TopBarLogo` como componente oficial de logo nas topbars e hero.
 
+## UX mobile-first (mar 2026)
+
+As melhorias definidas em `ux-mobile-spec.md` foram implementadas preservando jornada, copy e branding.
+
+- Barra de progresso global + safe areas na `TopBar`.
+- `StickyFooter` para manter ações acessíveis em telas longas.
+- Swipe horizontal e restauração de scroll em etapas com slides.
+- Toque e acessibilidade: aumento de hit area e atributos ARIA em componentes interativos.
+- Persistência local do onboarding no `OnboardingContext` com função de reset.
+- Feedback de processamento com `ProcessingOverlay` nas confirmações-chave.
+- Navegação de revisão por etapas concluídas com `StepDrawer`.
+- Ajustes de legibilidade/contraste (`textDim`) e tipografia responsiva via `design-tokens`.
+- Persistência do multistep isolada por `compra_id` (chave por compra no localStorage), evitando reaproveitar progresso entre links diferentes.
+- Comando temporário de teste: triplo clique no logo da topbar limpa o `localStorage` e reinicia a página.
+
+Validação executada:
+
+- `npm run build` em `apps/onboarding` concluído com sucesso.
+
+### Comando temporário de teste (remover para prod)
+
+- Implementação em `src/components/TopBar.jsx`.
+- Flag de controle: `ENABLE_TEST_TRIPLE_TAP_RESET`.
+- Comportamento: 3 cliques no logo em até `TRIPLE_TAP_WINDOW_MS` executam `localStorage.clear()` + `window.location.reload()`.
+- Desligamento para produção: definir `ENABLE_TEST_TRIPLE_TAP_RESET = false` ou remover o bloco `TEMP-TEST-ONLY`.
+
 **Evidências técnicas:** `npm run build` no diretório do app; busca sem emojis e sem setas textuais (`→`, `←`) em `src/*.jsx`.
+
+## Ajustes de copy e regras (mar 2026)
+
+Atualizações de conteúdo aplicadas nas etapas 2, 3 e 4, sem alteração de fluxo:
+
+- `Etapa2`:
+  - atualização de copy sobre responsabilidade de divulgação/tráfego.
+  - atualização de copy sobre sessões de filmagem + briefing.
+  - texto de pacote exibido como `2 vídeos (de 30 segundos) e 4 peças estáticas`.
+- `Etapa3`:
+  - timeline ajustada para `Preparação (Start Kit)`.
+  - timeline ajustada para `Aprovação com a Celebridade`.
+- `Etapa4`:
+  - atualização de texto de canais digitais.
+  - inclusão de dois cards de regras: marcação da celebridade e veiculação apenas em canais oficiais da marca.
+
+Validação executada:
+
+- `npm run build` em `apps/onboarding` concluído com sucesso.
+
+## Etapa 6 dividida (mar 2026)
+
+A etapa de identidade visual foi dividida em duas etapas explícitas no fluxo:
+
+- `Etapa 6.1`: mantém o conteúdo atual de identidade visual.
+- `Etapa 6.2`: nova etapa de bonificação de prazo com coleta mock de referências.
+- `Etapa 8`: modo avançado (antiga etapa 7).
+
+Regras da `Etapa 6.2`:
+
+- opção de preenchimento imediato com obrigatórios: logo + fonte;
+- cores iniciam com 3 presets e aceitam até 5 cores;
+- upload de imagens é opcional;
+- opção de \"deixar para depois\" permite avançar e marca a etapa como pendente.
+
+Estado salvo no contexto (`userData`):
+
+- `identityBonusChoice`, `identityBonusLogoName`, `identityBonusColors`,
+  `identityBonusFont`, `identityBonusImagesCount`, `identityBonusPending`.
+
+## Webhook de material (Etapa 5)
+
+- Regra: quando o usuario marca `Sim, quero receber as 10 superdicas de trafego pago`
+  na Etapa 5 e clica em avancar, o app dispara:
+  - `POST` para `VITE_TRAFFIC_MATERIAL_WEBHOOK_ENDPOINT`
+  - fallback: `https://hub.aureatech.io/webhook-test/primeirospassos-envio-material`
+  - payload: `{ "url": string }`
+- Prioridade da URL enviada:
+  1. `VITE_TRAFFIC_MATERIAL_URL` (quando configurada e valida)
+  2. fallback para URL atual da pagina (`window.location.href`) para nao perder o evento
+- Escolha `Agora nao` nao dispara webhook.
 
 ## Troubleshooting (Lottie)
 
@@ -103,3 +180,5 @@ vercel --prod --scope aureas-projects-ca9dee86
 |----------|-------------|-----------|
 | `VITE_SUPABASE_URL` | Sim | URL base do projeto Supabase para leitura de `get-onboarding-data` |
 | `VITE_ONBOARDING_BASE_URL` | Nao (local) | URL base usada em desenvolvimento para links do onboarding |
+| `VITE_TRAFFIC_MATERIAL_URL` | Nao (recomendada) | Link do material enviado no webhook da Etapa 5 quando houver opt-in |
+| `VITE_TRAFFIC_MATERIAL_WEBHOOK_ENDPOINT` | Nao (recomendada) | Endpoint do webhook n8n para receber o POST da Etapa 5 |

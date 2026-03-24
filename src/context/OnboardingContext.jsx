@@ -10,7 +10,8 @@ import {
 
 const OnboardingContext = createContext(null);
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 8;
+const STORAGE_KEY_BASE = 'primeiro-passo-state';
 
 const STEP_TITLES = {
   1: 'Bem-vindo',
@@ -18,8 +19,9 @@ const STEP_TITLES = {
   3: 'Prazos e combinados',
   4: 'Regras de uso',
   5: 'Sua presenca digital',
-  6: 'Sua identidade visual',
-  7: 'Modo avancado',
+  6: 'Sua identidade visual (6.1)',
+  7: 'Bonificacao de prazo (6.2)',
+  8: 'Modo avancado',
   final: 'Resumo final',
 };
 
@@ -33,6 +35,12 @@ const INITIAL_USER_DATA = {
   atendente: 'Equipe Acelerai',
   trafficChoice: null,
   productionPath: null,
+  identityBonusChoice: null,
+  identityBonusLogoName: '',
+  identityBonusColors: ['#E8356D', '#384FFE', '#111119'],
+  identityBonusFont: '',
+  identityBonusImagesCount: 0,
+  identityBonusPending: false,
 };
 
 const UUID_REGEX =
@@ -54,6 +62,18 @@ function parseCompraIdFromQuery() {
   }
 }
 
+function getValidCompraIdFromQuery() {
+  const compraId = parseCompraIdFromQuery();
+  if (!compraId) return null;
+  if (!UUID_REGEX.test(compraId)) return null;
+  return compraId;
+}
+
+function getStorageKey(compraId) {
+  if (!compraId) return null;
+  return `${STORAGE_KEY_BASE}:${compraId}`;
+}
+
 function mapRemotePayloadToUserData(payload) {
   return {
     ...INITIAL_USER_DATA,
@@ -69,11 +89,53 @@ function mapRemotePayloadToUserData(payload) {
   };
 }
 
+function loadSavedState(compraId) {
+  try {
+    if (typeof window === 'undefined') return null;
+    const key = getStorageKey(compraId);
+    if (!key) return null;
+    const saved = window.localStorage.getItem(key);
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    return {
+      currentStep: parsed.currentStep,
+      completedSteps: new Set(parsed.completedSteps || []),
+      userData: parsed.userData || INITIAL_USER_DATA,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveState(compraId, currentStep, completedSteps, userData) {
+  try {
+    if (typeof window === 'undefined') return;
+    const key = getStorageKey(compraId);
+    if (!key) return;
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({
+        compraId,
+        currentStep,
+        completedSteps: [...completedSteps],
+        userData,
+        savedAt: Date.now(),
+      })
+    );
+  } catch {
+    // localStorage pode falhar em modo privado.
+  }
+}
+
 export function OnboardingProvider({ children }) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState(new Set());
+  const initialCompraId = getValidCompraIdFromQuery();
+  const saved = loadSavedState(initialCompraId);
+
+  const [storageCompraId, setStorageCompraId] = useState(initialCompraId);
+  const [currentStep, setCurrentStep] = useState(saved?.currentStep || 1);
+  const [completedSteps, setCompletedSteps] = useState(saved?.completedSteps || new Set());
   const [direction, setDirection] = useState(1);
-  const [userData, setUserData] = useState(INITIAL_USER_DATA);
+  const [userData, setUserData] = useState(saved?.userData || INITIAL_USER_DATA);
   const [isHydrating, setIsHydrating] = useState(true);
   const [hydrationError, setHydrationError] = useState(null);
   const [hydrationCompraId, setHydrationCompraId] = useState(null);
@@ -81,6 +143,8 @@ export function OnboardingProvider({ children }) {
   // Use ref to always have latest currentStep in callbacks
   const currentStepRef = useRef(currentStep);
   currentStepRef.current = currentStep;
+  const storageCompraIdRef = useRef(storageCompraId);
+  storageCompraIdRef.current = storageCompraId;
 
   const completeStep = useCallback((step) => {
     setCompletedSteps((prev) => new Set([...prev, step]));
@@ -89,7 +153,7 @@ export function OnboardingProvider({ children }) {
   const goNext = useCallback(() => {
     const step = currentStepRef.current;
     completeStep(step);
-    const next = step === 'final' ? 'done' : step === 7 ? 'final' : step + 1;
+    const next = step === 'final' ? 'done' : step === 8 ? 'final' : step + 1;
     setDirection(1);
     setCurrentStep(next);
     window.scrollTo({ top: 0 });
@@ -106,6 +170,12 @@ export function OnboardingProvider({ children }) {
     setUserData((prev) => ({ ...prev, ...updates }));
   }, []);
 
+  const resetOnboarding = useCallback(() => {
+    const key = getStorageKey(storageCompraId);
+    if (key) window.localStorage.removeItem(key);
+    window.location.reload();
+  }, [storageCompraId]);
+
   const hydrateFromQueryParam = useCallback(async () => {
     const compraId = parseCompraIdFromQuery();
     setHydrationError(null);
@@ -121,6 +191,15 @@ export function OnboardingProvider({ children }) {
       setHydrationError('Link invalido: compra_id deve ser um UUID valido.');
       setIsHydrating(false);
       return;
+    }
+
+    if (compraId !== storageCompraIdRef.current) {
+      const nextSaved = loadSavedState(compraId);
+      setStorageCompraId(compraId);
+      setDirection(1);
+      setCurrentStep(nextSaved?.currentStep || 1);
+      setCompletedSteps(nextSaved?.completedSteps || new Set());
+      setUserData(nextSaved?.userData || INITIAL_USER_DATA);
     }
 
     const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || '').trim();
@@ -161,6 +240,10 @@ export function OnboardingProvider({ children }) {
     hydrateFromQueryParam();
   }, [hydrateFromQueryParam]);
 
+  useEffect(() => {
+    saveState(storageCompraId, currentStep, completedSteps, userData);
+  }, [storageCompraId, currentStep, completedSteps, userData]);
+
   const value = useMemo(
     () => ({
       currentStep,
@@ -177,6 +260,7 @@ export function OnboardingProvider({ children }) {
       hydrationError,
       hydrationCompraId,
       retryHydration: hydrateFromQueryParam,
+      resetOnboarding,
     }),
     [
       currentStep,
@@ -191,6 +275,7 @@ export function OnboardingProvider({ children }) {
       hydrationError,
       hydrationCompraId,
       hydrateFromQueryParam,
+      resetOnboarding,
     ]
   );
 

@@ -11,7 +11,7 @@
   --color-red-gradient-end-dark: #9E2645;
   --color-text: #F5F5F5;
   --color-text-muted: #AAAAAA;
-  --color-text-dim: #666666;
+  --color-text-dim: #787878;
   --color-border: #222222;
   --color-input-bg: #111111;
   --color-success: #00E676;
@@ -31,7 +31,7 @@
   --color-red: #E8356D;
   --color-text: #F5F5F5;
   --color-text-muted: #AAAAAA;
-  --color-text-dim: #666666;
+  --color-text-dim: #787878;
   --color-border: #222222;
   --color-input-bg: #111111;
   --color-success: #00E676;
@@ -75,4 +75,13 @@ button {
 /* Remove tap highlight on mobile */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe areas para iPhone notch/Dynamic Island */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

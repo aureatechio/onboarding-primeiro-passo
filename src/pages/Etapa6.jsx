@@ -7,6 +7,7 @@ import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
+import StickyFooter from "../components/StickyFooter"
 
 export default function Etapa6() {
   const { userData, goNext } = useOnboarding()
@@ -19,7 +20,7 @@ export default function Etapa6() {
     return (
       <CompletionScreen
         icon="palette"
-        title="Etapa 6 concluída!"
+        title="Etapa 6.1 concluída!"
         description={`Seu atendente ${userData.atendente} vai te ajudar a organizar todos os materiais de identidade visual. Se tiver dúvidas sobre o que enviar, é só perguntar.`}
       />
     )
@@ -39,6 +40,7 @@ export default function Etapa6() {
         title="Sua identidade visual"
         readTime="2 minutos"
         showPersonalized={true}
+        stepLabel="ETAPA 6.1 DE 8"
       />
 
       {/* Card 1 - Intro */}
@@ -227,6 +229,9 @@ export default function Etapa6() {
       >
         <motion.button
           onClick={() => setAcknowledged(!acknowledged)}
+          role="checkbox"
+          aria-checked={acknowledged}
+          aria-label="Confirmar entendimento sobre envio dos materiais de identidade visual"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -273,11 +278,13 @@ export default function Etapa6() {
       </motion.div>
 
       {/* NavButtons */}
-      <NavButtons
-        onNext={() => setCompleted(true)}
-        nextLabel="Confirmar e avançar"
-        nextDisabled={!acknowledged}
-      />
+      <StickyFooter>
+        <NavButtons
+          onNext={() => setCompleted(true)}
+          nextLabel="Confirmar e avançar"
+          nextDisabled={!acknowledged}
+        />
+      </StickyFooter>
     </PageLayout>
   )
 }

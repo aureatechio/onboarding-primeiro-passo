@@ -11,7 +11,8 @@ import QuizConfirmation from "../components/QuizConfirmation"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import BulletList from "../components/BulletList"
-import AlertBox from "../components/AlertBox"
+import StickyFooter from "../components/StickyFooter"
+import ProcessingOverlay from "../components/ProcessingOverlay"
 
 const TOTAL_SLIDES = 4
 
@@ -23,21 +24,25 @@ export default function Etapa2() {
   const [completed, setCompleted] = useState(false)
   const [slideDirection, setSlideDirection] = useState(1)
   const [quizReady, setQuizReady] = useState(false)
+  const [processing, setProcessing] = useState(false)
 
   const celebName = userData.celebName
-  const pacote = userData.pacote
+  const pacoteResumo = "2 vídeos (de 30 segundos) e 4 peças estáticas."
 
   const goToSlide = useCallback((index) => {
     setSlideDirection(index > currentSlide ? 1 : -1)
     setCurrentSlide(index)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }, [currentSlide])
 
   const nextSlide = useCallback(() => {
     if (currentSlide < TOTAL_SLIDES - 1) {
       setSlideDirection(1)
       setCurrentSlide((prev) => prev + 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     } else {
       setShowQuiz(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }, [currentSlide])
 
@@ -45,6 +50,7 @@ export default function Etapa2() {
     if (currentSlide > 0) {
       setSlideDirection(-1)
       setCurrentSlide((prev) => prev - 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }, [currentSlide])
 
@@ -54,7 +60,7 @@ export default function Etapa2() {
   }, [])
 
   const handleConfirmAndAdvance = useCallback(() => {
-    setCompleted(true)
+    setProcessing(true)
   }, [])
 
   const quizQuestions = [
@@ -88,19 +94,11 @@ export default function Etapa2() {
     // ── Slide 2.1 ──
     <div key="slide-1">
       <p style={{ color: COLORS.textMuted, fontSize: 14, lineHeight: 1.7, margin: "0 0 16px 0" }}>
-        A <strong style={{ color: COLORS.text }}>Aceleraí</strong> é uma plataforma de campanhas com celebridades.
-        Nós cuidamos de toda a <strong style={{ color: COLORS.text }}>produção dos criativos</strong> — vídeos,
-        imagens e materiais com a participação da celebridade contratada.
+        A Aceleraí não é uma agência de publicidade tradicional. Nós produzimos os criativos com
+        a celebridade, mas a divulgação, o planejamento e o tráfego pago ficam{" "}
+        <strong style={{ color: COLORS.text }}>por sua conta</strong> (ou da sua agência/equipe de
+        marketing).
       </p>
-
-      <div style={{ marginBottom: 16 }}>
-        <AlertBox color={COLORS.red}>
-          <strong style={{ color: COLORS.text }}>Importante:</strong> A Aceleraí não é uma agência
-          de publicidade tradicional. Nós produzimos os criativos com a celebridade, mas a{" "}
-          <strong style={{ color: COLORS.text }}>divulgação e o tráfego pago ficam por sua conta</strong>{" "}
-          (ou da sua agência/equipe de marketing).
-        </AlertBox>
-      </div>
 
       <div
         style={{
@@ -168,8 +166,8 @@ export default function Etapa2() {
     // ── Slide 2.2 ──
     <div key="slide-2">
       <p style={{ color: COLORS.textMuted, fontSize: 14, lineHeight: 1.7, margin: "0 0 16px 0" }}>
-        A celebridade participa de <strong style={{ color: COLORS.text }}>sessões de gravação</strong> onde
-        registramos diversos materiais. A partir dessas gravações, combinamos com o{" "}
+        A celebridade já realizou <strong style={{ color: COLORS.text }}>sessões de filmagem</strong>{" "}
+        onde registramos diversos textos. A partir dessas gravações, combinamos com o{" "}
         <strong style={{ color: COLORS.text }}>briefing da sua empresa</strong> para criar os criativos
         da sua campanha.
       </p>
@@ -283,7 +281,7 @@ export default function Etapa2() {
           lineHeight: 1.3,
           textAlign: "center",
         }}>
-          {pacote}
+          {pacoteResumo}
         </p>
       </div>
 
@@ -398,17 +396,22 @@ export default function Etapa2() {
             {slideTitles[currentSlide]}
           </h2>
 
-          <SlideTransition slideKey={currentSlide} direction={slideDirection}>
+          <SlideTransition
+            slideKey={currentSlide}
+            direction={slideDirection}
+            onSwipeLeft={nextSlide}
+            onSwipeRight={currentSlide > 0 ? prevSlide : undefined}
+          >
             {slideContents[currentSlide]}
           </SlideTransition>
 
-          <div style={{ marginTop: 24 }}>
+          <StickyFooter>
             <NavButtons
               onPrev={currentSlide > 0 ? prevSlide : undefined}
               onNext={nextSlide}
               nextLabel={currentSlide < TOTAL_SLIDES - 1 ? "Próximo" : "Ir para confirmação"}
             />
-          </div>
+          </StickyFooter>
         </>
       ) : (
         <>
@@ -421,15 +424,26 @@ export default function Etapa2() {
             confirmMessage="Tudo confirmado. Você pode avançar."
           />
 
-          <NavButtons
-            onPrev={handleQuizBack}
-            prevLabel="Voltar"
-            onNext={handleConfirmAndAdvance}
-            nextLabel="Confirmar e avançar"
-            nextDisabled={!quizReady}
-          />
+          <StickyFooter>
+            <NavButtons
+              onPrev={handleQuizBack}
+              prevLabel="Voltar"
+              onNext={handleConfirmAndAdvance}
+              nextLabel="Confirmar e avançar"
+              nextDisabled={!quizReady}
+            />
+          </StickyFooter>
         </>
       )}
+      <ProcessingOverlay
+        show={processing}
+        messages={["Salvando respostas...", "Concluído!"]}
+        duration={1200}
+        onComplete={() => {
+          setProcessing(false)
+          setCompleted(true)
+        }}
+      />
     </PageLayout>
   )
 }

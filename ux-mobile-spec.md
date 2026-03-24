@@ -1093,27 +1093,57 @@ export default function TopBar({ showCompleted = false }) {
 
 ## 13. Checklist de Execução
 
-- [ ] Barra de progresso global adicionada na TopBar (fixa, 3px, gradient)
-- [ ] `viewport-fit=cover` no `index.html`
-- [ ] Safe areas aplicadas na TopBar e no footer
-- [ ] `StickyFooter.jsx` criado e aplicado em TODAS as etapas
-- [ ] Spacer de 100px adicionado no `PageLayout`
-- [ ] `SlideTransition.jsx` atualizado com suporte a swipe (drag + callbacks)
-- [ ] Swipe conectado em Etapa2, Etapa3, Etapa4
-- [ ] Checkboxes do `QuizConfirmation` aumentados pra 28px
-- [ ] SlideDots com área de toque expandida (padding 14px)
-- [ ] `window.scrollTo` adicionado em TODAS as funções `nextSlide`, `prevSlide`, `goToSlide`
-- [ ] Persistência com localStorage implementada no `OnboardingContext`
-- [ ] Função `resetOnboarding` disponível no context
-- [ ] `ProcessingOverlay.jsx` criado
-- [ ] ProcessingOverlay usado na Etapa 3 (ativação da preparação)
-- [ ] ProcessingOverlay usado nas transições de conclusão de etapa
-- [ ] `RESPONSIVE_TYPE` criado em `tokens.js`
-- [ ] Títulos do Hero e EtapaFinal usando `clamp()`
-- [ ] `textDim` atualizado de `#666666` para `#787878` (colors.js + global.css)
-- [ ] Atributos ARIA adicionados no QuizConfirmation, SlideDots, NavButtons, TopBar
-- [ ] `StepDrawer.jsx` criado
-- [ ] StepDrawer integrado na TopBar (dots clicáveis abrem o drawer)
-- [ ] Testado em viewport 375px (iPhone baseline)
-- [ ] Testado em viewport 320px (iPhone SE)
-- [ ] Nenhum texto ou lógica de negócio foi alterado
+- [x] Barra de progresso global adicionada na TopBar (fixa, 3px, gradient)
+- [x] `viewport-fit=cover` no `index.html`
+- [x] Safe areas aplicadas na TopBar e no footer
+- [x] `StickyFooter.jsx` criado e aplicado em TODAS as etapas
+- [x] Spacer de 100px adicionado no `PageLayout`
+- [x] `SlideTransition.jsx` atualizado com suporte a swipe (drag + callbacks)
+- [x] Swipe conectado em Etapa2, Etapa3, Etapa4
+- [x] Checkboxes do `QuizConfirmation` aumentados pra 28px
+- [x] SlideDots com área de toque expandida (padding 14px)
+- [x] `window.scrollTo` adicionado em TODAS as funções `nextSlide`, `prevSlide`, `goToSlide`
+- [x] Persistência com localStorage implementada no `OnboardingContext`
+- [x] Função `resetOnboarding` disponível no context
+- [x] `ProcessingOverlay.jsx` criado
+- [x] ProcessingOverlay usado na Etapa 3 (ativação da preparação)
+- [x] ProcessingOverlay usado nas transições de conclusão de etapa
+- [x] Tipografia responsiva (`clamp`) aplicada via `design-tokens.js` (sem criar `tokens.js`)
+- [x] Títulos do Hero e EtapaFinal usando `clamp()`
+- [x] `textDim` atualizado de `#666666` para `#787878` (tokens + global.css)
+- [x] Atributos ARIA adicionados no QuizConfirmation, SlideDots, NavButtons, TopBar
+- [x] `StepDrawer.jsx` criado
+- [x] StepDrawer integrado na TopBar (dots clicáveis abrem o drawer)
+- [x] Testado em viewport 375px (iPhone baseline)
+- [x] Testado em viewport 320px (iPhone SE)
+- [x] Nenhuma lógica de negócio foi alterada
+
+## Nota operacional (estado por compra)
+
+- O estado do multistep deve ser persistido por partição de compra (`primeiro-passo-state:<compra_id>`).
+- Trocar o `compra_id` na URL não pode reaproveitar progresso de outra compra.
+
+## Atualização posterior de conteúdo (mar 2026)
+
+Após a execução deste spec de UX, houve ajuste pontual de copy/regras nas etapas:
+
+- `Etapa2`: mensagens de responsabilidade de mídia e texto explicativo de sessões + briefing.
+- `Etapa3`: atualização de dois labels da timeline (`Preparação (Start Kit)` e `Aprovação com a Celebridade`).
+- `Etapa4`: atualização de canais digitais e inclusão de cards com regras de publicação da celebridade.
+
+Esses ajustes foram somente de conteúdo visual, mantendo fluxo, navegação e gates do onboarding.
+
+## Atualização posterior de fluxo (mar 2026)
+
+O fluxo passou a ter divisão explícita da etapa de identidade visual:
+
+- `6.1`: identidade visual (conteúdo original da antiga etapa 6).
+- `6.2`: bonificação de prazo com formulário mock de referências visuais.
+- etapa seguinte de modo avançado passa para `8`.
+
+Regras funcionais adicionadas na `6.2`:
+
+- opção \"vou adicionar\" exige logo + fonte para conclusão completa;
+- paleta começa com 3 cores preset e aceita expansão até 5;
+- imagens de campanhas são opcionais;
+- opção \"deixar para depois\" e botão \"continuar depois\" avançam o fluxo com pendência marcada.

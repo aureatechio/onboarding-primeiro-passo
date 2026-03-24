@@ -8,6 +8,7 @@ export default function StepHeader({
   alert,
   tag,
   showPersonalized = false,
+  stepLabel,
 }) {
   const { currentStep, totalSteps } = useOnboarding();
   const stepNum = typeof currentStep === "number" ? currentStep : totalSteps;
@@ -34,7 +35,7 @@ export default function StepHeader({
               fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            ETAPA {stepNum} DE {totalSteps}
+            {stepLabel || `ETAPA ${stepNum} DE ${totalSteps}`}
           </span>
         </div>
         {showPersonalized && (

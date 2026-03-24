@@ -91,6 +91,9 @@ export default function QuizConfirmation({
           <motion.button
             key={i}
             onClick={() => handleConfirm(i)}
+            role="checkbox"
+            aria-checked={confirmations[i]}
+            aria-label={q}
             whileTap={{ scale: 0.98 }}
             style={{
               display: "flex",
@@ -114,8 +117,8 @@ export default function QuizConfirmation({
               }}
               transition={{ duration: 0.2 }}
               style={{
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 borderRadius: 7,
                 flexShrink: 0,
                 marginTop: 0,
@@ -133,7 +136,7 @@ export default function QuizConfirmation({
                     exit={{ scale: 0 }}
                     style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
                   >
-                    <Check size={14} color={COLORS.bg} strokeWidth={3} />
+                    <Check size={15} color={COLORS.bg} strokeWidth={3} />
                   </motion.div>
                 )}
               </AnimatePresence>

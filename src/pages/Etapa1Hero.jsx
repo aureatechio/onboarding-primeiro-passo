@@ -3,6 +3,7 @@ import { useOnboarding } from "../context/OnboardingContext";
 import { motion, useScroll, useTransform } from "framer-motion";
 import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
+import { TYPE } from "../theme/design-tokens";
 
 export default function Etapa1Hero() {
   const { userData, goNext } = useOnboarding();
@@ -130,12 +131,9 @@ export default function Etapa1Hero() {
           <motion.h1
             variants={item}
             style={{
-              fontSize: "48px",
-              fontWeight: 900,
+              ...TYPE.hero,
               color: COLORS.text,
               margin: "0 0 24px 0",
-              lineHeight: 1.1,
-              letterSpacing: "-1px",
             }}
           >
             Primeiro Passo

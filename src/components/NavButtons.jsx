@@ -28,6 +28,7 @@ export default function NavButtons({
         <button
           type="button"
           onClick={onPrev}
+          aria-label="Voltar para o passo anterior"
           style={{
             flex: 1,
             padding: 14,
@@ -50,6 +51,8 @@ export default function NavButtons({
       <button
         type="button"
         onClick={handleNext}
+        aria-label={nextDisabled ? "Complete os itens para avançar" : "Avançar para o próximo passo"}
+        aria-disabled={nextDisabled}
         style={{
           flex: 2,
           padding: 14,

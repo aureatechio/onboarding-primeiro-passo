@@ -14,7 +14,7 @@ export const colorHex = {
   redGradientEndDark: "#9E2645",
   text: "#F5F5F5",
   textMuted: "#AAAAAA",
-  textDim: "#666666",
+  textDim: "#787878",
   border: "#222222",
   inputBg: "#111111",
   success: "#00E676",
@@ -165,19 +165,19 @@ export const designTokens = {
  */
 export const TYPE = {
   hero: {
-    fontSize: 48,
+    fontSize: "clamp(32px, 10vw, 48px)",
     fontWeight: designTokens.fontWeight.black,
     letterSpacing: "-0.04em",
     lineHeight: 1.1,
   },
   h1: {
-    fontSize: 28,
+    fontSize: "clamp(24px, 6vw, 36px)",
     fontWeight: designTokens.fontWeight.black,
     letterSpacing: "-0.03em",
     lineHeight: 1.2,
   },
   h2: {
-    fontSize: 20,
+    fontSize: "clamp(18px, 5vw, 28px)",
     fontWeight: designTokens.fontWeight.extrabold,
     letterSpacing: "-0.02em",
     lineHeight: 1.3,

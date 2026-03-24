@@ -11,6 +11,8 @@ import QuizConfirmation from "../components/QuizConfirmation";
 import TopBar from "../components/TopBar";
 import Icon from "../components/Icon";
 import BulletList from "../components/BulletList";
+import StickyFooter from "../components/StickyFooter";
+import ProcessingOverlay from "../components/ProcessingOverlay";
 
 export default function Etapa3() {
   const { userData, goNext, totalSteps } = useOnboarding();
@@ -18,6 +20,7 @@ export default function Etapa3() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [activated, setActivated] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [slideDirection, setSlideDirection] = useState(1);
   const [quizReady, setQuizReady] = useState(false);
 
@@ -26,23 +29,28 @@ export default function Etapa3() {
   const goToSlide = (index) => {
     setSlideDirection(index > currentSlide ? 1 : -1);
     setCurrentSlide(index);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const nextSlide = () => {
     if (currentSlide < totalSlides - 1) {
       setSlideDirection(1);
       setCurrentSlide((s) => s + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       setShowQuiz(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const prevSlide = () => {
     if (showQuiz) {
       setShowQuiz(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (currentSlide > 0) {
       setSlideDirection(-1);
       setCurrentSlide((s) => s - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -336,11 +344,11 @@ export default function Etapa3() {
         const timeline = [
           { label: "Assinatura do contrato", status: "done" },
           { label: "Primeiro Passo", status: "current", tag: "AGORA" },
-          { label: "Preparação (15 dias)", status: "next", tag: "EM BREVE" },
+          { label: "Preparação (Start Kit)", status: "next", tag: "EM BREVE" },
           { label: "Briefing criativo", status: "future" },
           { label: "Produção das peças", status: "future" },
           { label: "Aprovação do cliente", status: "future" },
-          { label: "Gravação com celebridade", status: "future" },
+          { label: "Aprovação com a Celebridade", status: "future" },
           { label: "Entrega final", status: "future" },
           { label: "Uso da campanha", status: "future" },
         ];
@@ -992,11 +1000,13 @@ export default function Etapa3() {
           <SlideTransition
             slideKey={currentSlide}
             direction={slideDirection}
+            onSwipeLeft={nextSlide}
+            onSwipeRight={currentSlide > 0 ? prevSlide : undefined}
           >
             {renderSlide()}
           </SlideTransition>
 
-          <div style={{ marginTop: 24 }}>
+          <StickyFooter>
             <NavButtons
               onPrev={currentSlide > 0 ? prevSlide : undefined}
               onNext={nextSlide}
@@ -1006,7 +1016,7 @@ export default function Etapa3() {
                   : "Revisar e confirmar"
               }
             />
-          </div>
+          </StickyFooter>
         </>
       ) : (
         <>
@@ -1023,15 +1033,32 @@ export default function Etapa3() {
             confirmMessage="Tudo certo! Você pode ativar a preparação."
           />
 
-          <NavButtons
-            onPrev={prevSlide}
-            onNext={() => setActivated(true)}
-            nextVariant="warning"
-            nextLabel="Confirmar e ativar preparação"
-            nextDisabled={!quizReady}
-          />
+          <StickyFooter>
+            <NavButtons
+              onPrev={prevSlide}
+              onNext={() => setProcessing(true)}
+              nextVariant="warning"
+              nextLabel="Confirmar e ativar preparação"
+              nextDisabled={!quizReady}
+            />
+          </StickyFooter>
         </>
       )}
+
+      <ProcessingOverlay
+        show={processing}
+        messages={[
+          "Ativando preparação...",
+          "Notificando sua atendente...",
+          "Registrando prazos...",
+          "Tudo pronto!",
+        ]}
+        duration={2500}
+        onComplete={() => {
+          setProcessing(false);
+          setActivated(true);
+        }}
+      />
     </PageLayout>
   );
 }

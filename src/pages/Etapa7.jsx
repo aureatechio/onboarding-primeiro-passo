@@ -8,6 +8,7 @@ import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import BulletList from "../components/BulletList"
+import StickyFooter from "../components/StickyFooter"
 
 export default function Etapa7() {
   const { userData, goNext, updateUserData } = useOnboarding()
@@ -21,7 +22,7 @@ export default function Etapa7() {
     return (
       <CompletionScreen
         icon="trendingUp"
-        title="Etapa 7 concluída!"
+        title="Etapa 8 concluída!"
         description={
           isHybrid
             ? "Você escolheu a produção híbrida. Lembre-se das regras de aprovação e prazos. Seu atendente vai orientar todo o processo."
@@ -45,6 +46,7 @@ export default function Etapa7() {
         title="Modo avançado"
         readTime="3 minutos"
         showPersonalized={true}
+        stepLabel="ETAPA 8 DE 8"
       />
 
       {/* Card 1 - Intro */}
@@ -87,6 +89,9 @@ export default function Etapa7() {
         {/* Option: Standard */}
         <motion.button
           onClick={() => setProductionPath("standard")}
+          role="radio"
+          aria-checked={productionPath === "standard"}
+          aria-label="Produção pela Aceleraí"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -155,6 +160,9 @@ export default function Etapa7() {
         {/* Option: Hybrid */}
         <motion.button
           onClick={() => setProductionPath("hybrid")}
+          role="radio"
+          aria-checked={productionPath === "hybrid"}
+          aria-label="Produção híbrida"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -372,14 +380,16 @@ export default function Etapa7() {
       )}
 
       {/* NavButtons */}
-      <NavButtons
-        onNext={() => {
-          updateUserData({ productionPath })
-          setCompleted(true)
-        }}
-        nextLabel="Concluir e avançar"
-        nextDisabled={!productionPath}
-      />
+      <StickyFooter>
+        <NavButtons
+          onNext={() => {
+            updateUserData({ productionPath })
+            setCompleted(true)
+          }}
+          nextLabel="Concluir e avançar"
+          nextDisabled={!productionPath}
+        />
+      </StickyFooter>
     </PageLayout>
   )
 }

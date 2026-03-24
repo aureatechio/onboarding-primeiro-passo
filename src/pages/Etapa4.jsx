@@ -10,6 +10,8 @@ import NavButtons from "../components/NavButtons"
 import QuizConfirmation from "../components/QuizConfirmation"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
+import StickyFooter from "../components/StickyFooter"
+import ProcessingOverlay from "../components/ProcessingOverlay"
 
 export default function Etapa4() {
   const { userData, goNext } = useOnboarding()
@@ -20,6 +22,7 @@ export default function Etapa4() {
   const [completed, setCompleted] = useState(false)
   const [slideDirection, setSlideDirection] = useState(1)
   const [quizReady, setQuizReady] = useState(false)
+  const [processing, setProcessing] = useState(false)
 
   const totalSlides = 4
 
@@ -27,29 +30,34 @@ export default function Etapa4() {
     setSlideDirection(index > currentSlide ? 1 : -1)
     setCurrentSlide(index)
     setShowQuiz(false)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const nextSlide = () => {
     if (showQuiz) {
-      if (quizReady) setCompleted(true)
+      if (quizReady) setProcessing(true)
       return
     }
     if (currentSlide < totalSlides - 1) {
       setSlideDirection(1)
       setCurrentSlide((s) => s + 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     } else {
       setShowQuiz(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
   const prevSlide = () => {
     if (showQuiz) {
       setShowQuiz(false)
+      window.scrollTo({ top: 0, behavior: "smooth" })
       return
     }
     if (currentSlide > 0) {
       setSlideDirection(-1)
       setCurrentSlide((s) => s - 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
@@ -375,7 +383,7 @@ export default function Etapa4() {
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="circleCheck" size={16} color={COLORS.success} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              Instagram, Facebook, Site e Trafego pago — uso liberado com pecas aprovadas.
+              Incluir os canais tiktok, youtube, linkedin e google;
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -383,6 +391,33 @@ export default function Etapa4() {
             <p style={{ ...bodyText, fontSize: 13 }}>
               WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade
               nesses canais.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Regras de marcacao e veiculacao */}
+      <div style={cardStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+          <Icon name="ban" size={20} color={COLORS.text} />
+          <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
+            Regras de publicação
+          </p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <Icon name="ban" size={16} color={COLORS.danger} />
+            <p style={{ ...bodyText, fontSize: 13 }}>
+              Não é permitido marcar a <strong style={{ color: COLORS.text }}>Celebridade nas publicações em redes sociais</strong>.
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <Icon name="alertTriangle" size={16} color={COLORS.warning} />
+            <p style={{ ...bodyText, fontSize: 13 }}>
+              Só é permitida a veiculação da celebridade nos canais oficiais da marca.
+              <br />
+              <br />
+              Colaboradores podem republicar o conteúdo mas não podem publicar em suas redes sociais pessoais.
             </p>
           </div>
         </div>
@@ -645,11 +680,13 @@ export default function Etapa4() {
       <SlideTransition
         slideKey={showQuiz ? "quiz" : `slide-${currentSlide}`}
         direction={slideDirection}
+        onSwipeLeft={showQuiz ? undefined : nextSlide}
+        onSwipeRight={currentSlide > 0 || showQuiz ? prevSlide : undefined}
       >
         {renderCurrentContent()}
       </SlideTransition>
 
-      <div style={{ marginTop: 24 }}>
+      <StickyFooter>
         <NavButtons
           onPrev={currentSlide > 0 || showQuiz ? prevSlide : undefined}
           onNext={nextSlide}
@@ -665,7 +702,16 @@ export default function Etapa4() {
           nextDisabled={showQuiz && !quizReady}
           nextVariant={showQuiz && quizReady ? "warning" : "red"}
         />
-      </div>
+      </StickyFooter>
+      <ProcessingOverlay
+        show={processing}
+        messages={["Salvando respostas...", "Concluído!"]}
+        duration={1200}
+        onComplete={() => {
+          setProcessing(false)
+          setCompleted(true)
+        }}
+      />
     </PageLayout>
   )
 }

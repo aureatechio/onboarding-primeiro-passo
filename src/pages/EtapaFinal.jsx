@@ -6,6 +6,7 @@ import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
 import LottieImport from "lottie-react";
 import celebrationAnimation from "../assets/lottie/celebration.json";
+import { TYPE } from "../theme/design-tokens";
 
 const Lottie =
   typeof LottieImport === "function"
@@ -68,7 +69,7 @@ export default function EtapaFinal() {
             )}
           </div>
 
-          <h1 style={{ color: COLORS.text, fontSize: 36, fontWeight: 900, margin: "0 0 12px 0", letterSpacing: "-0.04em" }}>
+          <h1 style={{ ...TYPE.h1, color: COLORS.text, margin: "0 0 12px 0" }}>
             Parabéns!
           </h1>
 
@@ -158,7 +159,7 @@ export default function EtapaFinal() {
           }}>
             <Icon name="circleCheck" size={30} color={COLORS.accent} />
           </div>
-          <h1 style={{ color: COLORS.text, fontSize: 28, fontWeight: 900, margin: "0 0 6px 0", letterSpacing: "-0.03em" }}>
+          <h1 style={{ ...TYPE.h1, color: COLORS.text, margin: "0 0 6px 0" }}>
             Tudo pronto. Sua campanha vai começar.
           </h1>
           <p style={{ color: COLORS.textMuted, fontSize: 14, margin: 0 }}>
