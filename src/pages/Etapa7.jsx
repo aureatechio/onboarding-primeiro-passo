@@ -6,6 +6,8 @@ import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
+import Icon from "../components/Icon"
+import BulletList from "../components/BulletList"
 
 export default function Etapa7() {
   const { userData, goNext, updateUserData } = useOnboarding()
@@ -18,7 +20,7 @@ export default function Etapa7() {
     const isHybrid = productionPath === "hybrid"
     return (
       <CompletionScreen
-        icon="🚀"
+        icon="trendingUp"
         title="Etapa 7 concluída!"
         description={
           isHybrid
@@ -59,7 +61,7 @@ export default function Etapa7() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <span style={{ fontSize: 20 }}>🎬</span>
+          <Icon name="clapperboard" size={20} color={COLORS.text} />
           <h2 style={{ color: COLORS.text, fontSize: 17, fontWeight: 800, margin: 0 }}>
             Você tem estrutura para ir além?
           </h2>
@@ -83,8 +85,11 @@ export default function Etapa7() {
         </p>
 
         {/* Option: Standard */}
-        <button
+        <motion.button
           onClick={() => setProductionPath("standard")}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             width: "100%",
             padding: 16,
@@ -117,12 +122,12 @@ export default function Etapa7() {
               }}
             >
               {productionPath === "standard" && (
-                <span style={{ color: COLORS.text, fontSize: 12, fontWeight: 900 }}>✓</span>
+                <Icon name="check" size={12} color={COLORS.text} />
               )}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <span style={{ fontSize: 16 }}>🎬</span>
+                <Icon name="clapperboard" size={16} color={COLORS.text} />
                 <span style={{ color: COLORS.text, fontSize: 14, fontWeight: 700 }}>
                   Produção pela Aceleraí
                 </span>
@@ -145,11 +150,14 @@ export default function Etapa7() {
               </p>
             </div>
           </div>
-        </button>
+        </motion.button>
 
         {/* Option: Hybrid */}
-        <button
+        <motion.button
           onClick={() => setProductionPath("hybrid")}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             width: "100%",
             padding: 16,
@@ -181,12 +189,12 @@ export default function Etapa7() {
               }}
             >
               {productionPath === "hybrid" && (
-                <span style={{ color: COLORS.bg, fontSize: 12, fontWeight: 900 }}>✓</span>
+                <Icon name="check" size={12} color={COLORS.bg} />
               )}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <span style={{ fontSize: 16 }}>🤝</span>
+                <Icon name="handshake" size={16} color={COLORS.text} />
                 <span style={{ color: COLORS.text, fontSize: 14, fontWeight: 700 }}>
                   Produção híbrida
                 </span>
@@ -209,7 +217,7 @@ export default function Etapa7() {
               </p>
             </div>
           </div>
-        </button>
+        </motion.button>
       </motion.div>
 
       {/* Conditional: Hybrid rules */}
@@ -231,7 +239,7 @@ export default function Etapa7() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 16 }}>🚫</span>
+              <Icon name="ban" size={16} color={COLORS.danger} />
               <span style={{ color: COLORS.danger, fontSize: 13, fontWeight: 800 }}>
                 Aprovação obrigatória
               </span>
@@ -253,7 +261,7 @@ export default function Etapa7() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 16 }}>⏱</span>
+              <Icon name="clock" size={16} color={COLORS.text} />
               <span style={{ color: COLORS.text, fontSize: 13, fontWeight: 800 }}>
                 3 dias úteis por lote
               </span>
@@ -277,19 +285,17 @@ export default function Etapa7() {
             <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 800, margin: "0 0 12px 0" }}>
               A celebridade pode rejeitar materiais que:
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
+            <BulletList
+              items={[
                 "Alterem a aparência ou voz da celebridade de forma inadequada",
                 "Associem a imagem a conteúdo ofensivo ou polêmico",
                 "Desrespeitem as diretrizes de uso da imagem",
                 "Incluam promessas ou alegações não autorizadas",
-              ].map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: COLORS.danger, fontSize: 10, marginTop: 4, flexShrink: 0 }}>●</span>
-                  <span style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5 }}>{item}</span>
-                </div>
-              ))}
-            </div>
+              ]}
+              color={COLORS.danger}
+              iconSize={12}
+              itemColor={COLORS.textMuted}
+            />
           </div>
 
           {/* Recommendations */}
@@ -305,19 +311,17 @@ export default function Etapa7() {
             <p style={{ color: COLORS.accent, fontSize: 13, fontWeight: 800, margin: "0 0 12px 0" }}>
               Recomendações para produção híbrida:
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
+            <BulletList
+              items={[
                 "Mantenha a qualidade visual dos materiais originais",
                 "Não distorça ou altere as proporções dos vídeos/fotos",
                 "Use as fontes e cores da marca de forma consistente",
                 "Envie os materiais para aprovação com antecedência",
-              ].map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ color: COLORS.accent, fontSize: 10, marginTop: 4, flexShrink: 0 }}>●</span>
-                  <span style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5 }}>{item}</span>
-                </div>
-              ))}
-            </div>
+              ]}
+              color={COLORS.accent}
+              iconSize={12}
+              itemColor={COLORS.textMuted}
+            />
           </div>
 
           {/* Briefing avançado box */}
@@ -354,7 +358,7 @@ export default function Etapa7() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 18 }}>✅</span>
+            <Icon name="circleCheck" size={18} color={COLORS.success} />
             <div>
               <p style={{ color: COLORS.success, fontSize: 14, fontWeight: 700, margin: "0 0 4px 0" }}>
                 Produção completa pela Aceleraí
@@ -373,7 +377,7 @@ export default function Etapa7() {
           updateUserData({ productionPath })
           setCompleted(true)
         }}
-        nextLabel="Concluir e avançar →"
+        nextLabel="Concluir e avançar"
         nextDisabled={!productionPath}
       />
     </PageLayout>

@@ -1,5 +1,7 @@
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
+import TopBarLogo from "./TopBarLogo";
+import { motion } from "framer-motion";
 
 export default function TopBar({ showCompleted = false }) {
   const { currentStep, completedSteps, totalSteps } = useOnboarding();
@@ -12,10 +14,10 @@ export default function TopBar({ showCompleted = false }) {
         position: "sticky",
         top: 0,
         zIndex: 10,
-        background: `${COLORS.bg}EE`,
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${COLORS.border}`,
+        background: "rgba(10, 10, 10, 0.85)",
+        backdropFilter: "blur(16px) saturate(180%)",
+        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
         padding: "12px 24px",
       }}
     >
@@ -28,17 +30,7 @@ export default function TopBar({ showCompleted = false }) {
           justifyContent: "space-between",
         }}
       >
-        <span
-          style={{
-            color: COLORS.accent,
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-        >
-          PRIMEIRO PASSO
-        </span>
+        <TopBarLogo />
 
         {showCompleted ? (
           <div
@@ -80,8 +72,9 @@ export default function TopBar({ showCompleted = false }) {
               const isActive = i + 1 <= stepNum;
 
               return (
-                <div
+                <motion.div
                   key={i}
+                  layoutId={`progress-dot-${i}`}
                   style={{
                     width: isActive ? 16 : 6,
                     height: 3,
@@ -91,8 +84,8 @@ export default function TopBar({ showCompleted = false }) {
                       : isCurrent
                         ? COLORS.red
                         : COLORS.border,
-                    transition: "all 0.4s ease",
                   }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               );
             })}

@@ -9,6 +9,7 @@ import SlideTransition from "../components/SlideTransition"
 import NavButtons from "../components/NavButtons"
 import QuizConfirmation from "../components/QuizConfirmation"
 import CompletionScreen from "../components/CompletionScreen"
+import Icon from "../components/Icon"
 
 export default function Etapa4() {
   const { userData, goNext } = useOnboarding()
@@ -56,15 +57,15 @@ export default function Etapa4() {
   if (completed) {
     return (
       <CompletionScreen
-        icon="⭐"
+        icon="star"
         title="Etapa 4 concluida!"
         description={`Agora voce conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento e essencial para uma campanha de sucesso.`}
         summaryItems={[
-          { icon: "🎬", label: "Celebridade", value: celebName },
-          { icon: "📍", label: "Praca", value: praca },
-          { icon: "🏷", label: "Segmento", value: segmento },
-          { icon: "✏️", label: "Ajustes", value: "2 rodadas por peca" },
-          { icon: "⏱", label: "Aprovacao celebridade", value: "Ate 3 dias uteis" },
+          { icon: "clapperboard", label: "Celebridade", value: celebName },
+          { icon: "mapPin", label: "Praca", value: praca },
+          { icon: "tag", label: "Segmento", value: segmento },
+          { icon: "penLine", label: "Ajustes", value: "2 rodadas por peca" },
+          { icon: "clock", label: "Aprovacao celebridade", value: "Ate 3 dias uteis" },
         ]}
       />
     )
@@ -158,7 +159,7 @@ export default function Etapa4() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span style={{ fontSize: 18 }}>🔒</span>
+          <Icon name="lock" size={18} color={COLORS.accent} />
           <p style={{ color: COLORS.accent, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Exclusividade geografica e de segmento
           </p>
@@ -173,7 +174,7 @@ export default function Etapa4() {
       {/* Practical example */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <span style={{ fontSize: 18 }}>📍</span>
+          <Icon name="mapPin" size={18} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Exemplo pratico do seu contrato
           </p>
@@ -192,10 +193,10 @@ export default function Etapa4() {
   // ─── Slide 4.3 ─────────────────────────────────────────────
   const renderSlide43 = () => {
     const steps = [
-      { icon: "🎬", label: "Producao cria a peca", color: COLORS.red, desc: "Nossa equipe desenvolve o material criativo." },
-      { icon: "👁", label: "Voce revisa e aprova", color: COLORS.accent, desc: "Voce analisa e pede ajustes se necessario." },
-      { icon: "⭐", label: "Celebridade aprova", color: COLORS.warning, desc: "A celebridade valida o uso da sua imagem." },
-      { icon: "✅", label: "Entrega liberada", color: COLORS.success, desc: "Peca aprovada e liberada para veiculacao." },
+      { icon: "clapperboard", label: "Producao cria a peca", color: COLORS.red, desc: "Nossa equipe desenvolve o material criativo." },
+      { icon: "eye", label: "Voce revisa e aprova", color: COLORS.accent, desc: "Voce analisa e pede ajustes se necessario." },
+      { icon: "star", label: "Celebridade aprova", color: COLORS.warning, desc: "A celebridade valida o uso da sua imagem." },
+      { icon: "circleCheck", label: "Entrega liberada", color: COLORS.success, desc: "Peca aprovada e liberada para veiculacao." },
     ]
 
     return (
@@ -245,7 +246,7 @@ export default function Etapa4() {
                     zIndex: 1,
                   }}
                 >
-                  <span style={{ fontSize: 9 }}>{step.icon}</span>
+                  <Icon name={step.icon} size={9} color={step.color} />
                 </div>
                 <div>
                   <p
@@ -274,7 +275,7 @@ export default function Etapa4() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: 16 }}>✏️</span>
+            <Icon name="penLine" size={16} color={COLORS.accent} />
             <p style={{ color: COLORS.accent, fontSize: 14, fontWeight: 800, margin: 0 }}>
               2 rodadas de ajustes por peca
             </p>
@@ -294,7 +295,7 @@ export default function Etapa4() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: 16 }}>⚠️</span>
+            <Icon name="alertTriangle" size={16} color={COLORS.warning} />
             <p style={{ color: COLORS.warning, fontSize: 14, fontWeight: 800, margin: 0 }}>
               Celebridade pode pedir ajustes
             </p>
@@ -314,7 +315,7 @@ export default function Etapa4() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 16 }}>💎</span>
+            <Icon name="gem" size={16} color={COLORS.red} />
             <p style={{ color: COLORS.red, fontSize: 14, fontWeight: 800, margin: 0 }}>
               Regra de ouro
             </p>
@@ -339,21 +340,21 @@ export default function Etapa4() {
       {/* Franquias */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>🏢</span>
+          <Icon name="building2" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Franquias e filiais
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ color: COLORS.success, fontSize: 16, flexShrink: 0 }}>✅</span>
+            <Icon name="circleCheck" size={16} color={COLORS.success} />
             <p style={{ ...bodyText, fontSize: 13 }}>
               Unidades na <strong style={{ color: COLORS.accent }}>mesma regiao</strong> da
               praca contratada podem usar as pecas normalmente.
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ color: COLORS.danger, fontSize: 16, flexShrink: 0 }}>🚫</span>
+            <Icon name="ban" size={16} color={COLORS.danger} />
             <p style={{ ...bodyText, fontSize: 13 }}>
               Unidades em <strong style={{ color: COLORS.danger }}>outras regioes</strong>{" "}
               precisam de contrato proprio para usar a celebridade.
@@ -365,20 +366,20 @@ export default function Etapa4() {
       {/* Canais digitais */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>📱</span>
+          <Icon name="smartphone" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Canais digitais
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ color: COLORS.success, fontSize: 16, flexShrink: 0 }}>✅</span>
+            <Icon name="circleCheck" size={16} color={COLORS.success} />
             <p style={{ ...bodyText, fontSize: 13 }}>
               Instagram, Facebook, Site e Trafego pago — uso liberado com pecas aprovadas.
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ color: COLORS.danger, fontSize: 16, flexShrink: 0 }}>🚫</span>
+            <Icon name="ban" size={16} color={COLORS.danger} />
             <p style={{ ...bodyText, fontSize: 13 }}>
               WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade
               nesses canais.
@@ -390,13 +391,13 @@ export default function Etapa4() {
       {/* TV / Outdoor */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>📺</span>
+          <Icon name="tv" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             TV, Radio e Outdoor
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
-          <span style={{ color: COLORS.warning, fontSize: 16, flexShrink: 0 }}>⚠️</span>
+          <Icon name="alertTriangle" size={16} color={COLORS.warning} />
           <p style={{ ...bodyText, fontSize: 13 }}>
             Consulte a equipe antes de veicular nesses meios. Cada formato pode ter regras
             especificas.
@@ -436,7 +437,7 @@ export default function Etapa4() {
       {/* Renovacao */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>🔄</span>
+          <Icon name="refreshCw" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Renovacao do contrato
           </p>
@@ -493,7 +494,7 @@ export default function Etapa4() {
       {/* Celebridade nao disponivel */}
       <div style={cardStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>🔀</span>
+          <Icon name="shuffle" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Celebridade nao disponivel
           </p>
@@ -541,7 +542,7 @@ export default function Etapa4() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <span style={{ fontSize: 20 }}>⚠️</span>
+          <Icon name="alertTriangle" size={20} color={COLORS.danger} />
           <p style={{ color: COLORS.danger, fontSize: 15, fontWeight: 800, margin: 0 }}>
             Fim do contrato — obrigacoes
           </p>
@@ -571,7 +572,7 @@ export default function Etapa4() {
           textAlign: "center",
         }}
       >
-        <span style={{ fontSize: 22 }}>⚖️</span>
+        <Icon name="scale" size={22} color={COLORS.danger} />
         <p
           style={{
             color: COLORS.danger,
@@ -607,7 +608,7 @@ export default function Etapa4() {
       </p>
       <QuizConfirmation
         questions={quizQuestions}
-        icon="⭐"
+        icon="star"
         title="Confirme o entendimento"
         subtitle="Marque todos os itens para concluir"
         iconBg={`${COLORS.warning}15`}
@@ -655,11 +656,11 @@ export default function Etapa4() {
           nextLabel={
             showQuiz
               ? quizReady
-                ? "Concluir etapa ✓"
+                ? "Concluir etapa"
                 : "Confirme todos os itens"
               : currentSlide === totalSlides - 1
-                ? "Ir para o quiz →"
-                : "Proximo →"
+                ? "Ir para o quiz"
+                : "Proximo"
           }
           nextDisabled={showQuiz && !quizReady}
           nextVariant={showQuiz && quizReady ? "warning" : "red"}

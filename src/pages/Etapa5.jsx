@@ -6,6 +6,9 @@ import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
+import Icon from "../components/Icon"
+import InfoCard from "../components/InfoCard"
+import { Smartphone } from "lucide-react"
 
 export default function Etapa5() {
   const { userData, goNext, updateUserData } = useOnboarding()
@@ -17,7 +20,7 @@ export default function Etapa5() {
   if (completed) {
     return (
       <CompletionScreen
-        icon="📱"
+        icon="smartphone"
         title="Etapa 5 concluída!"
         description={
           trafficChoice === "yes"
@@ -40,30 +43,21 @@ export default function Etapa5() {
       />
 
       {/* Card 1 - Seus criativos precisam de um palco */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        style={{
-          background: `linear-gradient(135deg, ${COLORS.red}18, ${COLORS.red}08)`,
-          border: `1px solid ${COLORS.red}25`,
-          borderRadius: 16,
-          padding: 22,
-          marginBottom: 16,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <span style={{ fontSize: 20 }}>📱</span>
-          <h2 style={{ color: COLORS.text, fontSize: 17, fontWeight: 800, margin: 0 }}>
-            Seus criativos precisam de um palco
-          </h2>
-        </div>
-        <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-          De nada adianta ter vídeos incríveis com uma celebridade se seus{" "}
-          <strong style={{ color: COLORS.text }}>canais digitais não estão preparados</strong> para
-          receber essa audiência. Suas redes sociais, site e landing pages precisam estar{" "}
-          <strong style={{ color: COLORS.text }}>prontos para converter</strong>.
-        </p>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{ marginBottom: 16 }}>
+        <InfoCard
+          icon={Smartphone}
+          title="Seus criativos precisam de um palco"
+          iconColor={COLORS.red}
+          borderColor={`${COLORS.red}25`}
+          bgTint={`linear-gradient(135deg, ${COLORS.red}18, ${COLORS.red}08)`}
+        >
+          <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+            De nada adianta ter vídeos incríveis com uma celebridade se seus{" "}
+            <strong style={{ color: COLORS.text }}>canais digitais não estão preparados</strong> para
+            receber essa audiência. Suas redes sociais, site e landing pages precisam estar{" "}
+            <strong style={{ color: COLORS.text }}>prontos para converter</strong>.
+          </p>
+        </InfoCard>
       </motion.div>
 
       {/* Card 2 - PENSE ASSIM */}
@@ -105,7 +99,7 @@ export default function Etapa5() {
                 margin: "0 auto 8px",
               }}
             >
-              <span style={{ fontSize: 22 }}>⭐</span>
+              <Icon name="star" size={22} color={COLORS.magenta} />
             </div>
             <p
               style={{
@@ -123,7 +117,7 @@ export default function Etapa5() {
             </p>
           </div>
 
-          <span style={{ color: COLORS.textDim, fontSize: 20, flexShrink: 0 }}>→</span>
+          <Icon name="arrowRight" size={20} color={COLORS.textDim} />
 
           <div style={{ flex: 1, textAlign: "center" }}>
             <div
@@ -138,7 +132,7 @@ export default function Etapa5() {
                 margin: "0 auto 8px",
               }}
             >
-              <span style={{ fontSize: 22 }}>📱</span>
+              <Icon name="smartphone" size={22} color={COLORS.accent} />
             </div>
             <p
               style={{
@@ -187,7 +181,7 @@ export default function Etapa5() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <span style={{ fontSize: 20 }}>🚀</span>
+          <Icon name="trendingUp" size={20} color={COLORS.accent} />
           <h3 style={{ color: COLORS.accent, fontSize: 16, fontWeight: 800, margin: 0 }}>
             Como acelerar seus resultados
           </h3>
@@ -204,8 +198,11 @@ export default function Etapa5() {
         </p>
 
         {/* Option: Yes */}
-        <button
+        <motion.button
           onClick={() => setTrafficChoice("yes")}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             width: "100%",
             padding: 14,
@@ -238,7 +235,7 @@ export default function Etapa5() {
               }}
             >
               {trafficChoice === "yes" && (
-                <span style={{ color: COLORS.bg, fontSize: 11, fontWeight: 900 }}>✓</span>
+                <Icon name="check" size={11} color={COLORS.bg} />
               )}
             </div>
             <div style={{ flex: 1 }}>
@@ -262,11 +259,14 @@ export default function Etapa5() {
               </span>
             </div>
           </div>
-        </button>
+        </motion.button>
 
         {/* Option: No */}
-        <button
+        <motion.button
           onClick={() => setTrafficChoice("no")}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             width: "100%",
             padding: 14,
@@ -298,14 +298,14 @@ export default function Etapa5() {
               }}
             >
               {trafficChoice === "no" && (
-                <span style={{ color: COLORS.bg, fontSize: 11, fontWeight: 900 }}>✓</span>
+                <Icon name="check" size={11} color={COLORS.bg} />
               )}
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: 600, margin: 0 }}>
               Agora não, quero seguir para a próxima etapa
             </p>
           </div>
-        </button>
+        </motion.button>
       </motion.div>
 
       {/* NavButtons */}
@@ -314,7 +314,7 @@ export default function Etapa5() {
           updateUserData({ trafficChoice })
           setCompleted(true)
         }}
-        nextLabel="Concluir e avançar →"
+        nextLabel="Concluir e avançar"
         nextDisabled={!trafficChoice}
       />
     </PageLayout>

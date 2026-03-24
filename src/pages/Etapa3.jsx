@@ -9,6 +9,8 @@ import SlideTransition from "../components/SlideTransition";
 import NavButtons from "../components/NavButtons";
 import QuizConfirmation from "../components/QuizConfirmation";
 import TopBar from "../components/TopBar";
+import Icon from "../components/Icon";
+import BulletList from "../components/BulletList";
 
 export default function Etapa3() {
   const { userData, goNext, totalSteps } = useOnboarding();
@@ -60,17 +62,17 @@ export default function Etapa3() {
 
     const nowItems = [
       {
-        icon: "📩",
+        icon: "mail",
         title: "Entraremos em contato",
         desc: "Nossa equipe vai te procurar nos canais combinados.",
       },
       {
-        icon: "⚡",
+        icon: "zap",
         title: "Responda rápido",
         desc: "Quanto mais rápido você responder, mais rápido sua campanha sai.",
       },
       {
-        icon: "🎬",
+        icon: "clapperboard",
         title: "A produção começa",
         desc: "Assim que tudo estiver alinhado, iniciamos as peças.",
       },
@@ -112,7 +114,7 @@ export default function Etapa3() {
               boxShadow: `0 0 40px ${COLORS.warning}15`,
             }}
           >
-            <span style={{ fontSize: 34 }}>⏱</span>
+            <Icon name="clock" size={34} color={COLORS.warning} />
           </motion.div>
 
           {/* Title */}
@@ -219,7 +221,7 @@ export default function Etapa3() {
                       : "none",
                 }}
               >
-                <span style={{ fontSize: 18, flexShrink: 0 }}>{ni.icon}</span>
+                <Icon name={ni.icon} size={18} color={COLORS.text} />
                 <div>
                   <p
                     style={{
@@ -271,7 +273,7 @@ export default function Etapa3() {
               padding: 16,
               borderRadius: 12,
               border: "none",
-              background: `linear-gradient(135deg, #CC2222, ${COLORS.red})`,
+              background: `linear-gradient(135deg, ${COLORS.redGradientStart}, ${COLORS.red})`,
               color: COLORS.text,
               fontSize: 15,
               fontWeight: 800,
@@ -280,7 +282,10 @@ export default function Etapa3() {
               letterSpacing: "0.01em",
             }}
           >
-            Continuar para Etapa 4 →
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              Continuar para Etapa 4
+              <Icon name="arrowRight" size={16} color={COLORS.text} />
+            </span>
           </motion.button>
 
           {/* Progress dots */}
@@ -316,7 +321,7 @@ export default function Etapa3() {
               fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            ETAPA 3 DE {totalSteps} ✓
+            ETAPA 3 DE {totalSteps} CONCLUIDA
           </motion.p>
         </motion.div>
       </div>
@@ -515,7 +520,7 @@ export default function Etapa3() {
                     justifyContent: "center",
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>🎯</span>
+                  <Icon name="target" size={18} color={COLORS.accent} />
                 </div>
                 <p
                   style={{
@@ -528,41 +533,7 @@ export default function Etapa3() {
                   A sua parte
                 </p>
               </div>
-              {yourPart.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "8px 0",
-                    borderBottom:
-                      i < yourPart.length - 1
-                        ? `1px solid ${COLORS.border}`
-                        : "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: COLORS.accent,
-                      fontSize: 12,
-                      lineHeight: "20px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    ✦
-                  </span>
-                  <span
-                    style={{
-                      color: COLORS.textMuted,
-                      fontSize: 13,
-                      lineHeight: "20px",
-                    }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
+              <BulletList items={yourPart} color={COLORS.accent} />
             </div>
 
             {/* Our part */}
@@ -593,7 +564,7 @@ export default function Etapa3() {
                     justifyContent: "center",
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>🎬</span>
+                  <Icon name="clapperboard" size={18} color={COLORS.red} />
                 </div>
                 <p
                   style={{
@@ -606,41 +577,7 @@ export default function Etapa3() {
                   A parte da Aceleraí
                 </p>
               </div>
-              {ourPart.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 10,
-                    padding: "8px 0",
-                    borderBottom:
-                      i < ourPart.length - 1
-                        ? `1px solid ${COLORS.border}`
-                        : "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: COLORS.red,
-                      fontSize: 12,
-                      lineHeight: "20px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    ✦
-                  </span>
-                  <span
-                    style={{
-                      color: COLORS.textMuted,
-                      fontSize: 13,
-                      lineHeight: "20px",
-                    }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
+              <BulletList items={ourPart} color={COLORS.red} />
             </div>
           </div>
         );
@@ -662,7 +599,7 @@ export default function Etapa3() {
                 padding: 16,
               }}
             >
-              <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+              <Icon name="alertTriangle" size={16} color={COLORS.warning} />
               <p
                 style={{
                   color: COLORS.warning,
@@ -713,7 +650,7 @@ export default function Etapa3() {
                         fontWeight: 800,
                       }}
                     >
-                      ✓
+                      <Icon name="check" size={14} color={COLORS.success} />
                     </span>
                   </div>
                   <span
@@ -861,7 +798,7 @@ export default function Etapa3() {
                     justifyContent: "center",
                   }}
                 >
-                  <span style={{ fontSize: 22 }}>💬</span>
+                  <Icon name="messageCircle" size={22} color={COLORS.whatsapp} />
                 </div>
                 <div>
                   <p
@@ -925,7 +862,7 @@ export default function Etapa3() {
                     justifyContent: "center",
                   }}
                 >
-                  <span style={{ fontSize: 22 }}>🖥</span>
+                  <Icon name="monitor" size={22} color={COLORS.red} />
                 </div>
                 <div>
                   <p
@@ -973,7 +910,7 @@ export default function Etapa3() {
                 padding: 14,
               }}
             >
-              <span style={{ fontSize: 14, flexShrink: 0 }}>⏱</span>
+              <Icon name="clock" size={14} color={COLORS.warning} />
               <p
                 style={{
                   color: COLORS.warning,
@@ -1065,8 +1002,8 @@ export default function Etapa3() {
               onNext={nextSlide}
               nextLabel={
                 currentSlide < totalSlides - 1
-                  ? "Próximo →"
-                  : "Revisar e confirmar →"
+                  ? "Próximo"
+                  : "Revisar e confirmar"
               }
             />
           </div>
@@ -1074,7 +1011,7 @@ export default function Etapa3() {
       ) : (
         <>
           <QuizConfirmation
-            icon="⏱"
+            icon="clock"
             iconBg={`${COLORS.warning}10`}
             subtitle="Ao confirmar, a preparação de 15 dias inicia"
             questions={[
@@ -1090,7 +1027,7 @@ export default function Etapa3() {
             onPrev={prevSlide}
             onNext={() => setActivated(true)}
             nextVariant="warning"
-            nextLabel="Confirmar e ativar preparação ⏱"
+            nextLabel="Confirmar e ativar preparação"
             nextDisabled={!quizReady}
           />
         </>

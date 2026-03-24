@@ -6,6 +6,7 @@ import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
+import Icon from "../components/Icon"
 
 export default function Etapa6() {
   const { userData, goNext } = useOnboarding()
@@ -17,7 +18,7 @@ export default function Etapa6() {
   if (completed) {
     return (
       <CompletionScreen
-        icon="🎨"
+        icon="palette"
         title="Etapa 6 concluída!"
         description={`Seu atendente ${userData.atendente} vai te ajudar a organizar todos os materiais de identidade visual. Se tiver dúvidas sobre o que enviar, é só perguntar.`}
       />
@@ -25,10 +26,10 @@ export default function Etapa6() {
   }
 
   const items = [
-    { icon: "🎨", title: "Logo em alta resolução", desc: "PNG com fundo transparente, de preferência" },
-    { icon: "🎨", title: "Cores principais da marca", desc: "Códigos hex (ex: #FF0000) ou referência visual" },
-    { icon: "🔤", title: "Fontes da comunicação", desc: "Nome das fontes usadas nos materiais da marca" },
-    { icon: "📸", title: "Referências visuais", desc: "Exemplos de peças, posts ou anúncios que você gosta" },
+    { icon: "palette", title: "Logo em alta resolução", desc: "PNG com fundo transparente, de preferência" },
+    { icon: "palette", title: "Cores principais da marca", desc: "Códigos hex (ex: #FF0000) ou referência visual" },
+    { icon: "type", title: "Fontes da comunicação", desc: "Nome das fontes usadas nos materiais da marca" },
+    { icon: "camera", title: "Referências visuais", desc: "Exemplos de peças, posts ou anúncios que você gosta" },
   ]
 
   // ── Main Screen ──
@@ -54,7 +55,7 @@ export default function Etapa6() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <span style={{ fontSize: 20 }}>🎨</span>
+          <Icon name="palette" size={20} color={COLORS.text} />
           <h2 style={{ color: COLORS.text, fontSize: 17, fontWeight: 800, margin: 0 }}>
             Suas peças ficam muito melhores com a sua cara
           </h2>
@@ -104,7 +105,7 @@ export default function Etapa6() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 14 }}>✅</span>
+              <Icon name="circleCheck" size={14} color={COLORS.success} />
               <span style={{ color: COLORS.success, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>
                 COM REFERÊNCIAS
               </span>
@@ -124,7 +125,7 @@ export default function Etapa6() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 14 }}>⚠️</span>
+              <Icon name="alertTriangle" size={14} color={COLORS.danger} />
               <span style={{ color: COLORS.danger, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>
                 SEM REFERÊNCIAS
               </span>
@@ -184,7 +185,7 @@ export default function Etapa6() {
                   flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
+                <Icon name={item.icon} size={18} color={COLORS.magenta} />
               </div>
               <div>
                 <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 700, margin: "0 0 3px 0" }}>
@@ -224,8 +225,11 @@ export default function Etapa6() {
         transition={{ delay: 0.45 }}
         style={{ marginBottom: 20 }}
       >
-        <button
+        <motion.button
           onClick={() => setAcknowledged(!acknowledged)}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
           style={{
             width: "100%",
             padding: 16,
@@ -259,19 +263,19 @@ export default function Etapa6() {
             }}
           >
             {acknowledged && (
-              <span style={{ color: COLORS.bg, fontSize: 13, fontWeight: 900 }}>✓</span>
+              <Icon name="check" size={13} color={COLORS.bg} />
             )}
           </div>
           <p style={{ color: acknowledged ? COLORS.text : COLORS.textMuted, fontSize: 13, fontWeight: 600, margin: 0, lineHeight: 1.5 }}>
             Entendi que preciso separar os materiais de identidade visual da minha marca para enviar ao atendente.
           </p>
-        </button>
+        </motion.button>
       </motion.div>
 
       {/* NavButtons */}
       <NavButtons
         onNext={() => setCompleted(true)}
-        nextLabel="Confirmar e avançar →"
+        nextLabel="Confirmar e avançar"
         nextDisabled={!acknowledged}
       />
     </PageLayout>

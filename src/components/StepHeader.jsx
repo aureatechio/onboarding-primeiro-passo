@@ -1,5 +1,6 @@
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
+import Icon from "./Icon";
 
 export default function StepHeader({
   title,
@@ -107,7 +108,7 @@ export default function StepHeader({
             padding: "10px 14px",
           }}
         >
-          <span style={{ fontSize: 14 }}>⏱</span>
+          <Icon name="clock" size={14} color={COLORS.warning} />
           <span
             style={{
               color: COLORS.warning,

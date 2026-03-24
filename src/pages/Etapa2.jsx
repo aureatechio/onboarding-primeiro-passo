@@ -9,6 +9,9 @@ import SlideTransition from "../components/SlideTransition"
 import NavButtons from "../components/NavButtons"
 import QuizConfirmation from "../components/QuizConfirmation"
 import CompletionScreen from "../components/CompletionScreen"
+import Icon from "../components/Icon"
+import BulletList from "../components/BulletList"
+import AlertBox from "../components/AlertBox"
 
 const TOTAL_SLIDES = 4
 
@@ -64,7 +67,7 @@ export default function Etapa2() {
   if (completed) {
     return (
       <CompletionScreen
-        icon="✓"
+        icon="check"
         title="Etapa 2 concluída!"
         description="Agora você sabe exatamente como funciona a sua campanha. No próximo passo, vamos alinhar os prazos e combinados."
       />
@@ -90,23 +93,13 @@ export default function Etapa2() {
         imagens e materiais com a participação da celebridade contratada.
       </p>
 
-      <div
-        style={{
-          background: `${COLORS.red}12`,
-          border: `1px solid ${COLORS.red}30`,
-          borderRadius: 12,
-          padding: 16,
-          marginBottom: 16,
-        }}
-      >
-        <p style={{ color: COLORS.red, fontSize: 13, fontWeight: 700, margin: "0 0 6px 0" }}>
-          Importante
-        </p>
-        <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-          A Aceleraí <strong style={{ color: COLORS.text }}>não é uma agência de publicidade tradicional</strong>.
-          Nós produzimos os criativos com a celebridade, mas a <strong style={{ color: COLORS.text }}>divulgação
-          e o tráfego pago ficam por sua conta</strong> (ou da sua agência/equipe de marketing).
-        </p>
+      <div style={{ marginBottom: 16 }}>
+        <AlertBox color={COLORS.red}>
+          <strong style={{ color: COLORS.text }}>Importante:</strong> A Aceleraí não é uma agência
+          de publicidade tradicional. Nós produzimos os criativos com a celebridade, mas a{" "}
+          <strong style={{ color: COLORS.text }}>divulgação e o tráfego pago ficam por sua conta</strong>{" "}
+          (ou da sua agência/equipe de marketing).
+        </AlertBox>
       </div>
 
       <div
@@ -134,7 +127,7 @@ export default function Etapa2() {
                 margin: "0 auto 8px",
               }}
             >
-              <span style={{ fontSize: 22 }}>🎬</span>
+              <Icon name="clapperboard" size={22} color={COLORS.red} />
             </div>
             <p style={{ color: COLORS.red, fontSize: 11, fontWeight: 800, margin: "0 0 2px 0", letterSpacing: "0.05em" }}>
               ACELERAÍ
@@ -144,7 +137,7 @@ export default function Etapa2() {
             </p>
           </div>
 
-          <span style={{ color: COLORS.textDim, fontSize: 20, flexShrink: 0 }}>→</span>
+          <Icon name="arrowRight" size={20} color={COLORS.textDim} />
 
           <div style={{ flex: 1, textAlign: "center" }}>
             <div
@@ -159,7 +152,7 @@ export default function Etapa2() {
                 margin: "0 auto 8px",
               }}
             >
-              <span style={{ fontSize: 22 }}>🎯</span>
+              <Icon name="target" size={22} color={COLORS.accent} />
             </div>
             <p style={{ color: COLORS.accent, fontSize: 11, fontWeight: 800, margin: "0 0 2px 0", letterSpacing: "0.05em" }}>
               VOCÊ
@@ -269,7 +262,7 @@ export default function Etapa2() {
             marginBottom: 16,
           }}
         >
-          <span style={{ fontSize: 12 }}>⭐</span>
+          <Icon name="star" size={12} color={COLORS.magenta} />
           <span
             style={{
               color: COLORS.magenta,
@@ -318,22 +311,18 @@ export default function Etapa2() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 18 }}>🎬</span>
+            <Icon name="clapperboard" size={18} color={COLORS.red} />
             <span style={{ color: COLORS.red, fontSize: 14, fontWeight: 800 }}>Da nossa parte</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
+          <BulletList
+            items={[
               "Produção dos criativos com a celebridade",
               "Edição e finalização profissional",
               "Entrega dentro do prazo combinado",
               "Suporte durante toda a campanha",
-            ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <span style={{ color: COLORS.red, fontSize: 10, marginTop: 4, flexShrink: 0 }}>●</span>
-                <span style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.5 }}>{item}</span>
-              </div>
-            ))}
-          </div>
+            ]}
+            color={COLORS.red}
+          />
         </div>
 
         {/* Da sua parte */}
@@ -346,22 +335,18 @@ export default function Etapa2() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <span style={{ fontSize: 18 }}>🎯</span>
+            <Icon name="target" size={18} color={COLORS.accent} />
             <span style={{ color: COLORS.accent, fontSize: 14, fontWeight: 800 }}>Da sua parte</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[
+          <BulletList
+            items={[
               "Enviar o briefing completo da empresa",
               "Rodar a divulgação e o tráfego pago",
               "Responder os leads gerados pela campanha",
               "Manter comunicação ativa com nosso time",
-            ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <span style={{ color: COLORS.accent, fontSize: 10, marginTop: 4, flexShrink: 0 }}>●</span>
-                <span style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.5 }}>{item}</span>
-              </div>
-            ))}
-          </div>
+            ]}
+            color={COLORS.accent}
+          />
         </div>
       </div>
 
@@ -421,7 +406,7 @@ export default function Etapa2() {
             <NavButtons
               onPrev={currentSlide > 0 ? prevSlide : undefined}
               onNext={nextSlide}
-              nextLabel={currentSlide < TOTAL_SLIDES - 1 ? "Próximo →" : "Ir para confirmação →"}
+              nextLabel={currentSlide < TOTAL_SLIDES - 1 ? "Próximo" : "Ir para confirmação"}
             />
           </div>
         </>
@@ -431,16 +416,16 @@ export default function Etapa2() {
             questions={quizQuestions}
             title="Confirme o entendimento"
             subtitle="Marque todos para avançar"
-            icon="✓"
+            icon="check"
             onAllConfirmed={(val) => setQuizReady(val)}
             confirmMessage="Tudo confirmado. Você pode avançar."
           />
 
           <NavButtons
             onPrev={handleQuizBack}
-            prevLabel="← Voltar"
+            prevLabel="Voltar"
             onNext={handleConfirmAndAdvance}
-            nextLabel="Confirmar e avançar →"
+            nextLabel="Confirmar e avançar"
             nextDisabled={!quizReady}
           />
         </>

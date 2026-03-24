@@ -2,6 +2,17 @@ import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
 import TopBar from "../components/TopBar";
+import TopBarLogo from "../components/TopBarLogo";
+import Icon from "../components/Icon";
+import LottieImport from "lottie-react";
+import celebrationAnimation from "../assets/lottie/celebration.json";
+
+const Lottie =
+  typeof LottieImport === "function"
+    ? LottieImport
+    : typeof LottieImport?.default === "function"
+      ? LottieImport.default
+      : null;
 
 export default function EtapaFinal() {
   const { userData, totalSteps } = useOnboarding();
@@ -21,9 +32,7 @@ export default function EtapaFinal() {
           padding: "12px 24px",
         }}>
           <div style={{ maxWidth: 520, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ color: COLORS.accent, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace" }}>
-              PRIMEIRO PASSO
-            </span>
+            <TopBarLogo />
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               background: `${COLORS.success}12`, border: `1px solid ${COLORS.success}25`,
@@ -48,7 +57,15 @@ export default function EtapaFinal() {
             margin: "0 auto 28px",
             boxShadow: `0 0 60px ${COLORS.accent}15`,
           }}>
-            <span style={{ fontSize: 48 }}>🎉</span>
+            {Lottie ? (
+              <Lottie
+                animationData={celebrationAnimation}
+                loop={false}
+                style={{ width: 96, height: 96 }}
+              />
+            ) : (
+              <Icon name="partyPopper" size={42} color={COLORS.accent} />
+            )}
           </div>
 
           <h1 style={{ color: COLORS.text, fontSize: 36, fontWeight: 900, margin: "0 0 12px 0", letterSpacing: "-0.04em" }}>
@@ -71,7 +88,7 @@ export default function EtapaFinal() {
             ))}
           </div>
           <p style={{ color: COLORS.success, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em", margin: "0 0 36px 0" }}>
-            PRIMEIRO PASSO CONCLUÍDO ✓
+            PRIMEIRO PASSO CONCLUIDO
           </p>
 
           {/* Card atendente */}
@@ -85,7 +102,7 @@ export default function EtapaFinal() {
               display: "flex", alignItems: "center", justifyContent: "center",
               margin: "0 auto 16px",
             }}>
-              <span style={{ fontSize: 28 }}>👋</span>
+              <Icon name="hand" size={28} color={COLORS.red} />
             </div>
             <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", margin: "0 0 6px 0" }}>
               SUA ATENDENTE
@@ -112,12 +129,12 @@ export default function EtapaFinal() {
   // TELA DE RESUMO
   // ════════════════════════════════════════════════
   const summaryRows = [
-    { label: "Celebridade", value: userData.celebName, icon: "⭐", color: COLORS.text },
-    { label: "Praça", value: userData.praca, icon: "📍", color: COLORS.accent },
-    { label: "Segmento", value: userData.segmento, icon: "🏷", color: COLORS.warning },
-    { label: "Pacote", value: "2 vídeos + 4 estáticas", icon: "🎬", color: COLORS.text },
-    { label: "Vigência", value: userData.vigencia, icon: "📅", color: COLORS.text },
-    { label: "Preparação", value: "15 dias (ativados)", icon: "⏱", color: COLORS.warning },
+    { label: "Celebridade", value: userData.celebName, icon: "star", color: COLORS.text },
+    { label: "Praça", value: userData.praca, icon: "mapPin", color: COLORS.accent },
+    { label: "Segmento", value: userData.segmento, icon: "tag", color: COLORS.warning },
+    { label: "Pacote", value: "2 vídeos + 4 estáticas", icon: "clapperboard", color: COLORS.text },
+    { label: "Vigência", value: userData.vigencia, icon: "calendarDays", color: COLORS.text },
+    { label: "Preparação", value: "15 dias (ativados)", icon: "clock", color: COLORS.warning },
   ];
 
   const nextSteps = [
@@ -139,7 +156,7 @@ export default function EtapaFinal() {
             display: "flex", alignItems: "center", justifyContent: "center",
             margin: "0 auto 16px",
           }}>
-            <span style={{ fontSize: 30 }}>✅</span>
+            <Icon name="circleCheck" size={30} color={COLORS.accent} />
           </div>
           <h1 style={{ color: COLORS.text, fontSize: 28, fontWeight: 900, margin: "0 0 6px 0", letterSpacing: "-0.03em" }}>
             Tudo pronto. Sua campanha vai começar.
@@ -161,7 +178,7 @@ export default function EtapaFinal() {
               borderBottom: i < summaryRows.length - 1 ? `1px solid ${COLORS.border}` : "none",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 14 }}>{row.icon}</span>
+                <Icon name={row.icon} size={14} color={row.color} />
                 <span style={{ color: COLORS.textDim, fontSize: 12, fontWeight: 600 }}>{row.label}</span>
               </div>
               <span style={{ color: row.color, fontSize: 13, fontWeight: 600 }}>{row.value}</span>
@@ -211,7 +228,7 @@ export default function EtapaFinal() {
             background: `${COLORS.red}15`, border: `1.5px solid ${COLORS.red}30`,
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>
-            <span style={{ fontSize: 24 }}>👋</span>
+            <Icon name="hand" size={24} color={COLORS.red} />
           </div>
           <div>
             <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>SUA ATENDENTE</p>
@@ -228,12 +245,15 @@ export default function EtapaFinal() {
           onClick={() => setFinished(true)}
           style={{
             width: "100%", padding: 18, borderRadius: 12, border: "none",
-            background: `linear-gradient(135deg, ${COLORS.red}, #FF4444)`,
+            background: `linear-gradient(135deg, ${COLORS.redGradientStart}, ${COLORS.red})`,
             color: COLORS.text, fontSize: 16, fontWeight: 900, cursor: "pointer",
             boxShadow: `0 4px 24px ${COLORS.red}30`,
           }}
         >
-          Concluir Primeiro Passo ✓
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            Concluir Primeiro Passo
+            <Icon name="check" size={16} color={COLORS.text} />
+          </span>
         </button>
         <p style={{ color: COLORS.textDim, fontSize: 11, textAlign: "center", marginTop: 12 }}>
           Ao concluir, seu perfil completo é gerado automaticamente.

@@ -1,16 +1,1 @@
-export const COLORS = {
-  bg: "#0A0A0A",
-  card: "#141414",
-  accent: "#C8FF00",
-  magenta: "#FF00FF",
-  red: "#E63333",
-  text: "#F5F5F5",
-  textMuted: "#AAAAAA",
-  textDim: "#666666",
-  border: "#222222",
-  inputBg: "#111111",
-  success: "#00E676",
-  warning: "#FFD600",
-  danger: "#FF4444",
-  whatsapp: "#25D366",
-};
+export { colorHex as COLORS } from "./design-tokens";

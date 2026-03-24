@@ -1,5 +1,16 @@
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
+import TopBarLogo from "../components/TopBarLogo";
+import Icon from "../components/Icon";
+import LottieImport from "lottie-react";
+import celebrationAnimation from "../assets/lottie/celebration.json";
+
+const Lottie =
+  typeof LottieImport === "function"
+    ? LottieImport
+    : typeof LottieImport?.default === "function"
+      ? LottieImport.default
+      : null;
 
 export default function TudoPronto() {
   const { userData, totalSteps } = useOnboarding();
@@ -31,17 +42,7 @@ export default function TudoPronto() {
             justifyContent: "space-between",
           }}
         >
-          <span
-            style={{
-              color: COLORS.accent,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            PRIMEIRO PASSO
-          </span>
+          <TopBarLogo />
           <div
             style={{
               display: "inline-flex",
@@ -102,7 +103,15 @@ export default function TudoPronto() {
               boxShadow: `0 0 60px ${COLORS.accent}15, 0 0 120px ${COLORS.red}10`,
             }}
           >
-            <span style={{ fontSize: 48 }}>🎉</span>
+            {Lottie ? (
+              <Lottie
+                animationData={celebrationAnimation}
+                loop={false}
+                style={{ width: 96, height: 96 }}
+              />
+            ) : (
+              <Icon name="partyPopper" size={42} color={COLORS.accent} />
+            )}
           </div>
 
           {/* Título */}
@@ -177,7 +186,7 @@ export default function TudoPronto() {
               margin: "0 0 36px 0",
             }}
           >
-            PRIMEIRO PASSO CONCLUÍDO ✓
+            PRIMEIRO PASSO CONCLUIDO
           </p>
 
           {/* Card atendente */}
@@ -203,7 +212,7 @@ export default function TudoPronto() {
                 margin: "0 auto 16px",
               }}
             >
-              <span style={{ fontSize: 28 }}>👋</span>
+              <Icon name="hand" size={28} color={COLORS.red} />
             </div>
             <p
               style={{

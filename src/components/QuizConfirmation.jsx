@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { motion, AnimatePresence } from "framer-motion";
+import { Check } from "lucide-react";
+import Icon from "./Icon";
 
 export default function QuizConfirmation({
   questions,
-  icon = "✓",
+  icon = "check",
   title = "Confirme o entendimento",
   subtitle = "Marque todos para avançar",
   iconBg,
@@ -59,7 +61,7 @@ export default function QuizConfirmation({
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 20 }}>{icon}</span>
+          <Icon name={icon} size={20} color={COLORS.accent} />
         </div>
         <div>
           <p
@@ -125,18 +127,14 @@ export default function QuizConfirmation({
             >
               <AnimatePresence>
                 {confirmations[i] && (
-                  <motion.span
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    style={{
-                      color: COLORS.bg,
-                      fontSize: 13,
-                      fontWeight: 800,
-                    }}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
                   >
-                    ✓
-                  </motion.span>
+                    <Check size={14} color={COLORS.bg} strokeWidth={3} />
+                  </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>

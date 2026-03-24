@@ -1,11 +1,16 @@
-import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import TopBarLogo from "../components/TopBarLogo";
+import Icon from "../components/Icon";
 
 export default function Etapa1Hero() {
   const { userData, goNext } = useOnboarding();
   const totalSteps = 7;
+  const { scrollY } = useScroll();
+  const glowY = useTransform(scrollY, [0, 300], [0, -80]);
+  const glowScale = useTransform(scrollY, [0, 300], [1, 1.2]);
+  const glowOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
 
   const valueProps = [
     "Entender como funciona a sua campanha",
@@ -19,15 +24,20 @@ export default function Etapa1Hero() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.2,
+        staggerChildren: 0.08,
+        delayChildren: 0.15,
       },
     },
   };
 
   const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
   };
 
   return (
@@ -44,20 +54,20 @@ export default function Etapa1Hero() {
         fontFamily: "'Inter', sans-serif",
       }}
     >
-      {/* Grid overlay */}
+      {/* Noise overlay */}
       <div
         style={{
           position: "absolute",
           inset: 0,
+          opacity: 0.03,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
           pointerEvents: "none",
         }}
       />
 
       {/* Glow accent circle at top */}
-      <div
+      <motion.div
         style={{
           position: "absolute",
           top: "-200px",
@@ -68,6 +78,9 @@ export default function Etapa1Hero() {
           borderRadius: "50%",
           background: `radial-gradient(circle, ${COLORS.red}22 0%, transparent 70%)`,
           pointerEvents: "none",
+          y: glowY,
+          scale: glowScale,
+          opacity: glowOpacity,
         }}
       />
 
@@ -88,39 +101,16 @@ export default function Etapa1Hero() {
         }}
       >
         <motion.div variants={container} initial="hidden" animate="show">
-          {/* Badge */}
+          {/* Logo marca (sem container pill) */}
           <motion.div
             variants={item}
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "6px 16px",
-              borderRadius: "999px",
-              border: `1px solid ${COLORS.border}`,
-              background: COLORS.card,
+              display: "flex",
+              justifyContent: "center",
               marginBottom: "32px",
             }}
           >
-            <span
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: COLORS.red,
-                display: "inline-block",
-              }}
-            />
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "2px",
-                color: COLORS.textMuted,
-              }}
-            >
-              ACELERAÍ
-            </span>
+            <TopBarLogo height={24} maxWidth={180} />
           </motion.div>
 
           {/* Greeting */}
@@ -216,16 +206,7 @@ export default function Etapa1Hero() {
                       : "none",
                 }}
               >
-                <span
-                  style={{
-                    color: COLORS.red,
-                    fontSize: "14px",
-                    lineHeight: "22px",
-                    flexShrink: 0,
-                  }}
-                >
-                  ✦
-                </span>
+                <Icon name="chevronRight" size={14} color={COLORS.red} />
                 <span
                   style={{
                     fontSize: "14px",
@@ -299,7 +280,7 @@ export default function Etapa1Hero() {
               fontWeight: 800,
               letterSpacing: "1.5px",
               color: "#FFFFFF",
-              background: `linear-gradient(135deg, ${COLORS.red}, #B22222)`,
+              background: `linear-gradient(135deg, ${COLORS.red}, ${COLORS.redGradientEndDark})`,
               border: "none",
               borderRadius: "12px",
               cursor: "pointer",
@@ -307,7 +288,10 @@ export default function Etapa1Hero() {
               transition: "box-shadow 0.3s ease",
             }}
           >
-            COMEÇAR AGORA →
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              COMEÇAR AGORA
+              <Icon name="arrowRight" size={16} color={COLORS.text} />
+            </span>
           </motion.button>
 
           {/* Micro-copy */}

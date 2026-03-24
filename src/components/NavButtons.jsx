@@ -1,10 +1,11 @@
 import { COLORS } from "../theme/colors";
+import Icon from "./Icon";
 
 export default function NavButtons({
   onPrev,
   onNext,
-  nextLabel = "Próximo →",
-  prevLabel = "← Anterior",
+  nextLabel = "Próximo",
+  prevLabel = "Anterior",
   nextDisabled = false,
   nextVariant = "red",
 }) {
@@ -12,7 +13,7 @@ export default function NavButtons({
   const bgGradient =
     nextVariant === "warning"
       ? `linear-gradient(135deg, #B8960A, ${COLORS.warning})`
-      : `linear-gradient(135deg, #CC2222, ${COLORS.red})`;
+      : `linear-gradient(135deg, ${COLORS.redGradientStart}, ${COLORS.red})`;
   const textColor = nextVariant === "warning" ? COLORS.bg : COLORS.text;
 
   const handleNext = () => {
@@ -40,7 +41,10 @@ export default function NavButtons({
             transition: "all 0.2s ease",
           }}
         >
-          {prevLabel}
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <Icon name="arrowLeft" size={16} color={COLORS.textMuted} />
+            {prevLabel}
+          </span>
         </button>
       )}
       <button
@@ -62,7 +66,14 @@ export default function NavButtons({
           opacity: nextDisabled ? 0.6 : 1,
         }}
       >
-        {nextLabel}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          {nextLabel}
+          <Icon
+            name="arrowRight"
+            size={16}
+            color={nextDisabled ? COLORS.textDim : textColor}
+          />
+        </span>
       </button>
     </div>
   );

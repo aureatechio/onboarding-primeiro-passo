@@ -2,16 +2,26 @@ import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
 import { motion } from "framer-motion";
 import TopBar from "./TopBar";
+import Icon from "./Icon";
+import LottieImport from "lottie-react";
+import successAnimation from "../assets/lottie/success.json";
+
+const Lottie =
+  typeof LottieImport === "function"
+    ? LottieImport
+    : typeof LottieImport?.default === "function"
+      ? LottieImport.default
+      : null;
 
 export default function CompletionScreen({
-  icon = "✓",
+  icon = "check",
   title,
   description,
   badge,
   badgeColor,
   summaryItems,
   children,
-  buttonLabel = "Continuar para a próxima etapa →",
+  buttonLabel = "Continuar para a próxima etapa",
   onContinue,
 }) {
   const { currentStep, totalSteps, goNext } = useOnboarding();
@@ -49,20 +59,26 @@ export default function CompletionScreen({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
-          style={{
-            width: 76,
-            height: 76,
-            borderRadius: "50%",
-            background: `${COLORS.success}15`,
-            border: `2px solid ${COLORS.success}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 24px",
-            boxShadow: `0 0 40px ${COLORS.success}15`,
-          }}
+          style={{ position: "relative", width: 96, height: 96, margin: "0 auto 24px" }}
         >
-          <span style={{ fontSize: 34 }}>{icon}</span>
+          {Lottie ? (
+            <Lottie
+              animationData={successAnimation}
+              loop={false}
+              style={{ width: 96, height: 96, opacity: 0.85 }}
+            />
+          ) : null}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name={icon} size={34} color={COLORS.success} />
+          </div>
         </motion.div>
 
         <h2
@@ -150,7 +166,7 @@ export default function CompletionScreen({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 15 }}>{item.icon}</span>
+                  <Icon name={item.icon} size={15} color={item.color || COLORS.text} />
                   <span style={{ color: COLORS.textDim, fontSize: 12, fontWeight: 600 }}>
                     {item.label}
                   </span>
@@ -173,7 +189,7 @@ export default function CompletionScreen({
             padding: 16,
             borderRadius: 12,
             border: "none",
-            background: `linear-gradient(135deg, #CC2222, ${COLORS.red})`,
+            background: `linear-gradient(135deg, ${COLORS.redGradientStart}, ${COLORS.red})`,
             color: COLORS.text,
             fontSize: 15,
             fontWeight: 800,
@@ -215,7 +231,7 @@ export default function CompletionScreen({
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
-          ETAPA {stepNum} DE {totalSteps} ✓
+          ETAPA {stepNum} DE {totalSteps} CONCLUIDA
         </p>
       </motion.div>
     </div>
