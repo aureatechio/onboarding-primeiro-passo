@@ -140,7 +140,7 @@ export default function EtapaFinal() {
 
   const nextSteps = [
     { num: "1", title: `Sua atendente ${userData.atendente} vai entrar em contato`, desc: "Em até 1 dia útil pra iniciar a produção da sua campanha", color: COLORS.red },
-    { num: "2", title: "Tenha esses materiais prontos", desc: "Informações sobre sua empresa, ideias pra campanha e sua identidade visual", color: COLORS.accent },
+    { num: "2", title: "START KIT em personalização", desc: "Em breve você receberá exemplos de peças para aumentar a eficiencia da sua campanha com ajuda de Agentes de IA desenvolvidos pelo nosso time.", color: COLORS.accent },
     { num: "3", title: "Responda rápido", desc: "Quanto mais ágil for a comunicação, mais rápido suas peças ficam prontas", color: COLORS.warning },
   ];
 

@@ -25,8 +25,8 @@ export default function Etapa7() {
         title="Etapa 8 concluída!"
         description={
           isHybrid
-            ? "Você escolheu a produção híbrida. Lembre-se das regras de aprovação e prazos. Seu atendente vai orientar todo o processo."
-            : "Ótima escolha! A equipe Aceleraí cuida de toda a produção dos seus criativos com qualidade profissional. Vamos para a etapa final!"
+            ? "A partir de agora, já estamos cuidando da produção do START KIT no modo personalizado. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha."
+            : "A partir de agora, já estamos cuidando da produção do START KIT. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha."
         }
         badge={isHybrid ? "PRODUÇÃO HÍBRIDA" : "PRODUÇÃO ACELERAÍ"}
         badgeColor={isHybrid ? COLORS.accent : COLORS.red}
@@ -162,7 +162,7 @@ export default function Etapa7() {
           onClick={() => setProductionPath("hybrid")}
           role="radio"
           aria-checked={productionPath === "hybrid"}
-          aria-label="Produção híbrida"
+          aria-label="Personalizado (Avançado)"
           whileHover={{ scale: 1.01, y: -2 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
@@ -204,7 +204,7 @@ export default function Etapa7() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <Icon name="handshake" size={16} color={COLORS.text} />
                 <span style={{ color: COLORS.text, fontSize: 14, fontWeight: 700 }}>
-                  Produção híbrida
+                  Personalizado (Avançado)
                 </span>
                 <span
                   style={{
@@ -221,7 +221,7 @@ export default function Etapa7() {
                 </span>
               </div>
               <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-                Você recebe os materiais brutos e sua equipe faz a edição final, seguindo nossas regras.
+                Você personaliza sua campanha com informações essenciais.
               </p>
             </div>
           </div>
