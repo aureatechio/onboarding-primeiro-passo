@@ -88,12 +88,29 @@ Regras da `Etapa 6.2`:
 - opção de preenchimento imediato com obrigatórios: logo + fonte;
 - cores iniciam com 3 presets e aceitam até 5 cores;
 - upload de imagens é opcional;
-- opção de \"deixar para depois\" permite avançar e marca a etapa como pendente.
+- opção de "deixar para depois" permite avançar e marca a etapa como pendente.
 
 Estado salvo no contexto (`userData`):
 
 - `identityBonusChoice`, `identityBonusLogoName`, `identityBonusColors`,
   `identityBonusFont`, `identityBonusImagesCount`, `identityBonusPending`.
+
+### Quick wins de UI/UX (mar 2026)
+
+Melhorias aplicadas no card de coleta da Etapa 6.2 para reduzir fricção e melhorar escaneabilidade:
+
+- Barra de progresso interna com contador de obrigatórios (`X/2 concluídos`).
+- Upload de logo customizado (input oculto + CTA visual + ações `Trocar`/`Remover`).
+- Upload de imagens com mesmo padrão (drag area + ações).
+- Chips de status por seção (`Obrigatório`/`Opcional`/`Concluído`/`Pendente`).
+- Títulos de seção limpos com ícones Lucide (sem prefixo `+ Adicionar`).
+- Validação contextual: erros aparecem somente após tentativa de avançar.
+- Scroll automático para o primeiro campo inválido ao falhar validação.
+- Acessibilidade: `fieldset`/`legend`, `role="radiogroup"`, `aria-invalid`, `aria-describedby`, `role="alert"`.
+- Radio buttons visuais com indicador circular (check icon) nos botões de escolha principal.
+- Fontes com preview real (`Aa Bb Cc 123`) e check icon no card selecionado.
+
+Validação executada: `npm run build` com sucesso.
 
 ## Webhook de material (Etapa 5)
 

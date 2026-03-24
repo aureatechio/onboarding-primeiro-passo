@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { motion } from "framer-motion"
+import { useMemo, useRef, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
 import PageLayout from "../components/PageLayout"
@@ -12,10 +12,90 @@ import StickyFooter from "../components/StickyFooter"
 const PRESET_COLORS = ["#E8356D", "#384FFE", "#111119"]
 
 const FONT_OPTIONS = [
-  { id: "inter", label: "Inter", preview: "Inter", family: "'Inter', sans-serif" },
-  { id: "jetbrains", label: "JetBrains Mono", preview: "JetBrains Mono", family: "'JetBrains Mono', monospace" },
-  { id: "georgia", label: "Georgia", preview: "Georgia", family: "Georgia, serif" },
+  { id: "inter", label: "Inter", preview: "Aa Bb Cc 123", family: "'Inter', sans-serif" },
+  { id: "jetbrains", label: "JetBrains Mono", preview: "Aa Bb Cc 123", family: "'JetBrains Mono', monospace" },
+  { id: "georgia", label: "Georgia", preview: "Aa Bb Cc 123", family: "Georgia, serif" },
 ]
+
+function StatusChip({ done, requiredLabel = "Obrigatório", optionalLabel = "Opcional", isOptional = false }) {
+  if (isOptional) {
+    return (
+      <span style={{
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: "0.04em",
+        padding: "2px 8px",
+        borderRadius: 100,
+        background: `${COLORS.textDim}20`,
+        color: COLORS.textDim,
+      }}>
+        {optionalLabel}
+      </span>
+    )
+  }
+
+  return (
+    <span style={{
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      padding: "2px 8px",
+      borderRadius: 100,
+      background: done ? `${COLORS.success}18` : `${COLORS.warning}18`,
+      color: done ? COLORS.success : COLORS.warning,
+    }}>
+      {done ? "Concluído" : requiredLabel}
+    </span>
+  )
+}
+
+function ProgressBar({ done, total }) {
+  const pct = total > 0 ? (done / total) * 100 : 0
+  const allDone = done === total
+
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 18,
+      padding: "10px 14px",
+      background: allDone ? `${COLORS.success}10` : `${COLORS.accent}08`,
+      border: `1px solid ${allDone ? COLORS.success : COLORS.accent}20`,
+      borderRadius: 10,
+    }}>
+      <Icon name={allDone ? "circleCheck" : "target"} size={16} color={allDone ? COLORS.success : COLORS.accent} />
+      <div style={{ flex: 1 }}>
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5,
+        }}>
+          <span style={{ color: COLORS.text, fontSize: 12, fontWeight: 700 }}>
+            {allDone ? "Tudo preenchido" : `Obrigatórios: ${done}/${total}`}
+          </span>
+          <span style={{ color: COLORS.textDim, fontSize: 11 }}>
+            {Math.round(pct)}%
+          </span>
+        </div>
+        <div style={{
+          height: 4, borderRadius: 2, background: COLORS.border, overflow: "hidden",
+        }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            style={{
+              height: "100%",
+              borderRadius: 2,
+              background: allDone
+                ? COLORS.success
+                : `linear-gradient(90deg, ${COLORS.accent}, ${COLORS.accent}AA)`,
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Etapa62() {
   const { userData, updateUserData } = useOnboarding()
@@ -31,10 +111,22 @@ export default function Etapa62() {
   const [imagesCount, setImagesCount] = useState(Number(userData.identityBonusImagesCount || 0))
   const [completed, setCompleted] = useState(false)
   const [pendingMode, setPendingMode] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const logoInputRef = useRef(null)
+  const imagesInputRef = useRef(null)
+  const logoSectionRef = useRef(null)
+  const fontSectionRef = useRef(null)
 
   const hasRequiredForAddNow = Boolean(logoName) && Boolean(selectedFont)
   const canConfirm = choice === "later" || (choice === "add_now" && hasRequiredForAddNow)
   const showContinueLater = choice === "add_now" && !hasRequiredForAddNow
+
+  const logoError = submitted && choice === "add_now" && !logoName
+  const fontError = submitted && choice === "add_now" && !selectedFont
+
+  const requiredDone = Number(Boolean(logoName)) + Number(Boolean(selectedFont))
+  const requiredTotal = 2
 
   const colorsRemaining = useMemo(() => Math.max(0, 5 - colors.length), [colors.length])
 
@@ -51,6 +143,7 @@ export default function Etapa62() {
 
   const handleSelectChoice = (nextChoice) => {
     setChoice(nextChoice)
+    setSubmitted(false)
     updateUserData({ identityBonusChoice: nextChoice })
   }
 
@@ -61,10 +154,22 @@ export default function Etapa62() {
     updateUserData({ identityBonusLogoName: nextLogo })
   }
 
+  const handleRemoveLogo = () => {
+    setLogoName("")
+    updateUserData({ identityBonusLogoName: "" })
+    if (logoInputRef.current) logoInputRef.current.value = ""
+  }
+
   const handleImagesChange = (event) => {
     const nextCount = event.target.files?.length || 0
     setImagesCount(nextCount)
     updateUserData({ identityBonusImagesCount: nextCount })
+  }
+
+  const handleRemoveImages = () => {
+    setImagesCount(0)
+    updateUserData({ identityBonusImagesCount: 0 })
+    if (imagesInputRef.current) imagesInputRef.current.value = ""
   }
 
   const handleColorChange = (index, value) => {
@@ -85,7 +190,22 @@ export default function Etapa62() {
     updateUserData({ identityBonusFont: fontId })
   }
 
+  const scrollToFirstError = () => {
+    if (!logoName && logoSectionRef.current) {
+      logoSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      return
+    }
+    if (!selectedFont && fontSectionRef.current) {
+      fontSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+  }
+
   const handleConfirm = () => {
+    if (choice === "add_now" && !hasRequiredForAddNow) {
+      setSubmitted(true)
+      scrollToFirstError()
+      return
+    }
     if (!canConfirm) return
     if (choice === "later") {
       persist({ identityBonusPending: true })
@@ -164,11 +284,11 @@ export default function Etapa62() {
         }}
       >
         <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 800, margin: "0 0 8px 0" }}>
-          COMO FUNCIONA?
+          Como funciona
         </p>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 10px 0" }}>
           Dentro do prazo de 15 dias após a assinatura do seu contrato, você recebe, ao final dos
-          três meses de contrato, os dias que vc conseguiu antecipar de prazo.
+          três meses de contrato, os dias que você conseguiu antecipar de prazo.
         </p>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 6px 0" }}>
           <strong style={{ color: COLORS.text }}>Exemplo A):</strong> Preenchendo ainda hoje (DIA DO
@@ -202,6 +322,8 @@ export default function Etapa62() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
+        role="radiogroup"
+        aria-label="Escolha de identidade visual"
         style={{ marginBottom: 16 }}
       >
         <motion.button
@@ -218,11 +340,23 @@ export default function Etapa62() {
             cursor: "pointer",
             textAlign: "left",
             marginBottom: 10,
+            outline: "none",
           }}
         >
-          <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-            ( ) Vou adicionar as minhas referências da identidade visual
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+              border: choice === "add_now" ? `2px solid ${COLORS.accent}` : `2px solid ${COLORS.textDim}`,
+              background: choice === "add_now" ? COLORS.accent : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.2s ease",
+            }}>
+              {choice === "add_now" && <Icon name="check" size={11} color={COLORS.bg} />}
+            </div>
+            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
+              Vou adicionar as minhas referências da identidade visual
+            </p>
+          </div>
         </motion.button>
 
         <motion.button
@@ -238,12 +372,24 @@ export default function Etapa62() {
             background: choice === "later" ? `${COLORS.warning}10` : COLORS.card,
             cursor: "pointer",
             textAlign: "left",
+            outline: "none",
           }}
         >
-          <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-            ( ) Prefiro deixar para depois tendo ciência que o prazo do meu contrato está correndo
-            desde já.
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
+              border: choice === "later" ? `2px solid ${COLORS.warning}` : `2px solid ${COLORS.textDim}`,
+              background: choice === "later" ? COLORS.warning : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "all 0.2s ease",
+            }}>
+              {choice === "later" && <Icon name="check" size={11} color={COLORS.bg} />}
+            </div>
+            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
+              Prefiro deixar para depois tendo ciência que o prazo do meu contrato está correndo
+              desde já.
+            </p>
+          </div>
         </motion.button>
       </motion.div>
 
@@ -260,38 +406,122 @@ export default function Etapa62() {
             marginBottom: 18,
           }}
         >
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: "0 0 8px 0" }}>
-              + Adicionar Logo (obrigatório)
-            </p>
+          <ProgressBar done={requiredDone} total={requiredTotal} />
+
+          {/* --- Logo section --- */}
+          <fieldset
+            ref={logoSectionRef}
+            style={{ border: "none", padding: 0, margin: "0 0 20px 0" }}
+            aria-describedby="logo-help"
+          >
+            <legend style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+              color: COLORS.text, fontSize: 13, fontWeight: 700,
+            }}>
+              <Icon name="palette" size={15} color={COLORS.text} />
+              Logo
+              <StatusChip done={Boolean(logoName)} />
+            </legend>
+
             <input
+              ref={logoInputRef}
               type="file"
               accept="image/*"
               onChange={handleLogoChange}
-              style={{ width: "100%" }}
+              style={{ display: "none" }}
+              id="logo-upload"
+              aria-invalid={logoError}
             />
-            {logoName ? (
-              <p style={{ color: COLORS.success, fontSize: 12, margin: "8px 0 0 0" }}>
-                Arquivo selecionado: {logoName}
-              </p>
-            ) : (
-              <p style={{ color: COLORS.warning, fontSize: 12, margin: "8px 0 0 0" }}>
-                Selecione um arquivo de logo para concluir esta etapa.
-              </p>
-            )}
-          </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: "0 0 8px 0" }}>
-              + Adicionar Cores Principais (3 presets fixas, máximo 5)
-            </p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {logoName ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                background: `${COLORS.success}10`,
+                border: `1px solid ${COLORS.success}25`,
+                borderRadius: 10, padding: "10px 14px",
+              }}>
+                <Icon name="circleCheck" size={16} color={COLORS.success} />
+                <span style={{ flex: 1, color: COLORS.text, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {logoName}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  style={{
+                    background: "transparent", border: "none",
+                    color: COLORS.accent, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", padding: "4px 8px",
+                  }}
+                >
+                  Trocar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveLogo}
+                  style={{
+                    background: "transparent", border: "none",
+                    color: COLORS.danger, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", padding: "4px 8px",
+                  }}
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
+              <label
+                htmlFor="logo-upload"
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  gap: 8, padding: "18px 14px",
+                  border: `1px dashed ${logoError ? COLORS.danger : COLORS.border}`,
+                  borderRadius: 10, cursor: "pointer",
+                  transition: "border-color 0.2s ease",
+                }}
+              >
+                <Icon name="camera" size={22} color={logoError ? COLORS.danger : COLORS.textDim} />
+                <span style={{ color: logoError ? COLORS.danger : COLORS.textMuted, fontSize: 13, fontWeight: 600 }}>
+                  Selecionar logo
+                </span>
+                <span id="logo-help" style={{ color: COLORS.textDim, fontSize: 11 }}>
+                  Formatos aceitos: PNG, JPG, SVG
+                </span>
+              </label>
+            )}
+
+            <AnimatePresence>
+              {logoError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "8px 0 0 0" }}
+                  role="alert"
+                >
+                  Envie o logo para avançar.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </fieldset>
+
+          {/* --- Colors section --- */}
+          <fieldset style={{ border: "none", padding: 0, margin: "0 0 20px 0" }}>
+            <legend style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+              color: COLORS.text, fontSize: 13, fontWeight: 700,
+            }}>
+              <Icon name="penLine" size={15} color={COLORS.text} />
+              Cores principais
+              <StatusChip isOptional={false} done={true} requiredLabel="Pré-definidas" />
+            </legend>
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
               {colors.map((color, index) => (
-                <div key={`${color}-${index}`} style={{ textAlign: "center" }}>
+                <div key={`${color}-${index}`} style={{ position: "relative" }}>
                   <input
                     type="color"
                     value={color}
                     onChange={(event) => handleColorChange(index, event.target.value)}
+                    aria-label={`Cor ${index + 1}`}
                     style={{
                       width: 44,
                       height: 44,
@@ -299,14 +529,26 @@ export default function Etapa62() {
                       borderRadius: 8,
                       background: "transparent",
                       padding: 2,
+                      cursor: "pointer",
                     }}
                   />
+                  {index < PRESET_COLORS.length && (
+                    <span style={{
+                      position: "absolute", top: -6, right: -4,
+                      fontSize: 8, fontWeight: 700, letterSpacing: "0.05em",
+                      background: COLORS.border, color: COLORS.textDim,
+                      padding: "1px 4px", borderRadius: 4,
+                    }}>
+                      PRESET
+                    </span>
+                  )}
                 </div>
               ))}
               {colors.length < 5 && (
                 <button
                   type="button"
                   onClick={handleAddColor}
+                  aria-label="Adicionar cor"
                   style={{
                     height: 44,
                     padding: "0 12px",
@@ -315,6 +557,7 @@ export default function Etapa62() {
                     background: "transparent",
                     color: COLORS.textMuted,
                     cursor: "pointer",
+                    fontSize: 13, fontWeight: 600,
                   }}
                 >
                   + cor
@@ -322,61 +565,166 @@ export default function Etapa62() {
               )}
             </div>
             <p style={{ color: COLORS.textDim, fontSize: 11, margin: "8px 0 0 0" }}>
-              Restantes: {colorsRemaining}
+              Máximo 5 cores {colorsRemaining > 0 && `\u00B7 Restantes: ${colorsRemaining}`}
             </p>
-          </div>
+          </fieldset>
 
-          <div style={{ marginBottom: 16 }}>
-            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: "0 0 8px 0" }}>
-              + Adicionar as minhas Fontes de texto (obrigatório)
-            </p>
+          {/* --- Fonts section --- */}
+          <fieldset
+            ref={fontSectionRef}
+            style={{ border: "none", padding: 0, margin: "0 0 20px 0" }}
+            aria-describedby="font-help"
+          >
+            <legend style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+              color: COLORS.text, fontSize: 13, fontWeight: 700,
+            }}>
+              <Icon name="type" size={15} color={COLORS.text} />
+              Fonte de texto
+              <StatusChip done={Boolean(selectedFont)} />
+            </legend>
+
             <div style={{ display: "grid", gap: 10 }}>
-              {FONT_OPTIONS.map((font) => (
-                <button
-                  key={font.id}
-                  type="button"
-                  onClick={() => handleSelectFont(font.id)}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    padding: 12,
-                    borderRadius: 10,
-                    border: selectedFont === font.id ? `2px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`,
-                    background: selectedFont === font.id ? `${COLORS.accent}10` : "transparent",
-                    cursor: "pointer",
-                  }}
-                >
-                  <p
+              {FONT_OPTIONS.map((font) => {
+                const isSelected = selectedFont === font.id
+                return (
+                  <button
+                    key={font.id}
+                    type="button"
+                    onClick={() => handleSelectFont(font.id)}
+                    aria-pressed={isSelected}
+                    aria-invalid={fontError && !isSelected}
                     style={{
-                      color: COLORS.text,
-                      fontSize: 16,
-                      fontFamily: font.family,
-                      margin: "0 0 4px 0",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "12px 14px",
+                      borderRadius: 10,
+                      border: isSelected
+                        ? `2px solid ${COLORS.accent}`
+                        : fontError
+                          ? `1px solid ${COLORS.danger}50`
+                          : `1px solid ${COLORS.border}`,
+                      background: isSelected ? `${COLORS.accent}10` : "transparent",
+                      cursor: "pointer",
+                      outline: "none",
+                      display: "flex", alignItems: "center", gap: 12,
+                      transition: "all 0.15s ease",
                     }}
                   >
-                    {font.preview}
-                  </p>
-                  <p style={{ color: COLORS.textDim, fontSize: 11, margin: 0 }}>{font.label}</p>
-                </button>
-              ))}
+                    <div style={{ flex: 1 }}>
+                      <p style={{
+                        color: COLORS.text, fontSize: 16, fontFamily: font.family,
+                        margin: "0 0 2px 0",
+                      }}>
+                        {font.preview}
+                      </p>
+                      <p style={{ color: COLORS.textDim, fontSize: 11, margin: 0 }}>{font.label}</p>
+                    </div>
+                    {isSelected && (
+                      <div style={{
+                        width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                        background: COLORS.accent,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <Icon name="check" size={12} color={COLORS.bg} />
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
             </div>
-          </div>
 
-          <div>
-            <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: "0 0 8px 0" }}>
-              + Adicionar imagens de peças de campanhas (opcional)
-            </p>
+            <AnimatePresence>
+              {fontError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "8px 0 0 0" }}
+                  id="font-help"
+                  role="alert"
+                >
+                  Selecione uma fonte para avançar.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </fieldset>
+
+          {/* --- Images section --- */}
+          <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+            <legend style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+              color: COLORS.text, fontSize: 13, fontWeight: 700,
+            }}>
+              <Icon name="camera" size={15} color={COLORS.text} />
+              Imagens de campanha
+              <StatusChip isOptional />
+            </legend>
+
             <input
+              ref={imagesInputRef}
               type="file"
               accept="image/*"
               multiple
               onChange={handleImagesChange}
-              style={{ width: "100%" }}
+              style={{ display: "none" }}
+              id="images-upload"
             />
-            <p style={{ color: COLORS.textDim, fontSize: 11, margin: "8px 0 0 0" }}>
-              {imagesCount > 0 ? `${imagesCount} imagem(ns) selecionada(s)` : "Nenhuma imagem selecionada"}
-            </p>
-          </div>
+
+            {imagesCount > 0 ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                background: `${COLORS.success}10`,
+                border: `1px solid ${COLORS.success}25`,
+                borderRadius: 10, padding: "10px 14px",
+              }}>
+                <Icon name="circleCheck" size={16} color={COLORS.success} />
+                <span style={{ flex: 1, color: COLORS.text, fontSize: 13 }}>
+                  {imagesCount} imagem{imagesCount > 1 ? "ns" : ""} selecionada{imagesCount > 1 ? "s" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => imagesInputRef.current?.click()}
+                  style={{
+                    background: "transparent", border: "none",
+                    color: COLORS.accent, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", padding: "4px 8px",
+                  }}
+                >
+                  Trocar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveImages}
+                  style={{
+                    background: "transparent", border: "none",
+                    color: COLORS.danger, fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", padding: "4px 8px",
+                  }}
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
+              <label
+                htmlFor="images-upload"
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  gap: 8, padding: "18px 14px",
+                  border: `1px dashed ${COLORS.border}`,
+                  borderRadius: 10, cursor: "pointer",
+                }}
+              >
+                <Icon name="camera" size={22} color={COLORS.textDim} />
+                <span style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: 600 }}>
+                  Selecionar imagens
+                </span>
+                <span style={{ color: COLORS.textDim, fontSize: 11 }}>
+                  Peças da campanha para referência
+                </span>
+              </label>
+            )}
+          </fieldset>
         </motion.div>
       )}
 
@@ -384,7 +732,7 @@ export default function Etapa62() {
         <NavButtons
           onNext={handleConfirm}
           nextLabel={choice === "later" ? "Confirmar e avançar com pendência" : "Confirmar e avançar"}
-          nextDisabled={!canConfirm}
+          nextDisabled={!canConfirm && !(choice === "add_now" && !hasRequiredForAddNow)}
         />
         {showContinueLater && (
           <button
