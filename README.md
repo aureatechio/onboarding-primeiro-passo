@@ -55,8 +55,51 @@ npm run build
 npm run preview
 ```
 
+## Deploy (Vercel)
+
+- Projeto oficial: `onboarding-primeiro-passo`
+- URL canônica de produção: `https://onboarding-primeiro-passo.vercel.app`
+- Estratégia: deploy isolado do app onboarding (não usa o `vercel.json` raiz do dashboard)
+
+### Configuração recomendada no projeto Vercel
+
+| Campo | Valor |
+|------|-------|
+| Root Directory | `apps/onboarding` |
+| Framework Preset | `Vite` |
+| Build Command | `pnpm build` |
+| Output Directory | `dist` |
+| Install Command | `npm i -g corepack@latest && corepack enable && corepack prepare --activate && pnpm install --frozen-lockfile` |
+
+### Deploy manual (CLI)
+
+```bash
+# Preview (a partir de apps/onboarding)
+vercel --scope aureas-projects-ca9dee86
+
+# Produção
+vercel --prod --scope aureas-projects-ca9dee86
+```
+
+### Validação pós-deploy
+
+- Abrir `https://onboarding-primeiro-passo.vercel.app`.
+- Validar rota SPA com `compra_id` na URL.
+- Confirmar carregamento da Edge Function `get-onboarding-data`.
+- Referência operacional completa: `docs/deploy-onboarding-vercel.md`.
+
+### Troubleshooting (lockfile em CI/Vercel)
+
+- Erro comum: `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`.
+- Causa provável: lockfile incompatível ou desatualizado para o ambiente do build.
+- Ações:
+  - sincronizar lockfile local (`pnpm install`) e commitar o `pnpm-lock.yaml` atualizado;
+  - garantir versões compatíveis (Node >= 20 e pnpm 10.x);
+  - em análise emergencial apenas, validar build com `--no-frozen-lockfile` para confirmar diagnóstico.
+
 ## Variaveis de ambiente
 
 | Variavel | Obrigatoria | Descricao |
 |----------|-------------|-----------|
 | `VITE_SUPABASE_URL` | Sim | URL base do projeto Supabase para leitura de `get-onboarding-data` |
+| `VITE_ONBOARDING_BASE_URL` | Nao (local) | URL base usada em desenvolvimento para links do onboarding |
