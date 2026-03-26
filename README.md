@@ -288,15 +288,26 @@ Contrato tecnico completo: `apps/onboarding/ai-step2/CONTRACT.md`
 ### Tela operacional de monitoramento (sem auth)
 
 - Rota dedicada no app onboarding: `/ai-step2/monitor`.
-- Entrada por query string:
-  - `?compra_id=<uuid>` (preferencial)
-  - `?job_id=<uuid>` (suporte adicional)
+- Modos de entrada por query string:
+  - **Lista (painel de controle):** sem params ou `?mode=list`
+  - **Detalhe:** `?compra_id=<uuid>` (preferencial) ou `?job_id=<uuid>`
+- Filtros da lista:
+  - `page`, `limit`
+  - `status` (`pending|processing|completed|partial|failed`)
+  - `celebrity` (filtro client-side por celebridade)
+  - `q` (busca simples por ids/status)
 - Objetivo: acompanhamento operacional da geracao IA com:
   - status, progresso e atualizacao periodica;
-  - galeria de previews com ampliar e download;
+  - galeria de previews em **Bento grid** por categoria (`moderna`, `clean`, `retail`) com aspect-ratio por formato;
+  - download disponivel **apenas no viewer ampliado** (sem botao inline nos cards);
+  - metricas de progresso (total esperado, gerado, percentual) e barra de andamento no **topo da aba Galeria**;
   - painel de detalhes do onboarding (identidade visual, briefing e uploads).
+- Navegacao:
+  - lista -> clique direto na linha injeta `job_id` na URL;
+  - detalhe -> botao `Voltar para lista`.
 - UX da sidebar:
-  - navegacao clicavel entre secoes da tela (`Visao Geral`, `Galeria`, `Dados do Onboarding`, `Erros e Diagnostico`);
-  - destaque visual de item ativo conforme secao em foco;
-  - sidebar preta com apenas o logo no topo (sem bloco decorativo/texto auxiliar).
+  - logo clicavel para home (`/ai-step2/monitor?mode=list`) limpando filtros;
+  - sidebar fixa e consistente entre lista e detalhe;
+  - no detalhe, navegacao por abas na area de conteudo (`Galeria`, `Dados do Onboarding`, `Erros e Diagnostico`).
+- Tabela de jobs: 5 colunas (Cliente, Celebridade, Status, Progresso, Atualizado em) com largura uniforme (`repeat(5, minmax(0, 1fr))`) e truncamento por ellipsis.
 - Fonte de dados principal: `get-ai-campaign-monitor` (agregador).
