@@ -28,6 +28,7 @@ import {
   Pause,
   PenLine,
   Play,
+  Plus,
   RefreshCw,
   RotateCcw,
   Scale,
@@ -42,6 +43,7 @@ import {
   TrendingUp,
   Tv,
   Type,
+  X,
   Zap,
 } from 'lucide-react'
 import { COLORS } from '../theme/colors'
@@ -90,6 +92,8 @@ const ICON_MAP = {
   trendingUp: TrendingUp,
   tv: Tv,
   type: Type,
+  x: X,
+  plus: Plus,
   zap: Zap,
 }
 

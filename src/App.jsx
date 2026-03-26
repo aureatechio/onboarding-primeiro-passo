@@ -11,6 +11,8 @@ import Etapa62 from './pages/Etapa62';
 import Etapa7 from './pages/Etapa7';
 import EtapaFinal from './pages/EtapaFinal';
 import AiStep2Monitor from './pages/AiStep2Monitor';
+import PerplexityConfigPage from './pages/AiStep2Monitor/PerplexityConfigPage';
+import NanoBananaConfigPage from './pages/AiStep2Monitor/NanoBananaConfigPage';
 
 // Error boundary pra pegar crashes silenciosos
 class ErrorBoundary extends Component {
@@ -126,9 +128,24 @@ function OnboardingFlow() {
 
 export default function App() {
   const pathname = window.location.pathname || '/';
-  const isAiMonitorRoute = pathname.startsWith('/ai-step2/monitor');
 
-  if (isAiMonitorRoute) {
+  if (pathname.startsWith('/ai-step2/perplexity-config')) {
+    return (
+      <ErrorBoundary>
+        <PerplexityConfigPage />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname.startsWith('/ai-step2/nanobanana-config')) {
+    return (
+      <ErrorBoundary>
+        <NanoBananaConfigPage />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname.startsWith('/ai-step2/monitor')) {
     return (
       <ErrorBoundary>
         <AiStep2Monitor />

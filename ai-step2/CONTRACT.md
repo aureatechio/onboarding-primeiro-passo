@@ -173,12 +173,25 @@ interface AiCampaignError {
 ### `get-ai-campaign-monitor` (GET)
 
 - Classificacao JWT: **publica** (`--no-verify-jwt`) — consumida pela tela operacional do onboarding (`/ai-step2/monitor`).
-- Query param: `compra_id` (preferencial) ou `job_id`.
-- Retorna payload agregada para operacao:
-  - `job` + `progress` (status/contadores);
-  - `assets[]`, `errors[]`, `missing[]`;
-  - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`;
-  - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados.
+- Modos suportados:
+  - `mode=list` (ou sem `job_id`/`compra_id`): retorna visao geral paginada.
+  - `mode=detail` (ou com `job_id`/`compra_id`): retorna payload detalhada atual.
+- Query params de lista:
+  - `page` (default `1`)
+  - `limit` (default `20`, max `100`)
+  - `status` (`pending | processing | completed | partial | failed`)
+  - `q` (busca simples por `job_id`/`compra_id` quando UUID; fallback por `status`)
+- Payload de lista:
+  - `mode: "list"`
+  - `items[]` com `job_id`, `compra_id`, `status`, `total_expected`, `total_generated`, `percent`, `created_at`, `updated_at`, `client_name`, `celebrity_name`
+  - `pagination` com `page`, `limit`, `total`, `total_pages`
+  - `summary` com totais por status (`pending`, `processing`, `completed`, `partial`, `failed`) e `total`
+- Payload de detalhe:
+  - `mode: "detail"` (implícito por estrutura atual)
+  - `job` + `progress` (status/contadores)
+  - `assets[]`, `errors[]`, `missing[]`
+  - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`
+  - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados
 - Mantem rate-limit in-memory por IP (mesmo baseline do endpoint de status).
 
 ## 6. Schema Supabase (migration)

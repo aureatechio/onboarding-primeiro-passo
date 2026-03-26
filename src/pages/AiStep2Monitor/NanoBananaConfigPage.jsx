@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Loader2, Palette, RefreshCw, Save } from 'lucide-react'
+import { Loader2, Palette, RefreshCw, Save, Settings, FileText, Brush, Ratio } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
@@ -77,6 +77,36 @@ const outlineButton = {
   border: `1px solid ${monitorTheme.borderStrong}`,
 }
 
+const tabBarStyle = {
+  display: 'flex',
+  gap: 0,
+  borderBottom: `2px solid ${monitorTheme.border}`,
+  marginBottom: 24,
+}
+
+const tabStyle = (active) => ({
+  padding: '10px 20px',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'transparent',
+  fontSize: 13,
+  fontWeight: active ? 700 : 500,
+  color: active ? monitorTheme.textPrimary : monitorTheme.textMuted,
+  borderBottom: active ? `2px solid ${monitorTheme.buttonDarkBg}` : '2px solid transparent',
+  marginBottom: -2,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  transition: 'color 0.15s, border-color 0.15s',
+})
+
+const TABS = [
+  { id: 'provider', label: 'Provider', icon: Settings },
+  { id: 'rules', label: 'Global Rules', icon: FileText },
+  { id: 'direction', label: 'Direcao Criativa', icon: Brush },
+  { id: 'formats', label: 'Formatos & Versao', icon: Ratio },
+]
+
 function Field({ label, hint, children }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -94,6 +124,7 @@ export default function NanoBananaConfigPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [activeTab, setActiveTab] = useState('provider')
 
   const fetchConfig = useCallback(async () => {
     setLoading(true)
@@ -200,87 +231,109 @@ export default function NanoBananaConfigPage() {
         </div>
       )}
 
-      <div style={cardStyle}>
-        <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Provider (Gemini)</h3>
-        <Field label="Model Name">
-          <input style={inputStyle} value={form.gemini_model_name} onChange={(e) => updateField('gemini_model_name', e.target.value)} />
-        </Field>
-        <Field label="API Base URL">
-          <input style={inputStyle} value={form.gemini_api_base_url} onChange={(e) => updateField('gemini_api_base_url', e.target.value)} />
-        </Field>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
-          <Field label="Max Retries" hint="0 a 10">
-            <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_retries} onChange={(e) => updateField('max_retries', Number(e.target.value))} min={0} max={10} />
+      <div style={tabBarStyle}>
+        {TABS.map((tab) => {
+          const Icon = tab.icon
+          return (
+            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} style={tabStyle(activeTab === tab.id)}>
+              <Icon size={14} />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {activeTab === 'provider' && (
+        <div style={cardStyle}>
+          <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Provider (Gemini)</h3>
+          <Field label="Model Name">
+            <input style={inputStyle} value={form.gemini_model_name} onChange={(e) => updateField('gemini_model_name', e.target.value)} />
           </Field>
-          <Field label="Worker Batch Size" hint="1 a 12">
-            <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.worker_batch_size} onChange={(e) => updateField('worker_batch_size', Number(e.target.value))} min={1} max={12} />
+          <Field label="API Base URL">
+            <input style={inputStyle} value={form.gemini_api_base_url} onChange={(e) => updateField('gemini_api_base_url', e.target.value)} />
           </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
+            <Field label="Max Retries" hint="0 a 10">
+              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_retries} onChange={(e) => updateField('max_retries', Number(e.target.value))} min={0} max={10} />
+            </Field>
+            <Field label="Worker Batch Size" hint="1 a 12">
+              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.worker_batch_size} onChange={(e) => updateField('worker_batch_size', Number(e.target.value))} min={1} max={12} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
+            <Field label="URL Expiry" hint="3600 a 2592000">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.url_expiry_seconds} onChange={(e) => updateField('url_expiry_seconds', Number(e.target.value))} min={3600} max={2592000} step={3600} />
+                <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>s</span>
+              </div>
+            </Field>
+            <Field label="Max Image Download" hint="1048576 a 52428800">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_image_download_bytes} onChange={(e) => updateField('max_image_download_bytes', Number(e.target.value))} min={1048576} max={52428800} step={1048576} />
+                <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>bytes</span>
+              </div>
+            </Field>
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
-          <Field label="URL Expiry" hint="3600 a 2592000">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.url_expiry_seconds} onChange={(e) => updateField('url_expiry_seconds', Number(e.target.value))} min={3600} max={2592000} step={3600} />
-              <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>s</span>
+      )}
+
+      {activeTab === 'rules' && (
+        <div style={cardStyle}>
+          <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Global Rules (Prompt Mestre)</h3>
+          <textarea style={textareaStyle} rows={20} value={form.global_rules} onChange={(e) => updateField('global_rules', e.target.value)} />
+          <div style={{ marginTop: 12 }}>
+            <Field label="Global Rules Version">
+              <input style={{ ...inputStyle, maxWidth: 300 }} value={form.global_rules_version} onChange={(e) => updateField('global_rules_version', e.target.value)} />
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'direction' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ marginBottom: designTokens.space[7] }}>
+          <div style={cardStyle}>
+            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Moderna</h3>
+            <textarea style={textareaStyle} rows={10} value={form.direction_moderna} onChange={(e) => updateField('direction_moderna', e.target.value)} />
+          </div>
+          <div style={cardStyle}>
+            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Clean</h3>
+            <textarea style={textareaStyle} rows={10} value={form.direction_clean} onChange={(e) => updateField('direction_clean', e.target.value)} />
+          </div>
+          <div style={cardStyle}>
+            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Retail</h3>
+            <textarea style={textareaStyle} rows={10} value={form.direction_retail} onChange={(e) => updateField('direction_retail', e.target.value)} />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'formats' && (
+        <>
+          <div style={cardStyle}>
+            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Formatos de Saida</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-5">
+              <Field label="1:1 (1080x1080)">
+                <textarea style={textareaStyle} rows={3} value={form.format_1_1} onChange={(e) => updateField('format_1_1', e.target.value)} />
+              </Field>
+              <Field label="4:5 (1080x1350)">
+                <textarea style={textareaStyle} rows={3} value={form.format_4_5} onChange={(e) => updateField('format_4_5', e.target.value)} />
+              </Field>
+              <Field label="16:9 (1920x1080)">
+                <textarea style={textareaStyle} rows={3} value={form.format_16_9} onChange={(e) => updateField('format_16_9', e.target.value)} />
+              </Field>
+              <Field label="9:16 (1080x1920)">
+                <textarea style={textareaStyle} rows={3} value={form.format_9_16} onChange={(e) => updateField('format_9_16', e.target.value)} />
+              </Field>
             </div>
-          </Field>
-          <Field label="Max Image Download" hint="1048576 a 52428800">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_image_download_bytes} onChange={(e) => updateField('max_image_download_bytes', Number(e.target.value))} min={1048576} max={52428800} step={1048576} />
-              <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>bytes</span>
-            </div>
-          </Field>
-        </div>
-      </div>
+          </div>
 
-      <div style={cardStyle}>
-        <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Global Rules (Prompt Mestre)</h3>
-        <textarea style={textareaStyle} rows={15} value={form.global_rules} onChange={(e) => updateField('global_rules', e.target.value)} />
-        <div style={{ marginTop: 12 }}>
-          <Field label="Global Rules Version">
-            <input style={{ ...inputStyle, maxWidth: 300 }} value={form.global_rules_version} onChange={(e) => updateField('global_rules_version', e.target.value)} />
-          </Field>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ marginBottom: designTokens.space[7] }}>
-        <div style={cardStyle}>
-          <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Direcao Criativa — Moderna</h3>
-          <textarea style={textareaStyle} rows={6} value={form.direction_moderna} onChange={(e) => updateField('direction_moderna', e.target.value)} />
-        </div>
-        <div style={cardStyle}>
-          <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Direcao Criativa — Clean</h3>
-          <textarea style={textareaStyle} rows={6} value={form.direction_clean} onChange={(e) => updateField('direction_clean', e.target.value)} />
-        </div>
-        <div style={cardStyle}>
-          <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Direcao Criativa — Retail</h3>
-          <textarea style={textareaStyle} rows={6} value={form.direction_retail} onChange={(e) => updateField('direction_retail', e.target.value)} />
-        </div>
-      </div>
-
-      <div style={cardStyle}>
-        <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Formatos de Saida</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-5">
-          <Field label="1:1 (1080x1080)">
-            <textarea style={textareaStyle} rows={3} value={form.format_1_1} onChange={(e) => updateField('format_1_1', e.target.value)} />
-          </Field>
-          <Field label="4:5 (1080x1350)">
-            <textarea style={textareaStyle} rows={3} value={form.format_4_5} onChange={(e) => updateField('format_4_5', e.target.value)} />
-          </Field>
-          <Field label="16:9 (1920x1080)">
-            <textarea style={textareaStyle} rows={3} value={form.format_16_9} onChange={(e) => updateField('format_16_9', e.target.value)} />
-          </Field>
-          <Field label="9:16 (1080x1920)">
-            <textarea style={textareaStyle} rows={3} value={form.format_9_16} onChange={(e) => updateField('format_9_16', e.target.value)} />
-          </Field>
-        </div>
-      </div>
-
-      <div style={{ ...cardStyle, maxWidth: 400 }}>
-        <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Versionamento</h3>
-        <Field label="Prompt Version">
-          <input style={inputStyle} value={form.prompt_version} onChange={(e) => updateField('prompt_version', e.target.value)} />
-        </Field>
-      </div>
+          <div style={cardStyle}>
+            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Versionamento</h3>
+            <Field label="Prompt Version">
+              <input style={{ ...inputStyle, maxWidth: 400 }} value={form.prompt_version} onChange={(e) => updateField('prompt_version', e.target.value)} />
+            </Field>
+          </div>
+        </>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${monitorTheme.border}`, paddingTop: 16, marginTop: 8 }}>
         <p style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>

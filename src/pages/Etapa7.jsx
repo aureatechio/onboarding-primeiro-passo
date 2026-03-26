@@ -12,6 +12,15 @@ import StickyFooter from "../components/StickyFooter"
 import CampaignBriefing from "../components/CampaignBriefing"
 import ProcessingOverlay from "../components/ProcessingOverlay"
 
+function isValidHttpUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
 async function submitBriefing(compraId, { mode, text, audioBlob, audioDuration }) {
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
   if (!supabaseUrl) {
@@ -36,6 +45,28 @@ async function submitBriefing(compraId, { mode, text, audioBlob, audioDuration }
   } catch (err) {
     console.error("[etapa7] briefing submit failed:", err)
     return { success: false, error: "network" }
+  }
+}
+
+async function generateCampaignBriefing(compraId, payload) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
+  if (!supabaseUrl) {
+    return { success: false, code: "INVALID_CONFIG", message: "VITE_SUPABASE_URL ausente." }
+  }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/generate-campaign-briefing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        compra_id: compraId,
+        ...payload,
+      }),
+    })
+    return await res.json()
+  } catch (err) {
+    console.error("[etapa7] generate briefing failed:", err)
+    return { success: false, code: "NETWORK_ERROR", message: "Falha de rede ao gerar briefing." }
   }
 }
 
@@ -64,31 +95,87 @@ export default function Etapa7() {
   const [productionPath, setProductionPath] = useState(null)
   const [completed, setCompleted] = useState(false)
   const [briefText, setBriefText] = useState(userData.campaignBriefText || "")
+  const [companySite, setCompanySite] = useState(userData.campaignCompanySite || "")
   const [audioBlob, setAudioBlob] = useState(null)
   const [audioDuration, setAudioDuration] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [briefingPersisted, setBriefingPersisted] = useState(false)
+  const [generationStatus, setGenerationStatus] = useState("idle")
+  const [generationError, setGenerationError] = useState("")
+  const [generatedData, setGeneratedData] = useState(null)
 
   const textIsValid =
     briefText.length >= CampaignBriefing.MIN_TEXT_LENGTH &&
     briefText.length <= CampaignBriefing.MAX_TEXT_LENGTH
   const audioIsValid = !!audioBlob && audioDuration > 0
+  const siteIsValid = isValidHttpUrl(companySite || "")
+
+  const briefMode = textIsValid && audioIsValid
+    ? "both"
+    : textIsValid
+      ? "text"
+      : audioIsValid
+        ? "audio"
+        : null
 
   const canAdvance =
-    productionPath === "standard" || (productionPath === "hybrid" && (textIsValid || audioIsValid))
+    productionPath === "standard" ||
+    (productionPath === "hybrid" &&
+      (textIsValid || audioIsValid))
+
+  const resetGeneratedState = useCallback(() => {
+    setGenerationStatus("idle")
+    setGenerationError("")
+    setGeneratedData(null)
+    updateUserData({
+      campaignBriefGenerationStatus: null,
+      campaignBriefErrorCode: null,
+      campaignGeneratedBriefing: null,
+      campaignGeneratedInsights: [],
+      campaignBriefCitations: [],
+    })
+  }, [updateUserData])
+
+  const handlePathSelect = useCallback((nextPath) => {
+    setProductionPath(nextPath)
+    setBriefingPersisted(false)
+    resetGeneratedState()
+  }, [resetGeneratedState])
+
+  const handleBriefTextChange = useCallback((nextValue) => {
+    setBriefText(nextValue)
+    if (generationStatus !== "idle") {
+      resetGeneratedState()
+    }
+  }, [generationStatus, resetGeneratedState])
+
+  const handleCompanySiteChange = useCallback((nextValue) => {
+    setCompanySite(nextValue)
+    if (generationStatus !== "idle") {
+      resetGeneratedState()
+    }
+  }, [generationStatus, resetGeneratedState])
+
+  const handleAudioChange = useCallback((nextAudioBlob) => {
+    setAudioBlob(nextAudioBlob)
+    if (generationStatus !== "idle") {
+      resetGeneratedState()
+    }
+  }, [generationStatus, resetGeneratedState])
+
+  const handleAudioDurationChange = useCallback((nextDuration) => {
+    setAudioDuration(nextDuration)
+    if (generationStatus !== "idle") {
+      resetGeneratedState()
+    }
+  }, [generationStatus, resetGeneratedState])
 
   const handleComplete = useCallback(async () => {
-    const briefMode = textIsValid && audioIsValid
-      ? "both"
-      : textIsValid
-        ? "text"
-        : audioIsValid
-          ? "audio"
-          : null
-
     updateUserData({
       productionPath,
       campaignBriefMode: productionPath === "hybrid" ? briefMode : null,
       campaignBriefText: productionPath === "hybrid" ? briefText : "",
+      campaignCompanySite: productionPath === "hybrid" ? companySite : "",
       campaignBriefAudioDurationSec: productionPath === "hybrid" ? audioDuration : 0,
     })
 
@@ -97,20 +184,101 @@ export default function Etapa7() {
 
       await updateProductionPath(hydrationCompraId, productionPath)
 
-      if (productionPath === "hybrid" && briefMode) {
-        await submitBriefing(hydrationCompraId, {
+      if (productionPath === "hybrid" && briefMode && !briefingPersisted) {
+        const submitResult = await submitBriefing(hydrationCompraId, {
           mode: briefMode,
           text: textIsValid ? briefText : undefined,
           audioBlob: audioIsValid ? audioBlob : undefined,
           audioDuration: audioIsValid ? audioDuration : undefined,
         })
+
+        if (submitResult?.success) {
+          setBriefingPersisted(true)
+        }
       }
 
       setIsSubmitting(false)
     }
 
+    if (productionPath === "hybrid" && briefMode && generationStatus === "idle") {
+      if (!hydrationCompraId) {
+        setGenerationStatus("error")
+        setGenerationError("Não foi possível identificar a compra para gerar o briefing.")
+        return
+      }
+
+      if (!siteIsValid) {
+        setGenerationStatus("error")
+        setGenerationError("Para gerar briefing IA, informe um site oficial válido.")
+        updateUserData({
+          campaignBriefGenerationStatus: "error",
+          campaignBriefErrorCode: "INVALID_INPUT",
+          campaignGeneratedBriefing: null,
+          campaignGeneratedInsights: [],
+          campaignBriefCitations: [],
+        })
+        return
+      }
+
+      setIsSubmitting(true)
+      setGenerationError("")
+      const result = await generateCampaignBriefing(hydrationCompraId, {
+        company_name: userData.clientName || "Cliente",
+        company_site: companySite,
+        celebrity_name: userData.celebName || "Celebridade",
+        context: {
+          segment: userData.segmento || null,
+          region: userData.praca || null,
+          campaign_goal_hint: null,
+        },
+        briefing_input: {
+          mode: briefMode,
+          text: textIsValid ? briefText : null,
+        },
+      })
+      setIsSubmitting(false)
+
+      if (result?.success && result?.data) {
+        setGenerationStatus("success")
+        setGeneratedData(result.data)
+        updateUserData({
+          campaignBriefGenerationStatus: "done",
+          campaignBriefErrorCode: null,
+          campaignGeneratedBriefing: result.data.briefing ?? null,
+          campaignGeneratedInsights: result.data.insights_pecas ?? [],
+          campaignBriefCitations: result.data.citacoes ?? [],
+        })
+      } else {
+        setGenerationStatus("error")
+        setGenerationError(result?.message || "Não foi possível gerar o briefing com IA no momento.")
+        updateUserData({
+          campaignBriefGenerationStatus: "error",
+          campaignBriefErrorCode: result?.code ?? "INTERNAL_ERROR",
+          campaignGeneratedBriefing: null,
+          campaignGeneratedInsights: [],
+          campaignBriefCitations: [],
+        })
+      }
+      return
+    }
+
     setCompleted(true)
-  }, [productionPath, briefText, audioBlob, audioDuration, textIsValid, audioIsValid, hydrationCompraId, updateUserData])
+  }, [
+    productionPath,
+    briefMode,
+    briefText,
+    companySite,
+    audioBlob,
+    audioDuration,
+    textIsValid,
+    audioIsValid,
+    siteIsValid,
+    hydrationCompraId,
+    briefingPersisted,
+    generationStatus,
+    userData,
+    updateUserData,
+  ])
 
   if (completed) {
     const isHybrid = productionPath === "hybrid"
@@ -177,7 +345,7 @@ export default function Etapa7() {
 
         {/* Option: Standard */}
         <motion.button
-          onClick={() => setProductionPath("standard")}
+          onClick={() => handlePathSelect("standard")}
           role="radio"
           aria-checked={productionPath === "standard"}
           aria-label="Produção pela Aceleraí"
@@ -248,7 +416,7 @@ export default function Etapa7() {
 
         {/* Option: Hybrid */}
         <motion.button
-          onClick={() => setProductionPath("hybrid")}
+          onClick={() => handlePathSelect("hybrid")}
           role="radio"
           aria-checked={productionPath === "hybrid"}
           aria-label="Personalizado (Avançado)"
@@ -424,11 +592,16 @@ export default function Etapa7() {
           {/* Campaign briefing (text / audio) */}
           <CampaignBriefing
             briefText={briefText}
-            onBriefTextChange={setBriefText}
+            onBriefTextChange={handleBriefTextChange}
             audioBlob={audioBlob}
-            onAudioChange={setAudioBlob}
+            onAudioChange={handleAudioChange}
             audioDuration={audioDuration}
-            onAudioDurationChange={setAudioDuration}
+            onAudioDurationChange={handleAudioDurationChange}
+            companySite={companySite}
+            onCompanySiteChange={handleCompanySiteChange}
+            generationStatus={generationStatus}
+            generationError={generationError}
+            generatedData={generatedData}
           />
 
           {/* Briefing avançado info box */}
@@ -482,7 +655,15 @@ export default function Etapa7() {
       <StickyFooter>
         <NavButtons
           onNext={handleComplete}
-          nextLabel={productionPath === "hybrid" ? "Enviar briefing e concluir" : "Concluir e avançar"}
+          nextLabel={
+            productionPath !== "hybrid"
+              ? "Concluir e avançar"
+              : generationStatus === "idle"
+                ? "Gerar briefing IA"
+                : generationStatus === "success"
+                  ? "Concluir e avançar"
+                  : "Concluir sem briefing IA"
+          }
           nextDisabled={!canAdvance || isSubmitting}
         />
       </StickyFooter>
@@ -490,7 +671,7 @@ export default function Etapa7() {
       <ProcessingOverlay
         show={isSubmitting}
         messages={[
-          "Enviando briefing...",
+          generationStatus === "idle" ? "Enviando briefing..." : "Gerando briefing com IA...",
           "Salvando dados da campanha...",
           "Quase pronto...",
         ]}

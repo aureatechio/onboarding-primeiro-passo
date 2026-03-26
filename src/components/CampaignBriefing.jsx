@@ -18,6 +18,15 @@ const TOPIC_CHIPS = [
 
 const TEXT_PLACEHOLDER = `Descreva os detalhes da sua campanha:\n\n• Qual o objetivo principal?\n• Quem é o público-alvo?\n• Qual a oferta ou mensagem central?\n• Qual o tom desejado (formal, descontraído, urgente)?\n• Há alguma data limite?`
 
+function isValidHttpUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === "http:" || url.protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
 function formatDuration(seconds) {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
@@ -379,7 +388,76 @@ function AudioTab({ audioBlob, audioDuration, onRecord, onStop, onReset, onPlay,
   )
 }
 
-export default function CampaignBriefing({ briefText, onBriefTextChange, audioBlob, onAudioChange, audioDuration, onAudioDurationChange }) {
+function GeneratedBriefingPreview({ generationStatus, generationError, generatedData }) {
+  if (generationStatus !== "success" && generationStatus !== "error") return null
+
+  if (generationStatus === "error") {
+    return (
+      <div
+        style={{
+          marginTop: 14,
+          padding: 14,
+          borderRadius: 12,
+          border: `1px solid ${COLORS.danger}30`,
+          background: `${COLORS.danger}10`,
+        }}
+      >
+        <p style={{ margin: "0 0 6px 0", color: COLORS.danger, fontSize: 12, fontWeight: 800 }}>
+          Não foi possível gerar o briefing com IA
+        </p>
+        <p style={{ margin: 0, color: COLORS.textMuted, fontSize: 12, lineHeight: 1.6 }}>
+          {generationError || "Você pode continuar o onboarding e tentar novamente depois."}
+        </p>
+      </div>
+    )
+  }
+
+  if (!generatedData) return null
+
+  const firstInsight = generatedData.insights_pecas?.[0]
+
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        padding: 14,
+        borderRadius: 12,
+        border: `1px solid ${COLORS.success}30`,
+        background: `${COLORS.success}10`,
+      }}
+    >
+      <p style={{ margin: "0 0 6px 0", color: COLORS.success, fontSize: 12, fontWeight: 800 }}>
+        Briefing IA gerado com sucesso
+      </p>
+      <p style={{ margin: "0 0 8px 0", color: COLORS.text, fontSize: 12, lineHeight: 1.6 }}>
+        {generatedData.briefing?.mensagem_central || "Mensagem central pronta para sua equipe."}
+      </p>
+      {firstInsight && (
+        <p style={{ margin: "0 0 6px 0", color: COLORS.textMuted, fontSize: 12, lineHeight: 1.6 }}>
+          <strong style={{ color: COLORS.text }}>Primeiro insight:</strong>{" "}
+          {firstInsight.chamada_principal}
+        </p>
+      )}
+      <p style={{ margin: 0, color: COLORS.textDim, fontSize: 11 }}>
+        Citações coletadas: {Array.isArray(generatedData.citacoes) ? generatedData.citacoes.length : 0}
+      </p>
+    </div>
+  )
+}
+
+export default function CampaignBriefing({
+  briefText,
+  onBriefTextChange,
+  audioBlob,
+  onAudioChange,
+  audioDuration,
+  onAudioDurationChange,
+  companySite,
+  onCompanySiteChange,
+  generationStatus = "idle",
+  generationError = "",
+  generatedData = null,
+}) {
   const [activeTab, setActiveTab] = useState("text")
   const [isRecording, setIsRecording] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -542,6 +620,7 @@ export default function CampaignBriefing({ briefText, onBriefTextChange, audioBl
 
   const textIsValid = briefText.length >= MIN_TEXT_LENGTH && briefText.length <= MAX_TEXT_LENGTH
   const audioIsValid = !!audioBlob && audioDuration > 0
+  const siteIsValid = isValidHttpUrl(companySite || "")
 
   return (
     <motion.div
@@ -568,6 +647,37 @@ export default function CampaignBriefing({ briefText, onBriefTextChange, audioBl
           <p style={{ color: COLORS.textDim, fontSize: 12, margin: "0 0 14px 0" }}>
             Envie por texto ou grave um áudio com as informações da sua campanha.
           </p>
+
+          <div style={{ marginBottom: 14 }}>
+            <label
+              htmlFor="campaign-site"
+              style={{ display: "block", color: COLORS.text, fontSize: 12, fontWeight: 700, marginBottom: 6 }}
+            >
+              Site oficial da empresa (para pesquisa IA)
+            </label>
+            <input
+              id="campaign-site"
+              value={companySite}
+              onChange={(e) => onCompanySiteChange(e.target.value)}
+              placeholder="https://suaempresa.com.br"
+              style={{
+                width: "100%",
+                borderRadius: 10,
+                border: `1px solid ${companySite && !siteIsValid ? COLORS.danger : COLORS.border}`,
+                background: COLORS.inputBg,
+                color: COLORS.text,
+                padding: "10px 12px",
+                fontSize: 12,
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            {companySite && !siteIsValid && (
+              <p style={{ margin: "6px 0 0 0", color: COLORS.danger, fontSize: 11 }}>
+                Informe uma URL válida com http:// ou https://
+              </p>
+            )}
+          </div>
         </div>
 
         <div
@@ -655,6 +765,14 @@ export default function CampaignBriefing({ briefText, onBriefTextChange, audioBl
             </span>
           </motion.div>
         )}
+
+        <div style={{ padding: "0 20px 16px" }}>
+          <GeneratedBriefingPreview
+            generationStatus={generationStatus}
+            generationError={generationError}
+            generatedData={generatedData}
+          />
+        </div>
       </div>
     </motion.div>
   )

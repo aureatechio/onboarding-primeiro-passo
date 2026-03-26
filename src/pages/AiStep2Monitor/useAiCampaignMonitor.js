@@ -21,6 +21,7 @@ export function useAiCampaignMonitor() {
   const listStatus = params.get('status') || ''
   const listQuery = params.get('q') || ''
   const listCelebrity = params.get('celebrity') || ''
+  const listCompra = params.get('compra') || ''
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -91,7 +92,7 @@ export function useAiCampaignMonitor() {
         setRefreshing(false)
       }
     },
-    [baseUrl, compraId, isListMode, jobId, listLimit, listPage, listQuery, listStatus]
+    [baseUrl, compraId, isListMode, jobId, listCompra, listLimit, listPage, listQuery, listStatus]
   )
 
   useEffect(() => {
@@ -128,6 +129,14 @@ export function useAiCampaignMonitor() {
           if (patch.celebrity) next.set('celebrity', patch.celebrity)
           else next.delete('celebrity')
         }
+        if (patch.compra !== undefined) {
+          if (patch.compra) {
+            next.set('compra', patch.compra)
+            next.delete('q')
+          } else {
+            next.delete('compra')
+          }
+        }
       })
     },
     [setSearchParams]
@@ -143,6 +152,7 @@ export function useAiCampaignMonitor() {
         next.delete('limit')
         next.delete('status')
         next.delete('q')
+        next.delete('compra')
         next.delete('celebrity')
       })
     },
@@ -167,6 +177,7 @@ export function useAiCampaignMonitor() {
       next.delete('limit')
       next.delete('status')
       next.delete('q')
+      next.delete('compra')
       next.delete('celebrity')
       next.set('mode', 'list')
     })
@@ -185,6 +196,8 @@ export function useAiCampaignMonitor() {
     listStatus,
     listQuery,
     listCelebrity,
+    listCompra,
+    eligiblePurchases: data?.eligible_purchases || [],
     updateListFilters,
     openJobDetail,
     backToList,

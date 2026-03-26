@@ -209,6 +209,14 @@ export default function DetailModePanel({
             <DataRow label="Fonte" value={identity?.font_choice} />
             <DataRow label="Paleta" value={(identity?.brand_palette || []).join(', ')} mono />
             <DataRow label="Notas" value={identity?.campaign_notes} />
+            <DataRow
+              label="Briefing Perplexity"
+              value={
+                briefing?.provider === 'perplexity' && briefing?.status === 'done'
+                  ? 'Sim (done)'
+                  : 'Nao'
+              }
+            />
             <DataRow label="Briefing modo" value={briefing?.mode} />
             <DataRow label="Briefing texto" value={briefing?.brief_text} />
             <DataRow label="Transcript status" value={briefing?.transcript_status} />

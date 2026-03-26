@@ -1,4 +1,3 @@
-import { Search } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { STATUS_OPTIONS } from './constants'
 import StatusBadge from './components/StatusBadge'
@@ -12,12 +11,16 @@ export default function ListModePanel({
   pagination,
   listStatus,
   listCelebrity,
-  searchInput,
-  setSearchInput,
+  listCompra,
+  eligiblePurchases,
   openJobDetail,
   updateListFilters,
 }) {
   const celebrityOptions = uniqueNonEmpty(listItems.map((item) => item.celebrity_name))
+  const compraOptions = eligiblePurchases.map((purchase) => ({
+    value: purchase.compra_id,
+    label: purchase.label,
+  }))
   const filteredItems = listCelebrity
     ? listItems.filter((item) => item.celebrity_name === listCelebrity)
     : listItems
@@ -62,39 +65,23 @@ export default function ListModePanel({
           padding: designTokens.space[6],
           marginBottom: designTokens.space[6],
           display: 'grid',
-          gridTemplateColumns: 'minmax(0,1.8fr) minmax(180px,1fr) minmax(200px,1fr) 120px',
+          gridTemplateColumns:
+            'minmax(0,2fr) minmax(170px,auto) minmax(180px,1fr) minmax(200px,1fr) 120px',
           gap: designTokens.space[4],
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            border: `1px solid ${monitorTheme.borderStrong}`,
-            borderRadius: monitorRadius.sm,
-            padding: '8px 10px',
-            background: monitorTheme.pageBg,
-          }}
+        <select
+          value={listCompra}
+          onChange={(event) => updateListFilters({ compra: event.target.value, page: 1 })}
+          style={selectStyles}
         >
-          <Search size={14} color={monitorTheme.textMuted} />
-          <input
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') updateListFilters({ q: searchInput.trim(), page: 1 })
-            }}
-            placeholder="Buscar por job_id/compra_id/status"
-            style={{
-              border: 'none',
-              outline: 'none',
-              width: '100%',
-              fontSize: 13,
-              color: monitorTheme.textPrimary,
-              background: 'transparent',
-            }}
-          />
-        </div>
+          <option value="">Compra elegivel (Cliente - Celebridade)</option>
+          {compraOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
         <select
           value={listStatus}
           onChange={(event) => updateListFilters({ status: event.target.value, page: 1 })}
@@ -120,10 +107,25 @@ export default function ListModePanel({
         </select>
         <button
           type="button"
-          onClick={() => updateListFilters({ q: searchInput.trim(), page: 1 })}
+          onClick={() => {
+            if (!listCompra) return
+            window.open(buildOnboardingFormUrl(listCompra), '_blank', 'noopener,noreferrer')
+          }}
+          disabled={!listCompra}
+          style={{
+            ...highlightActionButtonStyles,
+            opacity: listCompra ? 1 : 0.65,
+            cursor: listCompra ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Abrir formulario
+        </button>
+        <button
+          type="button"
+          onClick={() => updateListFilters({ compra: '', status: '', celebrity: '', page: 1 })}
           style={actionButtonStyles}
         >
-          Buscar
+          Limpar
         </button>
       </div>
 
@@ -131,7 +133,7 @@ export default function ListModePanel({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
+            gridTemplateColumns: 'repeat(6, 1fr)',
             background: monitorTheme.cardMutedBg,
             padding: '10px 16px',
             borderBottom: `1px solid ${monitorTheme.border}`,
@@ -141,6 +143,7 @@ export default function ListModePanel({
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Cliente</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Celebridade</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Status</p>
+          <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Perplexity</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Progresso</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Atualizado em</p>
         </div>
@@ -154,7 +157,7 @@ export default function ListModePanel({
               onClick={() => openJobDetail(item.job_id)}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
+                gridTemplateColumns: 'repeat(6, 1fr)',
                 padding: '12px 16px',
                 width: '100%',
                 border: 'none',
@@ -180,6 +183,9 @@ export default function ListModePanel({
                 {item.celebrity_name || '-'}
               </p>
               <StatusBadge status={item.status} />
+              <span style={item.has_perplexity_briefing ? perplexityOnBadgeStyle : perplexityOffBadgeStyle}>
+                {item.has_perplexity_briefing ? 'Perplexity' : 'Sem Perplexity'}
+              </span>
               <ProgressBar percent={item.percent} height={7} />
               <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, margin: 0, ...truncateStyles }}>
                 {formatDate(item.updated_at)}
@@ -243,4 +249,42 @@ const actionButtonStyles = {
   cursor: 'pointer',
   fontWeight: 600,
   color: monitorTheme.textPrimary,
+}
+
+const highlightActionButtonStyles = {
+  border: 'none',
+  background: `linear-gradient(135deg, ${monitorTheme.brandGradientStart}, ${monitorTheme.brandGradientEnd})`,
+  color: '#FFFFFF',
+  borderRadius: monitorRadius.sm,
+  padding: '8px 12px',
+  fontWeight: 700,
+}
+
+function buildOnboardingFormUrl(compraId) {
+  const url = new URL('/', window.location.origin)
+  url.searchParams.set('compra_id', compraId)
+  return url.toString()
+}
+
+const perplexityBadgeBaseStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '4px 8px',
+  borderRadius: 999,
+  fontSize: 11,
+  fontWeight: 700,
+  width: 'fit-content',
+}
+
+const perplexityOnBadgeStyle = {
+  ...perplexityBadgeBaseStyle,
+  background: monitorTheme.completedBg,
+  color: monitorTheme.completedText,
+}
+
+const perplexityOffBadgeStyle = {
+  ...perplexityBadgeBaseStyle,
+  background: monitorTheme.pendingBg,
+  color: monitorTheme.pendingText,
 }

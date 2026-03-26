@@ -23,8 +23,9 @@ export default function AiStep2Monitor() {
     isListMode,
     listPage,
     listStatus,
-    listQuery,
     listCelebrity,
+    listCompra,
+    eligiblePurchases,
     updateListFilters,
     openJobDetail,
     backToList,
@@ -35,7 +36,6 @@ export default function AiStep2Monitor() {
   const [viewerIndex, setViewerIndex] = useState(-1)
   const [zoom, setZoom] = useState(1)
   const [activeTab, setActiveTab] = useState(DETAIL_TABS[0].id)
-  const [searchInput, setSearchInput] = useState(listQuery)
 
   const assets = data?.assets || []
   const listItems = data?.items || []
@@ -55,10 +55,6 @@ export default function AiStep2Monitor() {
   const progress = data?.progress || { total_expected: 12, total_generated: 0, percent: 0 }
 
   const currentAsset = viewerIndex >= 0 ? assets[viewerIndex] : null
-
-  useEffect(() => {
-    setSearchInput(listQuery)
-  }, [listQuery])
 
   useEffect(() => {
     if (isListMode) setActiveTab(DETAIL_TABS[0].id)
@@ -145,8 +141,8 @@ export default function AiStep2Monitor() {
                 pagination={pagination}
                 listStatus={listStatus}
                 listCelebrity={listCelebrity}
-                searchInput={searchInput}
-                setSearchInput={setSearchInput}
+                listCompra={listCompra}
+                eligiblePurchases={eligiblePurchases}
                 openJobDetail={openJobDetail}
                 updateListFilters={updateListFilters}
               />
