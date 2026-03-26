@@ -138,30 +138,48 @@ interface AiCampaignError {
 - Campos: `compra_id`, `choice` (`add_now`|`later`), `logo` (File), `brand_palette` (JSON string), `font_choice`, `campaign_images` (File[], max 5), `campaign_notes`, `production_path`.
 - Faz upload de logo e imagens para bucket `onboarding-identity`.
 - Upsert em tabela `onboarding_identity` (onConflict: `compra_id`).
+- Quando `production_path = 'standard'`, dispara `create-ai-campaign-job` em background (fire-and-forget, server-to-server com service role).
 - Retorna `{ success, data: { identity_id, logo_path, campaign_images_count } }`.
 
 ### `create-ai-campaign-job` (POST)
 
-- Classificacao JWT: **protegida** (requer bearer interno / service role).
+- Classificacao JWT: **publica no gateway** (`--no-verify-jwt`) com autenticacao **interna obrigatoria** via bearer service role.
 - Recebe apenas `compra_id` no body JSON.
 - Valida elegibilidade, le identidade visual do banco, cria job e 12 assets pending.
 - Retorna `{ success, job_id, status: 'processing' }` imediatamente.
-- Dispatcha workers em background via `EdgeRuntime.waitUntil`.
+- Dispatcha workers em background via `EdgeRuntime.waitUntil`, delegando para `generate-ai-campaign-image` por chamada HTTP.
 - Retorna `{ success, job_id, status }` se idempotente (job existente).
 
 ### `generate-ai-campaign-image` (POST)
 
-- Classificacao JWT: **protegida** (requer bearer interno / service role).
+- Classificacao JWT: **publica no gateway** (`--no-verify-jwt`) com autenticacao **interna obrigatoria** via bearer service role.
 - Worker individual chamado pelo orquestrador.
 - Recebe `job_id`, `asset_id`, `compra_id`, `group_name`, `format`, `celebrity_png_url`, `client_logo_url`, `campaign_image_url`, `prompt`.
 - Gera 1 imagem via Gemini, faz upload no Storage, atualiza asset no banco.
 - Retorna `{ success, asset_id, status }`.
+
+### Trigger automatico da geracao (onboarding -> ai-step2)
+
+- Path `hybrid`: `save-campaign-briefing` dispara `create-ai-campaign-job` apos upsert do briefing.
+- Path `standard`: `save-onboarding-identity` dispara `create-ai-campaign-job` quando recebe `production_path = 'standard'`.
+- Em ambos os casos, o trigger e fire-and-forget e nao bloqueia o response da etapa no frontend.
 
 ### `get-ai-campaign-status` (GET)
 
 - Classificacao JWT: **publica** (`--no-verify-jwt`) — consumida pelo frontend onboarding.
 - Query param: `job_id` ou `compra_id`.
 - Retorna job + assets[] + errors[].
+
+### `get-ai-campaign-monitor` (GET)
+
+- Classificacao JWT: **publica** (`--no-verify-jwt`) — consumida pela tela operacional do onboarding (`/ai-step2/monitor`).
+- Query param: `compra_id` (preferencial) ou `job_id`.
+- Retorna payload agregada para operacao:
+  - `job` + `progress` (status/contadores);
+  - `assets[]`, `errors[]`, `missing[]`;
+  - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`;
+  - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados.
+- Mantem rate-limit in-memory por IP (mesmo baseline do endpoint de status).
 
 ## 6. Schema Supabase (migration)
 

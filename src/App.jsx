@@ -10,6 +10,7 @@ import Etapa6 from './pages/Etapa6';
 import Etapa62 from './pages/Etapa62';
 import Etapa7 from './pages/Etapa7';
 import EtapaFinal from './pages/EtapaFinal';
+import AiStep2Monitor from './pages/AiStep2Monitor';
 
 // Error boundary pra pegar crashes silenciosos
 class ErrorBoundary extends Component {
@@ -124,6 +125,17 @@ function OnboardingFlow() {
 }
 
 export default function App() {
+  const pathname = window.location.pathname || '/';
+  const isAiMonitorRoute = pathname.startsWith('/ai-step2/monitor');
+
+  if (isAiMonitorRoute) {
+    return (
+      <ErrorBoundary>
+        <AiStep2Monitor />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <OnboardingProvider>
       <ErrorBoundary>

@@ -80,35 +80,37 @@ Validação executada:
 A etapa de identidade visual foi dividida em duas etapas explícitas no fluxo:
 
 - `Etapa 6.1`: mantém o conteúdo atual de identidade visual.
-- `Etapa 6.2`: nova etapa de bonificação de prazo com coleta mock de referências.
+- `Etapa 6.2`: nova etapa de bonificação de prazo com coleta de identidade visual em multistep.
 - `Etapa 8`: modo avançado (antiga etapa 7).
 
-Regras da `Etapa 6.2`:
+### Etapa 6.2 — Multistep de identidade visual (mar 2026)
 
-- opção de preenchimento imediato com obrigatórios: logo + fonte;
-- cores iniciam com 3 presets e aceitam até 5 cores;
-- upload de imagens é opcional;
-- opção de "deixar para depois" permite avançar e marca a etapa como pendente.
+A Etapa 6.2 é um multistep interno de 5 sub-slides com `SlideDots` + `SlideTransition`:
+
+| Slide | Conteúdo | Obrigatório |
+|-------|----------|-------------|
+| 0 — Logo | Upload com miniatura e "X" para remover | Sim (bloqueia avanço) |
+| 1 — Cores | Cores extraídas do logo (até 3, editáveis, não removíveis) + cores custom (adicionáveis, removíveis) | Não |
+| 2 — Fonte | Seleção entre Inter, JetBrains Mono, Georgia | Sim (bloqueia avanço) |
+| 3 — Imagens | Upload múltiplo com grid de miniaturas e "X" individual (max 5) | Não |
+| 4 — Observações | Textarea de notas livres (max 500 chars) + confirmação final | Não |
+
+Regras de cores:
+- Após upload de logo PNG/JPG/WebP, até 3 cores são extraídas automaticamente via canvas (`src/lib/color-extractor.js`).
+- SVG não dispara extração (usuário adiciona manualmente).
+- Cores extraídas: editáveis via color picker com popover + input hex, NÃO removíveis.
+- Cores custom: adicionáveis, editáveis, removíveis. Limite total de 5 cores (extraídas + custom).
+
+Componentes novos:
+- `src/components/ThumbnailPreview.jsx` — miniatura de imagem com botão "X".
+- `src/components/ColorSwatch.jsx` — cor editável com popover (color picker embarcado + input hex).
+- `src/lib/color-extractor.js` — extração de cores dominantes via canvas + median-cut.
 
 Estado salvo no contexto (`userData`):
 
-- `identityBonusChoice`, `identityBonusLogoName`, `identityBonusColors`,
+- `identityBonusChoice`, `identityBonusLogoName`, `identityBonusExtractedColors`,
+  `identityBonusCustomColors`, `identityBonusColors` (combined),
   `identityBonusFont`, `identityBonusImagesCount`, `identityBonusPending`.
-
-### Quick wins de UI/UX (mar 2026)
-
-Melhorias aplicadas no card de coleta da Etapa 6.2 para reduzir fricção e melhorar escaneabilidade:
-
-- Barra de progresso interna com contador de obrigatórios (`X/2 concluídos`).
-- Upload de logo customizado (input oculto + CTA visual + ações `Trocar`/`Remover`).
-- Upload de imagens com mesmo padrão (drag area + ações).
-- Chips de status por seção (`Obrigatório`/`Opcional`/`Concluído`/`Pendente`).
-- Títulos de seção limpos com ícones Lucide (sem prefixo `+ Adicionar`).
-- Validação contextual: erros aparecem somente após tentativa de avançar.
-- Scroll automático para o primeiro campo inválido ao falhar validação.
-- Acessibilidade: `fieldset`/`legend`, `role="radiogroup"`, `aria-invalid`, `aria-describedby`, `role="alert"`.
-- Radio buttons visuais com indicador circular (check icon) nos botões de escolha principal.
-- Fontes com preview real (`Aa Bb Cc 123`) e check icon no card selecionado.
 
 Validação executada: `npm run build` com sucesso.
 
@@ -118,29 +120,42 @@ Quando o usuario seleciona `Personalizado (Avancado)` na Etapa 8 (Modo avancado)
 
 - **Texto**: textarea guiado com minimo 80 / maximo 2000 caracteres, chips de topico rapido.
 - **Audio**: gravacao via MediaRecorder (max. 3 min / 10 MB), player de revisao, regravar.
+- **Site oficial**: campo de URL da empresa para grounding da pesquisa na geracao IA.
 
-Regra de avanco: texto valido **ou** audio gravado com sucesso habilita o CTA `Enviar briefing e concluir`.
+Regra de fluxo:
+- Texto valido **ou** audio gravado habilita o CTA.
+- Primeira acao no CTA em `hybrid`: gera briefing IA via Perplexity.
+- Em sucesso: CTA muda para conclusao.
+- Em falha: CTA permite concluir sem bloquear a jornada (fallback operacional).
 
 ### Fluxo de submissao
 
 1. Frontend envia `POST multipart/form-data` para `save-campaign-briefing` Edge Function.
 2. Audio eh salvo em Supabase Storage (bucket `onboarding-briefings`).
 3. Metadados persistidos na tabela `onboarding_briefings` (upsert por `compra_id`).
-4. Transcricao assincrona marcada como `pending` (worker futuro).
-5. Frontend nao bloqueia conclusao aguardando transcricao.
+4. Frontend envia `POST /functions/v1/generate-campaign-briefing` com payload canonico.
+5. Edge Function gera resposta estruturada (briefing + insights + citacoes) e persiste versoes/status.
+6. Transcricao assincrona permanece `pending` para audio (worker futuro).
+7. Frontend nao bloqueia conclusao por falha de provider.
 
 ### Campos no userData
 
 - `campaignBriefMode`: `'text' | 'audio' | 'both' | null`
 - `campaignBriefText`: `string`
+- `campaignCompanySite`: `string`
 - `campaignBriefAudioDurationSec`: `number`
 - `campaignBriefTranscript`: `string | null`
 - `campaignBriefTranscriptStatus`: `'pending' | 'done' | 'error' | null`
+- `campaignGeneratedBriefing`: `object | null`
+- `campaignGeneratedInsights`: `array`
+- `campaignBriefCitations`: `array`
+- `campaignBriefGenerationStatus`: `'done' | 'error' | null`
+- `campaignBriefErrorCode`: `string | null`
 
 ### Componentes
 
 - `src/components/CampaignBriefing.jsx` — bloco completo com tabs, textarea, gravador, player.
-- Integrado em `src/pages/Etapa7.jsx` (exibido condicionalmente quando `productionPath === 'hybrid'`).
+- Integrado em `src/pages/Etapa7.jsx` com ciclo de geracao IA (`loading/success/error/retry`) no modo `hybrid`.
 - Resumo final (`EtapaFinal.jsx`) exibe linhas de `Producao` e `Briefing` no card de resumo.
 
 Validacao executada: `npm run build` com sucesso.
@@ -237,6 +252,12 @@ vercel --prod --scope aureas-projects-ca9dee86
 
 Pipeline de geracao de 12 pecas estaticas (3 grupos x 4 formatos) integrado ao onboarding.
 
+Disparo automatico do job:
+
+- Path `hybrid`: `save-campaign-briefing` dispara `create-ai-campaign-job` apos salvar briefing.
+- Path `standard`: `save-onboarding-identity` dispara `create-ai-campaign-job` quando recebe `production_path=standard`.
+- Trigger server-to-server (service role), fire-and-forget.
+
 ### Variaveis de ambiente (Edge Functions)
 
 | Variavel | Obrigatoria | Descricao |
@@ -249,8 +270,10 @@ Pipeline de geracao de 12 pecas estaticas (3 grupos x 4 formatos) integrado ao o
 
 | Funcao | Tipo | Descricao |
 |--------|------|-----------|
-| `create-ai-campaign-job` | Protegida | Cria job e executa pipeline de geracao em background |
+| `create-ai-campaign-job` | Publica (sem verify_jwt) + bearer interno | Cria/retoma job e delega geracao para workers `generate-ai-campaign-image` em background |
+| `generate-ai-campaign-image` | Publica (sem verify_jwt) + bearer interno | Worker individual para gerar 1 asset, subir no storage e atualizar status no banco |
 | `get-ai-campaign-status` | Publica | Polling de status e retorno de assets |
+| `get-ai-campaign-monitor` | Publica | Endpoint agregador para tela operacional (job + assets + erros + onboarding identity + briefing + uploads assinados) |
 
 ### Tabelas Supabase
 
@@ -261,3 +284,19 @@ Pipeline de geracao de 12 pecas estaticas (3 grupos x 4 formatos) integrado ao o
 | `ai_campaign_errors` | Erros por tentativa de geracao |
 
 Contrato tecnico completo: `apps/onboarding/ai-step2/CONTRACT.md`
+
+### Tela operacional de monitoramento (sem auth)
+
+- Rota dedicada no app onboarding: `/ai-step2/monitor`.
+- Entrada por query string:
+  - `?compra_id=<uuid>` (preferencial)
+  - `?job_id=<uuid>` (suporte adicional)
+- Objetivo: acompanhamento operacional da geracao IA com:
+  - status, progresso e atualizacao periodica;
+  - galeria de previews com ampliar e download;
+  - painel de detalhes do onboarding (identidade visual, briefing e uploads).
+- UX da sidebar:
+  - navegacao clicavel entre secoes da tela (`Visao Geral`, `Galeria`, `Dados do Onboarding`, `Erros e Diagnostico`);
+  - destaque visual de item ativo conforme secao em foco;
+  - sidebar preta com apenas o logo no topo (sem bloco decorativo/texto auxiliar).
+- Fonte de dados principal: `get-ai-campaign-monitor` (agregador).
