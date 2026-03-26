@@ -41,6 +41,13 @@ const INITIAL_USER_DATA = {
   identityBonusFont: '',
   identityBonusImagesCount: 0,
   identityBonusPending: false,
+  campaignNotes: '',
+  campaignBriefMode: null,
+  campaignBriefText: '',
+  campaignBriefAudioUrl: '',
+  campaignBriefAudioDurationSec: 0,
+  campaignBriefTranscript: null,
+  campaignBriefTranscriptStatus: null,
 };
 
 const UUID_REGEX =

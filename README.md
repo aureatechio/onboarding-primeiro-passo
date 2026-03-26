@@ -112,6 +112,39 @@ Melhorias aplicadas no card de coleta da Etapa 6.2 para reduzir fricção e melh
 
 Validação executada: `npm run build` com sucesso.
 
+## Briefing de campanha — Modo Personalizado (Etapa 8, mar 2026)
+
+Quando o usuario seleciona `Personalizado (Avancado)` na Etapa 8 (Modo avancado), um novo bloco `Detalhes da campanha` aparece com duas abas:
+
+- **Texto**: textarea guiado com minimo 80 / maximo 2000 caracteres, chips de topico rapido.
+- **Audio**: gravacao via MediaRecorder (max. 3 min / 10 MB), player de revisao, regravar.
+
+Regra de avanco: texto valido **ou** audio gravado com sucesso habilita o CTA `Enviar briefing e concluir`.
+
+### Fluxo de submissao
+
+1. Frontend envia `POST multipart/form-data` para `save-campaign-briefing` Edge Function.
+2. Audio eh salvo em Supabase Storage (bucket `onboarding-briefings`).
+3. Metadados persistidos na tabela `onboarding_briefings` (upsert por `compra_id`).
+4. Transcricao assincrona marcada como `pending` (worker futuro).
+5. Frontend nao bloqueia conclusao aguardando transcricao.
+
+### Campos no userData
+
+- `campaignBriefMode`: `'text' | 'audio' | 'both' | null`
+- `campaignBriefText`: `string`
+- `campaignBriefAudioDurationSec`: `number`
+- `campaignBriefTranscript`: `string | null`
+- `campaignBriefTranscriptStatus`: `'pending' | 'done' | 'error' | null`
+
+### Componentes
+
+- `src/components/CampaignBriefing.jsx` — bloco completo com tabs, textarea, gravador, player.
+- Integrado em `src/pages/Etapa7.jsx` (exibido condicionalmente quando `productionPath === 'hybrid'`).
+- Resumo final (`EtapaFinal.jsx`) exibe linhas de `Producao` e `Briefing` no card de resumo.
+
+Validacao executada: `npm run build` com sucesso.
+
 ## Webhook de material (Etapa 5)
 
 - Regra: quando o usuario marca `Sim, quero receber as 10 superdicas de trafego pago`
@@ -199,3 +232,32 @@ vercel --prod --scope aureas-projects-ca9dee86
 | `VITE_ONBOARDING_BASE_URL` | Nao (local) | URL base usada em desenvolvimento para links do onboarding |
 | `VITE_TRAFFIC_MATERIAL_URL` | Nao (recomendada) | Link do material enviado no webhook da Etapa 5 quando houver opt-in |
 | `VITE_TRAFFIC_MATERIAL_WEBHOOK_ENDPOINT` | Nao (recomendada) | Endpoint do webhook n8n para receber o POST da Etapa 5 |
+
+## ai-step2 (Geracao de pecas por IA)
+
+Pipeline de geracao de 12 pecas estaticas (3 grupos x 4 formatos) integrado ao onboarding.
+
+### Variaveis de ambiente (Edge Functions)
+
+| Variavel | Obrigatoria | Descricao |
+|----------|-------------|-----------|
+| `GEMINI_API_KEY` | Sim | API key para chamadas ao modelo Gemini |
+| `SUPABASE_URL` | Sim | URL do projeto Supabase (automatica em Edge Functions) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Sim | Chave service role (automatica em Edge Functions) |
+
+### Edge Functions
+
+| Funcao | Tipo | Descricao |
+|--------|------|-----------|
+| `create-ai-campaign-job` | Protegida | Cria job e executa pipeline de geracao em background |
+| `get-ai-campaign-status` | Publica | Polling de status e retorno de assets |
+
+### Tabelas Supabase
+
+| Tabela | Descricao |
+|--------|-----------|
+| `ai_campaign_jobs` | Jobs de geracao com status e metadados |
+| `ai_campaign_assets` | Assets gerados (grupo, formato, URL) |
+| `ai_campaign_errors` | Erros por tentativa de geracao |
+
+Contrato tecnico completo: `apps/onboarding/ai-step2/CONTRACT.md`

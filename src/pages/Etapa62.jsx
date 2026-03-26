@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
@@ -8,6 +8,43 @@ import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import StickyFooter from "../components/StickyFooter"
+import ProcessingOverlay from "../components/ProcessingOverlay"
+import { validateLogoFile, validateAiStep2Inputs } from "../lib/ai-step2-validation"
+
+async function saveIdentityToBackend(compraId, { choice, logoFile, colors, fontId, imagesFiles, campaignNotes }) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
+  if (!supabaseUrl) {
+    console.warn("[etapa62] VITE_SUPABASE_URL missing, skipping identity save")
+    return { success: true, skipped: true }
+  }
+
+  const formData = new FormData()
+  formData.append("compra_id", compraId)
+  formData.append("choice", choice)
+
+  if (choice === "add_now") {
+    if (logoFile) formData.append("logo", logoFile)
+    formData.append("brand_palette", JSON.stringify(colors))
+    if (fontId) formData.append("font_choice", fontId)
+    if (campaignNotes) formData.append("campaign_notes", campaignNotes)
+    if (imagesFiles?.length) {
+      for (const img of imagesFiles) {
+        formData.append("campaign_images", img)
+      }
+    }
+  }
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/save-onboarding-identity`, {
+      method: "POST",
+      body: formData,
+    })
+    return await res.json()
+  } catch (err) {
+    console.error("[etapa62] identity save failed:", err)
+    return { success: false, error: "network" }
+  }
+}
 
 const PRESET_COLORS = ["#E8356D", "#384FFE", "#111119"]
 
@@ -98,10 +135,12 @@ function ProgressBar({ done, total }) {
 }
 
 export default function Etapa62() {
-  const { userData, updateUserData } = useOnboarding()
+  const { userData, updateUserData, hydrationCompraId } = useOnboarding()
 
   const [choice, setChoice] = useState(userData.identityBonusChoice || null)
   const [logoName, setLogoName] = useState(userData.identityBonusLogoName || "")
+  const [logoFile, setLogoFile] = useState(null)
+  const [logoValidationError, setLogoValidationError] = useState(null)
   const [colors, setColors] = useState(
     Array.isArray(userData.identityBonusColors) && userData.identityBonusColors.length > 0
       ? userData.identityBonusColors
@@ -109,9 +148,13 @@ export default function Etapa62() {
   )
   const [selectedFont, setSelectedFont] = useState(userData.identityBonusFont || "")
   const [imagesCount, setImagesCount] = useState(Number(userData.identityBonusImagesCount || 0))
+  const [imagesFiles, setImagesFiles] = useState([])
+  const [campaignNotes, setCampaignNotes] = useState(userData.campaignNotes || "")
   const [completed, setCompleted] = useState(false)
   const [pendingMode, setPendingMode] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   const logoInputRef = useRef(null)
   const imagesInputRef = useRef(null)
@@ -122,7 +165,8 @@ export default function Etapa62() {
   const canConfirm = choice === "later" || (choice === "add_now" && hasRequiredForAddNow)
   const showContinueLater = choice === "add_now" && !hasRequiredForAddNow
 
-  const logoError = submitted && choice === "add_now" && !logoName
+  const logoError = (submitted && choice === "add_now" && !logoName) || logoValidationError
+  const logoErrorMessage = logoValidationError || (submitted && choice === "add_now" && !logoName ? "Envie o logo para avançar." : null)
   const fontError = submitted && choice === "add_now" && !selectedFont
 
   const requiredDone = Number(Boolean(logoName)) + Number(Boolean(selectedFont))
@@ -137,6 +181,7 @@ export default function Etapa62() {
       identityBonusColors: colors,
       identityBonusFont: selectedFont,
       identityBonusImagesCount: imagesCount,
+      campaignNotes,
       ...partial,
     })
   }
@@ -149,24 +194,39 @@ export default function Etapa62() {
 
   const handleLogoChange = (event) => {
     const file = event.target.files?.[0]
-    const nextLogo = file?.name || ""
-    setLogoName(nextLogo)
-    updateUserData({ identityBonusLogoName: nextLogo })
+    if (!file) return
+    const result = validateLogoFile(file)
+    if (!result.valid) {
+      setLogoValidationError(result.error)
+      setLogoName("")
+      setLogoFile(null)
+      updateUserData({ identityBonusLogoName: "" })
+      if (logoInputRef.current) logoInputRef.current.value = ""
+      return
+    }
+    setLogoValidationError(null)
+    setLogoName(file.name)
+    setLogoFile(file)
+    updateUserData({ identityBonusLogoName: file.name })
   }
 
   const handleRemoveLogo = () => {
     setLogoName("")
+    setLogoFile(null)
+    setLogoValidationError(null)
     updateUserData({ identityBonusLogoName: "" })
     if (logoInputRef.current) logoInputRef.current.value = ""
   }
 
   const handleImagesChange = (event) => {
-    const nextCount = event.target.files?.length || 0
-    setImagesCount(nextCount)
-    updateUserData({ identityBonusImagesCount: nextCount })
+    const files = event.target.files ? Array.from(event.target.files) : []
+    setImagesFiles(files)
+    setImagesCount(files.length)
+    updateUserData({ identityBonusImagesCount: files.length })
   }
 
   const handleRemoveImages = () => {
+    setImagesFiles([])
     setImagesCount(0)
     updateUserData({ identityBonusImagesCount: 0 })
     if (imagesInputRef.current) imagesInputRef.current.value = ""
@@ -200,30 +260,77 @@ export default function Etapa62() {
     }
   }
 
-  const handleConfirm = () => {
-    if (choice === "add_now" && !hasRequiredForAddNow) {
-      setSubmitted(true)
-      scrollToFirstError()
-      return
+  const handleConfirm = useCallback(async () => {
+    if (choice === "add_now") {
+      const validation = validateAiStep2Inputs({
+        logoFile,
+        logoName,
+        colors,
+        fontId: selectedFont,
+      })
+      if (!validation.valid) {
+        setSubmitted(true)
+        if (validation.errors.logo) setLogoValidationError(validation.errors.logo)
+        scrollToFirstError()
+        return
+      }
     }
     if (!canConfirm) return
-    if (choice === "later") {
+
+    setSaveError(null)
+    setIsSaving(true)
+
+    try {
+      if (hydrationCompraId) {
+        const result = await saveIdentityToBackend(hydrationCompraId, {
+          choice,
+          logoFile: choice === "add_now" ? logoFile : null,
+          colors: choice === "add_now" ? colors : [],
+          fontId: choice === "add_now" ? selectedFont : "",
+          imagesFiles: choice === "add_now" ? imagesFiles : [],
+          campaignNotes: choice === "add_now" ? campaignNotes : "",
+        })
+        if (!result.success && !result.skipped) {
+          setSaveError(result.message || result.error || "Erro ao salvar identidade visual.")
+          setIsSaving(false)
+          return
+        }
+      }
+
+      if (choice === "later") {
+        persist({ identityBonusPending: true })
+        setPendingMode(true)
+      } else {
+        persist({ identityBonusPending: false })
+        setPendingMode(false)
+      }
+      setCompleted(true)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [choice, canConfirm, logoFile, colors, selectedFont, imagesFiles, campaignNotes, hydrationCompraId, logoName, persist])
+
+  const handleContinueLater = useCallback(async () => {
+    setSaveError(null)
+    setIsSaving(true)
+    try {
+      if (hydrationCompraId) {
+        await saveIdentityToBackend(hydrationCompraId, {
+          choice: "later",
+          logoFile: null,
+          colors: [],
+          fontId: "",
+          imagesFiles: [],
+          campaignNotes: "",
+        })
+      }
       persist({ identityBonusPending: true })
       setPendingMode(true)
       setCompleted(true)
-      return
+    } finally {
+      setIsSaving(false)
     }
-
-    persist({ identityBonusPending: false })
-    setPendingMode(false)
-    setCompleted(true)
-  }
-
-  const handleContinueLater = () => {
-    persist({ identityBonusPending: true })
-    setPendingMode(true)
-    setCompleted(true)
-  }
+  }, [hydrationCompraId, persist])
 
   if (completed) {
     return (
@@ -489,7 +596,7 @@ export default function Etapa62() {
             )}
 
             <AnimatePresence>
-              {logoError && (
+              {logoError && logoErrorMessage && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -497,7 +604,7 @@ export default function Etapa62() {
                   style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "8px 0 0 0" }}
                   role="alert"
                 >
-                  Envie o logo para avançar.
+                  {logoErrorMessage}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -651,7 +758,7 @@ export default function Etapa62() {
           </fieldset>
 
           {/* --- Images section --- */}
-          <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+          <fieldset style={{ border: "none", padding: 0, margin: "0 0 20px 0" }}>
             <legend style={{
               display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
               color: COLORS.text, fontSize: 13, fontWeight: 700,
@@ -725,19 +832,81 @@ export default function Etapa62() {
               </label>
             )}
           </fieldset>
+
+          {/* --- Campaign notes section --- */}
+          <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+            <legend style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+              color: COLORS.text, fontSize: 13, fontWeight: 700,
+            }}>
+              <Icon name="penLine" size={15} color={COLORS.text} />
+              Observações para a campanha
+              <StatusChip isOptional />
+            </legend>
+
+            <textarea
+              value={campaignNotes}
+              onChange={(e) => {
+                const val = e.target.value.slice(0, 500)
+                setCampaignNotes(val)
+                updateUserData({ campaignNotes: val })
+              }}
+              placeholder="Descreva o objetivo, tom ou qualquer detalhe que ajude na criação das peças..."
+              maxLength={500}
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "12px 14px",
+                borderRadius: 10,
+                border: `1px solid ${COLORS.border}`,
+                background: "transparent",
+                color: COLORS.text,
+                fontSize: 13,
+                lineHeight: 1.6,
+                resize: "vertical",
+                fontFamily: "inherit",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <p style={{ color: COLORS.textDim, fontSize: 11, margin: "6px 0 0 0", textAlign: "right" }}>
+              {campaignNotes.length}/500
+            </p>
+          </fieldset>
+        </motion.div>
+      )}
+
+      {saveError && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 14px",
+            borderRadius: 10,
+            background: `${COLORS.danger}10`,
+            border: `1px solid ${COLORS.danger}25`,
+            marginBottom: 12,
+          }}
+        >
+          <Icon name="alertTriangle" size={14} color={COLORS.danger} />
+          <span style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600 }}>{saveError}</span>
         </motion.div>
       )}
 
       <StickyFooter>
         <NavButtons
           onNext={handleConfirm}
-          nextLabel={choice === "later" ? "Confirmar e avançar com pendência" : "Confirmar e avançar"}
-          nextDisabled={!canConfirm && !(choice === "add_now" && !hasRequiredForAddNow)}
+          nextLabel={isSaving ? "Salvando..." : choice === "later" ? "Confirmar e avançar com pendência" : "Confirmar e avançar"}
+          nextDisabled={isSaving || (!canConfirm && !(choice === "add_now" && !hasRequiredForAddNow))}
         />
         {showContinueLater && (
           <button
             type="button"
             onClick={handleContinueLater}
+            disabled={isSaving}
             style={{
               marginTop: 10,
               width: "100%",
@@ -748,13 +917,24 @@ export default function Etapa62() {
               color: COLORS.warning,
               fontSize: 13,
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: isSaving ? "not-allowed" : "pointer",
+              opacity: isSaving ? 0.5 : 1,
             }}
           >
-            Continuar depois (marcar etapa como pendente)
+            {isSaving ? "Salvando..." : "Continuar depois (marcar etapa como pendente)"}
           </button>
         )}
       </StickyFooter>
+
+      <ProcessingOverlay
+        show={isSaving}
+        messages={[
+          "Enviando identidade visual...",
+          "Salvando logo e cores...",
+          "Quase pronto...",
+        ]}
+        duration={4000}
+      />
     </PageLayout>
   )
 }

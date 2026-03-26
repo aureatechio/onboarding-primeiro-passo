@@ -129,6 +129,14 @@ export default function EtapaFinal() {
   // ════════════════════════════════════════════════
   // TELA DE RESUMO
   // ════════════════════════════════════════════════
+  const briefLabel = userData.campaignBriefMode === "both"
+    ? "Texto + Áudio"
+    : userData.campaignBriefMode === "audio"
+      ? "Áudio"
+      : userData.campaignBriefMode === "text"
+        ? "Texto"
+        : null
+
   const summaryRows = [
     { label: "Celebridade", value: userData.celebName, icon: "star", color: COLORS.text },
     { label: "Praça", value: userData.praca, icon: "mapPin", color: COLORS.accent },
@@ -136,6 +144,8 @@ export default function EtapaFinal() {
     { label: "Pacote", value: "2 vídeos + 4 estáticas", icon: "clapperboard", color: COLORS.text },
     { label: "Vigência", value: userData.vigencia, icon: "calendarDays", color: COLORS.text },
     { label: "Preparação", value: "15 dias (ativados)", icon: "clock", color: COLORS.warning },
+    { label: "Produção", value: userData.productionPath === "hybrid" ? "Personalizado" : "Aceleraí", icon: "handshake", color: userData.productionPath === "hybrid" ? COLORS.accent : COLORS.red },
+    ...(briefLabel ? [{ label: "Briefing", value: briefLabel, icon: "send", color: COLORS.accent }] : []),
   ];
 
   const nextSteps = [

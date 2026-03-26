@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
 import { motion } from "framer-motion"
@@ -9,14 +9,109 @@ import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import BulletList from "../components/BulletList"
 import StickyFooter from "../components/StickyFooter"
+import CampaignBriefing from "../components/CampaignBriefing"
+import ProcessingOverlay from "../components/ProcessingOverlay"
+
+async function submitBriefing(compraId, { mode, text, audioBlob, audioDuration }) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
+  if (!supabaseUrl) {
+    console.warn("[etapa7] VITE_SUPABASE_URL missing, skipping briefing submit")
+    return { success: true, skipped: true }
+  }
+
+  const formData = new FormData()
+  formData.append("compra_id", compraId)
+  formData.append("mode", mode)
+  if (text) formData.append("text", text)
+  if (audioDuration) formData.append("audio_duration_sec", String(audioDuration))
+  if (audioBlob) formData.append("audio", audioBlob, "briefing.webm")
+
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/save-campaign-briefing`, {
+      method: "POST",
+      body: formData,
+    })
+    const data = await res.json()
+    return data
+  } catch (err) {
+    console.error("[etapa7] briefing submit failed:", err)
+    return { success: false, error: "network" }
+  }
+}
+
+async function updateProductionPath(compraId, productionPath) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
+  if (!supabaseUrl) return
+
+  try {
+    await fetch(`${supabaseUrl}/functions/v1/save-onboarding-identity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        compra_id: compraId,
+        choice: "add_now",
+        production_path: productionPath,
+      }),
+    })
+  } catch (err) {
+    console.error("[etapa7] production_path update failed:", err)
+  }
+}
 
 export default function Etapa7() {
-  const { userData, goNext, updateUserData } = useOnboarding()
+  const { userData, goNext, updateUserData, hydrationCompraId } = useOnboarding()
 
   const [productionPath, setProductionPath] = useState(null)
   const [completed, setCompleted] = useState(false)
+  const [briefText, setBriefText] = useState(userData.campaignBriefText || "")
+  const [audioBlob, setAudioBlob] = useState(null)
+  const [audioDuration, setAudioDuration] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // ── Completed ──
+  const textIsValid =
+    briefText.length >= CampaignBriefing.MIN_TEXT_LENGTH &&
+    briefText.length <= CampaignBriefing.MAX_TEXT_LENGTH
+  const audioIsValid = !!audioBlob && audioDuration > 0
+
+  const canAdvance =
+    productionPath === "standard" || (productionPath === "hybrid" && (textIsValid || audioIsValid))
+
+  const handleComplete = useCallback(async () => {
+    const briefMode = textIsValid && audioIsValid
+      ? "both"
+      : textIsValid
+        ? "text"
+        : audioIsValid
+          ? "audio"
+          : null
+
+    updateUserData({
+      productionPath,
+      campaignBriefMode: productionPath === "hybrid" ? briefMode : null,
+      campaignBriefText: productionPath === "hybrid" ? briefText : "",
+      campaignBriefAudioDurationSec: productionPath === "hybrid" ? audioDuration : 0,
+    })
+
+    if (hydrationCompraId) {
+      setIsSubmitting(true)
+
+      await updateProductionPath(hydrationCompraId, productionPath)
+
+      if (productionPath === "hybrid" && briefMode) {
+        await submitBriefing(hydrationCompraId, {
+          mode: briefMode,
+          text: textIsValid ? briefText : undefined,
+          audioBlob: audioIsValid ? audioBlob : undefined,
+          audioDuration: audioIsValid ? audioDuration : undefined,
+        })
+      }
+
+      setIsSubmitting(false)
+    }
+
+    setCompleted(true)
+  }, [productionPath, briefText, audioBlob, audioDuration, textIsValid, audioIsValid, hydrationCompraId, updateUserData])
+
   if (completed) {
     const isHybrid = productionPath === "hybrid"
     return (
@@ -30,16 +125,10 @@ export default function Etapa7() {
         }
         badge={isHybrid ? "PRODUÇÃO HÍBRIDA" : "PRODUÇÃO ACELERAÍ"}
         badgeColor={isHybrid ? COLORS.accent : COLORS.red}
-      >
-        {/* Override button text via children - the CompletionScreen already has a button,
-            but we note the desired label. Since CompletionScreen uses goNext internally
-            with fixed text, we pass the override intent. The button text is hardcoded
-            in CompletionScreen, so this is informational. */}
-      </CompletionScreen>
+      />
     )
   }
 
-  // ── Main Screen ──
   return (
     <PageLayout>
       <StepHeader
@@ -228,7 +317,7 @@ export default function Etapa7() {
         </motion.button>
       </motion.div>
 
-      {/* Conditional: Hybrid rules */}
+      {/* Conditional: Hybrid rules + briefing */}
       {productionPath === "hybrid" && (
         <motion.div
           initial={{ opacity: 0, y: 20, height: 0 }}
@@ -332,7 +421,17 @@ export default function Etapa7() {
             />
           </div>
 
-          {/* Briefing avançado box */}
+          {/* Campaign briefing (text / audio) */}
+          <CampaignBriefing
+            briefText={briefText}
+            onBriefTextChange={setBriefText}
+            audioBlob={audioBlob}
+            onAudioChange={setAudioBlob}
+            audioDuration={audioDuration}
+            onAudioDurationChange={setAudioDuration}
+          />
+
+          {/* Briefing avançado info box */}
           <div
             style={{
               background: `${COLORS.accent}10`,
@@ -382,14 +481,21 @@ export default function Etapa7() {
       {/* NavButtons */}
       <StickyFooter>
         <NavButtons
-          onNext={() => {
-            updateUserData({ productionPath })
-            setCompleted(true)
-          }}
-          nextLabel="Concluir e avançar"
-          nextDisabled={!productionPath}
+          onNext={handleComplete}
+          nextLabel={productionPath === "hybrid" ? "Enviar briefing e concluir" : "Concluir e avançar"}
+          nextDisabled={!canAdvance || isSubmitting}
         />
       </StickyFooter>
+
+      <ProcessingOverlay
+        show={isSubmitting}
+        messages={[
+          "Enviando briefing...",
+          "Salvando dados da campanha...",
+          "Quase pronto...",
+        ]}
+        duration={4000}
+      />
     </PageLayout>
   )
 }
