@@ -27,6 +27,10 @@ export function useAiCampaignMonitor() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
+  const [actionSuccess, setActionSuccess] = useState('')
+  const [retryingAssetId, setRetryingAssetId] = useState('')
+  const [retryingAll, setRetryingAll] = useState(false)
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
 
   const baseUrl = import.meta.env.VITE_SUPABASE_URL || ''
@@ -84,6 +88,7 @@ export function useAiCampaignMonitor() {
 
         setData(payload)
         setError('')
+        setActionError('')
         setLastUpdatedAt(new Date().toISOString())
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro inesperado.')
@@ -183,11 +188,77 @@ export function useAiCampaignMonitor() {
     })
   }, [setSearchParams])
 
+  const retryRequest = useCallback(
+    async (payload) => {
+      if (!baseUrl) {
+        setActionError('VITE_SUPABASE_URL nao configurada.')
+        return { ok: false }
+      }
+
+      try {
+        setActionError('')
+        setActionSuccess('')
+
+        const response = await fetch(`${baseUrl}/functions/v1/retry-ai-campaign-assets`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        })
+
+        const result = await response.json()
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.message || 'Falha ao reprocessar.')
+        }
+
+        setActionSuccess(result?.message || 'Reprocessamento disparado com sucesso.')
+        await fetchData({ silent: true })
+        return { ok: true, result }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erro inesperado ao reprocessar.'
+        setActionError(message)
+        return { ok: false, message }
+      }
+    },
+    [baseUrl, fetchData]
+  )
+
+  const retrySingleAsset = useCallback(
+    async (assetId) => {
+      if (!jobId || !assetId) return { ok: false, message: 'job_id/asset_id ausente.' }
+      setRetryingAssetId(assetId)
+      const response = await retryRequest({
+        job_id: jobId,
+        asset_id: assetId,
+        mode: 'single',
+      })
+      setRetryingAssetId('')
+      return response
+    },
+    [jobId, retryRequest]
+  )
+
+  const retryFailedAssets = useCallback(async () => {
+    if (!jobId) return { ok: false, message: 'job_id ausente.' }
+    setRetryingAll(true)
+    const response = await retryRequest({
+      job_id: jobId,
+      mode: 'failed',
+    })
+    setRetryingAll(false)
+    return response
+  }, [jobId, retryRequest])
+
   return {
     data,
     loading,
     refreshing,
     error,
+    actionError,
+    actionSuccess,
+    retryingAssetId,
+    retryingAll,
     lastUpdatedAt,
     compraId,
     jobId,
@@ -203,5 +274,7 @@ export function useAiCampaignMonitor() {
     backToList,
     goHome,
     reload: fetchData,
+    retrySingleAsset,
+    retryFailedAssets,
   }
 }

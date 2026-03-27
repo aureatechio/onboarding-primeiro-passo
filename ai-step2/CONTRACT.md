@@ -106,6 +106,7 @@ interface AiCampaignAsset {
   job_id: string       // uuid FK
   group_name: 'moderna' | 'clean' | 'retail'
   format: '1:1' | '4:5' | '16:9' | '9:16'
+  status: 'pending' | 'processing' | 'completed' | 'failed'
   image_url: string    // signed URL ou path no bucket
   width: number | null
   height: number | null
@@ -189,10 +190,25 @@ interface AiCampaignError {
 - Payload de detalhe:
   - `mode: "detail"` (implícito por estrutura atual)
   - `job` + `progress` (status/contadores)
-  - `assets[]`, `errors[]`, `missing[]`
+  - `assets[]` (inclui `status` por asset), `errors[]`, `missing[]`
   - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`
   - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados
 - Mantem rate-limit in-memory por IP (mesmo baseline do endpoint de status).
+
+### `retry-ai-campaign-assets` (POST)
+
+- Classificacao JWT: **publica** (`--no-verify-jwt`) com validacoes server-side de estado.
+- Objetivo: reprocessar assets com falha para um `job_id` existente.
+- Body:
+  - `job_id` (obrigatorio)
+  - `mode` opcional: `single | failed` (default `failed`)
+  - `asset_id` obrigatorio quando `mode = single`
+- Regras:
+  - Retry permitido apenas para assets `failed`.
+  - Bloqueia retry quando houver assets `pending/processing` no job (`JOB_BUSY`).
+  - Prepara assets alvo para `pending` e dispara `create-ai-campaign-job` para retomar processamento.
+- Saida:
+  - `success`, `job_id`, `compra_id`, `retried_count`, `target_asset_ids[]`, status do disparo.
 
 ## 6. Schema Supabase (migration)
 

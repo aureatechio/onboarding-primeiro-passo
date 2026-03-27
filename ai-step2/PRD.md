@@ -26,6 +26,8 @@ Objetivo: transformar dados do cliente e ativos visuais em **12 imagens finais**
 - Geracao de **3 grupos criativos**: `moderna`, `clean`, `retail`
 - Geracao de **4 formatos por grupo**: `1:1`, `4:5`, `16:9`, `9:16`
 - Entrega final das imagens geradas.
+- Operacao no monitor com retry unitario por asset e retry em lote para assets com falha.
+- Galeria operacional com navegacao por abas de categoria (`moderna`, `clean`, `retail`).
 
 ### Fora de escopo (v1)
 
@@ -112,6 +114,9 @@ Total por execucao: **3 x 4 = 12 imagens**.
 - **RF-08:** Gerar os 4 formatos por grupo.
 - **RF-09:** Expor status de processamento ao usuario.
 - **RF-10:** Disponibilizar as URLs finais das imagens.
+- **RF-11:** Permitir retry unitario para assets com status `failed`.
+- **RF-12:** Permitir retry em lote para todos os assets `failed` do job.
+- **RF-13:** Exibir navegacao por abas de categoria no monitor operacional.
 
 ## 7. Requisitos nao funcionais
 
@@ -139,6 +144,8 @@ Total por execucao: **3 x 4 = 12 imagens**.
 - [ ] Regras de `global-rules.md` sao aplicadas ao prompt final.
 - [ ] Saida retorna metadados minimos e URLs das imagens.
 - [ ] Logs permitem auditoria de ponta a ponta.
+- [ ] Monitor permite reprocessar um asset falho e todos os falhos do job.
+- [ ] Job nao permanece em `processing` quando todos os assets estao em estado terminal.
 
 ## 10. Estado atual vs estado alvo
 

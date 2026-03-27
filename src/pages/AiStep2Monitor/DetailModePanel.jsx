@@ -1,6 +1,6 @@
-import { Image as ImageIcon } from 'lucide-react'
+import { AlertTriangle, Image as ImageIcon, Loader2, RotateCcw } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
-import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS } from './constants'
+import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import DataRow from './components/DataRow'
 import ProgressBar from './components/ProgressBar'
 import TabBar from './components/TabBar'
@@ -17,11 +17,20 @@ export default function DetailModePanel({
   activeTab,
   onTabChange,
   onOpenViewer,
+  activeGalleryCategory,
+  onGalleryCategoryChange,
+  onRetrySingleAsset,
+  onRetryFailedAssets,
+  retryingAssetId,
+  retryingAll,
 }) {
   const groupedAssets = ASSET_GROUPS.map((group) => ({
     ...group,
     items: assets.filter((asset) => normalizeGroupName(asset.group_name) === group.key),
   }))
+  const currentGroup =
+    groupedAssets.find((group) => group.key === activeGalleryCategory) || groupedAssets[0]
+  const failedAssets = assets.filter((asset) => asset.status === 'failed')
 
   return (
     <>
@@ -29,6 +38,62 @@ export default function DetailModePanel({
 
       {activeTab === 'gallery' ? (
         <section>
+          {failedAssets.length > 0 ? (
+            <div
+              style={{
+                border: `1px solid ${monitorTheme.dangerBorder}`,
+                background: monitorTheme.dangerBg,
+                color: monitorTheme.dangerTextStrong,
+                borderRadius: monitorRadius.xl,
+                padding: designTokens.space[5],
+                marginBottom: designTokens.space[6],
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 12,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <AlertTriangle size={18} style={{ marginTop: 2 }} />
+                  <div>
+                    <p style={{ ...TYPE.bodySmall, color: monitorTheme.dangerTextStrong }}>
+                      Tivemos uma instabilidade temporaria no provedor de imagens.
+                    </p>
+                    <p style={{ ...TYPE.caption, color: monitorTheme.dangerText, marginTop: 2 }}>
+                      {failedAssets.length} asset(s) com falha. Voce pode tentar novamente agora.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onRetryFailedAssets}
+                  disabled={retryingAll}
+                  style={{
+                    border: `1px solid ${monitorTheme.dangerBorder}`,
+                    background: monitorTheme.pageBg,
+                    color: monitorTheme.dangerTextStrong,
+                    borderRadius: monitorRadius.md,
+                    padding: '8px 10px',
+                    cursor: retryingAll ? 'not-allowed' : 'pointer',
+                    opacity: retryingAll ? 0.7 : 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontWeight: 600,
+                  }}
+                >
+                  {retryingAll ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+                  Reprocessar todas com erro
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           <div
             style={{
               display: 'grid',
@@ -71,10 +136,15 @@ export default function DetailModePanel({
             <ProgressBar percent={progress.percent} animated showLabel={false} height={10} />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-            <h2 style={{ ...TYPE.h3, color: monitorTheme.textPrimary }}>Previews gerados</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <h2 style={{ ...TYPE.h3, color: monitorTheme.textPrimary }}>Previews por categoria</h2>
             <p style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>{assets.length} assets</p>
           </div>
+          <TabBar
+            tabs={GALLERY_CATEGORY_TABS}
+            activeTab={activeGalleryCategory}
+            onTabChange={onGalleryCategoryChange}
+          />
 
           {assets.length === 0 ? (
             <div
@@ -89,100 +159,150 @@ export default function DetailModePanel({
               Nenhum preview disponivel ainda.
             </div>
           ) : (
-            <div style={{ display: 'grid', gap: designTokens.space[9] }}>
-              {groupedAssets.map((group) => (
-                <div key={group.key}>
-                  <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary, marginBottom: 10 }}>
-                    {group.label}
-                  </h3>
-                  {group.items.length === 0 ? (
-                    <div
-                      style={{
-                        border: `1px dashed ${monitorTheme.borderStrong}`,
-                        borderRadius: monitorRadius.lg,
-                        padding: 14,
-                        color: monitorTheme.textMuted,
-                      }}
-                    >
-                      Nenhum asset nesta categoria.
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                        gap: designTokens.space[5],
-                      }}
-                    >
-                      {group.items.map((asset, index) => {
-                        const ratio = ASPECT_RATIOS[asset.format] || ASPECT_RATIOS['1:1']
-                        return (
-                          <button
-                            key={asset.id || `${asset.group_name}-${asset.format}-${index}`}
-                            type="button"
-                            onClick={() => onOpenViewer(asset)}
+            <div>
+              <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary, marginBottom: 10 }}>
+                {currentGroup?.label || 'Categoria'}
+              </h3>
+              {!currentGroup || currentGroup.items.length === 0 ? (
+                <div
+                  style={{
+                    border: `1px dashed ${monitorTheme.borderStrong}`,
+                    borderRadius: monitorRadius.lg,
+                    padding: 14,
+                    color: monitorTheme.textMuted,
+                  }}
+                >
+                  Nenhum asset nesta categoria.
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: designTokens.space[5],
+                  }}
+                >
+                  {currentGroup.items.map((asset, index) => {
+                    const ratio = ASPECT_RATIOS[asset.format] || ASPECT_RATIOS['1:1']
+                    const isFailed = asset.status === 'failed'
+                    const isRetryingThis = retryingAssetId === asset.id
+
+                    return (
+                      <div
+                        key={asset.id || `${asset.group_name}-${asset.format}-${index}`}
+                        style={{
+                          border: `1px solid ${isFailed ? monitorTheme.dangerBorder : monitorTheme.border}`,
+                          borderRadius: monitorRadius.xl,
+                          overflow: 'hidden',
+                          background: monitorTheme.cardMutedBg,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => onOpenViewer(asset)}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            padding: 0,
+                            textAlign: 'left',
+                          }}
+                        >
+                          <div
                             style={{
-                              border: `1px solid ${monitorTheme.border}`,
-                              borderRadius: monitorRadius.xl,
+                              aspectRatio: ratio,
+                              width: '100%',
+                              position: 'relative',
                               overflow: 'hidden',
-                              background: monitorTheme.cardMutedBg,
-                              cursor: 'pointer',
-                              padding: 0,
-                              display: 'flex',
-                              flexDirection: 'column',
                             }}
                           >
-                            <div
+                            {asset.image_url ? (
+                              <img
+                                src={asset.image_url}
+                                alt={`${asset.group_name} ${asset.format}`}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  display: 'block',
+                                }}
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  display: 'grid',
+                                  placeItems: 'center',
+                                  color: monitorTheme.sidebarTextMuted,
+                                  background: monitorTheme.pageBg,
+                                }}
+                              >
+                                <ImageIcon size={28} />
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                        <div
+                          style={{
+                            padding: '8px 10px',
+                            background: monitorTheme.pageBg,
+                            borderTop: `1px solid ${monitorTheme.border}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                          }}
+                        >
+                          <div>
+                            <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, margin: 0 }}>
+                              {(asset.group_name || '-').toUpperCase()} · {asset.format || '-'}
+                            </p>
+                            <p
                               style={{
-                                aspectRatio: ratio,
-                                width: '100%',
-                                position: 'relative',
-                                overflow: 'hidden',
+                                ...TYPE.caption,
+                                marginTop: 3,
+                                color: isFailed ? monitorTheme.failedText : monitorTheme.textMuted,
                               }}
                             >
-                              {asset.image_url ? (
-                                <img
-                                  src={asset.image_url}
-                                  alt={`${asset.group_name} ${asset.format}`}
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    display: 'block',
-                                  }}
-                                />
+                              {asset.status || 'unknown'}
+                            </p>
+                          </div>
+                          {isFailed ? (
+                            <button
+                              type="button"
+                              onClick={() => onRetrySingleAsset(asset.id)}
+                              disabled={isRetryingThis || retryingAll}
+                              title="Reprocessar esta imagem"
+                              style={{
+                                border: `1px solid ${monitorTheme.dangerBorder}`,
+                                background: monitorTheme.dangerBg,
+                                color: monitorTheme.dangerTextStrong,
+                                borderRadius: monitorRadius.md,
+                                width: 30,
+                                height: 30,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: isRetryingThis || retryingAll ? 'not-allowed' : 'pointer',
+                                opacity: isRetryingThis || retryingAll ? 0.7 : 1,
+                              }}
+                            >
+                              {isRetryingThis ? (
+                                <Loader2 size={14} className="animate-spin" />
                               ) : (
-                                <div
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    display: 'grid',
-                                    placeItems: 'center',
-                                    color: monitorTheme.sidebarTextMuted,
-                                  }}
-                                >
-                                  <ImageIcon size={28} />
-                                </div>
+                                <RotateCcw size={14} />
                               )}
-                            </div>
-                            <div
-                              style={{
-                                padding: '8px 10px',
-                                background: monitorTheme.pageBg,
-                                borderTop: `1px solid ${monitorTheme.border}`,
-                              }}
-                            >
-                              <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, margin: 0 }}>
-                                {(asset.group_name || '-').toUpperCase()} · {asset.format || '-'}
-                              </p>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </section>

@@ -34,6 +34,11 @@ export const ASSET_GROUPS = [
   { key: 'retail', label: 'Retail' },
 ]
 
+export const GALLERY_CATEGORY_TABS = ASSET_GROUPS.map((group) => ({
+  id: group.key,
+  label: group.label,
+}))
+
 export const ASPECT_RATIOS = {
   '1:1': '1 / 1',
   '4:5': '4 / 5',

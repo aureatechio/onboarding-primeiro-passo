@@ -5,7 +5,7 @@ import DetailModePanel from './DetailModePanel'
 import ListModePanel from './ListModePanel'
 import ImageViewer from './components/ImageViewer'
 import StatusBadge from './components/StatusBadge'
-import { DETAIL_TABS } from './constants'
+import { DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import { useAiCampaignMonitor } from './useAiCampaignMonitor'
 import { formatDate } from './utils'
 import { monitorRadius, monitorTheme } from './theme'
@@ -17,6 +17,10 @@ export default function AiStep2Monitor() {
     loading,
     refreshing,
     error,
+    actionError,
+    actionSuccess,
+    retryingAssetId,
+    retryingAll,
     lastUpdatedAt,
     compraId,
     jobId,
@@ -31,11 +35,14 @@ export default function AiStep2Monitor() {
     backToList,
     goHome,
     reload,
+    retrySingleAsset,
+    retryFailedAssets,
   } = useAiCampaignMonitor()
 
   const [viewerIndex, setViewerIndex] = useState(-1)
   const [zoom, setZoom] = useState(1)
   const [activeTab, setActiveTab] = useState(DETAIL_TABS[0].id)
+  const [activeGalleryCategory, setActiveGalleryCategory] = useState(GALLERY_CATEGORY_TABS[0].id)
 
   const assets = data?.assets || []
   const listItems = data?.items || []
@@ -58,6 +65,10 @@ export default function AiStep2Monitor() {
 
   useEffect(() => {
     if (isListMode) setActiveTab(DETAIL_TABS[0].id)
+  }, [isListMode])
+
+  useEffect(() => {
+    if (isListMode) setActiveGalleryCategory(GALLERY_CATEGORY_TABS[0].id)
   }, [isListMode])
 
   const openViewerByAsset = (asset) => {
@@ -129,6 +140,36 @@ export default function AiStep2Monitor() {
               </div>
             ) : null}
 
+            {actionError ? (
+              <div
+                style={{
+                  border: `1px solid ${monitorTheme.dangerBorder}`,
+                  background: monitorTheme.dangerBg,
+                  color: monitorTheme.dangerTextStrong,
+                  borderRadius: monitorRadius.xl,
+                  padding: 14,
+                  marginBottom: 16,
+                }}
+              >
+                <strong>Falha no reprocessamento:</strong> {actionError}
+              </div>
+            ) : null}
+
+            {actionSuccess ? (
+              <div
+                style={{
+                  border: `1px solid ${monitorTheme.borderStrong}`,
+                  background: monitorTheme.completedBg,
+                  color: monitorTheme.completedText,
+                  borderRadius: monitorRadius.xl,
+                  padding: 14,
+                  marginBottom: 16,
+                }}
+              >
+                {actionSuccess}
+              </div>
+            ) : null}
+
             {loading ? (
               <div className="animate-pulse" style={{ display: 'grid', gap: 14 }}>
                 <div style={{ height: 100, borderRadius: monitorRadius.xl, background: monitorTheme.borderSoft }} />
@@ -156,7 +197,13 @@ export default function AiStep2Monitor() {
                 progress={progress}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+                activeGalleryCategory={activeGalleryCategory}
+                onGalleryCategoryChange={setActiveGalleryCategory}
                 onOpenViewer={openViewerByAsset}
+                onRetrySingleAsset={retrySingleAsset}
+                onRetryFailedAssets={retryFailedAssets}
+                retryingAssetId={retryingAssetId}
+                retryingAll={retryingAll}
               />
             )}
       {!isListMode && currentAsset ? (
