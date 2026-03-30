@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 function toPage(value, fallback) {
   return Math.max(parseInt(value || String(fallback), 10) || fallback, 1)
@@ -6,6 +6,45 @@ function toPage(value, fallback) {
 
 function toLimit(value, fallback) {
   return Math.min(Math.max(parseInt(value || String(fallback), 10) || fallback, 1), 100)
+}
+
+const responseCache = new Map()
+const inflightByKey = new Map()
+const maxCachedResponses = 25
+
+function cacheResponse(key, payload, loadedAt) {
+  if (!key) return
+  responseCache.set(key, { payload, loadedAt })
+  if (responseCache.size > maxCachedResponses) {
+    const oldestKey = responseCache.keys().next().value
+    if (oldestKey) responseCache.delete(oldestKey)
+  }
+}
+
+function inDev() {
+  return Boolean(import.meta.env.DEV)
+}
+
+function mark(name) {
+  if (typeof performance === 'undefined') return
+  performance.mark(name)
+}
+
+function measure(name, start, end) {
+  if (typeof performance === 'undefined') return
+  const hasStart = performance.getEntriesByName(start).length > 0
+  const hasEnd = performance.getEntriesByName(end).length > 0
+  if (!hasStart || !hasEnd) return
+  performance.measure(name, start, end)
+  const entries = performance.getEntriesByName(name)
+  const duration = entries[entries.length - 1]?.duration
+  if (inDev() && typeof duration === 'number') {
+    console.debug(`[ai-step2-monitor][perf] ${name}: ${Math.round(duration)}ms`)
+  }
+}
+
+function isAbortError(error) {
+  return error instanceof Error && error.name === 'AbortError'
 }
 
 export function useAiCampaignMonitor() {
@@ -34,6 +73,16 @@ export function useAiCampaignMonitor() {
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
 
   const baseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+  const requestIdRef = useRef(0)
+  const dataRef = useRef(null)
+  const activeRequestRef = useRef({ controller: null, key: '' })
+
+  const requestKey = useMemo(() => {
+    if (isListMode) {
+      return `list|page=${listPage}|limit=${listLimit}|status=${listStatus}|q=${listQuery}`
+    }
+    return `detail|compra=${compraId}|job=${jobId}`
+  }, [compraId, isListMode, jobId, listLimit, listPage, listQuery, listStatus])
 
   const setSearchParams = useCallback((updater) => {
     const nextParams = new URLSearchParams(window.location.search)
@@ -41,17 +90,26 @@ export function useAiCampaignMonitor() {
     const nextSearch = nextParams.toString()
     const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}`
     window.history.pushState({}, '', nextUrl)
+    window.dispatchEvent(new Event('aurea:location-change'))
     setLocationSearch(window.location.search)
   }, [])
 
   useEffect(() => {
     const onPopState = () => setLocationSearch(window.location.search)
     window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
+    window.addEventListener('aurea:location-change', onPopState)
+    return () => {
+      window.removeEventListener('popstate', onPopState)
+      window.removeEventListener('aurea:location-change', onPopState)
+    }
   }, [])
 
+  useEffect(() => {
+    dataRef.current = data
+  }, [data])
+
   const fetchData = useCallback(
-    async ({ silent = false } = {}) => {
+    async ({ silent = false, force = false } = {}) => {
       if (!baseUrl) {
         setError('VITE_SUPABASE_URL nao configurada.')
         setLoading(false)
@@ -63,8 +121,20 @@ export function useAiCampaignMonitor() {
         return
       }
 
-      if (!silent) setLoading(true)
-      if (silent) setRefreshing(true)
+      const cacheEntry = responseCache.get(requestKey)
+      const hasVisibleData = Boolean(dataRef.current || cacheEntry?.payload)
+
+      if (!silent && cacheEntry?.payload && !force) {
+        setData(cacheEntry.payload)
+        setLastUpdatedAt(cacheEntry.loadedAt)
+        setError('')
+        setLoading(false)
+      }
+
+      if (!silent) setLoading(!hasVisibleData)
+      if (silent || hasVisibleData) setRefreshing(true)
+
+      const currentRequestId = ++requestIdRef.current
 
       try {
         const query = new URLSearchParams()
@@ -79,25 +149,68 @@ export function useAiCampaignMonitor() {
           if (jobId) query.set('job_id', jobId)
         }
 
-        const response = await fetch(`${baseUrl}/functions/v1/get-ai-campaign-monitor?${query.toString()}`)
+        const url = `${baseUrl}/functions/v1/get-ai-campaign-monitor?${query.toString()}`
+        const runFetch = async () => {
+          if (activeRequestRef.current.controller && activeRequestRef.current.key !== requestKey) {
+            activeRequestRef.current.controller.abort()
+          }
+
+          const controller = new AbortController()
+          activeRequestRef.current = { controller, key: requestKey }
+          mark('ai-step2-list-fetch-start')
+          const fetchPromise = fetch(url, { signal: controller.signal })
+          inflightByKey.set(requestKey, fetchPromise)
+          try {
+            return await fetchPromise
+          } finally {
+            inflightByKey.delete(requestKey)
+          }
+        }
+
+        const inflightPromise = inflightByKey.get(requestKey)
+        let response
+
+        if (inflightPromise) {
+          try {
+            response = await inflightPromise
+          } catch (inflightErr) {
+            // A shared inflight request can be aborted by StrictMode remounts.
+            // In this case, immediately retry with a fresh request.
+            if (!isAbortError(inflightErr)) throw inflightErr
+            response = await runFetch()
+          }
+        } else {
+          response = await runFetch()
+        }
+
         const payload = await response.json()
+        mark('ai-step2-list-fetch-end')
+        measure('ai-step2:list-fetch', 'ai-step2-list-fetch-start', 'ai-step2-list-fetch-end')
+        measure('ai-step2:nav-to-fetch-end', 'ai-step2-nav-start', 'ai-step2-list-fetch-end')
 
         if (!response.ok || !payload?.success) {
           throw new Error(payload?.message || 'Falha ao carregar monitor.')
         }
 
+        if (currentRequestId !== requestIdRef.current) {
+          return
+        }
+
+        const loadedAt = new Date().toISOString()
         setData(payload)
         setError('')
         setActionError('')
-        setLastUpdatedAt(new Date().toISOString())
+        setLastUpdatedAt(loadedAt)
+        cacheResponse(requestKey, payload, loadedAt)
       } catch (err) {
+        if (isAbortError(err)) return
         setError(err instanceof Error ? err.message : 'Erro inesperado.')
       } finally {
         setLoading(false)
         setRefreshing(false)
       }
     },
-    [baseUrl, compraId, isListMode, jobId, listCompra, listLimit, listPage, listQuery, listStatus]
+    [baseUrl, compraId, isListMode, jobId, listLimit, listPage, listQuery, listStatus, requestKey]
   )
 
   useEffect(() => {
@@ -115,6 +228,14 @@ export function useAiCampaignMonitor() {
     const intervalId = window.setInterval(() => fetchData({ silent: true }), intervalMs)
     return () => window.clearInterval(intervalId)
   }, [data, fetchData, isListMode])
+
+  useEffect(() => {
+    return () => {
+      if (activeRequestRef.current.controller) {
+        activeRequestRef.current.controller.abort()
+      }
+    }
+  }, [])
 
   const updateListFilters = useCallback(
     (patch) => {

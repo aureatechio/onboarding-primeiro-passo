@@ -16,6 +16,20 @@ function getActiveId() {
   return 'monitor'
 }
 
+function navigateTo(path) {
+  const target = new URL(path, window.location.origin)
+  const next = `${target.pathname}${target.search}`
+  const current = `${window.location.pathname}${window.location.search}`
+  if (next === current) return
+
+  if (typeof performance !== 'undefined') {
+    performance.mark('ai-step2-nav-start')
+  }
+
+  window.history.pushState({}, '', next)
+  window.dispatchEvent(new Event('aurea:location-change'))
+}
+
 export default function MonitorLayout({ children }) {
   const activeId = getActiveId()
 
@@ -34,7 +48,7 @@ export default function MonitorLayout({ children }) {
         >
           <button
             type="button"
-            onClick={() => { window.location.href = '/ai-step2/monitor?mode=list' }}
+            onClick={() => navigateTo('/ai-step2/monitor?mode=list')}
             style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
             aria-label="Ir para home do monitor"
           >
@@ -49,7 +63,7 @@ export default function MonitorLayout({ children }) {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => { window.location.href = item.path }}
+                  onClick={() => navigateTo(item.path)}
                   style={{
                     borderRadius: monitorRadius.md,
                     padding: '10px 12px',

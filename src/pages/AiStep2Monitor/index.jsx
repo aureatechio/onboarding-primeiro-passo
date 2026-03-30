@@ -71,6 +71,25 @@ export default function AiStep2Monitor() {
     if (isListMode) setActiveGalleryCategory(GALLERY_CATEGORY_TABS[0].id)
   }, [isListMode])
 
+  useEffect(() => {
+    if (!isListMode || loading) return
+    if (typeof window === 'undefined' || typeof performance === 'undefined') return
+
+    // Tracks time-to-usable list view after nav/fetch.
+    window.requestAnimationFrame(() => {
+      performance.mark('ai-step2-list-render-ready')
+      const hasNavStart = performance.getEntriesByName('ai-step2-nav-start').length > 0
+      if (hasNavStart) {
+        performance.measure('ai-step2:nav-to-render-ready', 'ai-step2-nav-start', 'ai-step2-list-render-ready')
+        const entries = performance.getEntriesByName('ai-step2:nav-to-render-ready')
+        const duration = entries[entries.length - 1]?.duration
+        if (import.meta.env.DEV && typeof duration === 'number') {
+          console.debug(`[ai-step2-monitor][perf] ai-step2:nav-to-render-ready: ${Math.round(duration)}ms`)
+        }
+      }
+    })
+  }, [isListMode, loading, listItems.length])
+
   const openViewerByAsset = (asset) => {
     const nextIndex = assets.findIndex((candidate) => candidate.id === asset.id)
     if (nextIndex < 0) return

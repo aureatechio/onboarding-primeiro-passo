@@ -323,3 +323,22 @@ Contrato tecnico completo: `apps/onboarding/ai-step2/CONTRACT.md`
   - no detalhe, navegacao por abas na area de conteudo (`Galeria`, `Dados do Onboarding`, `Erros e Diagnostico`).
 - Tabela de jobs: 5 colunas (Cliente, Celebridade, Status, Progresso, Atualizado em) com largura uniforme (`repeat(5, minmax(0, 1fr))`) e truncamento por ellipsis.
 - Fonte de dados principal: `get-ai-campaign-monitor` (agregador).
+
+### Melhoria de performance do monitor (mar 2026)
+
+- Navegacao lateral do monitor passou de `window.location.href` para `history.pushState` + evento `aurea:location-change`, evitando full reload entre `Visao Geral`, `Perplexity IA` e `NanoBanana IA`.
+- Hook `useAiCampaignMonitor` recebeu:
+  - cache em memoria por chave de query (`mode/page/limit/status/q`);
+  - dedupe de requests em voo (`inflightByKey`);
+  - cancelamento com `AbortController` para troca rapida de filtros/rota;
+  - loading progressivo (mantem dados visiveis durante revalidacao).
+- Instrumentacao adicionada com `performance.mark/measure`:
+  - `ai-step2-nav-start`
+  - `ai-step2-list-fetch-start` / `ai-step2-list-fetch-end`
+  - `ai-step2-list-render-ready`
+  - metricas logadas em dev como `[ai-step2-monitor][perf] ...`.
+- Benchmark manual (5 transicoes config -> lista, ambiente local quente):
+  - `nav-to-render-ready` observado: `991ms`, `33ms`, `35ms`, `36ms`, `982ms`
+  - mediana: `36ms`
+  - p95: `991ms`
+- Baseline pre-melhoria observado no diagnostico inicial: percepcao de 2-3s com exibicao de skeleton antes da tabela util.

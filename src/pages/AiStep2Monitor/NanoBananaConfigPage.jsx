@@ -77,6 +77,18 @@ const buttonBase = {
   border: 'none',
 }
 
+const selectStyle = {
+  ...inputStyle,
+  maxWidth: 320,
+  cursor: 'pointer',
+}
+
+const DIRECTION_MODE_OPTIONS = [
+  { value: 'text', label: 'Apenas texto' },
+  { value: 'both', label: 'Prompt + Imagem' },
+  { value: 'image', label: 'Referencia Power' },
+]
+
 const uploadCardStyle = {
   border: `1px dashed ${monitorTheme.borderStrong}`,
   borderRadius: monitorRadius.md,
@@ -517,66 +529,54 @@ export default function NanoBananaConfigPage() {
 
       {activeTab === 'direction' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ marginBottom: designTokens.space[7] }}>
-          <div style={cardStyle}>
-            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Moderna</h3>
-            <textarea
-              style={textareaStyle}
-              rows={8}
-              value={form.direction_moderna}
-              onChange={(e) => updateField('direction_moderna', e.target.value)}
-            />
-            <Field label="Imagem de referência (PNG/JPG/WEBP)">
-              <ReferenceImageUpload
-                id="onboarding-ref-moderna"
-                selectedFile={referenceFiles.moderna}
-                currentImageUrl={form.direction_moderna_image_url}
-                onSelectFile={(file) => handleReferenceFile('moderna', file)}
-                onRemove={() => markReferenceRemoval('moderna')}
-                onReadImage={() => handleReadImage('moderna')}
-                isReading={Boolean(readingByCategory.moderna)}
-              />
-            </Field>
-          </div>
-          <div style={cardStyle}>
-            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Clean</h3>
-            <textarea
-              style={textareaStyle}
-              rows={8}
-              value={form.direction_clean}
-              onChange={(e) => updateField('direction_clean', e.target.value)}
-            />
-            <Field label="Imagem de referência (PNG/JPG/WEBP)">
-              <ReferenceImageUpload
-                id="onboarding-ref-clean"
-                selectedFile={referenceFiles.clean}
-                currentImageUrl={form.direction_clean_image_url}
-                onSelectFile={(file) => handleReferenceFile('clean', file)}
-                onRemove={() => markReferenceRemoval('clean')}
-                onReadImage={() => handleReadImage('clean')}
-                isReading={Boolean(readingByCategory.clean)}
-              />
-            </Field>
-          </div>
-          <div style={cardStyle}>
-            <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Retail</h3>
-            <textarea
-              style={textareaStyle}
-              rows={8}
-              value={form.direction_retail}
-              onChange={(e) => updateField('direction_retail', e.target.value)}
-            />
-            <Field label="Imagem de referência (PNG/JPG/WEBP)">
-              <ReferenceImageUpload
-                id="onboarding-ref-retail"
-                selectedFile={referenceFiles.retail}
-                currentImageUrl={form.direction_retail_image_url}
-                onSelectFile={(file) => handleReferenceFile('retail', file)}
-                onRemove={() => markReferenceRemoval('retail')}
-                onReadImage={() => handleReadImage('retail')}
-                isReading={Boolean(readingByCategory.retail)}
-              />
-            </Field>
-          </div>
+          {[
+            { key: 'moderna', label: 'Moderna' },
+            { key: 'clean', label: 'Clean' },
+            { key: 'retail', label: 'Retail' },
+          ].map(({ key, label }) => {
+            const mode = form[`direction_${key}_mode`] || 'text'
+            const showImageUpload = mode === 'both' || mode === 'image'
+            return (
+              <div key={key} style={cardStyle}>
+                <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>{label}</h3>
+                <Field
+                  label="Modo de uso da IA"
+                  hint="Define como o modelo usa o prompt e a imagem de referência ao gerar os criativos."
+                >
+                  <select
+                    style={selectStyle}
+                    value={mode}
+                    onChange={(e) => updateField(`direction_${key}_mode`, e.target.value)}
+                  >
+                    {DIRECTION_MODE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Prompt de direção criativa">
+                  <textarea
+                    style={textareaStyle}
+                    rows={8}
+                    value={form[`direction_${key}`]}
+                    onChange={(e) => updateField(`direction_${key}`, e.target.value)}
+                  />
+                </Field>
+                {showImageUpload && (
+                  <Field label="Imagem de referência (PNG/JPG/WEBP)">
+                    <ReferenceImageUpload
+                      id={`onboarding-ref-${key}`}
+                      selectedFile={referenceFiles[key]}
+                      currentImageUrl={form[`direction_${key}_image_url`]}
+                      onSelectFile={(file) => handleReferenceFile(key, file)}
+                      onRemove={() => markReferenceRemoval(key)}
+                      onReadImage={() => handleReadImage(key)}
+                      isReading={Boolean(readingByCategory[key])}
+                    />
+                  </Field>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
 

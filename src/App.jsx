@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, useEffect, useState } from 'react';
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext';
 import PageTransition from './components/PageTransition';
 import Etapa1Hero from './pages/Etapa1Hero';
@@ -127,7 +127,29 @@ function OnboardingFlow() {
 }
 
 export default function App() {
-  const pathname = window.location.pathname || '/';
+  const [currentLocation, setCurrentLocation] = useState(() => ({
+    pathname: window.location.pathname || '/',
+    search: window.location.search || '',
+  }))
+
+  useEffect(() => {
+    const syncLocation = () => {
+      setCurrentLocation({
+        pathname: window.location.pathname || '/',
+        search: window.location.search || '',
+      })
+    }
+
+    window.addEventListener('popstate', syncLocation)
+    window.addEventListener('aurea:location-change', syncLocation)
+
+    return () => {
+      window.removeEventListener('popstate', syncLocation)
+      window.removeEventListener('aurea:location-change', syncLocation)
+    }
+  }, [])
+
+  const pathname = currentLocation.pathname
 
   if (pathname.startsWith('/ai-step2/perplexity-config')) {
     return (
