@@ -25,6 +25,7 @@ Objetivo: transformar dados do cliente e ativos visuais em **12 imagens finais**
   - regras globais de `global-rules.md`
 - Geracao de **3 grupos criativos**: `moderna`, `clean`, `retail`
 - Geracao de **4 formatos por grupo**: `1:1`, `4:5`, `16:9`, `9:16`
+- Configuracao por categoria com texto de direcao criativa e leitura assistida por imagem
 - Entrega final das imagens geradas.
 - Operacao no monitor com retry unitario por asset e retry em lote para assets com falha.
 - Galeria operacional com navegacao por abas de categoria (`moderna`, `clean`, `retail`).
@@ -117,6 +118,8 @@ Total por execucao: **3 x 4 = 12 imagens**.
 - **RF-11:** Permitir retry unitario para assets com status `failed`.
 - **RF-12:** Permitir retry em lote para todos os assets `failed` do job.
 - **RF-13:** Exibir navegacao por abas de categoria no monitor operacional.
+- **RF-14:** Permitir upload de imagem de referencia por categoria (`moderna|clean|retail`) no NanoBanana config.
+- **RF-15:** Permitir acao `Ler imagem` por categoria para converter imagem em direcao textual no formato padrao e sobrescrever o campo de texto.
 
 ## 7. Requisitos nao funcionais
 

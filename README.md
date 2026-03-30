@@ -114,6 +114,18 @@ Estado salvo no contexto (`userData`):
 
 Validação executada: `npm run build` com sucesso.
 
+### Incidente de persistencia na geracao IA (mar 2026)
+
+- Sintoma no frontend: banner `Nao foi possivel gerar o briefing com IA` com detalhe `Falha ao persistir briefing gerado no banco.`.
+- Causa raiz no backend: `generate-campaign-briefing` fazia `upsert` em `onboarding_briefings` sem enviar `mode` (coluna `NOT NULL`).
+- Correcao aplicada:
+  - persistencia passou a sempre incluir `mode`;
+  - reutiliza `mode` ja salvo por `save-campaign-briefing` para o mesmo `compra_id`;
+  - fallback seguro para `briefing_input.mode` (ou `text`).
+- Efeito esperado:
+  - nao ocorre mais erro de constraint de `mode`;
+  - erros de provider continuam retornando de forma deterministica sem quebrar persistencia de status.
+
 ## Briefing de campanha — Modo Personalizado (Etapa 8, mar 2026)
 
 Quando o usuario seleciona `Personalizado (Avancado)` na Etapa 8 (Modo avancado), um novo bloco `Detalhes da campanha` aparece com duas abas:

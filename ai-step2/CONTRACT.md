@@ -324,6 +324,32 @@ Se ja existe job com mesmo `compra_id + input_hash`:
 | clean | Branco puro | Foto limpa flutuando, canto direito | Split editorial 30/70 | Light/regular serif ou sans | Vogue / Apple |
 | retail | Cor solida da marca | Cut-out em pe, lado direito | Geometrico duro, blocos e badges | All-caps condensed, maximo contraste | Casas Bahia / Magazine Luiza |
 
+## 9.1. Referencia por categoria (NanoBanana Config)
+
+Cada categoria (`moderna`, `clean`, `retail`) suporta configuracao independente com foco em texto final:
+
+- `direction_<categoria>`: texto da direcao criativa
+- `direction_<categoria>_image_path`: path no bucket `nanobanana-references`
+- `direction_<categoria>_image_url`: signed URL temporaria para preview no monitor
+
+Regras de validacao no `update-nanobanana-config`:
+
+- texto de direcao por categoria e obrigatorio para salvar
+- imagem de referencia e opcional (serve de insumo para leitura por IA e rastreabilidade visual)
+
+Leitura assistida por imagem:
+
+- endpoint `read-nanobanana-reference` recebe `multipart/form-data` com:
+  - `category`: `moderna|clean|retail`
+  - `image`: arquivo PNG/JPG/WEBP
+- resposta retorna `direction_text` no formato padrao de direcao criativa
+- ao clicar em `Ler imagem` no frontend, o texto da categoria e sobrescrito diretamente
+
+No pipeline de geracao:
+
+- `create-ai-campaign-job` utiliza `direction_<categoria>` como fonte canonica de direcao
+- o worker de geracao recebe prompt textual final por grupo/formato
+
 ## 10. Prompt version
 
 Formato: `v1.0.0` (semver).
