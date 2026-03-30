@@ -20,5 +20,3 @@ O prompt para o Nano Banana é composto de:
 | Layout       | Assimétrico, foto domina, texto na base    | Split editorial 30/70 com coluna de texto     | Geométrico duro, blocos e badges           |
 | Tipografia   | Ultra-bold condensed, impactante           | Light/regular serif ou sans, com muito espaço | All-caps condensed, máximo contraste       |
 | Referência   | Nike / pôster de filme                     | Vogue / anúncio Apple                         | Casas Bahia / Magazine Luiza               |
-
-![1774456928337](image/ruas/1774456928337.png)
