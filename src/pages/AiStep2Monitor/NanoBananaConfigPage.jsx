@@ -1,5 +1,18 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Loader2, Palette, RefreshCw, Save, Settings, FileText, Brush, Ratio } from 'lucide-react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import {
+  Loader2,
+  Palette,
+  RefreshCw,
+  Save,
+  Settings,
+  FileText,
+  Brush,
+  Ratio,
+  UploadCloud,
+  Image as ImageIcon,
+  Trash2,
+  ScanText,
+} from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
@@ -64,6 +77,35 @@ const buttonBase = {
   border: 'none',
 }
 
+const uploadCardStyle = {
+  border: `1px dashed ${monitorTheme.borderStrong}`,
+  borderRadius: monitorRadius.md,
+  background: '#f8fafc',
+  padding: '10px 12px',
+}
+
+const uploadActionStyle = {
+  ...buttonBase,
+  background: '#fff',
+  color: monitorTheme.textPrimary,
+  border: `1px solid ${monitorTheme.borderStrong}`,
+  padding: '6px 12px',
+  fontSize: 12,
+}
+
+const uploadMetaStyle = {
+  ...TYPE.caption,
+  color: monitorTheme.textMuted,
+  marginTop: 8,
+}
+
+const previewStyle = {
+  marginTop: 8,
+  maxHeight: 120,
+  borderRadius: 6,
+  border: `1px solid ${monitorTheme.border}`,
+}
+
 const primaryButton = {
   ...buttonBase,
   background: monitorTheme.buttonDarkBg,
@@ -117,6 +159,102 @@ function Field({ label, hint, children }) {
   )
 }
 
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function ReferenceImageUpload({
+  id,
+  selectedFile,
+  currentImageUrl,
+  onSelectFile,
+  onRemove,
+  onReadImage,
+  isReading,
+}) {
+  const hasImage = Boolean(selectedFile || currentImageUrl)
+  const [localPreviewUrl, setLocalPreviewUrl] = useState(null)
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setLocalPreviewUrl(null)
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile)
+    setLocalPreviewUrl(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [selectedFile])
+
+  return (
+    <div style={{ marginTop: 2 }}>
+      <div style={uploadCardStyle}>
+        <input
+          id={id}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          style={{ display: 'none' }}
+          onChange={(e) => onSelectFile(e.target.files?.[0] ?? null)}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <UploadCloud size={14} style={{ color: monitorTheme.textMuted, marginTop: 2 }} />
+            <div>
+              <p style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 2 }}>Imagem de referência</p>
+              <p style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>PNG/JPG/WEBP • até 10MB</p>
+            </div>
+          </div>
+          <label htmlFor={id} style={{ ...uploadActionStyle, cursor: 'pointer' }}>
+            {hasImage ? 'Trocar imagem' : 'Selecionar imagem'}
+          </label>
+        </div>
+
+        {selectedFile && (
+          <div style={uploadMetaStyle}>
+            <strong style={{ color: monitorTheme.textPrimary }}>Arquivo selecionado:</strong> {selectedFile.name} ({formatFileSize(selectedFile.size)})
+          </div>
+        )}
+      </div>
+
+      {currentImageUrl && !selectedFile && (
+        <div style={{ marginTop: 8 }}>
+          <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ImageIcon size={12} />
+            Imagem atual
+          </p>
+          <img src={currentImageUrl} alt="Referencia atual" style={previewStyle} />
+        </div>
+      )}
+
+      {localPreviewUrl && (
+        <div style={{ marginTop: 8 }}>
+          <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ImageIcon size={12} />
+            Prévia local
+          </p>
+          <img src={localPreviewUrl} alt="Previa local" style={previewStyle} />
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+        <button type="button" style={{ ...outlineButton, opacity: !selectedFile || isReading ? 0.6 : 1 }} onClick={onReadImage} disabled={!selectedFile || isReading}>
+          {isReading ? <Loader2 size={13} className="animate-spin" /> : <ScanText size={13} />}
+          {isReading ? 'Lendo imagem...' : 'Ler imagem'}
+        </button>
+        {hasImage && (
+          <button type="button" style={{ ...outlineButton }} onClick={onRemove}>
+            <Trash2 size={13} />
+            Remover imagem
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function NanoBananaConfigPage() {
   const [form, setForm] = useState(null)
   const [original, setOriginal] = useState(null)
@@ -125,6 +263,9 @@ export default function NanoBananaConfigPage() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   const [activeTab, setActiveTab] = useState('provider')
+  const [referenceFiles, setReferenceFiles] = useState({})
+  const [removeReferenceImage, setRemoveReferenceImage] = useState({})
+  const [readingByCategory, setReadingByCategory] = useState({})
 
   const fetchConfig = useCallback(async () => {
     setLoading(true)
@@ -147,7 +288,9 @@ export default function NanoBananaConfigPage() {
     }
   }, [])
 
-  useEffect(() => { fetchConfig() }, [fetchConfig])
+  useEffect(() => {
+    void fetchConfig()
+  }, [fetchConfig])
 
   const isDirty = useMemo(() => {
     if (!form || !original) return false
@@ -164,10 +307,29 @@ export default function NanoBananaConfigPage() {
       if (form[key] !== original[key]) changed[key] = form[key]
     }
     try {
+      const hasFileChanges = Object.keys(referenceFiles).length > 0 || Object.keys(removeReferenceImage).length > 0
+      let body = JSON.stringify(changed)
+      const headers = { 'Content-Type': 'application/json' }
+
+      if (hasFileChanges) {
+        const formData = new FormData()
+        for (const [key, value] of Object.entries(changed)) {
+          if (value == null) continue
+          formData.append(key, String(value))
+        }
+        for (const category of ['moderna', 'clean', 'retail']) {
+          const file = referenceFiles[category]
+          if (file) formData.append(`direction_${category}_image`, file)
+          if (removeReferenceImage[category]) formData.append(`direction_${category}_remove_image`, 'true')
+        }
+        body = formData
+        delete headers['Content-Type']
+      }
+
       const res = await fetch(`${SUPABASE_URL}/functions/v1/update-nanobanana-config`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(changed),
+        headers,
+        body,
       })
       const data = await res.json()
       if (!res.ok) {
@@ -177,6 +339,8 @@ export default function NanoBananaConfigPage() {
       }
       setForm({ ...data.config })
       setOriginal({ ...data.config })
+      setReferenceFiles({})
+      setRemoveReferenceImage({})
       setSuccess('Configuracoes salvas com sucesso')
       setSaving(false)
     } catch (err) {
@@ -188,11 +352,73 @@ export default function NanoBananaConfigPage() {
   const handleReload = () => {
     setForm(null)
     setOriginal(null)
+    setReferenceFiles({})
+    setRemoveReferenceImage({})
     fetchConfig()
   }
 
   const updateField = (key, value) => {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev))
+  }
+
+  const handleReferenceFile = (category, file) => {
+    setReferenceFiles((prev) => {
+      const next = { ...prev }
+      if (file) next[category] = file
+      else delete next[category]
+      return next
+    })
+    if (file) {
+      setRemoveReferenceImage((prev) => ({ ...prev, [category]: false }))
+    }
+  }
+
+  const markReferenceRemoval = (category) => {
+    setReferenceFiles((prev) => {
+      const next = { ...prev }
+      delete next[category]
+      return next
+    })
+    setRemoveReferenceImage((prev) => ({ ...prev, [category]: true }))
+    setForm((prev) => prev ? {
+      ...prev,
+      [`direction_${category}_image_path`]: null,
+      [`direction_${category}_image_url`]: null,
+    } : prev)
+  }
+
+  const handleReadImage = async (category) => {
+    const file = referenceFiles[category]
+    if (!file) return
+
+    setReadingByCategory((prev) => ({ ...prev, [category]: true }))
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('category', category)
+      formData.append('image', file)
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/read-nanobanana-reference`, {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Erro ao ler imagem')
+      } else {
+        const text = typeof data.direction_text === 'string' ? data.direction_text.trim() : ''
+        if (!text) {
+          setError('A leitura da imagem não retornou texto')
+        } else {
+          updateField(`direction_${category}`, text)
+        }
+      }
+    } catch (err) {
+      setError(err.message || 'Erro de conexao ao ler imagem')
+    } finally {
+      setReadingByCategory((prev) => ({ ...prev, [category]: false }))
+    }
   }
 
   if (loading || !form) {
@@ -293,15 +519,63 @@ export default function NanoBananaConfigPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5" style={{ marginBottom: designTokens.space[7] }}>
           <div style={cardStyle}>
             <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Moderna</h3>
-            <textarea style={textareaStyle} rows={10} value={form.direction_moderna} onChange={(e) => updateField('direction_moderna', e.target.value)} />
+            <textarea
+              style={textareaStyle}
+              rows={8}
+              value={form.direction_moderna}
+              onChange={(e) => updateField('direction_moderna', e.target.value)}
+            />
+            <Field label="Imagem de referência (PNG/JPG/WEBP)">
+              <ReferenceImageUpload
+                id="onboarding-ref-moderna"
+                selectedFile={referenceFiles.moderna}
+                currentImageUrl={form.direction_moderna_image_url}
+                onSelectFile={(file) => handleReferenceFile('moderna', file)}
+                onRemove={() => markReferenceRemoval('moderna')}
+                onReadImage={() => handleReadImage('moderna')}
+                isReading={Boolean(readingByCategory.moderna)}
+              />
+            </Field>
           </div>
           <div style={cardStyle}>
             <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Clean</h3>
-            <textarea style={textareaStyle} rows={10} value={form.direction_clean} onChange={(e) => updateField('direction_clean', e.target.value)} />
+            <textarea
+              style={textareaStyle}
+              rows={8}
+              value={form.direction_clean}
+              onChange={(e) => updateField('direction_clean', e.target.value)}
+            />
+            <Field label="Imagem de referência (PNG/JPG/WEBP)">
+              <ReferenceImageUpload
+                id="onboarding-ref-clean"
+                selectedFile={referenceFiles.clean}
+                currentImageUrl={form.direction_clean_image_url}
+                onSelectFile={(file) => handleReferenceFile('clean', file)}
+                onRemove={() => markReferenceRemoval('clean')}
+                onReadImage={() => handleReadImage('clean')}
+                isReading={Boolean(readingByCategory.clean)}
+              />
+            </Field>
           </div>
           <div style={cardStyle}>
             <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Retail</h3>
-            <textarea style={textareaStyle} rows={10} value={form.direction_retail} onChange={(e) => updateField('direction_retail', e.target.value)} />
+            <textarea
+              style={textareaStyle}
+              rows={8}
+              value={form.direction_retail}
+              onChange={(e) => updateField('direction_retail', e.target.value)}
+            />
+            <Field label="Imagem de referência (PNG/JPG/WEBP)">
+              <ReferenceImageUpload
+                id="onboarding-ref-retail"
+                selectedFile={referenceFiles.retail}
+                currentImageUrl={form.direction_retail_image_url}
+                onSelectFile={(file) => handleReferenceFile('retail', file)}
+                onRemove={() => markReferenceRemoval('retail')}
+                onReadImage={() => handleReadImage('retail')}
+                isReading={Boolean(readingByCategory.retail)}
+              />
+            </Field>
           </div>
         </div>
       )}
