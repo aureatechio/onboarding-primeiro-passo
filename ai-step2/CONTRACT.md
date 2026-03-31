@@ -88,7 +88,9 @@ Retries: max 2 tentativas por chamada ao modelo com backoff exponencial (1s, 3s)
 - Em falha HTTP (`response.ok = false`) o asset e marcado como `failed` e registra erro `worker_http_error`.
 - Em resposta invalida (`JSON` invalido ou `success=false`) o asset e marcado como `failed` e registra erro `worker_response_invalid`.
 - Em excecoes de runtime/rede na chamada do worker o asset e marcado como `failed` e registra erro `worker_call_exception`.
+- Excecoes nao tratadas dentro do proprio worker devem ser convertidas para resposta estruturada e erro `worker_unhandled_error` (sem deixar o asset em estado nao terminal).
 - Ao finalizar o batch, assets ainda em `pending/processing` podem ser reconciliados para `failed` com erro `stale_processing_timeout` quando houver falhas no lote.
+- Fechamento final do job deve considerar o snapshot completo de `ai_campaign_assets` do job (nao apenas o subconjunto despachado no ciclo atual).
 
 ## 4. Output contract
 
@@ -133,7 +135,7 @@ interface AiCampaignError {
   job_id: string
   group_name: string
   format: string
-  error_type: string   // ex.: 'model_error' | 'upload_error' | 'worker_http_error' | 'worker_response_invalid' | 'worker_call_exception' | 'stale_processing_timeout'
+  error_type: string   // ex.: 'model_error' | 'upload_error' | 'worker_http_error' | 'worker_response_invalid' | 'worker_call_exception' | 'worker_unhandled_error' | 'stale_processing_timeout'
   error_message: string
   attempt: number
   created_at: string

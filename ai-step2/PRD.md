@@ -149,6 +149,7 @@ Total por execucao: **3 x 4 = 12 imagens**.
 - [ ] Logs permitem auditoria de ponta a ponta.
 - [ ] Monitor permite reprocessar um asset falho e todos os falhos do job.
 - [ ] Job nao permanece em `processing` quando todos os assets estao em estado terminal.
+- [ ] Falhas inesperadas do worker sao registradas com erro estruturado (sem `500` opaco e sem asset preso em `pending/processing`).
 
 ## 10. Estado atual vs estado alvo
 
