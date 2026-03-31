@@ -1,18 +1,25 @@
-import { Brain, Palette, BarChart3 } from 'lucide-react'
+import { Brain, Palette, BarChart3, Zap, Sparkles } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 
-const NAV_ITEMS = [
+const MAIN_NAV = [
   { id: 'monitor', label: 'Visao Geral', icon: BarChart3, path: '/ai-step2/monitor?mode=list' },
   { id: 'perplexity', label: 'Perplexity IA', icon: Brain, path: '/ai-step2/perplexity-config' },
   { id: 'nanobanana', label: 'NanoBanana IA', icon: Palette, path: '/ai-step2/nanobanana-config' },
+]
+
+const GARDEN_NAV = [
+  { id: 'post-turbo', label: 'Post Turbo', icon: Zap, path: '/ai-step2/post-turbo', newTab: true },
+  { id: 'post-gen', label: 'Post Gen', icon: Sparkles, path: '/ai-step2/post-gen', newTab: true },
 ]
 
 function getActiveId() {
   const pathname = window.location.pathname || '/'
   if (pathname.includes('perplexity-config')) return 'perplexity'
   if (pathname.includes('nanobanana-config')) return 'nanobanana'
+  if (pathname.includes('post-turbo')) return 'post-turbo'
+  if (pathname.includes('post-gen')) return 'post-gen'
   return 'monitor'
 }
 
@@ -28,6 +35,51 @@ function navigateTo(path) {
 
   window.history.pushState({}, '', next)
   window.dispatchEvent(new Event('aurea:location-change'))
+}
+
+function handleNavClick(item) {
+  if (item.newTab) {
+    window.open(item.path, '_blank')
+  } else {
+    navigateTo(item.path)
+  }
+}
+
+function NavButton({ item, isActive }) {
+  const Icon = item.icon
+  return (
+    <button
+      key={item.id}
+      type="button"
+      onClick={() => handleNavClick(item)}
+      style={{
+        borderRadius: monitorRadius.md,
+        padding: '10px 12px',
+        background: isActive ? monitorTheme.sidebarItemActiveBg : 'transparent',
+        border: isActive
+          ? `1px solid ${monitorTheme.sidebarItemActiveBorder}`
+          : '1px solid transparent',
+        color: monitorTheme.sidebarText,
+        fontSize: 13,
+        fontWeight: isActive ? 700 : 500,
+        textAlign: 'left',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        transition: 'background 0.15s, border-color 0.15s',
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) e.currentTarget.style.background = monitorTheme.sidebarItemBg
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) e.currentTarget.style.background = 'transparent'
+      }}
+    >
+      <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
+      {item.label}
+    </button>
+  )
 }
 
 export default function MonitorLayout({ children }) {
@@ -56,43 +108,24 @@ export default function MonitorLayout({ children }) {
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {NAV_ITEMS.map((item) => {
-              const isActive = item.id === activeId
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navigateTo(item.path)}
-                  style={{
-                    borderRadius: monitorRadius.md,
-                    padding: '10px 12px',
-                    background: isActive ? monitorTheme.sidebarItemActiveBg : 'transparent',
-                    border: isActive
-                      ? `1px solid ${monitorTheme.sidebarItemActiveBorder}`
-                      : '1px solid transparent',
-                    color: monitorTheme.sidebarText,
-                    fontSize: 13,
-                    fontWeight: isActive ? 700 : 500,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    transition: 'background 0.15s, border-color 0.15s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = monitorTheme.sidebarItemBg
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.background = 'transparent'
-                  }}
-                >
-                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
-                  {item.label}
-                </button>
-              )
-            })}
+            {MAIN_NAV.map((item) => (
+              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <p style={{
+              ...TYPE.caption,
+              color: monitorTheme.sidebarTextMuted,
+              padding: '4px 12px 2px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}>
+              Aurea Garden
+            </p>
+            {GARDEN_NAV.map((item) => (
+              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
+            ))}
           </div>
 
           <div style={{ marginTop: 'auto', borderTop: `1px solid ${monitorTheme.sidebarBorder}`, paddingTop: 12 }}>
