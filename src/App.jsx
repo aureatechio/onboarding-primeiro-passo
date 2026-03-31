@@ -15,6 +15,7 @@ import PerplexityConfigPage from './pages/AiStep2Monitor/PerplexityConfigPage';
 import NanoBananaConfigPage from './pages/AiStep2Monitor/NanoBananaConfigPage';
 import PostTurboPage from './pages/AiStep2Monitor/PostTurboPage';
 import PostGenPage from './pages/AiStep2Monitor/PostGenPage';
+import GardenGalleryPage from './pages/AiStep2Monitor/GardenGalleryPage';
 
 // Error boundary pra pegar crashes silenciosos
 class ErrorBoundary extends Component {
@@ -165,6 +166,14 @@ export default function App() {
     return (
       <ErrorBoundary>
         <PostGenPage />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname.startsWith('/ai-step2/gallery')) {
+    return (
+      <ErrorBoundary>
+        <GardenGalleryPage />
       </ErrorBoundary>
     );
   }

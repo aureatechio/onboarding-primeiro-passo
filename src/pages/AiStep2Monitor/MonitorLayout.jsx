@@ -1,4 +1,4 @@
-import { Brain, Palette, BarChart3, Zap, Sparkles } from 'lucide-react'
+import { Brain, Palette, BarChart3, Zap, Sparkles, Image } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
@@ -12,6 +12,7 @@ const MAIN_NAV = [
 const GARDEN_NAV = [
   { id: 'post-turbo', label: 'Post Turbo', icon: Zap, path: '/ai-step2/post-turbo', newTab: true },
   { id: 'post-gen', label: 'Post Gen', icon: Sparkles, path: '/ai-step2/post-gen', newTab: true },
+  { id: 'gallery', label: 'Galeria', icon: Image, path: '/ai-step2/gallery', newTab: true },
 ]
 
 function getActiveId() {
@@ -20,6 +21,7 @@ function getActiveId() {
   if (pathname.includes('nanobanana-config')) return 'nanobanana'
   if (pathname.includes('post-turbo')) return 'post-turbo'
   if (pathname.includes('post-gen')) return 'post-gen'
+  if (pathname.includes('gallery')) return 'gallery'
   return 'monitor'
 }
 
