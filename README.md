@@ -323,6 +323,7 @@ Contrato tecnico completo: `apps/onboarding/ai-step2/CONTRACT.md`
   - no detalhe, navegacao por abas na area de conteudo (`Galeria`, `Dados do Onboarding`, `Erros e Diagnostico`).
 - Tabela de jobs: 5 colunas (Cliente, Celebridade, Status, Progresso, Atualizado em) com largura uniforme (`repeat(5, minmax(0, 1fr))`) e truncamento por ellipsis.
 - Fonte de dados principal: `get-ai-campaign-monitor` (agregador).
+- Aba `Perplexity IA > Testes`: execucao manual de prompt por compra elegivel, com campos complementares e historico de runs (`test-perplexity-briefing` + tabela `perplexity_test_runs`).
 
 ### Melhoria de performance do monitor (mar 2026)
 

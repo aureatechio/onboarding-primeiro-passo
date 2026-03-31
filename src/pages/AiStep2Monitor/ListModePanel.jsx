@@ -75,7 +75,7 @@ export default function ListModePanel({
           onChange={(event) => updateListFilters({ compra: event.target.value, page: 1 })}
           style={selectStyles}
         >
-          <option value="">Compra elegivel (Cliente - Celebridade)</option>
+          <option value="">Compra elegivel (paga + contrato assinado)</option>
           {compraOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -133,7 +133,7 @@ export default function ListModePanel({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(6, 1fr)',
+            gridTemplateColumns: 'repeat(7, 1fr)',
             background: monitorTheme.cardMutedBg,
             padding: '10px 16px',
             borderBottom: `1px solid ${monitorTheme.border}`,
@@ -144,6 +144,7 @@ export default function ListModePanel({
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Celebridade</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Status</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Perplexity</p>
+          <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Diagnostico</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Progresso</p>
           <p style={{ ...TYPE.caption, color: monitorTheme.textSecondary, margin: 0 }}>Atualizado em</p>
         </div>
@@ -157,7 +158,7 @@ export default function ListModePanel({
               onClick={() => openJobDetail(item.job_id)}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(6, 1fr)',
+                gridTemplateColumns: 'repeat(7, 1fr)',
                 padding: '12px 16px',
                 width: '100%',
                 border: 'none',
@@ -185,6 +186,12 @@ export default function ListModePanel({
               <StatusBadge status={item.status} />
               <span style={item.has_perplexity_briefing ? perplexityOnBadgeStyle : perplexityOffBadgeStyle}>
                 {item.has_perplexity_briefing ? 'Perplexity' : 'Sem Perplexity'}
+              </span>
+              <span
+                style={getDiagnosticBadgeStyle(item)}
+                title={getDiagnosticTooltip(item)}
+              >
+                {getDiagnosticLabel(item)}
               </span>
               <ProgressBar percent={item.percent} height={7} />
               <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, margin: 0, ...truncateStyles }}>
@@ -287,4 +294,48 @@ const perplexityOffBadgeStyle = {
   ...perplexityBadgeBaseStyle,
   background: monitorTheme.pendingBg,
   color: monitorTheme.pendingText,
+}
+
+const diagnosticBadgeBaseStyle = {
+  ...perplexityBadgeBaseStyle,
+  border: `1px solid ${monitorTheme.borderStrong}`,
+}
+
+function getDiagnosticLabel(item) {
+  if (item?.stuck_assets_count > 0) return `Preso (${item.stuck_assets_count})`
+  if (item?.has_inconsistency) return 'Inconsistente'
+  if (item?.last_error_type) return item.last_error_type
+  if (item?.failed_assets_count > 0) return `Falhas (${item.failed_assets_count})`
+  return 'Sem sinais'
+}
+
+function getDiagnosticTooltip(item) {
+  const flags = Array.isArray(item?.inconsistency_flags) ? item.inconsistency_flags.join(', ') : 'none'
+  const lastError = item?.last_error_type || 'n/a'
+  return `flags=${flags} | failed_assets=${item?.failed_assets_count || 0} | stuck_assets=${item?.stuck_assets_count || 0} | last_error=${lastError}`
+}
+
+function getDiagnosticBadgeStyle(item) {
+  if (item?.stuck_assets_count > 0 || item?.has_inconsistency) {
+    return {
+      ...diagnosticBadgeBaseStyle,
+      background: monitorTheme.dangerBg,
+      borderColor: monitorTheme.dangerBorder,
+      color: monitorTheme.dangerTextStrong,
+    }
+  }
+
+  if (item?.failed_assets_count > 0 || item?.last_error_type) {
+    return {
+      ...diagnosticBadgeBaseStyle,
+      background: monitorTheme.pendingBg,
+      color: monitorTheme.pendingText,
+    }
+  }
+
+  return {
+    ...diagnosticBadgeBaseStyle,
+    background: monitorTheme.completedBg,
+    color: monitorTheme.completedText,
+  }
 }

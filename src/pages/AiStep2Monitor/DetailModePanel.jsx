@@ -31,6 +31,9 @@ export default function DetailModePanel({
   const currentGroup =
     groupedAssets.find((group) => group.key === activeGalleryCategory) || groupedAssets[0]
   const failedAssets = assets.filter((asset) => asset.status === 'failed')
+  const diagnostics = data?.diagnostics || {}
+  const diagnosticFlags = diagnostics?.inconsistency_flags || []
+  const lastError = diagnostics?.last_error || null
 
   return (
     <>
@@ -428,6 +431,32 @@ export default function DetailModePanel({
           <h3 style={{ ...TYPE.h3, color: monitorTheme.dangerText, marginBottom: 10 }}>
             Erros do pipeline
           </h3>
+          <div
+            style={{
+              border: `1px solid ${monitorTheme.border}`,
+              borderRadius: monitorRadius.md,
+              padding: 10,
+              marginBottom: 10,
+              background: monitorTheme.pageBg,
+            }}
+          >
+            <p style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>
+              Falhas worker: {diagnostics?.worker_failures_count || 0}
+            </p>
+            <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, marginTop: 2 }}>
+              Origem da ultima falha: {diagnostics?.last_failure_source || 'unknown'}
+            </p>
+            {lastError ? (
+              <p style={{ ...TYPE.caption, color: monitorTheme.dangerTextStrong, marginTop: 2 }}>
+                Ultimo erro: {lastError.error_type} ({lastError.created_at || 'sem data'})
+              </p>
+            ) : null}
+            {diagnosticFlags.length > 0 ? (
+              <p style={{ ...TYPE.caption, color: monitorTheme.dangerTextStrong, marginTop: 2 }}>
+                Flags de inconsistencia: {diagnosticFlags.join(', ')}
+              </p>
+            ) : null}
+          </div>
           {data?.errors?.length > 0 ? (
             <div style={{ display: 'grid', gap: 8 }}>
               {data.errors.map((errorItem) => (

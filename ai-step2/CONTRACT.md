@@ -9,6 +9,8 @@ compras.checkout_status = 'pago'
 AND compras.clicksign_status = 'Assinado'
 ```
 
+Observacao: `vendaaprovada = true` isoladamente nao qualifica compra como elegivel para criacao de job.
+
 Resposta de bloqueio padrao:
 
 ```json
@@ -64,7 +66,7 @@ O orquestrador recebe apenas `compra_id` no body. Os demais inputs sao lidos dir
 9. Retornar {job_id, status: processing} ao chamador
 10. Em background (EdgeRuntime.waitUntil):
     - Para cada asset: POST para generate-ai-campaign-image
-    - Ao final: atualizar status do job (completed/partial/failed)
+    - Ao final: atualizar status do job (completed/partial/failed), reconciliando assets nao-terminais
 ```
 
 ### Worker (`generate-ai-campaign-image`)
@@ -79,6 +81,14 @@ O orquestrador recebe apenas `compra_id` no body. Os demais inputs sao lidos dir
 ```
 
 Retries: max 2 tentativas por chamada ao modelo com backoff exponencial (1s, 3s).
+
+#### Reconciliacao e rastreabilidade de erro (P1)
+
+- Falhas na chamada do worker agora tambem sao persistidas pelo orquestrador, para evitar job falho sem erro rastreavel.
+- Em falha HTTP (`response.ok = false`) o asset e marcado como `failed` e registra erro `worker_http_error`.
+- Em resposta invalida (`JSON` invalido ou `success=false`) o asset e marcado como `failed` e registra erro `worker_response_invalid`.
+- Em excecoes de runtime/rede na chamada do worker o asset e marcado como `failed` e registra erro `worker_call_exception`.
+- Ao finalizar o batch, assets ainda em `pending/processing` podem ser reconciliados para `failed` com erro `stale_processing_timeout` quando houver falhas no lote.
 
 ## 4. Output contract
 
@@ -123,7 +133,7 @@ interface AiCampaignError {
   job_id: string
   group_name: string
   format: string
-  error_type: string   // 'model_error' | 'timeout' | 'validation'
+  error_type: string   // ex.: 'model_error' | 'upload_error' | 'worker_http_error' | 'worker_response_invalid' | 'worker_call_exception' | 'stale_processing_timeout'
   error_message: string
   attempt: number
   created_at: string
@@ -185,12 +195,20 @@ interface AiCampaignError {
 - Payload de lista:
   - `mode: "list"`
   - `items[]` com `job_id`, `compra_id`, `status`, `total_expected`, `total_generated`, `percent`, `created_at`, `updated_at`, `client_name`, `celebrity_name`
+  - cada item inclui diagnostico operacional: `failed_assets_count`, `stuck_assets_count`, `last_error_type`, `last_error_at`, `has_inconsistency`, `inconsistency_flags[]`
   - `pagination` com `page`, `limit`, `total`, `total_pages`
   - `summary` com totais por status (`pending`, `processing`, `completed`, `partial`, `failed`) e `total`
+  - `eligible_purchases[]` com pendencias aptas ao disparo manual no monitor, restritas a `checkout_status = 'pago'` e `clicksign_status = 'Assinado'` (sem job existente)
 - Payload de detalhe:
   - `mode: "detail"` (implícito por estrutura atual)
   - `job` + `progress` (status/contadores)
   - `assets[]` (inclui `status` por asset), `errors[]`, `missing[]`
+  - `diagnostics` com:
+    - `status_counts` (`total`, `completed`, `failed`, `processing`, `pending`)
+    - `worker_failures_count`
+    - `inconsistency_flags[]` (ex.: `job_failed_with_processing_assets`, `job_failed_without_errors`, `failed_assets_without_error_records`)
+    - `last_error` (`error_type`, `error_message`, `created_at`)
+    - `last_failure_source` (`worker`, `provider`, `storage_upload`, `database`, `unknown`)
   - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`
   - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados
 - Mantem rate-limit in-memory por IP (mesmo baseline do endpoint de status).
