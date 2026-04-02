@@ -1,5 +1,5 @@
 import { type Request } from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 
 const isTestEnv = process.env.NODE_ENV === 'test'
 const windowMs = Number(process.env.WEBHOOK_RATE_LIMIT_WINDOW_MS ?? 60_000)
@@ -12,7 +12,7 @@ function resolveRateLimitKey(req: Request): string {
       return overrideKey
     }
   }
-  return req.ip ?? 'unknown'
+  return ipKeyGenerator(req) ?? 'unknown'
 }
 
 export const webhookRateLimiter = rateLimit({
