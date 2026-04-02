@@ -1,0 +1,757 @@
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { corsHeaders, handleCors } from '../_shared/cors.ts'
+import { GROUPS, FORMATS } from '../_shared/ai-campaign/prompt-builder.ts'
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const RATE_LIMIT_MAX = 60
+const RATE_LIMIT_WINDOW_MS = 60_000
+const ipHits = new Map<string, { count: number; resetAt: number }>()
+const VALID_STATUSES = ['pending', 'processing', 'completed', 'partial', 'failed'] as const
+const STUCK_ASSET_AGE_MINUTES = 10
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const entry = ipHits.get(ip)
+  if (!entry || now >= entry.resetAt) {
+    ipHits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    return true
+  }
+  entry.count++
+  return entry.count <= RATE_LIMIT_MAX
+}
+
+function json(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
+
+async function createSignedUrlIfPath(
+  supabase: ReturnType<typeof createClient>,
+  bucket: string,
+  pathOrUrl: string | null | undefined,
+  expiresInSec: number
+): Promise<string | null> {
+  if (!pathOrUrl) return null
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) return pathOrUrl
+  const { data } = await supabase.storage.from(bucket).createSignedUrl(pathOrUrl, expiresInSec)
+  return data?.signedUrl ?? null
+}
+
+function toPositiveInt(value: string | null, fallback: number): number {
+  if (!value) return fallback
+  const parsed = parseInt(value, 10)
+  if (Number.isNaN(parsed) || parsed <= 0) return fallback
+  return parsed
+}
+
+function normalizeStatus(value: string | null): string {
+  if (!value) return ''
+  return value.trim().toLowerCase()
+}
+
+function getFailureSource(errorType: string | null): string {
+  if (!errorType) return 'unknown'
+  if (errorType.startsWith('worker_')) return 'worker'
+  if (errorType.includes('upload')) return 'storage_upload'
+  if (errorType.includes('model') || errorType.includes('provider')) return 'provider'
+  if (errorType.includes('db') || errorType.includes('persistence')) return 'database'
+  return 'unknown'
+}
+
+async function resolveNamesByCompraIds(
+  supabase: ReturnType<typeof createClient>,
+  compraIds: string[]
+): Promise<{
+  compraMap: Record<string, { cliente_id: string | null; celebridade: string | null }>
+  clientNameMap: Record<string, string>
+  celebrityNameMap: Record<string, string>
+}> {
+  if (compraIds.length === 0) {
+    return { compraMap: {}, clientNameMap: {}, celebrityNameMap: {} }
+  }
+
+  const { data: comprasRows } = await supabase
+    .from('compras')
+    .select('id, cliente_id, celebridade')
+    .in('id', compraIds)
+
+  const compraMap: Record<string, { cliente_id: string | null; celebridade: string | null }> = {}
+  const clientIds = new Set<string>()
+  const celebrityIds = new Set<string>()
+
+  for (const row of comprasRows || []) {
+    compraMap[row.id] = {
+      cliente_id: row.cliente_id ?? null,
+      celebridade: row.celebridade ?? null,
+    }
+    if (row.cliente_id) clientIds.add(row.cliente_id)
+    if (row.celebridade) celebrityIds.add(row.celebridade)
+  }
+
+  const [clientsRes, celebsRes] = await Promise.all([
+    clientIds.size > 0
+      ? supabase
+        .from('clientes')
+        .select('id, nome, nome_fantasia, razaosocial')
+        .in('id', Array.from(clientIds))
+      : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+    celebrityIds.size > 0
+      ? supabase
+        .from('celebridadesReferencia')
+        .select('id, nome')
+        .in('id', Array.from(celebrityIds))
+      : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+  ])
+
+  const clientNameMap: Record<string, string> = {}
+  for (const client of clientsRes.data || []) {
+    clientNameMap[client.id] =
+      client.nome || client.nome_fantasia || client.razaosocial || 'Cliente'
+  }
+
+  const celebrityNameMap: Record<string, string> = {}
+  for (const celeb of celebsRes.data || []) {
+    celebrityNameMap[celeb.id] = celeb.nome || 'Celebridade'
+  }
+
+  return { compraMap, clientNameMap, celebrityNameMap }
+}
+
+async function resolveEligibleOnboardingPurchases(
+  supabase: ReturnType<typeof createClient>
+): Promise<
+  Array<{
+    compra_id: string
+    clientName: string
+    celebName: string
+    label: string
+  }>
+> {
+  const { data: comprasRows, error: comprasError } = await supabase
+    .from('compras')
+    .select('id, cliente_id, celebridade, checkout_status, clicksign_status, vendaaprovada, created_at')
+    .eq('clicksign_status', 'Assinado')
+    .eq('checkout_status', 'pago')
+    .order('created_at', { ascending: false })
+    .limit(200)
+
+  if (comprasError || !comprasRows || comprasRows.length === 0) return []
+
+  const compraIds = comprasRows.map((row) => row.id)
+  const { data: jobRows, error: jobsError } = await supabase
+    .from('ai_campaign_jobs')
+    .select('compra_id')
+    .in('compra_id', compraIds)
+
+  if (jobsError) return []
+
+  const processedCompraIds = new Set(
+    (jobRows || [])
+      .map((row) => row.compra_id)
+      .filter((compraId): compraId is string => Boolean(compraId))
+  )
+  const pendingRows = comprasRows.filter((row) => !processedCompraIds.has(row.id))
+  if (pendingRows.length === 0) return []
+
+  const pendingIds = pendingRows.map((row) => row.id)
+  const { compraMap, clientNameMap, celebrityNameMap } = await resolveNamesByCompraIds(
+    supabase,
+    pendingIds
+  )
+
+  return pendingRows.map((row) => {
+    const compraInfo = compraMap[row.id] || { cliente_id: null, celebridade: null }
+    const clientName = compraInfo.cliente_id
+      ? (clientNameMap[compraInfo.cliente_id] || 'Cliente')
+      : 'Cliente'
+    const celebName = compraInfo.celebridade
+      ? (celebrityNameMap[compraInfo.celebridade] || 'Celebridade contratada')
+      : 'Celebridade contratada'
+
+    return {
+      compra_id: row.id,
+      clientName,
+      celebName,
+      label: `${clientName} - ${celebName}`,
+    }
+  })
+}
+
+async function resolvePerplexityBriefingCompraIds(
+  supabase: ReturnType<typeof createClient>,
+  compraIds: string[]
+): Promise<Set<string>> {
+  if (compraIds.length === 0) return new Set<string>()
+
+  const { data, error } = await supabase
+    .from('onboarding_briefings')
+    .select('compra_id')
+    .in('compra_id', compraIds)
+    .eq('status', 'done')
+    .eq('provider', 'perplexity')
+
+  if (error || !data) return new Set<string>()
+
+  return new Set(
+    data
+      .map((row) => row.compra_id)
+      .filter((compraId): compraId is string => Boolean(compraId))
+  )
+}
+
+function applySearchFilter(query: string, builder: any) {
+  if (!query) return builder
+  if (UUID_REGEX.test(query)) {
+    return builder.or(`id.eq.${query},compra_id.eq.${query}`)
+  }
+  return builder.ilike('status', `%${query}%`)
+}
+
+Deno.serve(async (req) => {
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
+
+  if (req.method !== 'GET') {
+    return json({ success: false, code: 'METHOD_NOT_ALLOWED', message: 'Use GET.' }, 405)
+  }
+
+  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  if (!checkRateLimit(clientIp)) {
+    return json({ success: false, code: 'RATE_LIMITED', message: 'Muitas requisicoes. Aguarde.' }, 429)
+  }
+
+  const url = new URL(req.url)
+  const mode = (url.searchParams.get('mode')?.trim().toLowerCase() || '') as 'list' | 'detail' | ''
+  const jobId = url.searchParams.get('job_id')?.trim() ?? ''
+  let compraId = url.searchParams.get('compra_id')?.trim() ?? ''
+  const page = toPositiveInt(url.searchParams.get('page'), 1)
+  const requestedLimit = toPositiveInt(url.searchParams.get('limit'), 20)
+  const limit = Math.min(requestedLimit, 100)
+  const statusFilter = normalizeStatus(url.searchParams.get('status'))
+  const qFilter = url.searchParams.get('q')?.trim() ?? ''
+  const shouldUseDetailMode = mode === 'detail' || Boolean(jobId) || Boolean(compraId)
+
+  if (shouldUseDetailMode && !jobId && !compraId) {
+    return json({
+      success: false,
+      code: 'MISSING_PARAM',
+      message: 'Informe job_id ou compra_id.',
+    }, 400)
+  }
+
+  if (jobId && !UUID_REGEX.test(jobId)) {
+    return json({ success: false, code: 'INVALID_JOB_ID', message: 'job_id invalido.' }, 400)
+  }
+  if (compraId && !UUID_REGEX.test(compraId)) {
+    return json({ success: false, code: 'INVALID_COMPRA_ID', message: 'compra_id invalido.' }, 400)
+  }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  const signedUrlExpirySec = parseInt(Deno.env.get('AI_CAMPAIGN_URL_EXPIRY_SECONDS') || '604800', 10)
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return json({ success: false, code: 'CONFIG_ERROR', message: 'Supabase env vars not configured.' }, 500)
+  }
+  const supabase = createClient(supabaseUrl, serviceRoleKey)
+
+  if (!shouldUseDetailMode) {
+    if (statusFilter && !VALID_STATUSES.includes(statusFilter as (typeof VALID_STATUSES)[number])) {
+      return json({
+        success: false,
+        code: 'INVALID_STATUS',
+        message: 'status invalido.',
+      }, 400)
+    }
+
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    let listQuery = supabase
+      .from('ai_campaign_jobs')
+      .select('id, compra_id, status, prompt_version, total_expected, total_generated, created_at, updated_at', {
+        count: 'exact',
+      })
+      .order('updated_at', { ascending: false })
+      .range(from, to)
+
+    if (statusFilter) {
+      listQuery = listQuery.eq('status', statusFilter)
+    }
+    listQuery = applySearchFilter(qFilter, listQuery)
+
+    const { data: jobsRows, error: listError, count } = await listQuery
+    if (listError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao listar jobs.' }, 500)
+    }
+
+    const listedJobs = jobsRows || []
+    const listedJobIds = Array.from(new Set(listedJobs.map((job) => String(job.id))))
+    const nowMs = Date.now()
+    const stuckCutoffMs = STUCK_ASSET_AGE_MINUTES * 60_000
+
+    const [assetsByJobRes, errorsByJobRes] = await Promise.all([
+      listedJobIds.length > 0
+        ? supabase
+          .from('ai_campaign_assets')
+          .select('job_id, status, created_at')
+          .in('job_id', listedJobIds)
+        : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+      listedJobIds.length > 0
+        ? supabase
+          .from('ai_campaign_errors')
+          .select('job_id, error_type, created_at')
+          .in('job_id', listedJobIds)
+          .order('created_at', { ascending: false })
+        : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+    ])
+
+    if (assetsByJobRes.error || errorsByJobRes.error) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao agregar diagnosticos.' }, 500)
+    }
+
+    const assetStatsByJob: Record<string, { failed: number; stuck: number; processingOrPending: number }> = {}
+    for (const asset of assetsByJobRes.data || []) {
+      const key = String(asset.job_id)
+      if (!assetStatsByJob[key]) {
+        assetStatsByJob[key] = { failed: 0, stuck: 0, processingOrPending: 0 }
+      }
+      const status = String(asset.status || '')
+      if (status === 'failed') assetStatsByJob[key].failed += 1
+      if (status === 'processing' || status === 'pending') {
+        assetStatsByJob[key].processingOrPending += 1
+        const createdAtMs = asset.created_at ? Date.parse(String(asset.created_at)) : NaN
+        if (!Number.isNaN(createdAtMs) && nowMs - createdAtMs >= stuckCutoffMs) {
+          assetStatsByJob[key].stuck += 1
+        }
+      }
+    }
+
+    const lastErrorByJob: Record<string, { error_type: string | null; created_at: string | null }> = {}
+    for (const row of errorsByJobRes.data || []) {
+      const key = String(row.job_id)
+      if (!lastErrorByJob[key]) {
+        lastErrorByJob[key] = {
+          error_type: row.error_type ? String(row.error_type) : null,
+          created_at: row.created_at ? String(row.created_at) : null,
+        }
+      }
+    }
+
+    let summaryQuery = supabase
+      .from('ai_campaign_jobs')
+      .select('status')
+      .order('updated_at', { ascending: false })
+
+    summaryQuery = applySearchFilter(qFilter, summaryQuery)
+    const { data: summaryRows, error: summaryError } = await summaryQuery
+    if (summaryError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao resumir jobs.' }, 500)
+    }
+
+    const summary = {
+      total: 0,
+      pending: 0,
+      processing: 0,
+      completed: 0,
+      partial: 0,
+      failed: 0,
+    }
+    for (const row of summaryRows || []) {
+      summary.total += 1
+      const statusKey = String(row.status || '') as keyof typeof summary
+      if (statusKey in summary) {
+        summary[statusKey] += 1
+      }
+    }
+
+    const compraIds = Array.from(
+      new Set((listedJobs || []).map((job) => String(job.compra_id)))
+    ) as string[]
+    const [{ compraMap, clientNameMap, celebrityNameMap }, briefingCompraIds, eligiblePurchases] =
+      await Promise.all([
+        resolveNamesByCompraIds(supabase, compraIds),
+        resolvePerplexityBriefingCompraIds(supabase, compraIds),
+        resolveEligibleOnboardingPurchases(supabase),
+      ])
+
+    const items = (listedJobs || []).map((job) => {
+      const totalExpected = Number(job.total_expected || 12)
+      const totalGenerated = Number(job.total_generated || 0)
+      const percent = totalExpected > 0
+        ? Math.round((Math.min(totalGenerated, totalExpected) / totalExpected) * 100)
+        : 0
+      const currentJobId = String(job.id)
+      const assetStats = assetStatsByJob[currentJobId] || {
+        failed: 0,
+        stuck: 0,
+        processingOrPending: 0,
+      }
+      const lastError = lastErrorByJob[currentJobId] || { error_type: null, created_at: null }
+      const inconsistencyFlags: string[] = []
+      if (String(job.status) === 'failed' && assetStats.processingOrPending > 0) {
+        inconsistencyFlags.push('job_failed_with_processing_assets')
+      }
+      if (String(job.status) === 'failed' && !lastError.error_type) {
+        inconsistencyFlags.push('job_failed_without_errors')
+      }
+      if (assetStats.stuck > 0) {
+        inconsistencyFlags.push('stuck_assets_detected')
+      }
+
+      const compraInfo = compraMap[String(job.compra_id)] || {
+        cliente_id: null,
+        celebridade: null,
+      }
+
+      return {
+        job_id: job.id,
+        compra_id: job.compra_id,
+        status: job.status,
+        prompt_version: job.prompt_version,
+        total_expected: totalExpected,
+        total_generated: totalGenerated,
+        percent,
+        created_at: job.created_at,
+        updated_at: job.updated_at,
+        client_name: compraInfo.cliente_id
+          ? (clientNameMap[compraInfo.cliente_id] || null)
+          : null,
+        celebrity_name: compraInfo.celebridade
+          ? (celebrityNameMap[compraInfo.celebridade] || null)
+          : null,
+        has_perplexity_briefing: briefingCompraIds.has(String(job.compra_id)),
+        failed_assets_count: assetStats.failed,
+        stuck_assets_count: assetStats.stuck,
+        last_error_type: lastError.error_type,
+        last_error_at: lastError.created_at,
+        has_inconsistency: inconsistencyFlags.length > 0,
+        inconsistency_flags: inconsistencyFlags,
+      }
+    })
+
+    const totalCount = count || 0
+    const totalPages = totalCount > 0 ? Math.ceil(totalCount / limit) : 1
+
+    return json({
+      success: true,
+      mode: 'list',
+      filters: {
+        page,
+        limit,
+        status: statusFilter || null,
+        q: qFilter || null,
+      },
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        total_pages: totalPages,
+      },
+      summary,
+      items,
+      eligible_purchases: eligiblePurchases,
+    })
+  }
+
+  let job: Record<string, unknown> | null = null
+  if (jobId) {
+    const { data: foundJob, error: foundJobError } = await supabase
+      .from('ai_campaign_jobs')
+      .select(
+        'id, compra_id, status, prompt_version, total_expected, total_generated, created_at, updated_at'
+      )
+      .eq('id', jobId)
+      .maybeSingle()
+
+    if (foundJobError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar job.' }, 500)
+    }
+    if (!foundJob) {
+      return json({ success: false, code: 'JOB_NOT_FOUND', message: 'Job nao encontrado.' }, 404)
+    }
+    job = foundJob
+    compraId = String(foundJob.compra_id || compraId)
+  } else {
+    const { data: foundJob, error: foundJobError } = await supabase
+      .from('ai_campaign_jobs')
+      .select(
+        'id, compra_id, status, prompt_version, total_expected, total_generated, created_at, updated_at'
+      )
+      .eq('compra_id', compraId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (foundJobError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar job.' }, 500)
+    }
+    job = foundJob || null
+  }
+
+  const [comprasRes, identityRes, briefingRes] = await Promise.all([
+    supabase
+      .from('compras')
+      .select('id, cliente_id, celebridade, checkout_status, clicksign_status, vendaaprovada')
+      .eq('id', compraId)
+      .maybeSingle(),
+    supabase
+      .from('onboarding_identity')
+      .select(
+        'id, choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, created_at, updated_at'
+      )
+      .eq('compra_id', compraId)
+      .maybeSingle(),
+    supabase
+      .from('onboarding_briefings')
+      .select(
+        'id, mode, brief_text, audio_path, audio_duration_sec, transcript, transcript_status, status, provider, created_at, updated_at'
+      )
+      .eq('compra_id', compraId)
+      .maybeSingle(),
+  ])
+
+  if (comprasRes.error || identityRes.error || briefingRes.error) {
+    return json({
+      success: false,
+      code: 'DB_ERROR',
+      message: 'Erro ao montar dados do monitor.',
+    }, 500)
+  }
+
+  const compra = comprasRes.data
+  const identity = identityRes.data
+  const briefing = briefingRes.data
+
+  let clientName: string | null = null
+  if (compra?.cliente_id) {
+    const { data: cliente } = await supabase
+      .from('clientes')
+      .select('nome, nome_fantasia')
+      .eq('id', compra.cliente_id)
+      .maybeSingle()
+    if (cliente) clientName = cliente.nome || cliente.nome_fantasia || null
+  }
+
+  let celebrityName: string | null = null
+  let celebrityImageUrl: string | null = null
+  if (compra?.celebridade) {
+    const { data: celeb } = await supabase
+      .from('celebridadesReferencia')
+      .select('nome, fotoPrincipal')
+      .eq('id', compra.celebridade)
+      .maybeSingle()
+    if (celeb) {
+      celebrityName = celeb.nome || null
+      celebrityImageUrl = celeb.fotoPrincipal || null
+    }
+  }
+
+  const [logoUrl, briefingAudioUrl, campaignImageUrls] = await Promise.all([
+    createSignedUrlIfPath(supabase, 'onboarding-identity', identity?.logo_path, signedUrlExpirySec),
+    createSignedUrlIfPath(supabase, 'onboarding-briefings', briefing?.audio_path, signedUrlExpirySec),
+    Promise.all(
+      (identity?.campaign_images_paths || []).map((path: string) =>
+        createSignedUrlIfPath(supabase, 'onboarding-identity', path, signedUrlExpirySec)
+      )
+    ),
+  ])
+
+  let assets: Array<Record<string, unknown>> = []
+  let errors: Array<Record<string, unknown>> = []
+  let missing: Array<{ group: string; format: string }> = []
+  let diagnostics: Record<string, unknown> = {
+    status_counts: {
+      total: 0,
+      completed: 0,
+      failed: 0,
+      processing: 0,
+      pending: 0,
+    },
+    worker_failures_count: 0,
+    inconsistency_flags: [],
+    last_error: null,
+    last_failure_source: 'unknown',
+  }
+
+  if (job?.id) {
+    const [assetsRes, errorsRes] = await Promise.all([
+      supabase
+        .from('ai_campaign_assets')
+        .select('id, group_name, format, status, image_url, width, height, prompt_version, created_at')
+        .eq('job_id', job.id)
+        .order('group_name')
+        .order('format'),
+      supabase
+        .from('ai_campaign_errors')
+        .select('id, group_name, format, error_type, error_message, attempt, created_at')
+        .eq('job_id', job.id)
+        .order('created_at'),
+    ])
+
+    if (assetsRes.error || errorsRes.error) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar assets/erros.' }, 500)
+    }
+
+    assets = (assetsRes.data || []) as Array<Record<string, unknown>>
+    for (const asset of assets) {
+      const signed = await createSignedUrlIfPath(
+        supabase,
+        'ai-campaign-assets',
+        String(asset.image_url || ''),
+        signedUrlExpirySec
+      )
+      asset.image_url = signed
+    }
+    errors = (errorsRes.data || []) as Array<Record<string, unknown>>
+
+    const statusCounts = {
+      total: assets.length,
+      completed: 0,
+      failed: 0,
+      processing: 0,
+      pending: 0,
+    }
+    for (const asset of assets) {
+      const status = String(asset.status || '')
+      if (status === 'completed') statusCounts.completed += 1
+      else if (status === 'failed') statusCounts.failed += 1
+      else if (status === 'processing') statusCounts.processing += 1
+      else if (status === 'pending') statusCounts.pending += 1
+    }
+
+    const workerFailuresCount = errors.filter((err) =>
+      String(err.error_type || '').startsWith('worker_')
+    ).length
+    const lastError =
+      errors.length > 0
+        ? {
+          error_type: String(errors[errors.length - 1].error_type || ''),
+          error_message: String(errors[errors.length - 1].error_message || ''),
+          created_at: String(errors[errors.length - 1].created_at || ''),
+        }
+        : null
+
+    const inconsistencyFlags: string[] = []
+    if (String(job.status) === 'failed' && statusCounts.processing + statusCounts.pending > 0) {
+      inconsistencyFlags.push('job_failed_with_processing_assets')
+    }
+    if (String(job.status) === 'failed' && errors.length === 0) {
+      inconsistencyFlags.push('job_failed_without_errors')
+    }
+    if (statusCounts.failed > 0 && errors.length === 0) {
+      inconsistencyFlags.push('failed_assets_without_error_records')
+    }
+
+    diagnostics = {
+      status_counts: statusCounts,
+      worker_failures_count: workerFailuresCount,
+      inconsistency_flags: inconsistencyFlags,
+      last_error: lastError,
+      last_failure_source: getFailureSource(lastError?.error_type || null),
+    }
+
+    const generatedSet = new Set(
+      assets.map((a) => `${String(a.group_name)}:${String(a.format)}`)
+    )
+    missing = GROUPS.flatMap((group) =>
+      FORMATS
+        .filter((format) => !generatedSet.has(`${group}:${format}`))
+        .map((format) => ({ group, format }))
+    )
+  }
+
+  const totalExpected = Number(job?.total_expected || 12)
+  const totalGenerated = Number(job?.total_generated || assets.length || 0)
+  const progressPercent = totalExpected > 0
+    ? Math.round((Math.min(totalGenerated, totalExpected) / totalExpected) * 100)
+    : 0
+
+  return json({
+    success: true,
+    mode: 'detail',
+    input: {
+      compra_id: compraId,
+      job_id: job?.id ?? null,
+    },
+    job: job
+      ? {
+        id: job.id,
+        compra_id: job.compra_id,
+        status: job.status,
+        prompt_version: job.prompt_version,
+        total_expected: totalExpected,
+        total_generated: totalGenerated,
+        created_at: job.created_at,
+        updated_at: job.updated_at,
+      }
+      : null,
+    progress: {
+      total_expected: totalExpected,
+      total_generated: totalGenerated,
+      percent: progressPercent,
+    },
+    assets,
+    errors,
+    diagnostics,
+    missing: missing.length > 0 ? missing : undefined,
+    onboarding: {
+      compra: compra
+        ? {
+          id: compra.id,
+          checkout_status: compra.checkout_status,
+          clicksign_status: compra.clicksign_status,
+          vendaaprovada: compra.vendaaprovada,
+          cliente_id: compra.cliente_id,
+          celebridade_id: compra.celebridade,
+        }
+        : null,
+      identity: identity
+        ? {
+          id: identity.id,
+          choice: identity.choice,
+          brand_palette: identity.brand_palette || [],
+          font_choice: identity.font_choice,
+          campaign_notes: identity.campaign_notes,
+          production_path: identity.production_path,
+          created_at: identity.created_at,
+          updated_at: identity.updated_at,
+          uploads: {
+            logo_path: identity.logo_path,
+            logo_url: logoUrl,
+            campaign_images_paths: identity.campaign_images_paths || [],
+            campaign_images_urls: campaignImageUrls.filter(Boolean),
+          },
+        }
+        : null,
+      briefing: briefing
+        ? {
+          id: briefing.id,
+          mode: briefing.mode,
+          brief_text: briefing.brief_text,
+          audio_duration_sec: briefing.audio_duration_sec,
+          transcript: briefing.transcript,
+          transcript_status: briefing.transcript_status,
+          status: briefing.status,
+          provider: briefing.provider,
+          created_at: briefing.created_at,
+          updated_at: briefing.updated_at,
+          audio_path: briefing.audio_path,
+          audio_url: briefingAudioUrl,
+        }
+        : null,
+      client: {
+        name: clientName,
+      },
+      celebrity: {
+        name: celebrityName,
+        image_url: celebrityImageUrl,
+      },
+    },
+  })
+})
