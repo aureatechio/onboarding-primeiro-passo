@@ -9,8 +9,7 @@ AUREA is a **pnpm 10 + Turborepo** monorepo with TypeScript/Node.js projects (No
 ```
 aurea/
 ├── apps/
-│   ├── dashboard/         # React 19 + Vite 6 admin dashboard
-│   ├── onboarding/        # React + Vite onboarding SPA ("Primeiro Passo")
+│   ├── onboarding/        # React + Vite onboarding SPA ("Primeiro Passo") — porta 5173
 │   ├── omie/              # Express 5 backend (CRM → OMIE ERP)
 │   └── checkout-cielo/    # Static SPA (Vanilla JS) + E2E tests for Edge Functions
 ├── packages/
@@ -34,10 +33,11 @@ aurea/
 
 | App | Package | Purpose |
 |-----|---------|---------|
-| `@aurea/dashboard` | `apps/dashboard` | React 19 + Vite 6 + Tailwind 4 + shadcn/ui admin dashboard (port **5174**) |
-| `primeiro-passo-app` | `apps/onboarding` | React + Vite onboarding SPA (Vercel project: **onboarding-primeiro-passo**) |
+| `primeiro-passo-app` | `apps/onboarding` | React + Vite onboarding SPA (Vercel project: **onboarding-primeiro-passo**) — porta **5173** |
 | `@aurea/omie` | `apps/omie` | CRM → OMIE ERP integration backend (Express 5 + axios) |
 | `@aurea/checkout-cielo` | `apps/checkout-cielo` | Static checkout SPA + Vitest E2E tests against live Edge Functions |
+
+> **Nota:** `apps/dashboard/` existe no repositório com alguns fragmentos de código e artefatos de build de uma implementação anterior que foi descontinuada. Não há código fonte ativo no dashboard — ignorar para fins de desenvolvimento.
 
 All apps share Supabase (PostgreSQL + Auth) as the backend infrastructure.
 
@@ -55,15 +55,15 @@ pnpm lint                # Lint all
 
 ### Specific App
 ```bash
-pnpm --filter @aurea/omie dev       # Run omie in dev mode (tsx watch)
-pnpm --filter @aurea/shared build   # Build shared package (must build before dependents)
+pnpm --filter primeiro-passo-app dev   # Run onboarding in dev mode (port 5173)
+pnpm --filter @aurea/omie dev          # Run omie in dev mode (tsx watch)
+pnpm --filter @aurea/shared build      # Build shared package (must build before dependents)
 ```
 
 ### Testing
 ```bash
 # Unit tests
 pnpm --filter @aurea/omie test              # Run omie unit tests
-pnpm --filter @aurea/dashboard test         # Run dashboard tests (jsdom environment)
 
 # Integration tests (omie only — separate config with 30s timeout)
 pnpm --filter @aurea/omie test:integration
@@ -178,11 +178,11 @@ Shared utilities in `supabase/functions/_shared/`:
 ## Code Style
 
 - **ESLint** + **Prettier**: no semicolons, single quotes, 2 spaces, trailing comma es5, **printWidth 100**, arrowParens always, endOfLine LF
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:` — use scopes: `feat(checkout):`, `fix(omie):`, `refactor(dashboard):`
+- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:` — use scopes: `feat(checkout):`, `fix(omie):`, `feat(onboarding):`
 - **Zod 4** for validation, **Pino** for logging (backends), **Express 5** for HTTP servers, **Vitest** for testing
 - Unused vars prefixed with `_` are allowed (`@typescript-eslint/no-unused-vars` ignores `^_`)
 - `@typescript-eslint/no-explicit-any` is `warn` (prefer `unknown`)
-- **Dashboard visual identity:** Acelerai brand — primary `#384ffe` (Acelerai Blue), destructive `#ff0058` (RED CRM), sidebar dark `#111119`. Font: Inter (Google Fonts CDN).
+- **Acelerai brand:** primary `#384ffe` (Acelerai Blue), destructive `#ff0058` (RED CRM). Font: Inter (Google Fonts CDN).
 
 ### TypeScript
 - Target: `ES2022`, strict mode + `noUncheckedIndexedAccess: true` (stricter than standard strict)
@@ -200,23 +200,17 @@ import { maskCpfCnpj, maskApiKey, maskDocument } from '@aurea/shared/mask'
 import { ServiceError, NotFoundError, TimeoutError, ValidationError, AuthenticationError, ExternalApiError, isAbortError } from '@aurea/shared/errors'
 import { createSupabaseClient } from '@aurea/shared/supabase'
 
-// Checkout contracts (shared between dashboard and Edge Functions)
+// Checkout contracts (shared between Edge Functions)
 import { ProcessCheckoutRequestContract, CieloWebhookPayloadContract, validateProcessCheckoutContract, PROCESSABLE_PAYMENT_METHODS } from '@aurea/shared/checkout-contracts'
 ```
-
-## Vercel Deploy (Dashboard)
-
-`vercel.json` must be in the **monorepo root** (Vercel auto-detects Turborepo). Critical config:
-- `installCommand`: `npm i -g corepack@latest && corepack enable && corepack prepare --activate && pnpm install` (without `corepack prepare --activate`, Vercel's bundled pnpm causes `ERR_PNPM_OUTDATED_LOCKFILE`)
-- Required env vars: `ENABLE_EXPERIMENTAL_COREPACK=1`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_SERVICE_ROLE_KEY` (use `VITE_SUPABASE_SECRET_KEY` as preferred credential for protected Edge Function calls when available)
-- **Security warning:** privileged `VITE_*` keys (`VITE_SUPABASE_SECRET_KEY` and `VITE_SUPABASE_SERVICE_ROLE_KEY`) are embedded in the JS bundle — protect production with Vercel Password Protection or IP allowlist
 
 ## Vercel Deploy (Onboarding)
 
 Onboarding uses a **dedicated Vercel project**: `onboarding-primeiro-passo`.
 - Root Directory: `apps/onboarding`
 - Canonical URL: `https://onboarding-primeiro-passo.vercel.app`
-- This flow is intentionally isolated from the dashboard root `vercel.json` pipeline.
+- `installCommand`: `npm i -g corepack@latest && corepack enable && corepack prepare --activate && pnpm install` (without `corepack prepare --activate`, Vercel's bundled pnpm causes `ERR_PNPM_OUTDATED_LOCKFILE`)
+- Required env vars: `ENABLE_EXPERIMENTAL_COREPACK=1`, `VITE_SUPABASE_URL`
 - Common CI error: `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE` when `pnpm-lock.yaml` is outdated/incompatible; sync and commit lockfile before redeploy.
 
 ## Resend Email Provider
@@ -255,7 +249,7 @@ Each app may contain:
 - `BACKLOG.md` or `backlog.md` - Feature backlog
 
 Cross-cutting docs:
-- `.context/modules/` — module docs (checkout, clicksign, dashboard, nfe, omie, shared)
+- `.context/modules/` — module docs (checkout, clicksign, nfe, omie, shared)
 - `docs/edge-functions-publicas-e-protegidas.md` — public vs protected Edge Functions classification
 - `docs/resend-email-provider.md` — email provider reference
 - `plan/CHECKLIST-DEPLOY-EDGE-FUNCTIONS.md` — batch deploy checklist
@@ -329,4 +323,4 @@ Cross-cutting docs:
 - Skills: `.context/skills/README.md`
 - Plans: `.context/plans/README.md`
 - Tasks: `tasks/README.md` (operational tasks, PREVC-aligned lifecycle)
-- Per-app guides: `apps/omie/AGENTS.md`, `apps/nfe/AGENTS.md`, `apps/checkout-cielo/AGENTS.md`
+- Per-app guides: `apps/omie/AGENTS.md`, `apps/checkout-cielo/AGENTS.md`
