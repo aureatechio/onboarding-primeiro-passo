@@ -26,3 +26,28 @@ dist-ssr
 .env
 .env.local
 .turbo
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Supabase CLI temp files
+supabase/.temp/
+
+# LibreOffice / Excel lock files
+.~lock.*
+*.xlsx#
+
+# Local skill/experiment files
+*.skill
+
+# Local HTML artifacts
+omie-skill-eval-review.html
+
+# Binary plan artifacts
+plan/*.pdf
+
+# Repositório onboarding aninhado (não é submódulo registrado)
+onboarding-primeiro-passo-repo/
+
+# Arquivos ZIP avulsos gerados localmente
+ziivcLKj
