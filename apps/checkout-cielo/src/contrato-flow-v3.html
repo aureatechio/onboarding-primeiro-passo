@@ -1,0 +1,3031 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aceleraí — Novo Contrato</title>
+<link rel="icon" type="image/svg+xml" href="./assets/svg/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<style>
+:root {
+  --bg: #F3F4F6;
+  --bg-card: #FFFFFF;
+  --bg-surface: #F9FAFB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-hint: #9CA3AF;
+  --border: #E5E5E5;
+  --border-input: #DDDDDD;
+  --border-focus: #1A1A1A;
+  --accent: #E8356D;
+  --accent-hover: #D42D60;
+  --accent-light: #FDF2F5;
+  --accent-border: #E8356D;
+  --success: #22C55E;
+  --success-bg: #F0FDF4;
+  --info-bg: #EFF6FF;
+  --info-border: #BFDBFE;
+  --info-text: #1E40AF;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-pill: 100px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --transition: 0.2s ease;
+  --bg-skeleton: #E5E7EB;
+  --bg-skeleton-highlight: #D1D5DB;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== HEADER / LOGO ===== */
+.site-header {
+  width: 100%;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  padding: 16px 0;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.header-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.logo-image {
+  width: 132px;
+  height: auto;
+  display: block;
+}
+
+.page-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 0;
+}
+
+.page-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.2;
+  margin-bottom: 0;
+}
+
+/* ===== STEPPER ===== */
+.stepper-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.stepper-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.stepper-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stepper-step.active .stepper-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--accent-light);
+}
+
+.stepper-step.active .stepper-label {
+  color: var(--text-primary);
+}
+
+.stepper-step.done .stepper-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.stepper-step.done .stepper-label {
+  color: var(--success);
+}
+
+.stepper-line {
+  flex: 1;
+  min-width: 26px;
+  height: 2px;
+  background: var(--border);
+  margin: 0 8px;
+  flex-shrink: 0;
+  transition: var(--transition);
+  border-radius: 1px;
+}
+
+.stepper-line.done {
+  background: var(--success);
+}
+
+.stepper-line.active {
+  background: linear-gradient(90deg, var(--success), var(--accent));
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+  margin-top: 30px;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.card-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* ===== SUMMARY BAR (step 3) ===== */
+.summary-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 14px 20px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: box-shadow var(--transition);
+}
+
+.summary-card:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.summary-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.summary-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.summary-meta-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-meta-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.summary-meta-content {
+  min-width: 0;
+}
+
+.summary-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-item-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-item-price {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summary-total-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.summary-total-wrap {
+  text-align: right;
+}
+
+.summary-total-caption {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.summary-total-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.summary-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transition: transform var(--transition);
+}
+
+.summary-card.expanded .summary-chevron {
+  transform: rotate(180deg);
+}
+
+.summary-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.summary-card.expanded .summary-panel {
+  max-height: 200px;
+}
+
+.summary-details {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.summary-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-total-label {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.secure-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #FAFAFA;
+  text-align: center;
+}
+
+.secure-badge svg {
+  width: 16px;
+  height: 16px;
+  color: #F59E0B;
+  flex-shrink: 0;
+}
+
+.secure-badge span {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .header-inner {
+    padding: 0 16px;
+  }
+
+  .stepper-bar {
+    padding: 4px 8px;
+  }
+
+  .stepper-label {
+    display: none;
+  }
+
+  .stepper-step {
+    gap: 0;
+  }
+
+  .stepper-line {
+    min-width: 18px;
+    margin: 0 6px;
+  }
+}
+
+/* Payment method cards live only in #v4 checkout — use apps/checkout-cielo/src/style.css (no global .method-option overrides here). */
+
+.method-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.method-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* ===== PROPOSAL ELEMENTS (STEP 1) ===== */
+.proposal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.proposal-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.proposal-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.proposal-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.proposal-price {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+/* ===== FORM (matches checkout inputs) ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .proposal-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.field-label .req {
+  color: var(--accent);
+}
+
+.field-input {
+  padding: 11px 14px;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: var(--transition);
+  outline: none;
+}
+
+.field-input::placeholder {
+  color: var(--text-hint);
+}
+
+.field-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(26,26,26,0.05);
+}
+
+.field-input.err {
+  border-color: var(--accent);
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.field-error {
+  font-size: 11px;
+  color: var(--accent);
+  display: none;
+}
+
+.field-input.err ~ .field-error {
+  display: block;
+}
+
+/* ===== CHECKBOX (styled) ===== */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1.5px solid transparent;
+  margin-top: 8px;
+}
+
+.check-row:hover { background: var(--accent-light); }
+
+.check-row.on {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.check-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-input);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: var(--transition);
+}
+
+.check-row.on .check-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.check-box svg {
+  width: 11px; height: 11px; color: #fff; opacity: 0; transition: var(--transition);
+}
+
+.check-row.on .check-box svg {
+  opacity: 1;
+}
+
+.check-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== CONFIRM GRID ===== */
+.confirm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.confirm-cell {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.confirm-cell:nth-child(odd) { padding-right: 16px; }
+.confirm-cell:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--border); }
+.confirm-cell:last-child, .confirm-cell:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+
+.confirm-cell-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.confirm-cell-value {
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.confirm-cell-value.big {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .confirm-grid { grid-template-columns: 1fr; }
+  .confirm-cell:nth-child(even) { padding-left: 0; border-left: none; }
+  .confirm-cell:nth-child(odd) { padding-right: 0; }
+}
+
+/* ===== SIGNATURE AREA ===== */
+.sig-area {
+  background: #FAFAFA;
+  height: 100%;
+}
+
+.sig-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+  display: block;
+}
+
+.sig-iframe[hidden] {
+  display: none !important;
+}
+
+.sig-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.sig-card-header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.sig-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sig-provider-badge {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 5px 12px;
+}
+
+.sig-status-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.sig-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #F59E0B;
+  animation: pulseStatus 2s infinite;
+}
+
+.sig-status-dot.done {
+  background: var(--success);
+  animation: none;
+}
+
+.sig-status-dot.error {
+  background: #EF4444;
+  animation: none;
+}
+
+@keyframes pulseStatus {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.sig-open-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #3B82F6;
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sig-open-tab:hover {
+  background: #EFF6FF;
+}
+
+.sig-open-tab svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sig-frame-shell {
+  min-height: 480px;
+  max-height: 700px;
+  height: calc(100vh - 340px);
+  overflow-y: auto;
+}
+
+.sig-frame-shell::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sig-frame-shell::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sig-frame-shell::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 999px;
+}
+
+.sig-frame-shell::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+.sig-card-footer {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.sig-card-footer-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sig-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: #FFFBEB;
+  color: #B45309;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sig-count-badge.done {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: #F0FDF4;
+  color: #15803D;
+}
+
+.sig-help-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.btn-signature {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(232,53,109,0.3);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.btn-signature:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(232,53,109,0.3);
+}
+
+.btn-signature.done {
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  box-shadow: 0 2px 8px rgba(34,197,94,0.25);
+}
+
+.btn-signature svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-signature:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.btn-ghost:hover { border-color: var(--text-primary); }
+.btn-ghost svg { width: 14px; height: 14px; }
+
+/* ===== ALERT ===== */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.alert-info {
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+}
+
+.alert-ok {
+  background: var(--success-bg);
+  border: 1px solid #A7F3D0;
+  color: #166534;
+}
+
+.alert svg {
+  width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px;
+}
+
+/* ===== BUTTONS (matches checkout pink CTA) ===== */
+.actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 28px;
+}
+
+.actions-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+  z-index: 100;
+  margin-top: 0;
+  padding: 14px 24px;
+}
+
+.actions-fixed-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.actions-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.btn-back:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.btn-back svg { width: 14px; height: 14px; }
+
+.btn-pink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.btn-pink:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,26,117,0.3);
+}
+
+.btn-pink:active { transform: translateY(0); }
+
+.btn-pink svg { width: 15px; height: 15px; }
+
+.btn-pink:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* Full-width pink like checkout */
+.btn-pink.full {
+  width: 100%;
+  padding: 15px;
+  font-size: 15px;
+  border-radius: var(--radius-pill);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font);
+}
+
+.btn-secondary:hover {
+  background: #F3F4F6;
+}
+
+/* ===== STEP VIEWS ===== */
+.step-view {
+  display: none;
+  animation: slideUp 0.35s ease;
+}
+
+.step-view.on {
+  display: block;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== PAYMENT STEP ===== */
+.pay-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
+}
+
+.pay-option:hover {
+  border-color: var(--accent);
+}
+
+.pay-icon {
+  width: 42px;
+  height: 42px;
+  background: var(--accent-light);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pay-icon svg {
+  width: 22px; height: 22px; color: var(--accent);
+}
+
+.pay-info { flex: 1; }
+
+.pay-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
+
+.pay-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pay-arrow svg {
+  width: 18px; height: 18px; color: var(--text-hint);
+}
+
+/* ===== SIGNATURE LOADING SCREEN (step 3) ===== */
+.sig-loading {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  animation: clFadeIn 0.4s ease;
+}
+
+.sig-loading[hidden] { display: none; }
+
+@keyframes clFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sig-loading .status-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.sig-loading .status-pill__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.sig-loading .status-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: clPulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.sig-loading .status-pill__dot--done {
+  background: var(--success);
+  animation: none;
+}
+
+.sig-loading .status-pill__text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: opacity 0.25s ease;
+}
+
+@keyframes clPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.sig-loading .cl-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.sig-loading .cl-progress-bar__fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sig-loading .steps-log {
+  margin-bottom: 20px;
+  min-height: 24px;
+}
+
+.sig-loading .step-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  animation: clStepSlideIn 0.35s ease;
+}
+
+@keyframes clStepSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sig-loading .step-line__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sig-loading .step-line__icon svg { display: block; }
+
+.sig-loading .step-line__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.sig-loading .step-line--final .step-line__text {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.sig-loading .skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+}
+
+.sig-loading .skeleton-line {
+  height: 12px;
+  background: var(--bg-skeleton);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sig-loading .skeleton-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, var(--bg-skeleton-highlight) 50%, transparent 100%);
+  animation: clShimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes clShimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.sig-loading .skeleton-line:nth-child(1)::after { animation-delay: 0s; }
+.sig-loading .skeleton-line:nth-child(2)::after { animation-delay: 0.1s; }
+.sig-loading .skeleton-line:nth-child(3)::after { animation-delay: 0.2s; }
+.sig-loading .skeleton-line:nth-child(4)::after { animation-delay: 0.3s; }
+.sig-loading .skeleton-line:nth-child(5)::after { animation-delay: 0.4s; }
+
+.sig-loading .skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sig-loading .skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sig-loading--ready .skeleton-card {
+  animation: clCardReady 0.5s ease forwards;
+}
+
+@keyframes clCardReady {
+  to { border-color: var(--success); box-shadow: 0 0 0 1px var(--success); }
+}
+
+.sig-loading .sig-message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+
+.sig-loading .sig-message[hidden] { display: none; }
+
+.sig-loading .status-pill__dot--error {
+  background: #EF4444;
+  animation: none;
+}
+
+/* ===== FEEDBACK MODAL ===== */
+.feedback-modal[hidden] {
+  display: none;
+}
+
+.feedback-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.feedback-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.feedback-modal__card {
+  position: relative;
+  width: min(460px, 100%);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(17, 24, 39, 0.2);
+  padding: 18px 18px 16px;
+}
+
+.feedback-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.feedback-modal__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.feedback-modal__tag.warning {
+  background: #FFFBEB;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #B45309;
+}
+
+.feedback-modal__tag.error {
+  background: #FEF2F2;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #B91C1C;
+}
+
+.feedback-modal__close {
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.feedback-modal__close:hover {
+  background: #F3F4F6;
+}
+
+.feedback-modal__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.feedback-modal__message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.feedback-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.feedback-modal__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563EB;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.feedback-modal__open:hover {
+  background: #EFF6FF;
+}
+
+.feedback-modal__open svg {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    max-height: none;
+    padding: 12px 0;
+  }
+
+  .header-inner {
+    padding: 0 16px;
+  }
+
+  .header-top,
+  .header-bottom {
+    flex-wrap: wrap;
+  }
+
+  .header-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-title-group {
+    gap: 3px;
+  }
+
+  .logo-image {
+    width: 140px;
+  }
+
+  .layout {
+    padding: 0 16px 100px;
+    margin-top: 20px;
+  }
+
+  .stepper-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 6px;
+  }
+
+  .stepper-line {
+    min-width: 12px;
+  }
+
+  .summary-total-caption {
+    display: none;
+  }
+
+  .sig-card-header,
+  .sig-card-footer {
+    padding: 12px 14px;
+  }
+
+  .sig-frame-shell {
+    min-height: 360px;
+  }
+
+  .actions-bar-fixed {
+    padding: 12px 16px;
+  }
+
+  .actions-fixed-inner {
+    gap: 10px;
+  }
+
+  .btn-back,
+  .btn-secondary,
+  .btn-pink {
+    font-size: 12px;
+  }
+
+  .feedback-modal__card {
+    padding: 16px 14px;
+  }
+
+}
+
+/* ===== CONTRATO CSS PROTECTION (override checkout :root leaks) ===== */
+body {
+  font-family: var(--font) !important;
+  background: var(--bg) !important;
+  color: var(--text-primary) !important;
+  line-height: 1.5 !important;
+}
+
+.site-header, .layout, .step-view:not(#v4),
+.feedback-modal, .actions-bar-fixed {
+  --border-focus: #1A1A1A;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+}
+
+/* Checkout scoped inside #v4 */
+#v4 .checkout-page {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+#v4 .checkout-grid {
+  max-width: 100%;
+}
+
+/* Cards de método de pagamento: rádio + ícone + textos + badge em uma única linha */
+.checkout-scope .method-option {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.checkout-scope .method-info {
+  text-align: left;
+}
+
+.checkout-scope .method-name,
+.checkout-scope .method-desc {
+  text-align: left;
+}
+</style>
+<!-- Checkout CDN dependencies -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://transaction.pagador.com.br/post/scripts/silentorderpost-1.0.min.js"></script>
+<script src="https://www.pagador.com.br/post/scripts/3ds/bpmpi.bundle.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo">
+        <img class="logo-image" src="./assets/image/logo_acelerai.png" alt="Aceleraí">
+      </div>
+      <div class="secure-badge">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/></svg>
+        <span>Ambiente seguro</span>
+      </div>
+    </div>
+    <div class="header-bottom">
+      <div class="header-title-group">
+        <h1 class="page-title" id="pageTitle">Novo Contrato</h1>
+        <p class="page-subtitle" id="pageSubtitle">Revise os dados iniciais da proposta antes de iniciar.</p>
+      </div>
+      <nav class="stepper-bar" id="stepper">
+        <div class="stepper-step" data-s="1">
+          <div class="stepper-num">1</div>
+          <span class="stepper-label">Revisão</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step" data-s="2">
+          <div class="stepper-num">2</div>
+          <span class="stepper-label">Confirmação</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step" data-s="3">
+          <div class="stepper-num">3</div>
+          <span class="stepper-label">Assinatura</span>
+        </div>
+        <div class="stepper-line"></div>
+        <div class="stepper-step" data-s="4">
+          <div class="stepper-num">4</div>
+          <span class="stepper-label">Pagamento</span>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <div class="main-col">
+
+    <!-- ===== STEP 0: LANDING ===== -->
+    <div class="step-view on" id="v0">
+      <div class="card">
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+          <div style="flex:1; min-width:140px; padding:14px 16px; background:var(--bg-surface); border-radius:var(--radius-md);">
+            <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:4px;">Cliente</div>
+            <div style="font-size:14px; font-weight:700;" id="introClient">-</div>
+          </div>
+          <div style="min-width:100px; padding:14px 16px; background:var(--bg-surface); border-radius:var(--radius-md);">
+            <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:4px;">Celebridade</div>
+            <div style="font-size:14px; font-weight:700;" id="introCelebrity">-</div>
+          </div>
+          <div style="min-width:100px; padding:14px 16px; background:var(--bg-surface); border-radius:var(--radius-md);">
+            <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:4px;">Valor</div>
+            <div style="font-size:14px; font-weight:800; color:var(--accent);" id="introValue">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div class="method-tags" id="introMethods"></div>
+
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>O contrato será assinado digitalmente e, após a assinatura, você seguirá para o pagamento.</span>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <div></div>
+        <button class="btn-pink" onclick="go(1)">
+          Iniciar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: REVISÃO ===== -->
+    <div class="step-view" id="v1">
+      <div class="card">
+        <div class="card-label">Elementos da proposta</div>
+        <div class="proposal-grid">
+          <div class="proposal-item">
+            <div class="proposal-label">Celebridade</div>
+            <div class="proposal-value" id="proposalCelebrity">-</div>
+          </div>
+          <div class="proposal-item">
+            <div class="proposal-label">Vigência</div>
+            <div class="proposal-value" id="proposalVigencia">-</div>
+          </div>
+          <div class="proposal-item">
+            <div class="proposal-label">Região</div>
+            <div class="proposal-value" id="proposalRegion">-</div>
+          </div>
+          <div class="proposal-item">
+            <div class="proposal-label">Preço</div>
+            <div class="proposal-value proposal-price" id="proposalValue">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Dados do contratante</div>
+        <div class="form-grid">
+          <div class="field full">
+            <label class="field-label">Razão social <span class="req">*</span></label>
+            <input type="text" class="field-input" id="fRazao" placeholder="Nome completo ou razão social">
+            <span class="field-error">Campo obrigatório</span>
+          </div>
+          <div class="field">
+            <label class="field-label">CPF ou CNPJ <span class="req">*</span></label>
+            <input type="text" class="field-input" id="fCpf" placeholder="000.000.000-00" maxlength="18">
+            <span class="field-hint">CPF ou CNPJ do contratante</span>
+            <span class="field-error">Informe um CPF ou CNPJ válido</span>
+          </div>
+          <div class="field">
+            <label class="field-label">Telefone</label>
+            <input type="text" class="field-input" id="fTel" placeholder="(00) 00000-0000" maxlength="15">
+          </div>
+          <div class="field full">
+            <label class="field-label">Endereço <span class="req">*</span></label>
+            <input type="text" class="field-input" id="fEnd" placeholder="Rua, número, bairro, cidade — UF">
+            <span class="field-error">Campo obrigatório</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="check-row" id="chkTerms" onclick="toggleChk(this)">
+        <div class="check-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="check-label">Li e concordo com todos os termos e cláusulas contratuais.</span>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn-back" onclick="go(0)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Voltar
+        </button>
+        <button class="btn-pink" id="btnNext1" onclick="go(2)" disabled>
+          Revisei os termos — Continuar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: CONFIRMAÇÃO ===== -->
+    <div class="step-view" id="v2">
+      <div class="card">
+        <div class="card-label">Resumo do contrato</div>
+        <div class="confirm-grid">
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">Cliente</div>
+            <div class="confirm-cell-value" id="summaryClient">-</div>
+          </div>
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">Valor</div>
+            <div class="confirm-cell-value big" id="summaryValue">R$ 0,00</div>
+          </div>
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">Razão Social</div>
+            <div class="confirm-cell-value" id="cRazao">—</div>
+          </div>
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">CPF / CNPJ</div>
+            <div class="confirm-cell-value" id="cCpf">—</div>
+          </div>
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">Endereço</div>
+            <div class="confirm-cell-value" id="cEnd">—</div>
+          </div>
+          <div class="confirm-cell">
+            <div class="confirm-cell-label">Proposta</div>
+            <div class="confirm-cell-value" id="summaryProposal">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>A assinatura digital será processada pela Clicksign. Após confirmar, você poderá assinar no painel integrado.</span>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn-back" onclick="go(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Voltar
+        </button>
+        <button class="btn-pink" onclick="go(3)">
+          Confirmar e Assinar Digitalmente
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: ASSINATURA ===== -->
+    <div class="step-view" id="v3">
+      <div class="summary-card" id="summaryCard">
+        <div class="summary-toggle" id="summaryToggle">
+          <div class="summary-meta">
+            <span class="summary-meta-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <path d="M14 2v6h6"></path>
+              </svg>
+            </span>
+            <div class="summary-meta-content">
+              <div class="summary-item-name" id="sidebarName">Contrato — -</div>
+              <div class="summary-item-desc" id="sidebarDesc">-</div>
+            </div>
+          </div>
+          <div class="summary-total-mini">
+            <div class="summary-total-wrap">
+              <div class="summary-total-caption">Total</div>
+              <div class="summary-total-value" id="sidebarTotal">R$ 0,00</div>
+            </div>
+            <svg class="summary-chevron" id="summaryChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="summary-panel" id="summaryPanel">
+          <div class="summary-details">
+            <div class="summary-row">
+              <div class="summary-item-name" id="sidebarNameExpanded">Contrato — -</div>
+              <div class="summary-item-price" id="sidebarPrice">R$ 0,00</div>
+            </div>
+            <div class="summary-row">
+              <span style="font-size:14px; color:var(--text-secondary);">Subtotal</span>
+              <span style="font-size:14px; font-weight:600;" id="sidebarSubtotal">R$ 0,00</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-total">
+              <span class="summary-total-label">Total</span>
+              <span class="summary-total-value" id="sidebarTotalExpanded">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sig-card">
+        <div class="sig-card-header">
+          <div class="sig-card-header-left">
+            <span class="sig-provider-badge">Clicksign</span>
+            <span class="sig-status-inline">
+              <span class="sig-status-dot" id="signatureHeaderDot"></span>
+              <span id="signatureHeaderText">Aguardando assinatura</span>
+            </span>
+          </div>
+          <a class="sig-open-tab" id="signatureOpenTab" href="#" target="_blank" rel="noopener noreferrer">
+            Abrir em nova aba
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 17L17 7"></path>
+              <path d="M7 7h10v10"></path>
+            </svg>
+          </a>
+        </div>
+        <div class="sig-frame-shell">
+          <div class="sig-area" id="signatureWrapper">
+            <div class="sig-loading" id="signatureLoading" hidden>
+              <div class="status-pill">
+                <div class="status-pill__inner">
+                  <div class="status-pill__dot" id="sigStatusDot"></div>
+                  <span class="status-pill__text" id="sigStatusText">Preparando assinatura...</span>
+                </div>
+              </div>
+              <div class="cl-progress-bar">
+                <div class="cl-progress-bar__fill" id="sigProgressFill"></div>
+              </div>
+              <div class="steps-log" id="sigStepsLog"></div>
+              <p class="sig-message" id="sigMessage" hidden></p>
+              <div class="skeleton-card">
+                <div class="skeleton-header">
+                  <div class="skeleton-line" style="width:180px;height:18px;"></div>
+                  <div class="skeleton-line" style="width:100px;height:14px;"></div>
+                </div>
+                <div class="skeleton-section">
+                  <div class="skeleton-line" style="width:100%;"></div>
+                  <div class="skeleton-line" style="width:93%;"></div>
+                  <div class="skeleton-line" style="width:100%;"></div>
+                  <div class="skeleton-line" style="width:58%;"></div>
+                </div>
+              </div>
+            </div>
+            <iframe
+              id="signatureIframe"
+              class="sig-iframe"
+              title="Assinatura digital do contrato"
+              hidden
+            ></iframe>
+          </div>
+        </div>
+        <div class="sig-card-footer">
+          <div class="sig-card-footer-left">
+            <span class="sig-count-badge" id="signatureCountBadge">0/1 Assinaturas</span>
+            <span class="sig-help-text">Assine o documento para continuar</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar actions-bar-fixed">
+        <div class="actions-fixed-inner">
+          <button class="btn-back" onclick="go(2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Voltar
+          </button>
+          <div class="actions-right">
+            <button class="btn-secondary" id="btnSignatureManual" type="button">
+              Já assinei
+            </button>
+            <button class="btn-pink" id="btnSignatureContinue" type="button" disabled>
+              Continuar para pagamento
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== STEP 4 — PAGAMENTO (checkout inline) ===== -->
+  <div id="v4" class="step-view">
+    <div class="checkout-scope">
+      <main class="checkout-page" id="checkout-main">
+        <div class="checkout-grid">
+          <section class="checkout-payment" aria-label="Formulário de pagamento">
+            <div id="payment-method-selector" class="payment-method-selector" aria-label="Selecione o método de pagamento">
+              <div class="method-options" role="radiogroup" aria-label="Métodos de pagamento">
+                <label class="method-option active" data-method="credit-card">
+                  <input type="radio" name="payment-method" value="credit-card" checked>
+                  <span class="method-icon">
+                    <img src="./assets/svg/solar_card-linear.svg" alt="" class="method-logo">
+                  </span>
+                  <span class="method-info">
+                    <span class="method-name">Cartão de Crédito</span>
+                    <span class="method-desc">Até 12x</span>
+                  </span>
+                  <span class="method-badge">Mais usado</span>
+                </label>
+                <label class="method-option" data-method="pix">
+                  <input type="radio" name="payment-method" value="pix">
+                  <span class="method-icon">
+                    <img src="./assets/svg/ic_outline-pix.svg" alt="PIX" class="method-logo">
+                  </span>
+                  <span class="method-info">
+                    <span class="method-name">PIX</span>
+                    <span class="method-desc" id="pix-method-desc">Aprovação instantânea</span>
+                  </span>
+                  <span class="pix-discount-badge" id="pix-discount-badge" hidden>5% OFF</span>
+                </label>
+                <label class="method-option" data-method="boleto">
+                  <input type="radio" name="payment-method" value="boleto">
+                  <span class="method-icon">
+                    <img src="./assets/svg/mingcute_paper-line.svg" alt="Boleto" class="method-logo">
+                  </span>
+                  <span class="method-info">
+                    <span class="method-name">Boleto</span>
+                    <span class="method-desc">Vence em 3 dias</span>
+                  </span>
+                </label>
+                <label class="method-option" data-method="dois_meios" hidden>
+                  <input type="radio" name="payment-method" value="dois_meios">
+                  <span class="method-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="method-logo method-logo-svg">
+                      <rect x="1" y="4" width="10" height="16" rx="1"/>
+                      <rect x="13" y="4" width="10" height="16" rx="1"/>
+                    </svg>
+                  </span>
+                  <span class="method-info">
+                    <span class="method-name">2 Meios</span>
+                    <span class="method-desc">Dividir pagamento</span>
+                  </span>
+                </label>
+                <label class="method-option" data-method="cartao-recorrente" hidden>
+                  <input type="radio" name="payment-method" value="cartao-recorrente">
+                  <span class="method-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="method-logo method-logo-svg">
+                      <rect x="2" y="5" width="20" height="14" rx="2"/>
+                      <line x1="2" y1="10" x2="22" y2="10"/>
+                      <path d="M17 15a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                      <path d="M19 13h1.5M17 11v-1.5"/>
+                    </svg>
+                  </span>
+                  <span class="method-info">
+                    <span class="method-name">Cartão Recorrente</span>
+                    <span class="method-desc">Cobrança automática</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+            <div class="payment-forms-wrapper">
+              <div id="payment-forms-container">
+                <div id="credit-card-form-wrapper" class="payment-form-section active">
+                  <form id="payment-form" class="payment-form" novalidate>
+                    <fieldset>
+                      <legend class="visually-hidden">Dados do Cartão de Crédito</legend>
+                      <div class="form-group"><label for="card-number">Número do Cartão</label><input type="text" id="card-number" name="cardNumber" class="bp-sop-cardnumber" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number" inputmode="numeric" pattern="[0-9\s]{13,19}" aria-describedby="card-number-hint" required><span id="card-number-hint" class="hint">16 dígitos do cartão</span></div>
+                      <div class="form-group"><div class="form-label-row"><label for="card-holder">Nome impresso no cartão</label><span class="field-tooltip" data-cardholder-tooltip><button type="button" class="field-tooltip-trigger" data-cardholder-tooltip-trigger aria-label="Ver exemplo do nome impresso no cartão" aria-expanded="false" aria-controls="cardholder-tooltip-content">?</button><span id="cardholder-tooltip-content" class="field-tooltip-content" role="tooltip"><span class="field-tooltip-title">Use exatamente como aparece no cartão</span><span class="field-tooltip-card" aria-hidden="true"><span class="field-tooltip-chip"></span><span class="field-tooltip-name-label">NOME SOBRENOME</span></span><span class="field-tooltip-description">Evite abreviações ou apelidos.</span></span></span></div><input type="text" id="card-holder" name="cardHolder" class="bp-sop-cardholdername" placeholder="Como impresso no cartão" autocomplete="cc-name" aria-describedby="card-holder-hint" required><span id="card-holder-hint" class="hint">Digite o nome exatamente como impresso no cartão</span></div>
+                      <div class="form-group"><label for="card-cpf">CPF ou CNPJ do Titular</label><input type="text" id="card-cpf" name="cardCpf" placeholder="000.000.000-00" maxlength="18" inputmode="numeric" aria-describedby="card-cpf-hint" required><span id="card-cpf-hint" class="hint">CPF ou CNPJ do titular do cartão</span></div>
+                      <div class="form-row">
+                        <div class="form-group form-group--half"><label for="card-expiry">Validade</label><input type="text" id="card-expiry" name="cardExpiry" class="bp-sop-cardexpirationdate" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" inputmode="numeric" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" aria-describedby="card-expiry-hint" required><span id="card-expiry-hint" class="hint">Mês/Ano (ex: 12/28)</span></div>
+                        <div class="form-group form-group--half"><label for="card-cvv">CVV</label><input type="text" id="card-cvv" name="cardCvv" class="bp-sop-cardcvv" placeholder="123" maxlength="4" autocomplete="cc-csc" inputmode="numeric" pattern="[0-9]{3,4}" aria-describedby="cvv-hint" required><span id="cvv-hint" class="hint">3 ou 4 dígitos</span></div>
+                      </div>
+                      <div class="form-group" id="amount-group"><label for="amount">Valor</label><input type="text" id="amount" name="amount" placeholder="R$ 0,00" inputmode="numeric" aria-describedby="amount-hint" required><span id="amount-hint" class="hint">Valor a ser cobrado</span></div>
+                      <div id="installments-group" class="form-group" hidden><label for="installments">Parcelamento</label><select id="installments" name="installments" aria-describedby="installments-hint"><option value="1">1x de R$ 0,00 (à vista)</option><option value="2">2x de R$ 0,00 sem juros</option><option value="3">3x de R$ 0,00 sem juros</option><option value="4">4x de R$ 0,00 sem juros</option><option value="5">5x de R$ 0,00 sem juros</option><option value="6">6x de R$ 0,00 sem juros</option><option value="7">7x de R$ 0,00 (1,99% a.m.)</option><option value="8">8x de R$ 0,00 (1,99% a.m.)</option><option value="9">9x de R$ 0,00 (1,99% a.m.)</option><option value="10">10x de R$ 0,00 (1,99% a.m.)</option><option value="11">11x de R$ 0,00 (1,99% a.m.)</option><option value="12">12x de R$ 0,00 (1,99% a.m.)</option></select><span id="installments-hint" class="hint">Escolha o número de parcelas</span><div id="installments-summary" class="installments-summary" hidden><p>Valor da parcela: <strong id="installment-value">R$ 0,00</strong></p><p id="total-with-interest" hidden>Total: <strong id="total-value">R$ 0,00</strong></p></div></div>
+                      <fieldset id="card-address-fields" class="address-fieldset" hidden>
+                        <legend>Endereço de Cobrança</legend>
+                        <div class="form-group"><label for="card-cep">CEP</label><div class="cep-input-wrapper"><input type="text" id="card-cep" name="cardCep" placeholder="00000-000" maxlength="9" inputmode="numeric" required><button type="button" id="card-cep-btn" class="btn-cep-search"><span class="btn-cep-text">Buscar</span><span class="btn-cep-loading" hidden><span class="cep-spinner"></span></span></button></div></div>
+                        <div class="form-row"><div class="form-group form-group--large"><label for="card-street">Endereço</label><input type="text" id="card-street" name="cardStreet" placeholder="Rua, Avenida..." required></div><div class="form-group form-group--small"><label for="card-address-number">Nº</label><input type="text" id="card-address-number" name="cardAddressNumber" placeholder="123" required></div></div>
+                        <div class="form-row"><div class="form-group form-group--half"><label for="card-district">Bairro</label><input type="text" id="card-district" name="cardDistrict" placeholder="Centro" maxlength="50" required></div><div class="form-group form-group--half"><label for="card-city">Cidade</label><input type="text" id="card-city" name="cardCity" placeholder="São Paulo" required></div></div>
+                        <div class="form-group form-group--small"><label for="card-state">UF</label><select id="card-state" name="cardState" required><option value="">--</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div>
+                      </fieldset>
+                    </fieldset>
+                    <div id="turnstile-widget" class="turnstile-container" style="display: none; margin-bottom: 1rem;"></div>
+                    <button type="submit" id="submit-btn" class="btn-pay" hidden><span class="btn-text">Pagar com Cartão</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Processando...</span></button>
+                  </form>
+                </div>
+                <div id="pix-form-wrapper" class="payment-form-section" hidden>
+                  <form id="pix-form" class="payment-form" novalidate>
+                    <fieldset>
+                      <legend class="visually-hidden">Dados para pagamento via PIX</legend>
+                      <div class="form-group"><label for="pix-name">Nome Completo</label><input type="text" id="pix-name" name="pixName" placeholder="Seu nome completo" autocomplete="name" required><span class="hint">Como aparece no documento</span></div>
+                      <div class="form-group"><label for="pix-document">CPF ou CNPJ</label><input type="text" id="pix-document" name="pixDocument" placeholder="000.000.000-00" maxlength="18" inputmode="numeric" required><span class="hint">Apenas números</span></div>
+                      <div class="form-group" id="pix-amount-group"><label for="pix-amount">Valor</label><input type="text" id="pix-amount" name="pixAmount" placeholder="R$ 0,00" inputmode="numeric" required><span class="hint">Valor a ser pago</span></div>
+                    </fieldset>
+                    <button type="submit" id="pix-submit-btn" class="btn-pay btn-pix" hidden><span class="btn-text">Gerar QR Code PIX</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Gerando...</span></button>
+                  </form>
+                </div>
+                <div id="boleto-form-wrapper" class="payment-form-section" hidden>
+                  <form id="boleto-form" class="payment-form" novalidate>
+                    <fieldset>
+                      <legend class="visually-hidden">Dados para pagamento via Boleto</legend>
+                      <div id="boleto-installments-section" class="boleto-installments-section">
+                        <div class="boleto-section-header"><h3 class="boleto-section-title">Boleto Bancário</h3><p class="boleto-total-display">Valor total: <strong id="boleto-total-value">R$ 0,00</strong></p></div>
+                        <div class="form-group"><label>Escolha o número de parcelas:</label><div class="installments-options-grid" id="boleto-parcelas-options"></div></div>
+                        <div class="installments-preview-box" id="boleto-parcelas-preview" hidden><h4 class="preview-title">Resumo das parcelas:</h4><ul class="installments-list" id="boleto-parcelas-list"></ul></div>
+                      </div>
+                      <div class="boleto-payer-section">
+                        <h4 class="payer-section-title">Dados do Pagador</h4>
+                        <div class="form-group"><label for="boleto-name">Nome Completo</label><input type="text" id="boleto-name" name="boletoName" placeholder="Seu nome completo" autocomplete="name" required></div>
+                        <div class="form-group"><label for="boleto-document">CPF ou CNPJ</label><input type="text" id="boleto-document" name="boletoDocument" placeholder="000.000.000-00" maxlength="18" inputmode="numeric" required></div>
+                      </div>
+                      <div class="boleto-address-section">
+                        <h4 class="payer-section-title">Endereço de Cobrança</h4>
+                        <div class="form-group"><label for="boleto-cep">CEP</label><div class="cep-input-wrapper"><input type="text" id="boleto-cep" name="boletoCep" placeholder="00000-000" maxlength="9" inputmode="numeric" required><button type="button" id="boleto-cep-btn" class="btn-cep-search"><span class="btn-cep-text">Buscar</span><span class="btn-cep-loading" hidden><span class="cep-spinner"></span></span></button></div></div>
+                        <div class="form-row"><div class="form-group form-group--large"><label for="boleto-street">Endereço</label><input type="text" id="boleto-street" name="boletoStreet" placeholder="Rua, Avenida..." required></div><div class="form-group form-group--small"><label for="boleto-number">Nº</label><input type="text" id="boleto-number" name="boletoNumber" placeholder="123" required></div></div>
+                        <div class="form-row"><div class="form-group form-group--half"><label for="boleto-district">Bairro</label><input type="text" id="boleto-district" name="boletoDistrict" placeholder="Centro" maxlength="50" required></div><div class="form-group form-group--half"><label for="boleto-city">Cidade</label><input type="text" id="boleto-city" name="boletoCity" placeholder="São Paulo" required></div></div>
+                        <div class="form-row"><div class="form-group form-group--small"><label for="boleto-state">UF</label><select id="boleto-state" name="boletoState" required><option value="">--</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div><div class="form-group form-group--large" id="boleto-amount-group"><label for="boleto-amount">Valor</label><input type="text" id="boleto-amount" name="boletoAmount" placeholder="R$ 0,00" inputmode="numeric" required></div></div>
+                      </div>
+                    </fieldset>
+                    <button type="submit" id="boleto-submit-btn" class="btn-pay btn-boleto" hidden><span class="btn-text">Gerar Boleto</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Gerando...</span></button>
+                  </form>
+                </div>
+                <div id="cartao-recorrente-form-wrapper" class="payment-form-section" hidden>
+                  <form id="recurrence-form" class="payment-form" novalidate>
+                    <fieldset>
+                      <legend class="visually-hidden">Pagamento com Cartão Recorrente</legend>
+                      <div class="recurrence-info-box" id="recurrence-info-box"><h4 class="recurrence-info-title">Cobrança Recorrente</h4><p class="recurrence-info-text">Valor: <strong id="recurrence-valor">R$ 0,00</strong> | Frequência: <strong id="recurrence-intervalo">Mensal</strong> | Dia da cobrança: <strong id="recurrence-dia">--</strong></p><p class="recurrence-info-note">Após o pagamento inicial, cobranças futuras serão feitas automaticamente no seu cartão.</p></div>
+                      <div class="sop-card-fields sop-card-fields--recurrence">
+                        <div class="form-group"><label for="rec-card-number">Número do Cartão</label><input type="text" id="rec-card-number" class="bp-sop-cardnumber" name="recCardNumber" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" autocomplete="cc-number" required><div id="rec-card-brand-icon" class="card-brand-icon"></div></div>
+                        <div class="form-group"><label for="rec-card-holder">Nome no Cartão</label><input type="text" id="rec-card-holder" class="bp-sop-cardholdername" name="recCardHolder" placeholder="NOME COMO NO CARTÃO" autocomplete="cc-name" required></div>
+                        <div class="form-row"><div class="form-group form-group--half"><label for="rec-card-expiry">Validade</label><input type="text" id="rec-card-expiry" class="bp-sop-cardexpirationdate" name="recCardExpiry" placeholder="MM/AAAA" inputmode="numeric" maxlength="7" autocomplete="cc-exp" required></div><div class="form-group form-group--half"><label for="rec-card-cvv">CVV</label><input type="text" id="rec-card-cvv" class="bp-sop-cardcvv" name="recCardCvv" placeholder="000" inputmode="numeric" maxlength="4" autocomplete="cc-csc" required></div></div>
+                      </div>
+                      <div class="recurrence-consent" id="recurrence-consent-group"><div class="check-row" id="recurrence-chk" onclick="toggleRecurrenceChk(this)"><div class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><span class="check-label" id="recurrence-consent-text">Autorizo a cobrança automática no meu cartão conforme a frequência indicada acima.</span></div></div>
+                    </fieldset>
+                    <button type="submit" id="recurrence-submit-btn" class="btn-pay" hidden><span class="btn-text">Pagar e Ativar Recorrência</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Processando...</span></button>
+                  </form>
+                </div>
+                <div id="dual-payment-form-wrapper" class="payment-form-section" hidden>
+                  <form id="dual-payment-form" class="payment-form" novalidate>
+                    <fieldset>
+                      <legend class="visually-hidden">Pagamento com 2 Meios</legend>
+                      <div class="dual-payment-header"><h3 class="dual-payment-title">2 Meios de Pagamento</h3><p class="dual-payment-subtitle">Divida o pagamento entre os métodos disponíveis</p><p class="dual-total-display">Valor total: <strong id="dual-total-value">R$ 0,00</strong></p></div>
+                      <div id="dual-method-1" class="dual-method-section expanded"><div id="dual-method-1-header" class="dual-method-header" role="button" aria-expanded="true"><span class="dual-method-number">1</span><span class="dual-method-title">Método 1</span><span id="dual-m1-status" class="dual-method-status" hidden></span><span class="dual-method-toggle" aria-hidden="true">▼</span></div><div id="dual-method-1-body" class="dual-method-body"><div class="dual-sub-selector"><label class="dual-sub-option"><input type="radio" name="dual-m1-type" value="pix" id="dual-m1-type-pix"><span class="dual-sub-label">PIX</span></label><label class="dual-sub-option"><input type="radio" name="dual-m1-type" value="cartao" id="dual-m1-type-card"><span class="dual-sub-label">Cartão</span></label><label class="dual-sub-option dual-sub-boleto" id="dual-m1-boleto-option" hidden><input type="radio" name="dual-m1-type" value="boleto" id="dual-m1-type-boleto"><span class="dual-sub-label">Boleto</span></label></div><div class="form-group dual-value-group"><label for="dual-m1-value">Valor</label><input type="text" id="dual-m1-value" placeholder="R$ 0,00" inputmode="numeric" autocomplete="off"><span id="dual-m1-value-error" class="dual-value-error" hidden></span><span id="dual-m1-value-hint" class="dual-value-hint" hidden></span></div><div id="dual-m1-pix-discount" class="dual-pix-discount-info" hidden></div><div id="dual-m1-card-fields" class="dual-card-fields" hidden><div class="form-group"><label for="dual-m1-card-number">Número do Cartão</label><input type="text" id="dual-m1-card-number" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number"></div><div class="form-group"><label for="dual-m1-card-holder">Nome do Titular</label><input type="text" id="dual-m1-card-holder" placeholder="Como impresso no cartão" autocomplete="cc-name"></div><div class="form-group"><label for="dual-m1-card-cpf">CPF ou CNPJ do Titular</label><input type="text" id="dual-m1-card-cpf" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div><div class="form-row"><div class="form-group form-group--half"><label for="dual-m1-card-expiry">Validade</label><input type="text" id="dual-m1-card-expiry" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp"></div><div class="form-group form-group--half"><label for="dual-m1-card-cvv">CVV</label><input type="text" id="dual-m1-card-cvv" placeholder="000" maxlength="4" inputmode="numeric" autocomplete="cc-csc"></div></div><div id="dual-m1-card-installments-group" class="form-group dual-card-installments-group"><label for="dual-m1-card-installments">Parcelamento</label><select id="dual-m1-card-installments" name="dual-m1-card-installments" aria-describedby="dual-m1-card-installments-hint"><option value="1">1x de R$ 0,00 (à vista)</option></select><span id="dual-m1-card-installments-hint" class="hint">Escolha o número de parcelas</span></div></div><div id="dual-m1-pix-fields" class="dual-pix-fields" hidden><div class="form-group"><label for="dual-m1-pix-document">CPF ou CNPJ</label><input type="text" id="dual-m1-pix-document" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div></div><div id="dual-m1-boleto-fields" class="dual-boleto-fields" hidden><div class="form-group"><label for="dual-m1-boleto-document">CPF ou CNPJ</label><input type="text" id="dual-m1-boleto-document" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div><div class="form-group"><label for="dual-m1-boleto-name">Nome completo</label><input type="text" id="dual-m1-boleto-name" placeholder="Nome do pagador"></div><div id="dual-m1-boleto-installments" class="dual-boleto-installments" hidden><div class="form-group"><label>Escolha o número de parcelas:</label></div><div id="dual-m1-boleto-parcelas-options" class="installments-options-grid"></div><div id="dual-m1-boleto-parcelas-preview" class="installments-preview-box" hidden><h4 class="preview-title">Resumo das parcelas:</h4><ul id="dual-m1-boleto-parcelas-list" class="installments-list"></ul></div></div></div></div></div>
+                      <div id="dual-method-2" class="dual-method-section"><div id="dual-method-2-header" class="dual-method-header" role="button" aria-expanded="false"><span class="dual-method-number">2</span><span class="dual-method-title">Método 2</span><span id="dual-m2-status" class="dual-method-status" hidden></span><span class="dual-method-toggle" aria-hidden="true">▼</span></div><div id="dual-method-2-body" class="dual-method-body" hidden><div class="dual-sub-selector"><label class="dual-sub-option"><input type="radio" name="dual-m2-type" value="pix" id="dual-m2-type-pix"><span class="dual-sub-label">PIX</span></label><label class="dual-sub-option"><input type="radio" name="dual-m2-type" value="cartao" id="dual-m2-type-card"><span class="dual-sub-label">Cartão</span></label><label class="dual-sub-option dual-sub-boleto" id="dual-m2-boleto-option" hidden><input type="radio" name="dual-m2-type" value="boleto" id="dual-m2-type-boleto"><span class="dual-sub-label">Boleto</span></label></div><div class="form-group dual-value-group"><label for="dual-m2-value">Valor (restante)</label><input type="text" id="dual-m2-value" placeholder="R$ 0,00" readonly class="dual-value-readonly"></div><div id="dual-m2-pix-discount" class="dual-pix-discount-info" hidden></div><div id="dual-m2-card-fields" class="dual-card-fields" hidden><div class="form-group"><label for="dual-m2-card-number">Número do Cartão</label><input type="text" id="dual-m2-card-number" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number"></div><div class="form-group"><label for="dual-m2-card-holder">Nome do Titular</label><input type="text" id="dual-m2-card-holder" placeholder="Como impresso no cartão" autocomplete="cc-name"></div><div class="form-group"><label for="dual-m2-card-cpf">CPF ou CNPJ do Titular</label><input type="text" id="dual-m2-card-cpf" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div><div class="form-row"><div class="form-group form-group--half"><label for="dual-m2-card-expiry">Validade</label><input type="text" id="dual-m2-card-expiry" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp"></div><div class="form-group form-group--half"><label for="dual-m2-card-cvv">CVV</label><input type="text" id="dual-m2-card-cvv" placeholder="000" maxlength="4" inputmode="numeric" autocomplete="cc-csc"></div></div><div id="dual-m2-card-installments-group" class="form-group dual-card-installments-group"><label for="dual-m2-card-installments">Parcelamento</label><select id="dual-m2-card-installments" name="dual-m2-card-installments" aria-describedby="dual-m2-card-installments-hint"><option value="1">1x de R$ 0,00 (à vista)</option></select><span id="dual-m2-card-installments-hint" class="hint">Escolha o número de parcelas</span></div></div><div id="dual-m2-pix-fields" class="dual-pix-fields" hidden><div class="form-group"><label for="dual-m2-pix-document">CPF ou CNPJ</label><input type="text" id="dual-m2-pix-document" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div></div><div id="dual-m2-boleto-fields" class="dual-boleto-fields" hidden><div class="form-group"><label for="dual-m2-boleto-document">CPF ou CNPJ</label><input type="text" id="dual-m2-boleto-document" placeholder="000.000.000-00" maxlength="18" inputmode="numeric"></div><div class="form-group"><label for="dual-m2-boleto-name">Nome completo</label><input type="text" id="dual-m2-boleto-name" placeholder="Nome do pagador"></div><div id="dual-m2-boleto-installments" class="dual-boleto-installments" hidden><div class="form-group"><label>Escolha o número de parcelas:</label></div><div id="dual-m2-boleto-parcelas-options" class="installments-options-grid"></div><div id="dual-m2-boleto-parcelas-preview" class="installments-preview-box" hidden><h4 class="preview-title">Resumo das parcelas:</h4><ul id="dual-m2-boleto-parcelas-list" class="installments-list"></ul></div></div></div></div></div>
+                      <div id="dual-address-section" class="dual-address-section" hidden><h4 class="payer-section-title">Endereço de Cobrança</h4><div class="form-group"><label for="dual-cep">CEP</label><input type="text" id="dual-cep" placeholder="00000-000" maxlength="9" inputmode="numeric"></div><div class="form-row"><div class="form-group form-group--large"><label for="dual-street">Endereço</label><input type="text" id="dual-street" placeholder="Rua, Avenida..."></div><div class="form-group form-group--small"><label for="dual-number">Nº</label><input type="text" id="dual-number" placeholder="123"></div></div><div class="form-row"><div class="form-group form-group--half"><label for="dual-district">Bairro</label><input type="text" id="dual-district" placeholder="Centro" maxlength="50"></div><div class="form-group form-group--half"><label for="dual-city">Cidade</label><input type="text" id="dual-city" placeholder="São Paulo"></div></div><div class="form-group form-group--small"><label for="dual-state">UF</label><select id="dual-state"><option value="">--</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div></div>
+                    </fieldset>
+                    <button type="submit" id="dual-submit-btn" class="btn-pay" hidden><span class="btn-text">Pagar com 2 Meios</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Processando...</span></button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <section id="feedback" class="feedback" role="alert" aria-live="polite" aria-atomic="true">
+              <div id="feedback-success" class="feedback-success" hidden><span class="feedback-icon" aria-hidden="true">✓</span><h2 class="feedback-title">Pagamento Aprovado!</h2><p id="success-message" class="feedback-message">Sua transação foi processada com sucesso.</p><div id="transaction-details" class="transaction-details"></div></div>
+              <div id="feedback-error" class="feedback-error" hidden><span class="feedback-icon" aria-hidden="true">✗</span><h2 class="feedback-title">Pagamento Não Autorizado</h2><p id="error-message" class="feedback-message">Não foi possível processar seu pagamento.</p><button type="button" id="retry-btn" class="btn-retry">Tentar Novamente</button></div>
+              <div id="pix-preview" class="payment-preview pix-preview" hidden><div class="preview-header"><span class="preview-icon">📱</span><h2 class="preview-title">Escaneie o QR Code</h2><p class="preview-subtitle">Use o app do seu banco para pagar</p></div><div class="qr-code-container"><canvas id="qr-code-canvas" width="200" height="200"></canvas></div><div class="pix-copy-paste"><label for="pix-code">Ou copie o código PIX:</label><div class="copy-container"><input type="text" id="pix-code" readonly><button type="button" id="copy-pix-btn" class="btn-copy">Copiar</button></div></div><p class="pix-expiration">⏱️ Válido por <strong id="pix-timer">30:00</strong></p><button type="button" id="pix-new-btn" class="btn-secondary">Gerar Novo QR Code</button></div>
+              <div id="boleto-preview" class="payment-preview boleto-preview" hidden><div class="preview-header"><span class="preview-icon">📄</span><h2 class="preview-title">Boleto Gerado!</h2><p class="preview-subtitle">Pague até a data de vencimento</p></div><div class="boleto-info"><div class="boleto-barcode"><svg id="boleto-barcode-svg" width="280" height="50"></svg></div><div class="boleto-line"><label for="boleto-digitable-line">Linha Digitável:</label><div class="copy-container"><input type="text" id="boleto-digitable-line" readonly><button type="button" id="copy-boleto-btn" class="btn-copy">Copiar</button></div></div></div><p class="boleto-expiration">📅 Vencimento: <strong id="boleto-due-date">--/--/----</strong></p><div class="boleto-actions"><a href="#" id="boleto-download-btn" class="btn-download" target="_blank">📥 Baixar Boleto PDF</a><button type="button" id="boleto-new-btn" class="btn-secondary">Gerar Novo Boleto</button></div></div>
+            </section>
+          </section>
+          <aside class="checkout-summary" aria-label="Resumo do pedido">
+            <div class="order-summary">
+              <h2 class="summary-title">Resumo do Pedido</h2>
+              <div class="summary-item"><div class="item-details"><span class="item-name" id="summary-item-name">Produto / Serviço</span><span class="item-description" id="summary-item-description">Descrição do item</span></div><span class="item-price" id="summary-item-price">R$ 0,00</span></div>
+              <div class="summary-divider"></div>
+              <div class="summary-row"><span>Subtotal</span><span id="summary-subtotal">R$ 0,00</span></div>
+              <div id="installments-sidebar-group" class="installments-inline" hidden><div class="summary-divider"></div><div class="form-group installments-select-group"><label for="installments-sidebar">Parcelamento</label><select id="installments-sidebar" name="installments-sidebar" aria-describedby="installments-sidebar-hint"><option value="1">1x de R$ 0,00 (à vista)</option><option value="2">2x de R$ 0,00 sem juros</option><option value="3">3x de R$ 0,00 sem juros</option><option value="4">4x de R$ 0,00 sem juros</option><option value="5">5x de R$ 0,00 sem juros</option><option value="6">6x de R$ 0,00 sem juros</option><option value="7">7x de R$ 0,00 (1,99% a.m.)</option><option value="8">8x de R$ 0,00 (1,99% a.m.)</option><option value="9">9x de R$ 0,00 (1,99% a.m.)</option><option value="10">10x de R$ 0,00 (1,99% a.m.)</option><option value="11">11x de R$ 0,00 (1,99% a.m.)</option><option value="12">12x de R$ 0,00 (1,99% a.m.)</option></select></div></div>
+              <div class="summary-row summary-row--discount" id="summary-pix-discount-row" hidden><span>Desconto PIX (<span id="summary-pix-discount-percent">0</span>%)</span><span class="discount-value" id="summary-pix-discount-value">- R$ 0,00</span></div>
+              <div class="summary-row summary-row--fees" id="summary-fees-row" hidden><span>Juros (<span id="summary-installments-count">0</span>x)</span><span id="summary-fees">R$ 0,00</span></div>
+              <div class="summary-divider"></div>
+              <div class="summary-total"><span>Total</span><span id="summary-total">R$ 0,00</span></div>
+            </div>
+            <div class="payment-action"><button type="button" id="main-submit-btn" class="btn-pay"><span class="btn-text">Pagar com Cartão</span><span class="btn-loading" hidden><span class="spinner" aria-hidden="true"></span>Processando...</span></button></div>
+            <div class="security-info"><div class="security-badge"><span class="lock-icon" aria-hidden="true">🔒</span><span>Pagamento seguro processado pela Cielo</span></div><div class="security-logos"><img src="./assets/image/logo_visa.png" alt="Visa" class="security-logo"><img src="./assets/image/logo_mastercard.png" alt="Mastercard" class="security-logo"><img src="./assets/image/logo_elo.png" alt="Elo" class="security-logo"><img src="./assets/image/logo_amex.png" alt="American Express" class="security-logo"></div></div>
+          </aside>
+        </div>
+      </main>
+      <button class="scroll-to-summary" id="scrollToSummary" aria-label="Ver resumo do pedido" title="Ver resumo do pedido" hidden><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Checkout Modals (outside .layout for fixed positioning) -->
+<div id="processing-modal" class="processing-modal" hidden>
+  <div class="processing-modal-overlay"></div>
+  <div class="processing-modal-content">
+    <div id="processing-loading" class="processing-state"><div class="processing-spinner"></div><p class="processing-text">Processando pagamento...</p></div>
+    <div id="processing-success" class="processing-state" hidden><span class="processing-icon success">✓</span><h2>Pagamento Aprovado!</h2><p id="processing-success-message">Sua transação foi processada com sucesso.</p><div id="processing-success-details"></div><button type="button" id="processing-close-btn" class="btn-primary">Concluir</button><button type="button" id="processing-close-window-btn" class="btn-primary" hidden>Fechar Janela</button></div>
+    <div id="processing-error" class="processing-state" hidden><span class="processing-icon error">✗</span><h2>Não foi possível concluir</h2><p id="processing-error-message">Não foi possível processar seu pagamento.</p><p class="processing-help-text">Entre em contato com o suporte se precisar de ajuda.</p><button type="button" id="processing-retry-btn" class="btn-secondary" hidden>Tentar Novamente</button><button type="button" id="error-close-window-btn" class="btn-primary">Fechar Janela</button></div>
+    <div id="processing-pix" class="processing-state processing-state-pix" hidden><div class="modal-pix-header"><span class="modal-pix-icon"><img src="./assets/svg/ic_outline-pix.svg" alt="PIX" class="pix-icon-img"></span><h2>Escaneie o QR Code</h2><p class="modal-pix-subtitle">Use o app do seu banco para pagar</p></div><div class="modal-qr-code-container"><canvas id="modal-qr-code-canvas" width="200" height="200"></canvas></div><div class="modal-pix-copy-paste"><label for="modal-pix-code">Ou copie o código PIX:</label><div class="modal-copy-container"><input type="text" id="modal-pix-code" readonly><button type="button" id="modal-copy-pix-btn" class="btn-copy">Copiar</button></div></div><p class="modal-pix-expiration">⏱️ Válido por <strong id="modal-pix-timer">30:00</strong></p><button type="button" id="pix-close-window-btn" class="btn-secondary">Fechar Janela</button></div>
+    <div id="processing-boleto" class="processing-state processing-state-boleto" hidden><div class="modal-boleto-header"><span class="modal-boleto-icon">📄</span><h2>Boleto Gerado!</h2><p class="modal-boleto-subtitle">Pague até a data de vencimento</p></div><div class="modal-boleto-barcode"><svg id="modal-boleto-barcode-svg" width="280" height="50"></svg></div><div class="modal-boleto-line"><label for="modal-boleto-digitable-line">Linha Digitável:</label><div class="modal-copy-container"><input type="text" id="modal-boleto-digitable-line" readonly><button type="button" id="modal-copy-boleto-btn" class="btn-copy">Copiar</button></div></div><p class="modal-boleto-expiration">📅 Vencimento: <strong id="modal-boleto-due-date">--/--/----</strong></p><div class="modal-boleto-actions"><a href="#" id="modal-boleto-download-btn" class="btn-primary" target="_blank">📥 Baixar Boleto PDF</a><button type="button" id="boleto-close-window-btn" class="btn-secondary">Fechar Janela</button></div></div>
+    <div id="processing-boleto-parcelado" class="processing-state processing-state-boleto-parcelado" hidden><div class="modal-boleto-parcelado-header"><span class="modal-boleto-parcelado-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48"><rect x="2" y="3" width="20" height="5" rx="1"/><rect x="2" y="10" width="20" height="5" rx="1"/><rect x="2" y="17" width="20" height="5" rx="1"/></svg></span><h2>Boletos Gerados!</h2></div><div class="modal-boleto-parcelado-message"><p class="boleto-parcelado-success-text">Seus <strong id="boleto-parcelado-count">0</strong> boletos foram gerados com sucesso.</p><p class="boleto-parcelado-info-text">Baixe seus boletos individualmente na lista abaixo.</p><p class="boleto-parcelado-valor-text">Valor por parcela: <strong id="boleto-parcelado-valor-parcela">R$ 0,00</strong></p></div><div id="boleto-parcelado-links" class="boleto-parcelado-links" aria-live="polite"></div><div class="modal-boleto-parcelado-footer"><button type="button" id="boleto-parcelado-close-btn" class="btn-secondary">Fechar Janela</button></div></div>
+  </div>
+</div>
+<div id="dual-payment-modal" class="dual-payment-modal" hidden role="dialog" aria-modal="true" aria-label="Processamento de pagamento com 2 meios"><div class="dual-modal-overlay"></div><div class="dual-modal-container"><button type="button" id="dual-modal-close" class="dual-modal-close-btn" aria-label="Fechar">&times;</button><div id="dual-modal-content" class="dual-modal-body"></div></div></div>
+<div id="validation-toast" class="validation-toast" hidden aria-live="polite" role="alert"><span class="toast-icon">⚠</span><span id="toast-message" class="toast-message"></span></div>
+
+<div class="feedback-modal" id="feedbackModal" hidden>
+  <div class="feedback-modal__backdrop" id="feedbackModalBackdrop"></div>
+  <div class="feedback-modal__card" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
+    <div class="feedback-modal__head">
+      <span class="feedback-modal__tag warning" id="feedbackModalTag">Aviso</span>
+      <button class="feedback-modal__close" id="feedbackModalClose" type="button" aria-label="Fechar">
+        ×
+      </button>
+    </div>
+    <h3 class="feedback-modal__title" id="feedbackModalTitle">Valide a assinatura</h3>
+    <p class="feedback-modal__message" id="feedbackModalMessage"></p>
+    <div class="feedback-modal__actions">
+      <a class="feedback-modal__open" id="feedbackModalOpen" href="#" target="_blank" rel="noopener noreferrer" hidden>
+        Abrir Clicksign
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 17L17 7"></path>
+          <path d="M7 7h10v10"></path>
+        </svg>
+      </a>
+      <button class="btn-pink" id="feedbackModalAcknowledge" type="button">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let cur = -1;
+
+const titles = {
+  '-1': ['Novo Contrato', 'Revise os dados iniciais da proposta antes de iniciar.'],
+  '1': ['Novo Contrato', 'Leia os termos e preencha os dados obrigatórios do contratante.'],
+  '2': ['Confirmar Contrato', 'Valide as informações antes de seguir para assinatura digital.'],
+  '3': ['Assinatura Digital', 'A assinatura é acompanhada automaticamente até conclusão.'],
+  '4': ['Pagamento', 'Finalize o pagamento para concluir a contratação.'],
+}
+const EDGE_FUNCTIONS_BASE_URL = 'https://awqtzoefutnfmnbomujt.supabase.co/functions/v1'
+const SIGNATURE_POLL_INTERVAL_MS = 5000
+const SIGNATURE_POLL_MAX_ATTEMPTS = 120
+const SIGNATURE_MIN_LOADING_MS = 4000
+
+let sessionData = null
+let checkoutRedirected = false
+const signatureFlow = {
+  uiState: 'idle',
+  mode: 'no_rsk',
+  status: 'draft',
+  signed: false,
+  contractId: null,
+  signUrl: null,
+  requestSignatureKey: null,
+  pollTimer: null,
+  pollAttempts: 0,
+  realtimeUnsubscribe: null,
+  errorCode: null,
+  errorMessage: '',
+  errorRequestId: null,
+}
+
+class ContractLoader {
+  constructor(containerSelector) {
+    this.container = document.querySelector(containerSelector)
+    this.statusDot = this.container.querySelector('#sigStatusDot')
+    this.statusText = this.container.querySelector('#sigStatusText')
+    this.progressFill = this.container.querySelector('#sigProgressFill')
+    this.stepsLog = this.container.querySelector('#sigStepsLog')
+
+    this.steps = [
+      { id: 'session', loading: 'Criando sessão de assinatura...', done: 'Sessão criada',    progress: 40 },
+      { id: 'status',  loading: 'Verificando status...',           done: 'Status verificado', progress: 75 },
+      { id: 'ready',   loading: 'Carregando contrato...',          done: 'Contrato pronto!',  progress: 100, isFinal: true },
+    ]
+    this.currentStepIndex = 0
+  }
+
+  start() {
+    this.currentStepIndex = 0
+    this.stepsLog.innerHTML = ''
+    this.progressFill.style.width = '0%'
+    this.statusDot.classList.remove('status-pill__dot--done', 'status-pill__dot--error')
+    this.statusDot.style.animation = ''
+    this.container.classList.remove('sig-loading--ready')
+    this._showLoadingState(this.steps[0])
+  }
+
+  completeStep(stepId) {
+    const stepIndex = this.steps.findIndex(s => s.id === stepId)
+    if (stepIndex === -1) return
+    const step = this.steps[stepIndex]
+    this.progressFill.style.width = step.progress + '%'
+    this._addLogLine(step.done, step.isFinal)
+    if (step.isFinal) { this._showFinalState(step); return }
+    const nextStep = this.steps[stepIndex + 1]
+    if (nextStep) {
+      this.currentStepIndex = stepIndex + 1
+      this._showLoadingState(nextStep)
+    }
+  }
+
+  _showLoadingState(step) {
+    this.statusText.style.opacity = '0'
+    setTimeout(() => {
+      this.statusText.textContent = step.loading
+      this.statusText.style.opacity = '1'
+    }, 200)
+  }
+
+  _showFinalState(step) {
+    this.statusText.style.opacity = '0'
+    setTimeout(() => {
+      this.statusText.textContent = step.done
+      this.statusText.style.opacity = '1'
+      this.statusDot.classList.add('status-pill__dot--done')
+      this.container.classList.add('sig-loading--ready')
+    }, 200)
+  }
+
+  _addLogLine(text, isFinal = false) {
+    const line = document.createElement('div')
+    line.className = 'step-line' + (isFinal ? ' step-line--final' : '')
+    const iconSvg = isFinal
+      ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+           <circle cx="10" cy="10" r="10" fill="#059669"/>
+           <path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+         </svg>`
+      : `<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+           <path d="M3 8l4 4 6-6" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+         </svg>`
+    line.innerHTML = `
+      <div class="step-line__icon">${iconSvg}</div>
+      <span class="step-line__text">${text}</span>
+    `
+    this.stepsLog.appendChild(line)
+  }
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function setTextById(id, value, fallback = '-') {
+  const el = document.getElementById(id)
+  if (!el) return
+  const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim()
+  el.textContent = normalized || fallback
+}
+
+function pickFirstValue(data, keys) {
+  for (const key of keys) {
+    const value = data?.[key]
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+  return ''
+}
+
+function formatCpfCnpj(raw) {
+  let v = String(raw || '').replace(/\D/g, '')
+  if (!v) return ''
+  if (v.length <= 11) {
+    return v
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  }
+
+  v = v.substring(0, 14)
+  return v
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+function formatPhone(raw) {
+  let v = String(raw || '').replace(/\D/g, '')
+  if (!v) return ''
+  if (v.length > 11) v = v.substring(0, 11)
+  if (v.length > 6) return v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+  if (v.length > 2) return v.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+  return v
+}
+
+function getSessionIdFromUrl() {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('session') || params.get('session_id')
+}
+
+function formatCurrencyFromCents(rawValue) {
+  const cents = Number(rawValue || 0)
+  const value = Number.isFinite(cents) ? cents / 100 : 0
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function getClientName(data) {
+  return pickFirstValue(data, ['cliente_nome', 'razao_social', 'company_name', 'customer_name', 'nome'])
+}
+
+function getCelebrityName(data) {
+  return pickFirstValue(data, [
+    'celebridade_nome',
+    'celebridade',
+    'influencer_nome',
+    'famoso_nome',
+    'campanha_celebridade',
+  ])
+}
+
+function getVigenciaLabel(data) {
+  const rawMonths = data?.vigencia_meses
+  const months = Number(rawMonths)
+  if (Number.isInteger(months) && months > 0) {
+    return `${months} ${months === 1 ? 'mês' : 'meses'}`
+  }
+
+  return pickFirstValue(data, ['vigencia', 'tempoocomprado'])
+}
+
+function getRegionName(data) {
+  return pickFirstValue(data, ['regiaocomprada', 'regiao', 'regiao_comprada'])
+}
+
+function getAmountLabel(data) {
+  return formatCurrencyFromCents(data?.valor_centavos ?? data?.amount ?? 0)
+}
+
+function normalizeContractStatus(rawStatus) {
+  const value = String(rawStatus || '').trim().toLowerCase()
+  if (value === 'signed' || value === 'assinado') return 'signed'
+  if (value === 'pending_signature' || value === 'aguardando assinatura') return 'pending_signature'
+  if (value === 'failed' || value === 'error' || value === 'cancelado') return 'failed'
+  return 'draft'
+}
+
+function resolveSignatureContract(data) {
+  const signatureData = data?.signature && typeof data.signature === 'object' ? data.signature : {}
+  const status = normalizeContractStatus(
+    signatureData.status || data?.contract_status || data?.clicksign_status
+  )
+  const requestSignatureKey =
+    signatureData.request_signature_key ||
+    pickFirstValue(signatureData, [
+      'provider_request_signature_key',
+      'signature_request_key',
+      'request_signature_key',
+    ]) ||
+    pickFirstValue(data || {}, [
+      'request_signature_key',
+      'provider_request_signature_key',
+      'signature_request_key',
+    ]) ||
+    null
+
+  const querySignUrl = new URLSearchParams(window.location.search).get('sign_url')
+  const signUrl =
+    querySignUrl ||
+    signatureData.sign_url ||
+    pickFirstValue(signatureData, ['provider_sign_url', 'signature_url', 'assinatura_url']) ||
+    pickFirstValue(data || {}, [
+      'clicksign_sign_url',
+      'provider_sign_url',
+      'sign_url',
+      'signature_url',
+      'assinatura_url',
+      'clicksign_document_url',
+    ]) ||
+    null
+
+  const mode =
+    signatureData.mode ||
+    (requestSignatureKey ? 'embedded_signature' : signUrl ? 'sign_url' : 'no_rsk')
+
+  return {
+    mode,
+    status,
+    signed: status === 'signed',
+    requestSignatureKey,
+    signUrl,
+    contractId: signatureData.contract_id || data?.compra_id || data?.contract_id || null,
+  }
+}
+
+function getMethodList(data) {
+  const map = {
+    cartao: 'Cartão',
+    'credit-card': 'Cartão',
+    pix: 'PIX',
+    boleto: 'Boleto',
+    boleto_parcelado: 'Boleto parcelado',
+    dois_meios: '2 Meios',
+  }
+  const labels = []
+
+  const visible = Array.isArray(data?.payment_methods?.visible) ? data.payment_methods.visible : []
+  visible.forEach((item) => {
+    const normalized = String(item || '').toLowerCase().trim()
+    if (!normalized) return
+    const label = map[normalized] || normalized.replaceAll('_', ' ')
+    if (!labels.includes(label)) labels.push(label)
+  })
+
+  const metodoPagamento = String(data?.metodo_pagamento || '').toLowerCase().trim()
+  if (metodoPagamento) {
+    const metodoLabel = map[metodoPagamento] || metodoPagamento.replaceAll('_', ' ')
+    if (!labels.includes(metodoLabel)) labels.push(metodoLabel)
+  }
+
+  if (data?.permite_dois_meios && !labels.includes('2 Meios')) labels.push('2 Meios')
+  if (data?.boleto_parcelado_enabled && !labels.includes('Boleto parcelado')) labels.push('Boleto parcelado')
+
+  return labels
+}
+
+function getProposalDescription(data) {
+  const fromDescription = pickFirstValue(data, ['item_descricao', 'descricao'])
+  if (fromDescription) return fromDescription
+
+  const parts = [getCelebrityName(data), getVigenciaLabel(data), getRegionName(data)].filter(Boolean)
+  return parts.join(' — ')
+}
+
+function renderIntroMethods(data) {
+  const container = document.getElementById('introMethods')
+  if (!container) return
+  container.innerHTML = ''
+  const labels = getMethodList(data)
+  const safeLabels = labels.length ? labels : ['-']
+
+  safeLabels.forEach((label) => {
+    const tag = document.createElement('span')
+    tag.className = 'method-tag'
+    tag.textContent = label
+    container.appendChild(tag)
+  })
+}
+
+function renderDynamicData(data) {
+  if (!data || typeof data !== 'object') return
+  const clientName = getClientName(data) || '-'
+  const celebrity = getCelebrityName(data) || '-'
+  const vigencia = getVigenciaLabel(data) || '-'
+  const region = getRegionName(data) || '-'
+  const amount = getAmountLabel(data)
+  const proposalDescription = getProposalDescription(data) || '-'
+
+  setTextById('introClient', clientName)
+  setTextById('introCelebrity', celebrity)
+  setTextById('introValue', amount, 'R$ 0,00')
+  renderIntroMethods(data)
+
+  setTextById('proposalCelebrity', celebrity)
+  setTextById('proposalVigencia', vigencia)
+  setTextById('proposalRegion', region)
+  setTextById('proposalValue', amount, 'R$ 0,00')
+
+  setTextById('summaryClient', clientName)
+  setTextById('summaryValue', amount, 'R$ 0,00')
+  setTextById('summaryProposal', [celebrity, vigencia].filter((v) => v && v !== '-').join(' — ') || '-')
+
+  setTextById('sidebarName', `Contrato — ${clientName}`, 'Contrato — -')
+  setTextById('sidebarNameExpanded', proposalDescription)
+  setTextById('sidebarDesc', proposalDescription)
+  setTextById('sidebarPrice', amount, 'R$ 0,00')
+  setTextById('sidebarSubtotal', amount, 'R$ 0,00')
+  setTextById('sidebarTotal', amount, 'R$ 0,00')
+  setTextById('sidebarTotalExpanded', amount, 'R$ 0,00')
+}
+
+function buildAddressString(data) {
+  const fullAddress = pickFirstValue(data, ['cliente_endereco_completo', 'full_address', 'address', 'endereco'])
+  if (fullAddress) return fullAddress
+
+  const street = pickFirstValue(data, ['cliente_endereco', 'logradouro'])
+  const number = pickFirstValue(data, ['cliente_numero', 'numero'])
+  const district = pickFirstValue(data, ['cliente_bairro', 'bairro'])
+  const city = pickFirstValue(data, ['cliente_cidade', 'cidade'])
+  const uf = pickFirstValue(data, ['cliente_uf', 'uf', 'estado'])
+  const cep = pickFirstValue(data, ['cliente_cep', 'cep'])
+
+  const lineA = [street, number].filter(Boolean).join(', ')
+  const lineB = [district, [city, uf].filter(Boolean).join(' — ')].filter(Boolean).join(', ')
+  return [lineA, lineB, cep].filter(Boolean).join(' ')
+}
+
+function setSignatureTag(message, state = 'pending') {
+  setTextById('signatureHeaderText', message, 'Aguardando assinatura')
+  const dot = document.getElementById('signatureHeaderDot')
+  if (dot) {
+    dot.classList.remove('done', 'error')
+    if (state === 'done') dot.classList.add('done')
+    if (state === 'error') dot.classList.add('error')
+  }
+}
+
+function openFeedbackModal({ title, message, kind = 'warning', showOpenLink = false } = {}) {
+  const modal = document.getElementById('feedbackModal')
+  const tag = document.getElementById('feedbackModalTag')
+  const titleEl = document.getElementById('feedbackModalTitle')
+  const messageEl = document.getElementById('feedbackModalMessage')
+  const openLink = document.getElementById('feedbackModalOpen')
+  const acknowledge = document.getElementById('feedbackModalAcknowledge')
+  if (!modal || !tag || !titleEl || !messageEl || !openLink || !acknowledge) return
+
+  titleEl.textContent = title || (kind === 'error' ? 'Erro ao validar assinatura' : 'Valide a assinatura')
+  messageEl.textContent = message || 'Não foi possível concluir esta ação no momento.'
+  tag.textContent = kind === 'error' ? 'Erro' : 'Aviso'
+  tag.classList.toggle('error', kind === 'error')
+  tag.classList.toggle('warning', kind !== 'error')
+
+  const canOpenClicksign = showOpenLink && Boolean(signatureFlow.signUrl)
+  openLink.hidden = !canOpenClicksign
+  if (canOpenClicksign) {
+    openLink.href = signatureFlow.signUrl
+  }
+
+  modal.hidden = false
+  acknowledge.focus()
+}
+
+function closeFeedbackModal() {
+  const modal = document.getElementById('feedbackModal')
+  if (!modal) return
+  modal.hidden = true
+}
+
+function getSignatureErrorMessage(code, message, requestId) {
+  const map = {
+    SESSION_NOT_FOUND: 'A sessão informada não foi encontrada. Gere um novo link de checkout.',
+    COMPRA_NOT_FOUND:
+      'A compra vinculada à sessão não foi localizada. Confirme o vínculo da sessão no CRM.',
+    COMPRA_QUERY_ERROR:
+      'Falha técnica ao consultar a compra para assinatura. Tente novamente em instantes.',
+    COMPRA_TRIGGER_PAYLOAD_ERROR:
+      'Não foi possível preparar os dados para iniciar assinatura. Tente novamente.',
+    TRIGGER_CLICKSIGN_FAILED:
+      'A Clicksign não respondeu como esperado. Tente novamente ou use a nova aba.',
+  }
+  const base = map[code] || message || 'Não foi possível carregar a assinatura agora.'
+  if (requestId) {
+    return `${base} Código de rastreio: ${requestId}.`
+  }
+  return base
+}
+
+function updateSignatureButtons() {
+  const manualButton = document.getElementById('btnSignatureManual')
+  const continueButton = document.getElementById('btnSignatureContinue')
+  const countBadge = document.getElementById('signatureCountBadge')
+  if (manualButton) manualButton.disabled = signatureFlow.uiState === 'loading'
+  if (continueButton) continueButton.disabled = !signatureFlow.signed
+  if (countBadge) {
+    if (signatureFlow.signed) {
+      countBadge.textContent = '1/1 Assinaturas'
+      countBadge.classList.add('done')
+    } else {
+      countBadge.textContent = '0/1 Assinaturas'
+      countBadge.classList.remove('done')
+    }
+  }
+}
+
+function showSignatureMessage(dotClass, pillText, message) {
+  const loadingEl = document.getElementById('signatureLoading')
+  const sigMessage = document.getElementById('sigMessage')
+  const sigStatusDot = document.getElementById('sigStatusDot')
+  const sigStatusText = document.getElementById('sigStatusText')
+  const skeletonCard = loadingEl?.querySelector('.skeleton-card')
+  const progressBar = loadingEl?.querySelector('.cl-progress-bar')
+  const stepsLog = document.getElementById('sigStepsLog')
+
+  document.getElementById('signatureIframe').hidden = true
+  if (loadingEl) loadingEl.hidden = false
+  if (skeletonCard) skeletonCard.hidden = true
+  if (progressBar) progressBar.hidden = true
+  if (stepsLog) stepsLog.hidden = true
+  if (sigMessage) { sigMessage.textContent = message; sigMessage.hidden = false }
+
+  if (sigStatusDot) {
+    sigStatusDot.classList.remove('status-pill__dot--done', 'status-pill__dot--error')
+    sigStatusDot.style.animation = 'none'
+    if (dotClass) sigStatusDot.classList.add(dotClass)
+  }
+  if (sigStatusText) sigStatusText.textContent = pillText
+
+  setSignatureTag(
+    pillText,
+    dotClass === 'status-pill__dot--done' ? 'done' : dotClass === 'status-pill__dot--error' ? 'error' : 'pending'
+  )
+}
+
+function renderSignature() {
+  const signatureIframe = document.getElementById('signatureIframe')
+  const signatureLoadingEl = document.getElementById('signatureLoading')
+  const signatureOpenTab = document.getElementById('signatureOpenTab')
+  if (!signatureIframe) return
+
+  if (signatureLoadingEl) signatureLoadingEl.hidden = true
+
+  updateSignatureButtons()
+  if (signatureOpenTab) {
+    signatureOpenTab.href = signatureFlow.signUrl || '#'
+  }
+
+  if (signatureFlow.signed) {
+    showSignatureMessage('status-pill__dot--done', 'Assinatura confirmada',
+      'Assinatura confirmada com sucesso. Você será redirecionado automaticamente.')
+    setSignatureTag('Assinado com sucesso', 'done')
+    return
+  }
+
+  if (signatureFlow.uiState === 'loading') {
+    signatureIframe.hidden = true
+    if (signatureLoadingEl) {
+      signatureLoadingEl.hidden = false
+      const skeletonCard = signatureLoadingEl.querySelector('.skeleton-card')
+      const progressBar = signatureLoadingEl.querySelector('.cl-progress-bar')
+      const stepsLog = document.getElementById('sigStepsLog')
+      const sigMessage = document.getElementById('sigMessage')
+      if (skeletonCard) skeletonCard.hidden = false
+      if (progressBar) progressBar.hidden = false
+      if (stepsLog) stepsLog.hidden = false
+      if (sigMessage) sigMessage.hidden = true
+    }
+    setSignatureTag('Preparando assinatura...')
+    return
+  }
+
+  if (signatureFlow.uiState === 'error') {
+    showSignatureMessage('status-pill__dot--error', 'Falha ao carregar',
+      signatureFlow.errorMessage || 'Não foi possível carregar a assinatura agora.')
+    return
+  }
+
+  if (
+    (signatureFlow.mode === 'sign_url' || signatureFlow.mode === 'embedded_signature') &&
+    signatureFlow.signUrl
+  ) {
+    if (signatureIframe.src !== signatureFlow.signUrl) {
+      signatureIframe.src = signatureFlow.signUrl
+    }
+    signatureIframe.hidden = false
+    setSignatureTag(
+      signatureFlow.mode === 'embedded_signature'
+        ? 'Assinatura embutida'
+        : 'Aguardando assinatura'
+    )
+    return
+  }
+
+  showSignatureMessage(null, 'Aguardando assinatura',
+    'A assinatura não está disponível em painel embutido. Use "Já assinei" após assinar.')
+}
+
+function applyContractorPrefill(data) {
+  const signerData = data?.contract_signer || data?.contratante || {}
+  const merged = { ...data, ...signerData }
+
+  const razao = pickFirstValue(merged, [
+    'razao_social',
+    'company_name',
+    'cliente_nome',
+    'customer_name',
+    'nome',
+  ])
+  const cpfCnpj = pickFirstValue(merged, [
+    'cliente_documento',
+    'document',
+    'cpf_cnpj',
+    'cnpj',
+    'cpf',
+  ])
+  const telefone = pickFirstValue(merged, [
+    'cliente_telefone',
+    'phone',
+    'telefone',
+    'whatsapp',
+  ])
+  const endereco = pickFirstValue(merged, [
+    'cliente_endereco',
+    'address',
+    'endereco',
+    'full_address',
+  ])
+  const enderecoCompleto = buildAddressString(merged) || endereco
+
+  const fRazao = document.getElementById('fRazao')
+  const fCpf = document.getElementById('fCpf')
+  const fTel = document.getElementById('fTel')
+  const fEnd = document.getElementById('fEnd')
+
+  if (fRazao && razao && !fRazao.value.trim()) fRazao.value = razao
+  if (fCpf && cpfCnpj && !fCpf.value.trim()) fCpf.value = formatCpfCnpj(cpfCnpj)
+  if (fTel && telefone && !fTel.value.trim()) fTel.value = formatPhone(telefone)
+  if (fEnd && enderecoCompleto && !fEnd.value.trim()) fEnd.value = enderecoCompleto
+
+  updateBtn()
+}
+
+function stopSignatureWatchers() {
+  if (signatureFlow.pollTimer) {
+    window.clearInterval(signatureFlow.pollTimer)
+    signatureFlow.pollTimer = null
+  }
+  if (typeof signatureFlow.realtimeUnsubscribe === 'function') {
+    signatureFlow.realtimeUnsubscribe()
+    signatureFlow.realtimeUnsubscribe = null
+  }
+}
+
+function applySignaturePayload(payload) {
+  if (!payload || typeof payload !== 'object') return
+  const contract = resolveSignatureContract(payload)
+  if (!contract.signUrl && signatureFlow.signUrl) {
+    contract.signUrl = signatureFlow.signUrl
+  }
+  if (!contract.requestSignatureKey && signatureFlow.requestSignatureKey) {
+    contract.requestSignatureKey = signatureFlow.requestSignatureKey
+  }
+  if (
+    contract.mode === 'no_rsk' &&
+    (contract.signUrl || contract.requestSignatureKey)
+  ) {
+    contract.mode = contract.requestSignatureKey ? 'embedded_signature' : 'sign_url'
+  }
+  signatureFlow.mode = contract.mode
+  signatureFlow.status = contract.status
+  signatureFlow.signed = contract.signed
+  signatureFlow.contractId = contract.contractId
+  signatureFlow.signUrl = contract.signUrl
+  signatureFlow.requestSignatureKey = contract.requestSignatureKey
+  signatureFlow.errorCode = null
+  signatureFlow.errorMessage = ''
+  signatureFlow.errorRequestId = null
+}
+
+async function fetchJson(url, init) {
+  const response = await fetch(url, init)
+  const requestId = response.headers.get('sb-request-id') || response.headers.get('x-correlation-id')
+  const rawBody = await response.text()
+  let payload = null
+  if (rawBody) {
+    try {
+      payload = JSON.parse(rawBody)
+    } catch {
+      payload = null
+    }
+  }
+
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      code: payload?.code || null,
+      message: payload?.message || `Erro HTTP ${response.status}`,
+      requestId,
+      payload,
+      rawBody,
+    }
+  }
+  return payload || {}
+}
+
+async function createSigningSessionIfNeeded() {
+  const sessionId = getSessionIdFromUrl()
+  if (!sessionId) return
+  const payload = await fetchJson(`${EDGE_FUNCTIONS_BASE_URL}/create-signing-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId }),
+  })
+  applySignaturePayload(payload)
+}
+
+async function checkSignatureStatus() {
+  const sessionId = getSessionIdFromUrl()
+  if (!sessionId) return null
+  const payload = await fetchJson(
+    `${EDGE_FUNCTIONS_BASE_URL}/check-signature-status?session_id=${encodeURIComponent(sessionId)}`
+  )
+  applySignaturePayload(payload)
+  return payload
+}
+
+function handleSignedContract(source) {
+  if (checkoutRedirected || !signatureFlow.signed) return
+  stopSignatureWatchers()
+  signatureFlow.uiState = 'signed'
+  renderSignature()
+  window.setTimeout(() => {
+    if (!checkoutRedirected) {
+      goCheckout(source || 'auto')
+    }
+  }, 700)
+}
+
+function startSignaturePolling() {
+  stopSignatureWatchers()
+  signatureFlow.pollAttempts = 0
+  signatureFlow.pollTimer = window.setInterval(async () => {
+    signatureFlow.pollAttempts += 1
+    if (signatureFlow.pollAttempts > SIGNATURE_POLL_MAX_ATTEMPTS) {
+      stopSignatureWatchers()
+      return
+    }
+    try {
+      await checkSignatureStatus()
+      renderSignature()
+      if (signatureFlow.signed) handleSignedContract('polling')
+    } catch (_error) {
+      // Mantem polling ativo; o fallback manual continua disponível.
+    }
+  }, SIGNATURE_POLL_INTERVAL_MS)
+}
+
+function startSignatureRealtimeIfAvailable() {
+  if (typeof window.subscribeSignatureRealtime !== 'function') return
+  const contractId = signatureFlow.contractId || sessionData?.compra_id || null
+  if (!contractId) return
+  signatureFlow.realtimeUnsubscribe = window.subscribeSignatureRealtime({
+    contractId,
+    onSigned: () => {
+      signatureFlow.signed = true
+      signatureFlow.status = 'signed'
+      handleSignedContract('realtime')
+    },
+  })
+}
+
+async function enterSignatureStep() {
+  const signatureStepStartMs = Date.now()
+  signatureFlow.uiState = 'loading'
+  renderSignature()
+  const loader = new ContractLoader('#signatureLoading')
+  loader.start()
+
+  try {
+    await createSigningSessionIfNeeded()
+    loader.completeStep('session')
+    await checkSignatureStatus()
+    loader.completeStep('status')
+    await delay(400)
+    loader.completeStep('ready')
+    await delay(600)
+    const elapsedMs = Date.now() - signatureStepStartMs
+    if (elapsedMs < SIGNATURE_MIN_LOADING_MS) {
+      await delay(SIGNATURE_MIN_LOADING_MS - elapsedMs)
+    }
+    signatureFlow.uiState = 'ready'
+  } catch (error) {
+    signatureFlow.errorCode = error?.code || null
+    signatureFlow.errorRequestId = error?.requestId || null
+    signatureFlow.errorMessage = getSignatureErrorMessage(
+      signatureFlow.errorCode,
+      error?.message,
+      signatureFlow.errorRequestId
+    )
+    signatureFlow.uiState = 'error'
+  }
+  renderSignature()
+  if (signatureFlow.signed) {
+    handleSignedContract('status-check')
+    return
+  }
+  startSignaturePolling()
+  startSignatureRealtimeIfAvailable()
+}
+
+async function loadContractorDataFromDatabase() {
+  const sessionId = getSessionIdFromUrl()
+  if (!sessionId) return
+  try {
+    const url = `${EDGE_FUNCTIONS_BASE_URL}/get-checkout-session?session_id=${encodeURIComponent(sessionId)}`
+    const data = await fetchJson(url)
+    sessionData = data
+    renderDynamicData(data)
+    applySignaturePayload(data)
+    renderSignature()
+    applyContractorPrefill(data)
+  } catch (_error) {}
+}
+
+function go(step) {
+  if (step !== 3) stopSignatureWatchers()
+
+  if (step === 2) {
+    const r = document.getElementById('fRazao')
+    const c = document.getElementById('fCpf')
+    const e = document.getElementById('fEnd')
+    let ok = true
+    ;[r, c, e].forEach((i) => {
+      if (!i.value.trim()) {
+        i.classList.add('err')
+        ok = false
+      } else i.classList.remove('err')
+    })
+    if (!document.getElementById('chkTerms').classList.contains('on')) return
+    if (!ok) return
+    document.getElementById('cRazao').textContent = r.value
+    document.getElementById('cCpf').textContent = c.value
+    document.getElementById('cEnd').textContent = e.value
+  }
+
+  cur = step
+
+  document.querySelectorAll('.step-view').forEach((v) => v.classList.remove('on'))
+  const viewId = step === 0 ? 'v0' : 'v' + step
+  document.getElementById(viewId).classList.add('on')
+  if (step === 3) void enterSignatureStep()
+  if (step === 4) initCheckoutStep()
+
+  const stepIdx = step <= 0 ? 0 : step
+  document.querySelectorAll('.stepper-step').forEach((el, i) => {
+    const s = i + 1
+    el.classList.remove('active', 'done')
+    if (s === stepIdx) el.classList.add('active')
+    if (s < stepIdx) el.classList.add('done')
+  })
+
+  document.querySelectorAll('.stepper-line').forEach((el, i) => {
+    const lineStep = i + 1
+    el.classList.toggle('done', lineStep < stepIdx - 1)
+    el.classList.toggle('active', lineStep === stepIdx - 1)
+  })
+
+  document.querySelectorAll('.stepper-step.done .stepper-num').forEach((el) => {
+    el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+  })
+
+  document.querySelectorAll('.stepper-step:not(.done) .stepper-num').forEach((el) => {
+    const s = el.parentElement.getAttribute('data-s')
+    if (!el.textContent.trim() || el.querySelector('svg')) el.textContent = s
+  })
+
+  const key = step <= 0 ? '-1' : String(step)
+  if (titles[key]) {
+    document.getElementById('pageTitle').textContent = titles[key][0]
+    document.getElementById('pageSubtitle').textContent = titles[key][1]
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+let checkoutInitialized = false
+function initCheckoutStep() {
+  if (checkoutInitialized) return
+  checkoutInitialized = true
+
+  if (typeof window.initCheckoutInline === 'function') {
+    window.initCheckoutInline()
+  }
+}
+
+function goCheckout(source = 'manual') {
+  if (checkoutRedirected) return
+  checkoutRedirected = true
+  const sessionId = getSessionIdFromUrl()
+  if (!sessionId) {
+    openFeedbackModal({
+      kind: 'error',
+      title: 'Sessão indisponível',
+      message: `Assinatura confirmada via ${source}, mas não foi possível localizar a sessão.`,
+    })
+    return
+  }
+  go(4)
+}
+
+function toggleChk(el) {
+  el.classList.toggle('on')
+  updateBtn()
+}
+
+function updateBtn() {
+  const r = document.getElementById('fRazao').value.trim()
+  const c = document.getElementById('fCpf').value.trim()
+  const e = document.getElementById('fEnd').value.trim()
+  const chk = document.getElementById('chkTerms').classList.contains('on')
+  document.getElementById('btnNext1').disabled = !(r && c && e && chk)
+}
+
+document.querySelectorAll('#v1 .field-input').forEach((inp) => {
+  inp.addEventListener('input', () => {
+    inp.classList.remove('err')
+    updateBtn()
+  })
+})
+
+document.getElementById('fCpf').addEventListener('input', function (e) {
+  let v = e.target.value.replace(/\D/g, '')
+  if (v.length <= 11) {
+    v = v
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  } else {
+    v = v.substring(0, 14)
+    v = v
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+  }
+  e.target.value = v
+  updateBtn()
+})
+
+document.getElementById('fTel').addEventListener('input', function (e) {
+  let v = e.target.value.replace(/\D/g, '')
+  if (v.length > 11) v = v.substring(0, 11)
+  if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+  e.target.value = v
+})
+
+document.getElementById('summaryToggle').addEventListener('click', () => {
+  document.getElementById('summaryCard').classList.toggle('expanded')
+})
+
+document.getElementById('feedbackModalAcknowledge').addEventListener('click', closeFeedbackModal)
+document.getElementById('feedbackModalClose').addEventListener('click', closeFeedbackModal)
+document.getElementById('feedbackModalBackdrop').addEventListener('click', closeFeedbackModal)
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeFeedbackModal()
+})
+
+document.getElementById('btnSignatureManual').addEventListener('click', async () => {
+  try {
+    await checkSignatureStatus()
+    renderSignature()
+    if (signatureFlow.signed) {
+      handleSignedContract('manual-confirm')
+      return
+    }
+    openFeedbackModal({
+      kind: 'warning',
+      title: 'Assinatura ainda pendente',
+      message: 'A assinatura ainda não foi confirmada. Finalize no Clicksign e tente novamente.',
+      showOpenLink: true,
+    })
+  } catch (error) {
+    const message = getSignatureErrorMessage(
+      error?.code || null,
+      error?.message,
+      error?.requestId || null
+    )
+    openFeedbackModal({
+      kind: 'error',
+      title: 'Falha ao validar assinatura',
+      message,
+      showOpenLink: true,
+    })
+  }
+})
+
+document.getElementById('btnSignatureContinue').addEventListener('click', () => {
+  goCheckout('continue-button')
+})
+
+renderDynamicData({})
+renderSignature()
+loadContractorDataFromDatabase()
+
+</script>
+
+<!-- Checkout JS (same files, loaded once, init on demand) -->
+<script src="./infra/api-client.js"></script>
+<script src="./core/checkout-context.js"></script>
+<script src="./checkout-tracker.js"></script>
+<script src="./payment-visibility.js"></script>
+<script src="./boleto-parcelado.js"></script>
+<script src="./dual-payment.js"></script>
+<script src="./payment-methods/card/index.js"></script>
+<script src="./payment-methods/pix/index.js"></script>
+<script src="./payment-methods/boleto/index.js"></script>
+<script src="./script.js"></script>
+
+</body>
+</html>
