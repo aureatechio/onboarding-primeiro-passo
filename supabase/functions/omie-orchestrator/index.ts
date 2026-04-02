@@ -1227,6 +1227,7 @@ Deno.serve(async (req: Request) => {
       tipoVenda: compra.tipo_venda ?? undefined,
       valorTotal: valorTotalSafe,
       parcelasExplicitas: parcelasResult?.parcelas,
+      dataCompetencia: formatDate(dataPagamentoConfirmado ?? compra.data_compra),
     })
     osPayloadForSync = osPayload as Record<string, unknown>
     await supabase
@@ -1480,6 +1481,7 @@ Deno.serve(async (req: Request) => {
       tipoVenda: compra.tipo_venda ?? undefined,
       valorTotal: valorTotalSafe,
       parcelasExplicitas: parcelasResult2?.parcelas,
+      dataCompetencia: formatDate(dataPagamentoConfirmado ?? compra.data_compra),
       ...(skipOsCreation && osId != null
         ? { operation: 'alterar' as const, existingOsId: osId }
         : {}),

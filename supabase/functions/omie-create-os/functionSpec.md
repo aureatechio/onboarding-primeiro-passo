@@ -19,6 +19,7 @@ Criar/atualizar Ordem de Servico no OMIE via `IncluirOS`/`AlterarOS`, normalizan
   - `omie_os_id`/`nCodOS` obrigatório para `os_operation=alterar`
   - `parcelas_explicitas`: array de parcelas pre-calculadas pelo caller (builder canonico). Quando presente, substitui a logica interna de montagem de parcelas e forca `cCodParc='999'` com `nQtdeParc=parcelas_explicitas.length`. Cada item: `{ nParcela, nValor, nPercentual, dDtVenc, meio_pagamento?, tipo_documento?, nsu? }`
   - `caracteristica_tipo_venda` (ou aliases `tipo_venda_label`/`tipo_venda`): classificacao comercial da compra (`Venda`, `Renovacao`, `Upsell`)
+  - `data_competencia` (ou `dDataRps`): data de competência da OS no formato `dd/MM/yyyy`. Quando informada, é enviada como `InformacoesAdicionais.dDataRps` no payload OMIE. Corresponde ao campo "Data de competência" da aba "Informações adicionais" na UI do OMIE.
 
 ## Validations
 - JSON valido.
@@ -44,6 +45,7 @@ Criar/atualizar Ordem de Servico no OMIE via `IncluirOS`/`AlterarOS`, normalizan
   - `call: AlterarOS` quando `os_operation=alterar`.
 - Para alteração, injeta `Cabecalho.nCodOS` e normaliza `ServicosPrestados[].nSeqItem/cAcaoItem`.
 - Quando `vendedor_omie_codigo` é informado, envia `Cabecalho.nCodVend`.
+- Quando `data_competencia` (ou `dDataRps`) estiver presente, inclui `InformacoesAdicionais.dDataRps` com o valor informado (formato `dd/MM/yyyy`). Campo opcional; quando ausente, o OMIE define a data de competência automaticamente.
 - Se `caracteristica_tipo_venda` estiver presente, normaliza para label operacional e acrescenta em `InformacoesAdicionais.cDadosAdicNF`:
   - `Venda` -> `Tipo de venda: Venda nova`
   - `Renovacao` -> `Tipo de venda: Renovação`
