@@ -54,13 +54,9 @@ Consultar `CONTEXT-MAP.md` e usar este mapeamento:
 
 | Palavras-chave | Modulo |
 |----------------|--------|
-| pagamento, checkout, pix, boleto, cartao, cielo, webhook payment, split, recorrencia, desconto | `checkout` |
 | OMIE, ordem de servico, OS, ERP, cliente OMIE, vendedor | `omie` |
-| dashboard, painel, monitor, tabela, filtro, tela | `dashboard` |
-| contrato, assinatura, ClickSign, signatario | `clicksign` |
-| email, resend, notificacao email | `email` |
-| onboarding, primeiro passo, cadastro inicial, perplexity, campanha AI | `onboarding` |
-| NFS-e, nota fiscal, emissao, fiscal | `nfe` |
+| onboarding, primeiro passo, cadastro inicial, etapa, fluxo | `onboarding` |
+| campanha AI, perplexity, garden, nanobanana, post-gen, briefing, imagem AI | `ai-campaign` |
 | deploy, edge function, supabase function, infra | `shared` |
 | config admin, logs, auditoria | `admin` |
 
@@ -72,7 +68,6 @@ Consultar `CONTEXT-MAP.md` e usar este mapeamento:
 2. Sub-modulo especifico se aplicavel
 3. `.cursor/skills/{modulo}-*specialist*/SKILL.md` ou skill correspondente
 4. `functionSpec.md` da funcao afetada (se Edge Function)
-5. `apps/{app}/AGENTS.md` do app afetado (se aplicavel)
 
 > Se o relato for ambiguo e voce nao conseguir identificar o modulo, pergunte ao usuario ANTES de continuar.
 
@@ -138,7 +133,6 @@ Responder ao usuario com:
 - Manter relato original intacto
 - Referenciar docs e arquivos consultados
 - Incluir paths completos nos arquivos-alvo
-- Para Edge Functions: consultar `docs/edge-functions-publicas-e-protegidas.md`
 - Para deploy: incluir `--project-ref awqtzoefutnfmnbomujt`
 
 ### NUNCA:
@@ -181,4 +175,3 @@ na tela de checkout monitor
 - Convencoes: `tasks/README.md`
 - Skill de enriquecimento (detalhado): `.cursor/skills/task-enricher/SKILL.md`
 - Context Map: `CONTEXT-MAP.md`
-- Edge Functions publicas/protegidas: `docs/edge-functions-publicas-e-protegidas.md`

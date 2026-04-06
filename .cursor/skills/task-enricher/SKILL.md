@@ -33,24 +33,19 @@ Consultar `CONTEXT-MAP.md` na raiz do projeto para determinar qual módulo é af
 
 | Palavras-chave no relato | Módulo | Context docs |
 |--------------------------|--------|-------------|
-| pagamento, checkout, pix, boleto, cartão, cielo, webhook, split, recorrência | `checkout` | `.context/modules/checkout/README.md` |
 | OMIE, ordem de serviço, OS, ERP, nota fiscal, NFS-e | `omie` | `.context/modules/omie/README.md` |
-| dashboard, painel, monitor, tabela, filtro | `dashboard` | `.context/modules/dashboard/README.md` |
-| contrato, assinatura, ClickSign | `clicksign` | `.context/modules/clicksign/README.md` |
-| email, resend, notificação por email | `email` | `.context/modules/email/README.md` |
-| onboarding, primeiro passo, cadastro inicial | `onboarding` | `.context/modules/onboarding/README.md` |
-| NFS-e, nota fiscal de serviço, emissão | `nfe` | `.context/modules/nfe/README.md` |
-| deploy, edge function, supabase function | `shared` | `docs/edge-functions-publicas-e-protegidas.md` |
+| onboarding, primeiro passo, cadastro inicial, etapa, fluxo | `onboarding` | `src/` |
+| campanha AI, perplexity, garden, nanobanana, post-gen, briefing, imagem AI | `ai-campaign` | `ai-step2/PRD.md` |
+| deploy, edge function, supabase function | `shared` | `CLAUDE.md` → seção Edge Functions Registry |
 
 ### Step 3: Carregar contexto do módulo
 
 **Obrigatório — ler nesta ordem:**
 
 1. O `README.md` do módulo identificado (`.context/modules/{modulo}/README.md`)
-2. O sub-módulo específico se aplicável (ex: `.context/modules/checkout/pix/README.md`)
+2. O sub-módulo específico se aplicável
 3. O skill correspondente (`.cursor/skills/{modulo}-specialist/SKILL.md` ou equivalente)
 4. O `functionSpec.md` da Edge Function afetada, se existir
-5. O `AGENTS.md` do app afetado, se existir
 
 > **IMPORTANTE:** Não pule este step. O contexto do módulo é o que diferencia um diagnóstico genérico de um diagnóstico que realmente entende o sistema.
 
@@ -89,7 +84,7 @@ Escrever na seção **Plano de Execução**:
 
 3. **Testes necessários:** quais rodar e quais criar
 
-4. **Deploy:** se envolve Edge Function, consultar `docs/edge-functions-publicas-e-protegidas.md` para classificar como pública ou protegida
+4. **Deploy:** se envolve Edge Function, confirmar se é pública ou protegida antes de montar o comando de deploy
 
 ### Step 7: Definir critérios de aceite
 
@@ -126,12 +121,8 @@ No frontmatter YAML da tarefa:
 ### Para Edge Functions:
 - Sempre verificar se existe `functionSpec.md`
 - Se não existir e o fix for no handler, considerar criar como parte do plano
-- Consultar `docs/edge-functions-publicas-e-protegidas.md` para classificação JWT
+- Confirmar classificação pública/protegida antes de qualquer instrução de deploy
 - Incluir `--project-ref awqtzoefutnfmnbomujt` em qualquer instrução de deploy
-
-### Para Dashboard:
-- Verificar identidade visual Acelerai (#384ffe, #ff0058, Inter)
-- Considerar impacto em filtros URL-serializados se aplicável
 
 ### Para OMIE:
 - Consultar `.context/modules/omie/NFSE-OPERACAO-OMIE.md` para issues de NFS-e
@@ -181,6 +172,4 @@ Critérios:
 - Template: `tasks/TASK-TEMPLATE.md`
 - Convenções: `tasks/README.md`
 - Context Map: `CONTEXT-MAP.md`
-- PREVC Workflow: `.context/README.md` → seção PREVC
-- Edge Functions: `docs/edge-functions-publicas-e-protegidas.md`
 - Module docs: `.context/modules/{modulo}/README.md`

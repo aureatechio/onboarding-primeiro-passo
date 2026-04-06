@@ -19,7 +19,6 @@ Observação:
 - Se houver lacunas, faça no máximo 3 suposições explícitas e marque como `ASSUNCAO`.
 
 ## Contexto obrigatório a considerar (quando aplicável)
-- `@docs/edge-functions-publicas-e-protegidas.md`
 - `@.cursor/rules/edge-functions-deploy.mdc`
 
 ## Regras de execução do plano (no conteúdo gerado)

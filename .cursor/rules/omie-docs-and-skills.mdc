@@ -2,10 +2,8 @@
 description: Obrigar consulta de documentacao e uso de skills em temas OMIE
 alwaysApply: false
 globs:
-  - "apps/omie/**"
   - "supabase/functions/omie-*/**"
   - "supabase/functions/_shared/omie/**"
-  - "supabase/functions/_shared/split.ts"
   - "supabase/functions/_shared/pipeline/trigger-nfe.ts"
   - ".context/modules/omie/**"
   - ".context/modules/omie/omie-upsert-os/**"
