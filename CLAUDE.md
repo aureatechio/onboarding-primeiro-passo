@@ -35,7 +35,10 @@ primeiro-passo-app/
 │           │   ├── suggest.ts    # Briefing seed suggestion
 │           │   └── discover.ts   # Company digital profile discovery
 │           ├── ai-campaign/      # AI campaign eligibility, image-generator, etc.
-│           └── garden/           # Garden validation
+│           ├── garden/           # Garden validation
+│           ├── nanobanana/       # NanoBanana config types, loader, constants
+│           │   └── config.ts     # NanoBananaDbConfig, loadNanoBananaConfig, CategoryKey, DirectionMode
+│           └── admin-auth.ts     # Admin password guard (x-admin-password header)
 ├── ai-step2/                     # AI Campaign Pipeline docs
 │   ├── PRD.md                    # Product requirements
 │   ├── BACKLOG.md                # Feature backlog
@@ -239,9 +242,34 @@ When working on Aurea Garden code (image generation, gallery, NanoBanana config)
 
 All Garden Edge Functions are **public** (deploy with `--no-verify-jwt`).
 
+## NanoBanana Context (Creative Direction Config)
+
+NanoBanana is the configuration module for AI creative direction (3 categories: moderna, clean, retail). When working on NanoBanana code, consult:
+
+1. `supabase/functions/<function>/functionSpec.md` — SDD specs for get/update/read functions
+2. `_shared/nanobanana/config.ts` — Single source of truth for types, constants, and singleton loader
+3. `_shared/admin-auth.ts` — Shared admin password guard used by update/read endpoints
+
+**Key architecture:**
+
+- **Singleton table:** `nanobanana_config` (exactly 1 row) — all config fields
+- **Storage bucket:** `nanobanana-references` — reference images per category
+- **Shared module:** `_shared/nanobanana/config.ts` — `NanoBananaDbConfig`, `loadNanoBananaConfig()`, `CategoryKey`, `DirectionMode`, `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE`, `REFERENCE_BUCKET`
+- **Auth:** `update-nanobanana-config` and `read-nanobanana-reference` are protected via `x-admin-password` header (`_shared/admin-auth.ts`). `get-nanobanana-config` is public (read-only).
+
+**JWT classification for deploy:**
+
+| Function | JWT | Auth |
+|----------|-----|------|
+| `get-nanobanana-config` | `--no-verify-jwt` | Public (read-only) |
+| `update-nanobanana-config` | `--no-verify-jwt` | `x-admin-password` in code |
+| `read-nanobanana-reference` | `--no-verify-jwt` | `x-admin-password` in code |
+
+All 3 functions deploy with `--no-verify-jwt` because the frontend has no JWT/login system. Write endpoints enforce `x-admin-password` header at the application level.
+
 ## SDD Convention (functionSpec.md)
 
-Some Edge Functions use Spec Driven Development: a `functionSpec.md` file alongside `index.ts` defines the function's contract. Check for existing specs before modifying OMIE, NFe, or Aurea Garden functions.
+Some Edge Functions use Spec Driven Development: a `functionSpec.md` file alongside `index.ts` defines the function's contract. Check for existing specs before modifying OMIE, NFe, Aurea Garden, or NanoBanana functions.
 
 ## Plan Convention
 

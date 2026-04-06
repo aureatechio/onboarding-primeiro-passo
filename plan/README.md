@@ -5,8 +5,8 @@
 - `2026-04-06-melhoria-modulo-perplexity.md` ✓ **Concluido**
   Consolidacao arquitetural e SDD do modulo Perplexity: shared client extraido (client.ts), 6 functionSpec.md criados, 50 testes unitarios (normalize/prompt/discover/client), update-perplexity-config protegido com requireAdminPassword, CLAUDE.md e CONTRACT.md atualizados, CHECKLIST-DEPLOY-EDGE-FUNCTIONS.md criado. Meta atingida: Perplexity alinhado ao padrao de qualidade do modulo OMIE.
 
-- `2026-04-06-melhoria-modulo-nanobanana.md` **Pendente**
-  Plano executavel para melhorar o modulo NanoBanana: shared module (_shared/nanobanana/config.ts), 3 functionSpecs (SDD), seguranca (auth em update/read), testes automatizados, atualizacao de CLAUDE.md e CONTRACT.md. Meta: alinhar NanoBanana ao padrao de qualidade do modulo OMIE.
+- `2026-04-06-melhoria-modulo-nanobanana.md` ✓ **Concluido**
+  Shared module extraido (_shared/nanobanana/config.ts), 3 functionSpecs (SDD) criados, seguranca via x-admin-password em update/read, admin-auth.ts compartilhado, 25 testes unitarios, CLAUDE.md e CONTRACT.md atualizados. Meta atingida: NanoBanana alinhado ao padrao de qualidade do modulo OMIE.
 
 - `2026-04-06-limpeza-pos-extracao-monorepo.md` ✓ **Concluido**
   Limpeza pós-extração: git tracking, dead code _shared/, reescrita de CLAUDE.md, CONTEXT-MAP.md, .cursor/ e .context/modules/omie/ para repo standalone. Arquivamento de tasks e plans do monorepo.

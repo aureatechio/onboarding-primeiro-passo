@@ -352,6 +352,31 @@ Cada categoria (`moderna`, `clean`, `retail`) suporta configuracao independente 
 - `direction_<categoria>_image_path`: path no bucket `nanobanana-references`
 - `direction_<categoria>_image_url`: signed URL temporaria para preview no monitor
 
+### Shared Module
+
+Tipos, constantes e loader do NanoBanana estao centralizados em `_shared/nanobanana/config.ts`:
+
+- `NanoBananaDbConfig` — interface unica da tabela singleton
+- `loadNanoBananaConfig(supabase)` — loader com cache in-memory
+- `CategoryKey`, `DirectionMode` — type aliases
+- `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE`, `REFERENCE_BUCKET` — constantes
+
+Consumidores: `create-ai-campaign-job`, `post-gen-generate`, `post-turbo-generate`, `get-nanobanana-config`, `update-nanobanana-config`, `read-nanobanana-reference`.
+
+### Autenticacao
+
+| Funcao | JWT deploy | Auth aplicada |
+|--------|-----------|---------------|
+| `get-nanobanana-config` | `--no-verify-jwt` | Nenhuma (leitura publica) |
+| `update-nanobanana-config` | `--no-verify-jwt` | `x-admin-password` via `_shared/admin-auth.ts` |
+| `read-nanobanana-reference` | `--no-verify-jwt` | `x-admin-password` via `_shared/admin-auth.ts` |
+
+O guard `requireAdminPassword` valida o header `x-admin-password` contra env var `ADMIN_PASSWORD` (default: `megazord`).
+
+### SDD (Spec Driven Development)
+
+Todas as 3 functions NanoBanana possuem `functionSpec.md` ao lado do `index.ts`, documentando contrato completo (inputs, validations, behavior, response, error handling).
+
 Regras de validacao no `update-nanobanana-config`:
 
 - texto de direcao por categoria e obrigatorio para salvar
