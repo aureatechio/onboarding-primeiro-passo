@@ -2,14 +2,11 @@
 
 ## Indice ativo
 
+- `2026-04-06-limpeza-pos-extracao-monorepo.md` ✓ **Concluido**
+  Limpeza pós-extração: git tracking, dead code _shared/, reescrita de CLAUDE.md, CONTEXT-MAP.md, .cursor/ e .context/modules/omie/ para repo standalone. Arquivamento de tasks e plans do monorepo.
+
 - `2026-04-02-melhoria-contexto-omie.md` ✓ **Concluido**
   Plano executavel para melhorar a engenharia de contexto do modulo OMIE: DOC-READING-ORDER condicional, BUSINESS-RULES.md com regras criticas do codigo, reescrita da rule OMIE, registro completo no CLAUDE.md, 6 functionSpecs faltantes, atualizacao de specs e skill. Meta: eliminar falhas de primeira tentativa por contexto insuficiente.
-
-- `2026-04-02-extracao-onboarding.md`
-  Guia passo-a-passo para extrair `apps/onboarding` para repo proprio (`aureatech/onboarding`) com preservacao de historico via git-filter-repo. Inclui reconexao Vercel, limpeza do monorepo e checklist de validacao.
-
-- `2026-04-02-recomendacoes-arquitetura-monorepo.md`
-  Recomendacoes de medio e longo prazo para saude do monorepo: estruturar `_shared/` com testes, contratos de API tipados, Turborepo remote caching, CODEOWNERS, cleanup de Edge Functions batch, e criterios para eventual separacao por dominio.
 
 - `2026-04-02-otimizacao-engenharia-contexto.md`
   Plano executado para reduzir ruido de contexto de IA: limpeza de regras/agents redundantes, globs contextuais, consolidacao de `CLAUDE.md` + `AGENTS.md`, criacao de `CONTEXT-MAP.md` e `apps/dashboard/AGENTS.md`.
@@ -88,6 +85,7 @@
 
 ## Historico
 
+- `historico/2026-04-02-extracao-onboarding.md` — Guia executado para extrair apps/onboarding para repo próprio. Concluído.
 - `2026-03-16-boletos-no-step-pagamento.md` — Niveis 1 e 2 implementados. Nivel 3 (gerar boleto admin) movido para `futuro/admin-generate-boleto.md`.
 
 Os planos datados e materiais de execucao/review/report/spec foram removidos desta pasta durante a limpeza de documentacao.
