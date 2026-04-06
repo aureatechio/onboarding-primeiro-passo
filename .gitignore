@@ -54,6 +54,3 @@ apps/
 packages/
 pnpm-workspace.yaml
 turbo.json
-
-# Arquivos ZIP avulsos gerados localmente
-ziivcLKj
