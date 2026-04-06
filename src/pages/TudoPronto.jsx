@@ -223,7 +223,7 @@ export default function TudoPronto() {
                 margin: "0 0 6px 0",
               }}
             >
-              SUA ATENDENTE
+              {userData.atendenteGenero === 'm' ? 'SEU ATENDENTE' : 'SUA ATENDENTE'}
             </p>
             <p
               style={{

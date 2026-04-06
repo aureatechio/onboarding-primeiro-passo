@@ -5,7 +5,6 @@ import { corsHeaders, handleCors } from '../_shared/cors.ts'
 interface CompraRow {
   id: string
   cliente_id: string | null
-  vendedoresponsavel: string | null
   celebridade: string | null
   segmento: string | null
   descricao: string | null
@@ -15,6 +14,7 @@ interface CompraRow {
   checkout_status: string | null
   clicksign_status: string | null
   vendaaprovada: boolean | null
+  valor_total: number | null
 }
 
 interface ClienteRow {
@@ -27,6 +27,11 @@ interface NomeRow {
   nome: string | null
 }
 
+interface AtendenteRow {
+  nome: string
+  genero: string
+}
+
 export interface OnboardingDataPayload {
   compra_id: string
   clientName: string
@@ -36,6 +41,7 @@ export interface OnboardingDataPayload {
   pacote: string
   vigencia: string
   atendente: string
+  atendenteGenero: string
 }
 
 interface OnboardingLookupResult {
@@ -86,7 +92,7 @@ export function createDependencies(): Dependencies {
       const { data: compra, error: compraError } = await supabase
         .from('compras')
         .select(
-          'id, cliente_id, vendedoresponsavel, celebridade, segmento, descricao, tempoocomprado, vigencia_meses, regiaocomprada, checkout_status, clicksign_status, vendaaprovada'
+          'id, cliente_id, celebridade, segmento, descricao, tempoocomprado, vigencia_meses, regiaocomprada, checkout_status, clicksign_status, vendaaprovada, valor_total'
         )
         .eq('id', compraId)
         .maybeSingle()
@@ -105,7 +111,9 @@ export function createDependencies(): Dependencies {
         return { found: true, eligible: false, data: null }
       }
 
-      const [clienteRes, vendedorRes, celebridadeRes, segmentoRes] =
+      const valorTotal = Number(compraRow.valor_total ?? 0)
+
+      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes] =
         await Promise.all([
           compraRow.cliente_id
             ? supabase
@@ -114,13 +122,15 @@ export function createDependencies(): Dependencies {
                 .eq('id', compraRow.cliente_id)
                 .maybeSingle()
             : Promise.resolve({ data: null, error: null }),
-          compraRow.vendedoresponsavel
-            ? supabase
-                .from('vendedores')
-                .select('nome')
-                .eq('id', compraRow.vendedoresponsavel)
-                .maybeSingle()
-            : Promise.resolve({ data: null, error: null }),
+          supabase
+            .from('atendentes')
+            .select('nome, genero')
+            .eq('ativo', true)
+            .lte('valor_min', valorTotal)
+            .or(`valor_max.is.null,valor_max.gte.${valorTotal}`)
+            .order('valor_min', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
           compraRow.celebridade
             ? supabase
                 .from('celebridadesReferencia')
@@ -138,7 +148,7 @@ export function createDependencies(): Dependencies {
         ])
 
       const cliente = (clienteRes.data as ClienteRow | null) ?? null
-      const vendedor = (vendedorRes.data as NomeRow | null) ?? null
+      const atendente = (atendenteRes.data as AtendenteRow | null) ?? null
       const celebridade = (celebridadeRes.data as NomeRow | null) ?? null
       const segmento = (segmentoRes.data as NomeRow | null) ?? null
 
@@ -154,7 +164,8 @@ export function createDependencies(): Dependencies {
         segmento: segmento?.nome?.trim() || 'Segmento contratado',
         pacote: compraRow.descricao?.trim() || 'Pacote contratado',
         vigencia: formatVigencia(compraRow.tempoocomprado, compraRow.vigencia_meses),
-        atendente: vendedor?.nome?.trim() || 'Equipe Acelerai',
+        atendente: atendente?.nome?.trim() || 'Equipe Acelerai',
+        atendenteGenero: atendente?.genero ?? 'f',
       }
 
       return {

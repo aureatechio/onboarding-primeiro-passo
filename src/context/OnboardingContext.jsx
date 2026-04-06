@@ -32,6 +32,7 @@ const INITIAL_USER_DATA = {
   pacote: 'Pacote contratado',
   vigencia: 'Periodo contratado',
   atendente: 'Equipe Acelerai',
+  atendenteGenero: 'f',
   trafficChoice: null,
   productionPath: null,
   identityBonusChoice: null,
@@ -98,6 +99,7 @@ function mapRemotePayloadToUserData(payload) {
     pacote: sanitizeString(payload?.pacote, INITIAL_USER_DATA.pacote),
     vigencia: sanitizeString(payload?.vigencia, INITIAL_USER_DATA.vigencia),
     atendente: sanitizeString(payload?.atendente, INITIAL_USER_DATA.atendente),
+    atendenteGenero: payload?.atendenteGenero === 'm' ? 'm' : 'f',
     trafficChoice: null,
     productionPath: null,
   };

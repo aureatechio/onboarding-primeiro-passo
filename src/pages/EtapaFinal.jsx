@@ -106,7 +106,7 @@ export default function EtapaFinal() {
               <Icon name="hand" size={28} color={COLORS.red} />
             </div>
             <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", margin: "0 0 6px 0" }}>
-              {ETAPA_FINAL.atendenteLabel}
+              {ETAPA_FINAL.atendenteLabel(userData.atendenteGenero)}
             </p>
             <p style={{ color: COLORS.text, fontSize: 22, fontWeight: 800, margin: "0 0 6px 0" }}>
               {userData.atendente}
@@ -154,7 +154,7 @@ export default function EtapaFinal() {
   ];
 
   const nextStepsColors = [COLORS.red, COLORS.accent, COLORS.warning];
-  const nextSteps = ETAPA_FINAL.nextSteps(userData.atendente).map((step, i) => ({
+  const nextSteps = ETAPA_FINAL.nextSteps(userData.atendente, userData.atendenteGenero).map((step, i) => ({
     ...step,
     color: nextStepsColors[i],
   }));
@@ -247,7 +247,7 @@ export default function EtapaFinal() {
             <Icon name="hand" size={24} color={COLORS.red} />
           </div>
           <div>
-            <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>{ETAPA_FINAL.atendenteLabel}</p>
+            <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>{ETAPA_FINAL.atendenteLabel(userData.atendenteGenero)}</p>
             <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 800, margin: "0 0 4px 0" }}>{userData.atendente}</p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, margin: 0 }}>
               {ETAPA_FINAL.atendenteContactTime(userData.atendente)}

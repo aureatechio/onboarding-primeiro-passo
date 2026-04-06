@@ -90,6 +90,7 @@ Deno.test('handleRequest returns payload when compra is eligible', async () => {
         pacote: '2 videos + 4 estaticas',
         vigencia: '3 meses',
         atendente: 'Yasmin',
+        atendenteGenero: 'f',
       },
     }),
   })

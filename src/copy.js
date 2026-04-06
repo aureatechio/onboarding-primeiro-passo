@@ -216,7 +216,7 @@ export const ETAPA3 = {
   // ── Processing ──
   processingMessages: [
     'Ativando preparação...',
-    'Notificando sua atendente...',
+    'Notificando seu(a) atendente...',
     'Registrando prazos...',
     'Tudo pronto!',
   ],
@@ -703,10 +703,10 @@ export const ETAPA_FINAL = {
 
   // ── Próximos passos ──
   proximosPassosLabel: 'PRÓXIMOS PASSOS',
-  nextSteps: (atendente) => [
+  nextSteps: (atendente, genero = 'f') => [
     {
       num: '1',
-      title: `Sua atendente ${atendente} vai entrar em contato`,
+      title: `${genero === 'm' ? 'Seu atendente' : 'Sua atendente'} ${atendente} vai entrar em contato`,
       desc: 'Em até 1 dia útil pra iniciar a produção da sua campanha',
     },
     {
@@ -722,7 +722,7 @@ export const ETAPA_FINAL = {
   ],
 
   // ── Card atendente ──
-  atendenteLabel: 'SUA ATENDENTE',
+  atendenteLabel: (genero = 'f') => genero === 'm' ? 'SEU ATENDENTE' : 'SUA ATENDENTE',
   atendenteContactTime: (atendente) =>
     `Entrará em contato em até 1 dia útil`,
 
