@@ -54,6 +54,22 @@ async function saveIdentityToBackend(compraId, { choice, logoFile, colors, fontI
 
 const TOTAL_SLIDES = 5
 
+function validateUrl(value) {
+  if (!value) return true
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`
+  try { new URL(withProtocol); return true } catch { return false }
+}
+
+function sanitizeInstagramHandle(raw) {
+  return raw.replace(/@/g, '').replace(/[^a-zA-Z0-9._]/g, '').slice(0, 30)
+}
+
+function validateInstagramHandle(value) {
+  if (!value) return true
+  return /^[a-zA-Z0-9][a-zA-Z0-9._]{0,28}[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(value) &&
+    !/\.\./.test(value)
+}
+
 function StatusChip({ done, requiredLabel = ETAPA62.statusObrigatorio, optionalLabel = ETAPA62.statusOpcional, isOptional = false }) {
   if (isOptional) {
     return (
@@ -106,6 +122,12 @@ export default function Etapa62() {
 
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideDirection, setSlideDirection] = useState(1)
+
+  const [showSimpleMode, setShowSimpleMode] = useState(false)
+  const [siteUrl, setSiteUrl] = useState(userData.siteUrl || '')
+  const [siteUrlError, setSiteUrlError] = useState(null)
+  const [instagramHandle, setInstagramHandle] = useState(userData.instagramHandle || '')
+  const [instagramUrlError, setInstagramUrlError] = useState(null)
 
   const logoInputRef = useRef(null)
   const imagesInputRef = useRef(null)
@@ -307,6 +329,42 @@ export default function Etapa62() {
       setIsSaving(false)
     }
   }, [hydrationCompraId, persist])
+
+  const handleConfirmSimplificado = useCallback(async () => {
+    const siteValid = validateUrl(siteUrl)
+    const igValid = validateInstagramHandle(instagramHandle)
+    setSiteUrlError(siteUrl && !siteValid ? ETAPA62.modoSimplificado.siteError : null)
+    setInstagramUrlError(instagramHandle && !igValid ? ETAPA62.modoSimplificado.instagramError : null)
+
+    setSaveError(null)
+    setIsSaving(true)
+    try {
+      if (hydrationCompraId) {
+        const instagramFullUrl = instagramHandle ? `https://www.instagram.com/${instagramHandle}` : ''
+        const parts = []
+        if (siteUrl) parts.push(`Site: ${siteUrl}`)
+        if (instagramFullUrl) parts.push(`Instagram: ${instagramFullUrl}`)
+        const result = await saveIdentityToBackend(hydrationCompraId, {
+          choice: 'add_now',
+          logoFile,
+          colors: allColors,
+          fontId: '',
+          imagesFiles: [],
+          campaignNotes: parts.join(' | '),
+        })
+        if (!result.success && !result.skipped) {
+          setSaveError(result.message || result.error || 'Erro ao salvar identidade visual.')
+          setIsSaving(false)
+          return
+        }
+      }
+      persist({ siteUrl, instagramHandle, identityBonusPending: false })
+      setPendingMode(false)
+      setCompleted(true)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [hydrationCompraId, logoFile, allColors, siteUrl, instagramHandle, persist])
 
   if (completed) {
     return (
@@ -716,7 +774,7 @@ export default function Etapa62() {
         stepLabel={ETAPA62.header.stepLabel}
       />
 
-      {!showMultistep && (
+      {!showMultistep && !showSimpleMode && (
         <>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -776,12 +834,277 @@ export default function Etapa62() {
 
           <StickyFooter>
             <NavButtons
-              onNext={handleConfirm}
-              nextLabel={isSaving ? ETAPA62.navSaving : ETAPA62.navConfirmPending}
-              nextDisabled={isSaving}
+              onNext={() => setShowSimpleMode(true)}
+              nextLabel={ETAPA62.navConfirmPending}
+              nextDisabled={false}
             />
           </StickyFooter>
         </>
+      )}
+
+      {!showMultistep && showSimpleMode && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          {/* Logo */}
+          <div style={{
+            background: COLORS.card, border: `1px solid ${COLORS.border}`,
+            borderRadius: 14, padding: 20, marginBottom: 16,
+          }}>
+            <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+              <legend style={{
+                display: "flex", alignItems: "center", gap: 8, marginBottom: 10, padding: 0,
+                color: COLORS.text, fontSize: 14, fontWeight: 700,
+              }}>
+                <Icon name="palette" size={16} color={COLORS.text} />
+                {ETAPA62.logoLabel}
+                <StatusChip isOptional />
+              </legend>
+
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                onChange={handleLogoChange}
+                style={{ display: "none" }}
+                id="logo-upload-simple"
+              />
+
+              {logoFile ? (
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  background: `${COLORS.success}10`,
+                  border: `1px solid ${COLORS.success}25`,
+                  borderRadius: 12, padding: 14,
+                }}>
+                  <ThumbnailPreview file={logoFile} onRemove={handleRemoveLogo} size={64} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      color: COLORS.text, fontSize: 13, fontWeight: 600, margin: "0 0 4px 0",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {logoName}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      style={{
+                        background: "transparent", border: "none",
+                        color: COLORS.accent, fontSize: 12, fontWeight: 700,
+                        cursor: "pointer", padding: 0,
+                      }}
+                    >
+                      {ETAPA62.logoChangeButton}
+                    </button>
+                  </div>
+                  {isExtracting && (
+                    <span style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+                      {ETAPA62.extractingColors}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <label
+                  htmlFor="logo-upload-simple"
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    gap: 8, padding: "24px 14px",
+                    border: `1px dashed ${logoValidationError ? COLORS.danger : COLORS.border}`,
+                    borderRadius: 12, cursor: "pointer",
+                  }}
+                >
+                  <Icon name="camera" size={26} color={logoValidationError ? COLORS.danger : COLORS.textDim} />
+                  <span style={{
+                    color: logoValidationError ? COLORS.danger : COLORS.textMuted,
+                    fontSize: 14, fontWeight: 600,
+                  }}>
+                    {ETAPA62.logoPlaceholder}
+                  </span>
+                  <span style={{ color: COLORS.textDim, fontSize: 11 }}>{ETAPA62.logoHint}</span>
+                </label>
+              )}
+
+              <AnimatePresence>
+                {logoValidationError && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "8px 0 0 0" }}
+                    role="alert"
+                  >
+                    {logoValidationError}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </fieldset>
+          </div>
+
+          {/* Cores — aparece após upload do logo */}
+          <AnimatePresence>
+            {logoFile && (
+              <motion.div
+                key="colors-simple"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                style={{
+                  background: COLORS.card, border: `1px solid ${COLORS.border}`,
+                  borderRadius: 14, padding: 20, marginBottom: 16,
+                }}
+              >
+                {slideColorsContent}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Site */}
+          <div style={{
+            background: COLORS.card, border: `1px solid ${COLORS.border}`,
+            borderRadius: 14, padding: 20, marginBottom: 16,
+          }}>
+            <label style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10,
+              color: COLORS.text, fontSize: 14, fontWeight: 700,
+            }}>
+              <Icon name="penLine" size={16} color={COLORS.text} />
+              {ETAPA62.modoSimplificado.siteLabel}
+              <StatusChip isOptional />
+            </label>
+            <div style={{
+              display: "flex", alignItems: "center",
+              border: `1px solid ${siteUrlError ? COLORS.danger : COLORS.border}`,
+              borderRadius: 10, overflow: "hidden",
+            }}>
+              <span style={{
+                padding: "12px 6px 12px 14px", background: `${COLORS.textDim}18`,
+                color: COLORS.textDim, fontSize: 12, fontWeight: 600,
+                whiteSpace: "nowrap", flexShrink: 0, userSelect: "none",
+              }}>
+                https://
+              </span>
+              <input
+                type="url"
+                value={siteUrl.replace(/^https?:\/\//i, '')}
+                placeholder={ETAPA62.modoSimplificado.sitePlaceholder}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/^https?:\/\//i, '')
+                  setSiteUrl(raw ? `https://${raw}` : '')
+                  setSiteUrlError(null)
+                }}
+                onBlur={() => {
+                  if (siteUrl && !validateUrl(siteUrl)) setSiteUrlError(ETAPA62.modoSimplificado.siteError)
+                }}
+                style={{
+                  flex: 1, padding: "12px 14px 12px 8px", border: "none",
+                  background: "transparent", color: COLORS.text,
+                  fontSize: 13, fontFamily: "inherit", outline: "none", minWidth: 0,
+                }}
+              />
+            </div>
+            <AnimatePresence>
+              {siteUrlError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "6px 0 0 0" }}
+                  role="alert"
+                >
+                  {siteUrlError}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Instagram */}
+          <div style={{
+            background: COLORS.card, border: `1px solid ${COLORS.border}`,
+            borderRadius: 14, padding: 20, marginBottom: 16,
+          }}>
+            <p style={{
+              display: "flex", alignItems: "center", gap: 8, marginBottom: 10,
+              color: COLORS.text, fontSize: 14, fontWeight: 700, margin: "0 0 10px 0",
+            }}>
+              <Icon name="camera" size={16} color={COLORS.text} />
+              {ETAPA62.modoSimplificado.instagramLabel}
+              <StatusChip isOptional />
+            </p>
+            <div style={{
+              display: "flex", alignItems: "center",
+              border: `1px solid ${instagramUrlError ? COLORS.danger : COLORS.border}`,
+              borderRadius: 10, overflow: "hidden",
+            }}>
+              <span style={{
+                padding: "12px 10px 12px 14px", background: `${COLORS.textDim}18`,
+                color: COLORS.textDim, fontSize: 12, fontWeight: 600,
+                whiteSpace: "nowrap", flexShrink: 0, userSelect: "none",
+              }}>
+                {ETAPA62.modoSimplificado.instagramPrefix}
+              </span>
+              <input
+                type="text"
+                value={instagramHandle}
+                placeholder={ETAPA62.modoSimplificado.instagramPlaceholder}
+                onChange={(e) => {
+                  const sanitized = sanitizeInstagramHandle(e.target.value)
+                  setInstagramHandle(sanitized)
+                  setInstagramUrlError(null)
+                }}
+                onBlur={() => {
+                  if (instagramHandle && !validateInstagramHandle(instagramHandle))
+                    setInstagramUrlError(ETAPA62.modoSimplificado.instagramError)
+                }}
+                style={{
+                  flex: 1, padding: "12px 14px 12px 8px", border: "none",
+                  background: "transparent", color: COLORS.text,
+                  fontSize: 13, fontFamily: "inherit", outline: "none", minWidth: 0,
+                }}
+              />
+            </div>
+            <AnimatePresence>
+              {instagramUrlError && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600, margin: "6px 0 0 0" }}
+                  role="alert"
+                >
+                  {instagramUrlError}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {saveError && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "10px 14px", borderRadius: 10,
+                background: `${COLORS.danger}10`,
+                border: `1px solid ${COLORS.danger}25`,
+                marginBottom: 12,
+              }}
+            >
+              <Icon name="alertTriangle" size={14} color={COLORS.danger} />
+              <span style={{ color: COLORS.danger, fontSize: 12, fontWeight: 600 }}>{saveError}</span>
+            </motion.div>
+          )}
+
+          <StickyFooter>
+            <NavButtons
+              onPrev={() => setShowSimpleMode(false)}
+              onNext={handleConfirmSimplificado}
+              nextLabel={isSaving ? ETAPA62.navSaving : ETAPA62.navConfirm}
+              nextDisabled={isSaving}
+            />
+          </StickyFooter>
+        </motion.div>
       )}
 
       {showMultistep && (

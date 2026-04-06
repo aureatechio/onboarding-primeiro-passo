@@ -548,9 +548,20 @@ export const ETAPA62 = {
   statusOpcional: 'Opcional',
   statusConcluido: 'Concluído',
 
+  // ── Modo simplificado ──
+  modoSimplificado: {
+    siteLabel: 'Site da sua empresa',
+    sitePlaceholder: 'www.seusite.com.br',
+    siteError: 'URL inválida. Verifique o endereço digitado.',
+    instagramLabel: 'Perfil do Instagram',
+    instagramPrefix: 'https://www.instagram.com/',
+    instagramPlaceholder: 'seuperfil',
+    instagramError: 'Handle inválido. Use apenas letras, números, pontos e underscores (ex: minha_marca).',
+  },
+
   // ── Navigation ──
   navConfirm: 'Confirmar e enviar',
-  navConfirmPending: 'Confirmar e avançar com pendência',
+  navConfirmPending: 'Confirmar e avançar',
   navContinueLater: 'Continuar depois (marcar etapa como pendente)',
   navSaving: 'Salvando...',
 
