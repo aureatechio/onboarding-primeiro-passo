@@ -1,12 +1,19 @@
-# Context Map — AUREA
+# Context Map — primeiro-passo-app
 
 Indice rapido para agentes de IA. Para cada dominio, leia os arquivos na ordem listada.
 
-## Checkout (pagamentos)
-1. `.context/modules/checkout/README.md` — visao geral
-2. `supabase/functions/<funcao>/functionSpec.md` — spec da funcao especifica
-3. `docs/edge-functions-publicas-e-protegidas.md` — classificacao JWT
-4. `.cursor/skills/checkout-braspag-specialist/SKILL.md` — regras de negocio
+## Onboarding (SPA React)
+1. `src/` — codigo fonte do app (pages, components, context, lib, theme)
+2. `src/context/OnboardingContext.jsx` — estado global do fluxo
+3. `src/pages/` — paginas Etapa1Hero → EtapaFinal → TudoPronto
+4. `src/copy.js` — conteudo textual das etapas
+
+## AI Campaign Pipeline
+1. `ai-step2/PRD.md` — requisitos do pipeline
+2. `ai-step2/BACKLOG.md` — backlog de features
+3. `ai-step2/CONTRACT.md` — contrato do pipeline
+4. `supabase/functions/<funcao>/functionSpec.md` — spec da funcao especifica
+5. `supabase/functions/_shared/ai-campaign/` — utilitarios compartilhados
 
 ## OMIE (ERP / Emissao Fiscal)
 1. `.context/modules/omie/DOC-READING-ORDER.md` — **LER PRIMEIRO**: roteamento condicional por tipo de tarefa
@@ -14,36 +21,6 @@ Indice rapido para agentes de IA. Para cada dominio, leia os arquivos na ordem l
 3. `.context/modules/omie/BUSINESS-RULES.md` — regras de negocio criticas (nao documentadas em specs)
 4. `supabase/functions/<funcao>/functionSpec.md` — spec da funcao especifica
 5. `.cursor/skills/omie-integracao/SKILL.md` — payload/API/transformacao
-6. `.cursor/skills/omie-nfse-operacao/SKILL.md` — operacao/diagnostico NFS-e
-7. `apps/omie/AGENTS.md` — contexto do backend Express
-
-## Dashboard
-1. `.context/modules/dashboard/README.md` — visao geral
-2. `.cursor/skills/dashboard-specialist/SKILL.md` — convencoes UI
-3. `apps/dashboard/src/` — codigo fonte
-
-## Onboarding
-1. `.context/modules/onboarding/README.md` — visao geral do fluxo
-2. `.cursor/skills/onboarding-*/SKILL.md` — skill do submodulo especifico
-
-## ClickSign (contratos)
-1. `.context/modules/clicksign/README.md` — integracao completa
-2. `.cursor/skills/clicksign-specialist/SKILL.md` — regras operacionais
-
-## Email (Resend)
-1. `.context/modules/email/README.md` — governanca
-2. `docs/resend-email-provider.md` — configuracao do provider
-3. `.cursor/skills/resend-email/SKILL.md` — implementacao
-
-## Edge Functions (deploy)
-1. `docs/edge-functions-publicas-e-protegidas.md` — classificacao
-2. `.cursor/skills/edge-function-deploy/SKILL.md` — protocolo
-3. `CLAUDE.md` -> secao "Supabase Critical Rules"
-
-## NFS-e
-1. `.context/modules/nfe/README.md` — visao geral
-2. `.context/modules/omie/NFSE-OPERACAO-OMIE.md` — operacao
-3. `.cursor/skills/omie-nfse-operacao/SKILL.md` — skill operacional
 
 ## Tarefas Operacionais
 1. `tasks/README.md` — convencoes, lifecycle, indice
