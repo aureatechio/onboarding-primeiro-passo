@@ -1,4 +1,4 @@
-import { Brain, Palette, BarChart3, Zap, Sparkles, Image } from 'lucide-react'
+import { Brain, Palette, BarChart3, Zap, Sparkles, Image, FileText } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
@@ -7,6 +7,7 @@ const MAIN_NAV = [
   { id: 'monitor', label: 'Visao Geral', icon: BarChart3, path: '/ai-step2/monitor?mode=list' },
   { id: 'perplexity', label: 'Perplexity IA', icon: Brain, path: '/ai-step2/perplexity-config' },
   { id: 'nanobanana', label: 'NanoBanana IA', icon: Palette, path: '/ai-step2/nanobanana-config' },
+  { id: 'copy-editor', label: 'Copy Editor', icon: FileText, path: '/copy-editor' },
 ]
 
 const GARDEN_NAV = [
@@ -22,6 +23,7 @@ function getActiveId() {
   if (pathname.includes('post-turbo')) return 'post-turbo'
   if (pathname.includes('post-gen')) return 'post-gen'
   if (pathname.includes('gallery')) return 'gallery'
+  if (pathname.startsWith('/copy-editor')) return 'copy-editor'
   return 'monitor'
 }
 

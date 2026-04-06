@@ -1,16 +1,17 @@
 /**
  * Edge Function: update-perplexity-config
  * Atualiza configurações do Perplexity/Sonar (todos os campos editáveis).
- * Acesso público (sem autenticação).
+ * Protegida por x-admin-password (requireAdminPassword).
  */
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { requireAdminPassword } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-password",
   "Access-Control-Allow-Methods": "PATCH, OPTIONS",
 };
 
@@ -76,6 +77,9 @@ Deno.serve(async (req: Request) => {
     if (req.method !== "PATCH") {
       return jsonResponse({ error: "Método não permitido", code: "METHOD_NOT_ALLOWED" }, 405);
     }
+
+    const authCheck = requireAdminPassword(req);
+    if (!authCheck.authorized) return authCheck.response;
 
     let body: UpdateBody;
     try {

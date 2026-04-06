@@ -18,6 +18,7 @@ import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'megazord'
 
 const cardStyle = {
   border: `1px solid ${monitorTheme.border}`,
@@ -321,7 +322,10 @@ export default function NanoBananaConfigPage() {
     try {
       const hasFileChanges = Object.keys(referenceFiles).length > 0 || Object.keys(removeReferenceImage).length > 0
       let body = JSON.stringify(changed)
-      const headers = { 'Content-Type': 'application/json' }
+      const headers = {
+        'Content-Type': 'application/json',
+        'x-admin-password': ADMIN_PASSWORD,
+      }
 
       if (hasFileChanges) {
         const formData = new FormData()
@@ -413,6 +417,7 @@ export default function NanoBananaConfigPage() {
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/read-nanobanana-reference`, {
         method: 'POST',
+        headers: { 'x-admin-password': ADMIN_PASSWORD },
         body: formData,
       })
       const data = await res.json()

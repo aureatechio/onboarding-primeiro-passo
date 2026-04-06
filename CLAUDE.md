@@ -28,7 +28,12 @@ primeiro-passo-app/
 │           ├── omie/             # OMIE utilities (canonical-os-payload, etc.)
 │           ├── pipeline/         # trigger-nfe.ts
 │           ├── email/            # Resend provider
-│           ├── perplexity/       # Perplexity AI helpers
+│           ├── perplexity/       # Perplexity AI integration
+│           │   ├── client.ts     # Shared provider client, errors, config loader
+│           │   ├── prompt.ts     # Briefing prompt builder
+│           │   ├── normalize.ts  # Response normalization + JSON extraction
+│           │   ├── suggest.ts    # Briefing seed suggestion
+│           │   └── discover.ts   # Company digital profile discovery
 │           ├── ai-campaign/      # AI campaign eligibility, image-generator, etc.
 │           └── garden/           # Garden validation
 ├── ai-step2/                     # AI Campaign Pipeline docs
@@ -173,15 +178,24 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 `get-onboarding-data`, `save-onboarding-identity`
 
 **AI Campaign Pipeline:**
-`create-ai-campaign-job`, `get-ai-campaign-status`, `get-ai-campaign-monitor`, `generate-campaign-briefing`, `save-campaign-briefing`, `suggest-briefing-seed`, `test-perplexity-briefing`, `generate-ai-campaign-image`, `retry-ai-campaign-assets`, `discover-company-sources`, `read-nanobanana-reference`
+`create-ai-campaign-job`, `get-ai-campaign-status`, `get-ai-campaign-monitor`, `save-campaign-briefing`, `generate-ai-campaign-image`, `retry-ai-campaign-assets`, `read-nanobanana-reference`
+
+**Perplexity (geracao):**
+`generate-campaign-briefing`, `test-perplexity-briefing`, `suggest-briefing-seed`, `discover-company-sources`
+
+**Perplexity (config):**
+`get-perplexity-config`, `update-perplexity-config`
 
 **Aurea Garden (Post Gen + Post Turbo):**
 `post-gen-generate`, `post-turbo-generate`, `list-garden-jobs`, `get-garden-options`, `get-garden-job`
 
-**OMIE (fluxo automático):**
+**NanoBanana (config):**
+`get-nanobanana-config`, `update-nanobanana-config`
+
+**OMIE (fluxo automatico):**
 `omie-orchestrator`, `omie-create-os`
 
-**OMIE (correção):**
+**OMIE (correcao):**
 `omie-upsert-os`, `omie-upsert-os-batch`, `omie-upsert-service`
 
 **OMIE (vendedores):**
@@ -189,9 +203,6 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 
 **OMIE (config):**
 `get-omie-nfse-config`, `update-omie-nfse-config`
-
-**Config:**
-`get-perplexity-config`, `update-perplexity-config`, `get-nanobanana-config`, `update-nanobanana-config`
 
 ## Code Style
 

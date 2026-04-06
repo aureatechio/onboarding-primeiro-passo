@@ -393,3 +393,49 @@ Incluida no calculo do `input_hash` — qualquer mudanca invalida cache de idemp
 | `AI_CAMPAIGN_MAX_IMAGE_DOWNLOAD_BYTES` | Max bytes por download de imagem | `15728640` (15 MB) |
 | `AI_CAMPAIGN_JOB_TIMEOUT_MS` | Timeout global do pipeline | `300000` (5 min) |
 | `AI_CAMPAIGN_URL_EXPIRY_SECONDS` | Expiracao de signed URLs | `604800` (7 dias) |
+
+## 12. Provider: Perplexity Sonar
+
+O pipeline usa Perplexity Sonar como provider de IA com search grounding para geracao de briefings e descoberta de fontes.
+
+### Config
+
+- Tabela: `perplexity_config` (singleton)
+- Funcoes: `get-perplexity-config` (GET), `update-perplexity-config` (PATCH)
+- Resolucao de config: env var → DB → hardcoded default
+- Cache de config em memoria com TTL de 5 minutos
+
+### Edge Functions
+
+| Funcao | Metodo | Proposito |
+|--------|--------|-----------|
+| `generate-campaign-briefing` | POST | Briefing completo (JSON: briefing + insights_pecas + citacoes) |
+| `suggest-briefing-seed` | POST | Sugestao de texto de briefing (texto corrido, min 120 chars) |
+| `discover-company-sources` | POST | Descoberta de perfis digitais (site, Instagram, LinkedIn, Facebook) |
+| `test-perplexity-briefing` | GET/POST | Sandbox de testes com historico em perplexity_test_runs |
+
+### Shared Modules (`_shared/perplexity/`)
+
+| Modulo | Responsabilidade |
+|--------|-----------------|
+| `client.ts` | Provider HTTP client, config loader com TTL, error classes (AppError, ProviderHttpError), helpers |
+| `prompt.ts` | Prompt builder para briefing (system prompt + user prompt template com placeholders) |
+| `normalize.ts` | Normalizacao de resposta + JSON extraction best-effort |
+| `suggest.ts` | Prompt + normalizacao para suggest seed (guard rail: min 120 chars) |
+| `discover.ts` | Prompt + normalizacao para discover (confidence: high/medium/low) |
+
+### Versionamento
+
+Cada resposta normalizada carrega triple-versioning:
+- `contract_version` — versao do schema de saida
+- `prompt_version` — versao do prompt enviado ao provider
+- `strategy_version` — versao da estrategia criativa
+
+### Variaveis de ambiente
+
+| Env var | Descricao | Default |
+|---------|-----------|---------|
+| `PERPLEXITY_API_KEY` | Chave da API Perplexity | (obrigatoria, pode ser via DB) |
+| `PERPLEXITY_MODEL` | Nome do modelo | `sonar` |
+| `PERPLEXITY_API_BASE_URL` | URL base da API | `https://api.perplexity.ai` |
+| `PERPLEXITY_TIMEOUT_MS` | Timeout da chamada ao provider | `15000` (15s) |

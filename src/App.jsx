@@ -16,6 +16,7 @@ import NanoBananaConfigPage from './pages/AiStep2Monitor/NanoBananaConfigPage';
 import PostTurboPage from './pages/AiStep2Monitor/PostTurboPage';
 import PostGenPage from './pages/AiStep2Monitor/PostGenPage';
 import GardenGalleryPage from './pages/AiStep2Monitor/GardenGalleryPage';
+import CopyEditor from './pages/CopyEditor';
 
 // Error boundary pra pegar crashes silenciosos
 class ErrorBoundary extends Component {
@@ -198,6 +199,14 @@ export default function App() {
     return (
       <ErrorBoundary>
         <AiStep2Monitor />
+      </ErrorBoundary>
+    );
+  }
+
+  if (pathname.startsWith('/copy-editor')) {
+    return (
+      <ErrorBoundary>
+        <CopyEditor />
       </ErrorBoundary>
     );
   }

@@ -1,7 +1,7 @@
 /**
  * Edge Function: update-nanobanana-config
  * Atualiza configurações do NanoBanana (todos os campos editáveis).
- * Acesso público (sem autenticação).
+ * Protegida via x-admin-password.
  */
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -14,11 +14,12 @@ import {
   VALID_DIRECTION_MODES,
   CONFIG_TABLE,
 } from "../_shared/nanobanana/config.ts";
+import { requireAdminPassword } from "../_shared/admin-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-admin-password",
   "Access-Control-Allow-Methods": "PATCH, OPTIONS",
 };
 
@@ -165,6 +166,9 @@ Deno.serve(async (req: Request) => {
     if (req.method !== "PATCH") {
       return jsonResponse({ error: "Método não permitido", code: "METHOD_NOT_ALLOWED" }, 405);
     }
+
+    const authCheck = requireAdminPassword(req);
+    if (!authCheck.authorized) return authCheck.response;
 
     const parsedPayload = await parsePayload(req);
     if (parsedPayload instanceof Response) {

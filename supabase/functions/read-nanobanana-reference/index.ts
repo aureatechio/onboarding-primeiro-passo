@@ -1,14 +1,16 @@
 /**
  * Edge Function: read-nanobanana-reference
  * Lê imagem de referência por categoria e devolve direção criativa em texto.
+ * Protegida via x-admin-password.
  */
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { type CategoryKey, VALID_CATEGORIES } from '../_shared/nanobanana/config.ts'
+import { requireAdminPassword } from '../_shared/admin-auth.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-admin-password',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
@@ -86,6 +88,9 @@ Deno.serve(async (req) => {
     if (req.method !== 'POST') {
       return json({ error: 'Método não permitido', code: 'METHOD_NOT_ALLOWED' }, 405)
     }
+
+    const authCheck = requireAdminPassword(req)
+    if (!authCheck.authorized) return authCheck.response
 
     const contentType = req.headers.get('content-type')?.toLowerCase() ?? ''
     if (!contentType.includes('multipart/form-data')) {
