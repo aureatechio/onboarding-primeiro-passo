@@ -6,6 +6,14 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  type CategoryKey,
+  type DirectionMode,
+  REFERENCE_BUCKET,
+  VALID_CATEGORIES,
+  VALID_DIRECTION_MODES,
+  CONFIG_TABLE,
+} from "../_shared/nanobanana/config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,13 +22,11 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "PATCH, OPTIONS",
 };
 
-const REFERENCE_BUCKET = "nanobanana-references";
 const MAX_REFERENCE_UPLOAD_BYTES = parseInt(
   Deno.env.get("NANOBANANA_MAX_REFERENCE_UPLOAD_BYTES") ?? String(10 * 1024 * 1024),
   10,
 );
 
-type CategoryKey = "moderna" | "clean" | "retail";
 type DirectionTextField =
   | "direction_moderna"
   | "direction_clean"
@@ -34,14 +40,11 @@ type DirectionImageField =
   | "direction_clean_image_path"
   | "direction_retail_image_path";
 
-const VALID_DIRECTION_MODES = ["text", "image", "both"] as const;
-type DirectionMode = (typeof VALID_DIRECTION_MODES)[number];
-
 function isValidDirectionMode(value: unknown): value is DirectionMode {
-  return VALID_DIRECTION_MODES.includes(value as DirectionMode);
+  return (VALID_DIRECTION_MODES as readonly string[]).includes(value as string);
 }
 
-const CATEGORY_KEYS: CategoryKey[] = ["moderna", "clean", "retail"];
+const CATEGORY_KEYS: readonly CategoryKey[] = VALID_CATEGORIES;
 
 interface ParsedPayload {
   updateData: Record<string, unknown>;
@@ -297,7 +300,7 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: existingConfig, error: existingConfigError } = await supabase
-      .from("nanobanana_config")
+      .from(CONFIG_TABLE)
       .select("*")
       .limit(1)
       .single();
@@ -371,7 +374,7 @@ Deno.serve(async (req: Request) => {
     updateData.updated_at = new Date().toISOString();
 
     const { data: updated, error } = await supabase
-      .from("nanobanana_config")
+      .from(CONFIG_TABLE)
       .update(updateData)
       .eq("id", existingConfig.id)
       .select()

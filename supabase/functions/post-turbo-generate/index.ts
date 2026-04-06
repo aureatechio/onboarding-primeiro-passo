@@ -9,39 +9,13 @@ import {
   BUCKET_NAME,
 } from '../_shared/garden/validate.ts'
 import { generateImage } from '../_shared/ai-campaign/image-generator.ts'
+import {
+  type NanoBananaDbConfig,
+  loadNanoBananaConfig,
+  VALID_CATEGORIES,
+} from '../_shared/nanobanana/config.ts'
 
 const URL_EXPIRY_SECONDS = 7 * 24 * 60 * 60
-const VALID_DIRECTIONS = ['moderna', 'clean', 'retail'] as const
-
-interface NanoBananaDbConfig {
-  gemini_model_name: string
-  gemini_api_base_url: string
-  max_retries: number
-  max_image_download_bytes: number
-  direction_moderna: string
-  direction_clean: string
-  direction_retail: string
-  format_1_1: string
-  format_4_5: string
-  format_16_9: string
-  format_9_16: string
-}
-
-async function loadNanoBananaConfig(
-  supabase: ReturnType<typeof createClient>,
-): Promise<NanoBananaDbConfig | null> {
-  try {
-    const { data, error } = await supabase
-      .from('nanobanana_config')
-      .select('*')
-      .limit(1)
-      .single()
-    if (error || !data) return null
-    return data as NanoBananaDbConfig
-  } catch {
-    return null
-  }
-}
 
 function mimeToExt(mime: string): string {
   if (mime.includes('jpeg') || mime.includes('jpg')) return 'jpg'
@@ -130,8 +104,8 @@ Deno.serve(async (req) => {
     if (imgErr) errors.push(imgErr)
     const formatErr = validateFormat(format)
     if (formatErr) errors.push(formatErr)
-    if (!VALID_DIRECTIONS.includes(directionParam as typeof VALID_DIRECTIONS[number])) {
-      errors.push(`direction invalido. Valores aceitos: ${VALID_DIRECTIONS.join(', ')}`)
+    if (!VALID_CATEGORIES.includes(directionParam as typeof VALID_CATEGORIES[number])) {
+      errors.push(`direction invalido. Valores aceitos: ${VALID_CATEGORIES.join(', ')}`)
     }
     const logoErr = validateImageFile(logoFile, 'logo', false)
     if (logoErr) errors.push(logoErr)

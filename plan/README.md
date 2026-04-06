@@ -2,6 +2,12 @@
 
 ## Indice ativo
 
+- `2026-04-06-melhoria-modulo-perplexity.md` **Pendente**
+  Consolidacao arquitetural e SDD do modulo Perplexity: extrair shared client (eliminar duplicacao de callProvider/loadDbConfig/AppError em 4 funcoes), migrar generate-campaign-briefing para normalize.ts shared, criar 6 functionSpec.md, adicionar testes unitarios para normalize/prompt/discover/client, proteger update-perplexity-config com auth, atualizar CLAUDE.md e CONTRACT.md. Meta: alinhar Perplexity ao padrao de qualidade do modulo OMIE.
+
+- `2026-04-06-melhoria-modulo-nanobanana.md` **Pendente**
+  Plano executavel para melhorar o modulo NanoBanana: shared module (_shared/nanobanana/config.ts), 3 functionSpecs (SDD), seguranca (auth em update/read), testes automatizados, atualizacao de CLAUDE.md e CONTRACT.md. Meta: alinhar NanoBanana ao padrao de qualidade do modulo OMIE.
+
 - `2026-04-06-limpeza-pos-extracao-monorepo.md` ✓ **Concluido**
   Limpeza pós-extração: git tracking, dead code _shared/, reescrita de CLAUDE.md, CONTEXT-MAP.md, .cursor/ e .context/modules/omie/ para repo standalone. Arquivamento de tasks e plans do monorepo.
 
@@ -89,3 +95,4 @@
 - `2026-03-16-boletos-no-step-pagamento.md` — Niveis 1 e 2 implementados. Nivel 3 (gerar boleto admin) movido para `futuro/admin-generate-boleto.md`.
 
 Os planos datados e materiais de execucao/review/report/spec foram removidos desta pasta durante a limpeza de documentacao.
+                                                                                                                                                               

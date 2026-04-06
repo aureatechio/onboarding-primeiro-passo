@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
+import { ETAPA4 } from "../copy"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -66,27 +67,15 @@ export default function Etapa4() {
     return (
       <CompletionScreen
         icon="star"
-        title="Etapa 4 concluida!"
-        description={`Agora voce conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento e essencial para uma campanha de sucesso.`}
-        summaryItems={[
-          { icon: "clapperboard", label: "Celebridade", value: celebName },
-          { icon: "mapPin", label: "Praca", value: praca },
-          { icon: "tag", label: "Segmento", value: segmento },
-          { icon: "penLine", label: "Ajustes", value: "2 rodadas por peca" },
-          { icon: "clock", label: "Aprovacao celebridade", value: "Ate 3 dias uteis" },
-        ]}
+        title={ETAPA4.completionTitle}
+        description={ETAPA4.completionDescription(celebName)}
+        summaryItems={ETAPA4.completionSummary(celebName, praca, segmento)}
       />
     )
   }
 
   // ─── Slides ─────────────────────────────────────────────────
-  const slideHeaders = [
-    { tag: "SLIDE 4.1", title: "Onde e como voce pode usar sua celebridade", readTime: "4 minutos" },
-    { tag: "SLIDE 4.3", title: "Como funciona a aprovacao das pecas" },
-    { tag: "SLIDE 4.4", title: "Franquias, filiais e outras midias" },
-    { tag: "SLIDE 4.5", title: "Prazo de uso e o que acontece no fim do contrato" },
-    { tag: "SLIDE 4.6", title: "Quiz — Regras de uso da celebridade" },
-  ]
+  const slideHeaders = ETAPA4.slideHeaders
 
   const currentHeader = showQuiz ? slideHeaders[4] : slideHeaders[currentSlide]
 
@@ -119,9 +108,7 @@ export default function Etapa4() {
   const renderSlide41 = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 16 }}>
-        A imagem de <strong style={{ color: COLORS.text }}>{celebName}</strong> e um ativo valioso.
-        Seu contrato garante exclusividade dentro de regras bem definidas de praca e segmento.
-        Veja exatamente o que esta no seu contrato:
+        {ETAPA4.slide1.body(celebName)}
       </p>
 
       {/* Contract card */}
@@ -134,7 +121,7 @@ export default function Etapa4() {
           marginBottom: 16,
         }}
       >
-        <p style={labelStyle}>SEU CONTRATO</p>
+        <p style={labelStyle}>{ETAPA4.slide1.contractLabel}</p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
@@ -169,13 +156,11 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <Icon name="lock" size={18} color={COLORS.accent} />
           <p style={{ color: COLORS.accent, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Exclusividade geografica e de segmento
+            {ETAPA4.slide1.exclusivityTitle}
           </p>
         </div>
         <p style={bodyText}>
-          Dentro da sua praca e segmento, nenhum concorrente pode usar{" "}
-          <strong style={{ color: COLORS.text }}>{celebName}</strong>. Essa exclusividade e
-          garantida pelo contrato e protege o investimento da sua campanha.
+          {ETAPA4.slide1.exclusivityBody(celebName)}
         </p>
       </div>
 
@@ -184,15 +169,11 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <Icon name="mapPin" size={18} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Exemplo pratico do seu contrato
+            {ETAPA4.slide1.exampleTitle}
           </p>
         </div>
         <p style={bodyText}>
-          Voce contratou <strong style={{ color: COLORS.text }}>{celebName}</strong> para a
-          praca <strong style={{ color: COLORS.accent }}>{praca}</strong> no segmento{" "}
-          <strong style={{ color: COLORS.warning }}>{segmento}</strong>. Isso significa que
-          somente voce pode veicular pecas com essa celebridade nessa regiao e nesse ramo de
-          atuacao.
+          {ETAPA4.slide1.exampleBody(celebName, praca, segmento)}
         </p>
       </div>
     </div>
@@ -200,23 +181,18 @@ export default function Etapa4() {
 
   // ─── Slide 4.3 ─────────────────────────────────────────────
   const renderSlide43 = () => {
-    const steps = [
-      { icon: "clapperboard", label: "Producao cria a peca", color: COLORS.red, desc: "Nossa equipe desenvolve o material criativo." },
-      { icon: "eye", label: "Voce revisa e aprova", color: COLORS.accent, desc: "Voce analisa e pede ajustes se necessario." },
-      { icon: "star", label: "Celebridade aprova", color: COLORS.warning, desc: "A celebridade valida o uso da sua imagem." },
-      { icon: "circleCheck", label: "Entrega liberada", color: COLORS.success, desc: "Peca aprovada e liberada para veiculacao." },
-    ]
+    const stepColors = [COLORS.red, COLORS.accent, COLORS.warning, COLORS.success]
+    const steps = ETAPA4.slide2.steps.map((s, i) => ({ ...s, color: stepColors[i] }))
 
     return (
       <div>
         <p style={{ ...bodyText, marginBottom: 20 }}>
-          Toda peca que usa a imagem da celebridade precisa passar por um fluxo de aprovacao.
-          Entenda cada etapa:
+          {ETAPA4.slide2.body}
         </p>
 
         {/* Timeline */}
         <div style={{ ...cardStyle, padding: 24 }}>
-          <p style={labelStyle}>FLUXO DE APROVACAO</p>
+          <p style={labelStyle}>{ETAPA4.slide2.flowLabel}</p>
           <div style={{ position: "relative", paddingLeft: 32 }}>
             {/* Vertical line */}
             <div
@@ -285,12 +261,11 @@ export default function Etapa4() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <Icon name="penLine" size={16} color={COLORS.accent} />
             <p style={{ color: COLORS.accent, fontSize: 14, fontWeight: 800, margin: 0 }}>
-              2 rodadas de ajustes por peca
+              {ETAPA4.slide2.ajustesTitle}
             </p>
           </div>
           <p style={{ ...bodyText, fontSize: 13 }}>
-            Cada peca tem direito a ate 2 rodadas de ajustes inclusos no contrato.
-            Ajustes adicionais podem gerar custos extras.
+            {ETAPA4.slide2.ajustesBody}
           </p>
         </div>
 
@@ -305,12 +280,11 @@ export default function Etapa4() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <Icon name="alertTriangle" size={16} color={COLORS.warning} />
             <p style={{ color: COLORS.warning, fontSize: 14, fontWeight: 800, margin: 0 }}>
-              Celebridade pode pedir ajustes
+              {ETAPA4.slide2.celebAjustesTitle}
             </p>
           </div>
           <p style={{ ...bodyText, fontSize: 13 }}>
-            A celebridade tem o direito contratual de solicitar alteracoes na peca antes de
-            aprovar. O prazo de aprovacao pela celebridade e de ate 3 dias uteis.
+            {ETAPA4.slide2.celebAjustesBody}
           </p>
         </div>
 
@@ -325,12 +299,11 @@ export default function Etapa4() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Icon name="gem" size={16} color={COLORS.red} />
             <p style={{ color: COLORS.red, fontSize: 14, fontWeight: 800, margin: 0 }}>
-              Regra de ouro
+              {ETAPA4.slide2.regraOuroTitle}
             </p>
           </div>
           <p style={{ ...bodyText, fontSize: 13, marginTop: 8 }}>
-            Nenhuma peca pode ser veiculada sem a aprovacao final da celebridade.
-            Veicular sem aprovacao pode gerar penalidades contratuais.
+            {ETAPA4.slide2.regraOuroBody}
           </p>
         </div>
       </div>
@@ -341,8 +314,7 @@ export default function Etapa4() {
   const renderSlide44 = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 20 }}>
-        Se voce tem mais de uma unidade ou usa diferentes canais, veja o que pode e o que
-        nao pode:
+        {ETAPA4.slide3.body}
       </p>
 
       {/* Franquias */}
@@ -350,22 +322,20 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="building2" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Franquias e filiais
+            {ETAPA4.slide3.franquias.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="circleCheck" size={16} color={COLORS.success} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              Unidades na <strong style={{ color: COLORS.accent }}>mesma regiao</strong> da
-              praca contratada podem usar as pecas normalmente.
+              {ETAPA4.slide3.franquias.allowed}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="ban" size={16} color={COLORS.danger} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              Unidades em <strong style={{ color: COLORS.danger }}>outras regioes</strong>{" "}
-              precisam de contrato proprio para usar a celebridade.
+              {ETAPA4.slide3.franquias.forbidden}
             </p>
           </div>
         </div>
@@ -376,21 +346,20 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="smartphone" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Canais digitais
+            {ETAPA4.slide3.canaisDigitais.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="circleCheck" size={16} color={COLORS.success} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              Incluir os canais tiktok, youtube, linkedin e google;
+              {ETAPA4.slide3.canaisDigitais.allowed}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="ban" size={16} color={COLORS.danger} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade
-              nesses canais.
+              {ETAPA4.slide3.canaisDigitais.forbidden}
             </p>
           </div>
         </div>
@@ -401,23 +370,20 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="ban" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Regras de publicação
+            {ETAPA4.slide3.regrasPublicacao.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="ban" size={16} color={COLORS.danger} />
             <p style={{ ...bodyText, fontSize: 13 }}>
-              Não é permitido marcar a <strong style={{ color: COLORS.text }}>Celebridade nas publicações em redes sociais</strong>.
+              {ETAPA4.slide3.regrasPublicacao.noTag}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <Icon name="alertTriangle" size={16} color={COLORS.warning} />
-            <p style={{ ...bodyText, fontSize: 13 }}>
-              Só é permitida a veiculação da celebridade nos canais oficiais da marca.
-              <br />
-              <br />
-              Colaboradores podem republicar o conteúdo mas não podem publicar em suas redes sociais pessoais.
+            <p style={{ ...bodyText, fontSize: 13, whiteSpace: "pre-line" }}>
+              {ETAPA4.slide3.regrasPublicacao.canaisOficiais}
             </p>
           </div>
         </div>
@@ -428,18 +394,17 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="tv" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            TV, Radio e Outdoor
+            {ETAPA4.slide3.tvRadioOutdoor.title}
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 12 }}>
           <Icon name="alertTriangle" size={16} color={COLORS.warning} />
           <p style={{ ...bodyText, fontSize: 13 }}>
-            Consulte a equipe antes de veicular nesses meios. Cada formato pode ter regras
-            especificas.
+            {ETAPA4.slide3.tvRadioOutdoor.warning}
           </p>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {["TV aberta", "TV fechada", "Radio", "Outdoor", "Busdoor", "Painel LED"].map(
+          {ETAPA4.slide3.tvRadioOutdoor.tags.map(
             (tag) => (
               <span
                 key={tag}
@@ -466,7 +431,7 @@ export default function Etapa4() {
   const renderSlide45 = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 20 }}>
-        Seu contrato tem prazo definido. Saiba o que acontece na renovacao e no encerramento:
+        {ETAPA4.slide4.body}
       </p>
 
       {/* Renovacao */}
@@ -474,11 +439,12 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="refreshCw" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Renovacao do contrato
+            {ETAPA4.slide4.renovacao.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+          {ETAPA4.slide4.renovacao.steps.map((step, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <span
               style={{
                 background: COLORS.accent,
@@ -494,35 +460,13 @@ export default function Etapa4() {
                 flexShrink: 0,
               }}
             >
-              1
+              {i + 1}
             </span>
             <p style={{ ...bodyText, fontSize: 13 }}>
-              A equipe entra em contato antes do vencimento para negociar a renovacao.
+              {step}
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span
-              style={{
-                background: COLORS.accent,
-                color: COLORS.bg,
-                width: 22,
-                height: 22,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 800,
-                flexShrink: 0,
-              }}
-            >
-              2
-            </span>
-            <p style={{ ...bodyText, fontSize: 13 }}>
-              Voce pode manter a mesma celebridade ou trocar por outra disponivel para sua
-              praca e segmento.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -531,7 +475,7 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="shuffle" size={20} color={COLORS.text} />
           <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Celebridade nao disponivel
+            {ETAPA4.slide4.naoDisponivel.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -544,10 +488,10 @@ export default function Etapa4() {
             }}
           >
             <p style={{ color: COLORS.accent, fontSize: 13, fontWeight: 700, margin: "0 0 4px 0" }}>
-              Opcao A — Trocar de celebridade
+              {ETAPA4.slide4.naoDisponivel.opcaoA.title}
             </p>
             <p style={{ ...bodyText, fontSize: 12 }}>
-              Voce pode escolher outra celebridade disponivel sem custo adicional de troca.
+              {ETAPA4.slide4.naoDisponivel.opcaoA.desc}
             </p>
           </div>
           <div
@@ -559,10 +503,10 @@ export default function Etapa4() {
             }}
           >
             <p style={{ color: COLORS.warning, fontSize: 13, fontWeight: 700, margin: "0 0 4px 0" }}>
-              Opcao B — Creditos
+              {ETAPA4.slide4.naoDisponivel.opcaoB.title}
             </p>
             <p style={{ ...bodyText, fontSize: 12 }}>
-              Se preferir, voce pode converter o valor restante em creditos para uso futuro.
+              {ETAPA4.slide4.naoDisponivel.opcaoB.desc}
             </p>
           </div>
         </div>
@@ -579,15 +523,11 @@ export default function Etapa4() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <Icon name="alertTriangle" size={20} color={COLORS.danger} />
           <p style={{ color: COLORS.danger, fontSize: 15, fontWeight: 800, margin: 0 }}>
-            Fim do contrato — obrigacoes
+            {ETAPA4.slide4.encerramento.title}
           </p>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            "Todas as pecas com a imagem da celebridade devem ser excluidas.",
-            "Remover de redes sociais, site, trafego pago e qualquer midia ativa.",
-            "O uso apos o vencimento configura violacao contratual.",
-          ].map((item, i) => (
+          {ETAPA4.slide4.encerramento.items.map((item, i) => (
             <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <span style={{ color: COLORS.danger, fontSize: 14, flexShrink: 0 }}>
                 {i + 1}.
@@ -616,39 +556,29 @@ export default function Etapa4() {
             margin: "8px 0 4px 0",
           }}
         >
-          Multa de ate 10x
+          {ETAPA4.slide4.multa.title}
         </p>
         <p style={{ ...bodyText, fontSize: 12, textAlign: "center" }}>
-          O uso indevido da imagem apos o fim do contrato pode gerar multa de ate 10 vezes o
-          valor contratual.
+          {ETAPA4.slide4.multa.desc}
         </p>
       </div>
     </div>
   )
 
   // ─── Quiz 4.6 ───────────────────────────────────────────────
-  const quizQuestions = [
-    `Entendo que a exclusividade de ${celebName} e valida para minha praca (${praca}) e meu segmento (${segmento}).`,
-    "Sei que toda peca precisa de aprovacao da celebridade e que tenho ate 2 rodadas de ajustes por peca.",
-    "Nao vou marcar a celebridade nas redes sociais nem usar sua imagem por WhatsApp ou e-mail marketing.",
-    "Ao encerrar o contrato, vou excluir todas as pecas com a imagem da celebridade de todos os canais.",
-    "Estou ciente de que o uso indevido pode gerar multa de ate 10x o valor contratual.",
-  ]
-
   const renderQuiz = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 20 }}>
-        Confirme que voce entendeu as regras de uso da imagem de{" "}
-        <strong style={{ color: COLORS.text }}>{celebName}</strong>:
+        {ETAPA4.quizIntro(celebName)}
       </p>
       <QuizConfirmation
-        questions={quizQuestions}
+        questions={ETAPA4.quizQuestions(celebName, praca, segmento)}
         icon="star"
-        title="Confirme o entendimento"
-        subtitle="Marque todos os itens para concluir"
+        title={ETAPA4.quizTitle}
+        subtitle={ETAPA4.quizSubtitle}
         iconBg={`${COLORS.warning}15`}
         onAllConfirmed={(ready) => setQuizReady(ready)}
-        confirmMessage="Tudo certo! Voce pode concluir esta etapa."
+        confirmMessage={ETAPA4.quizConfirmMessage}
       />
     </div>
   )
@@ -693,11 +623,11 @@ export default function Etapa4() {
           nextLabel={
             showQuiz
               ? quizReady
-                ? "Concluir etapa"
-                : "Confirme todos os itens"
+                ? ETAPA4.navConcluir
+                : ETAPA4.navConfirmAll
               : currentSlide === totalSlides - 1
-                ? "Ir para o quiz"
-                : "Proximo"
+                ? ETAPA4.navGoToQuiz
+                : ETAPA4.navNextSlide
           }
           nextDisabled={showQuiz && !quizReady}
           nextVariant={showQuiz && quizReady ? "warning" : "red"}
@@ -705,7 +635,7 @@ export default function Etapa4() {
       </StickyFooter>
       <ProcessingOverlay
         show={processing}
-        messages={["Salvando respostas...", "Concluído!"]}
+        messages={ETAPA4.processingMessages}
         duration={1200}
         onComplete={() => {
           setProcessing(false)

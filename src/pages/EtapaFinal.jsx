@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
+import { ETAPA_FINAL } from "../copy";
 import TopBar from "../components/TopBar";
 import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
@@ -70,16 +71,15 @@ export default function EtapaFinal() {
           </div>
 
           <h1 style={{ ...TYPE.h1, color: COLORS.text, margin: "0 0 12px 0" }}>
-            Parabéns!
+            {ETAPA_FINAL.parabens.title}
           </h1>
 
           <p style={{ color: COLORS.textMuted, fontSize: 16, lineHeight: 1.7, margin: "0 auto 8px", maxWidth: 400 }}>
-            Você está entre os poucos empresários do Brasil que contam com uma{" "}
-            <span style={{ color: COLORS.text, fontWeight: 600 }}>celebridade na sua comunicação</span>.
+            {ETAPA_FINAL.parabens.body}
           </p>
 
           <p style={{ color: COLORS.accent, fontSize: 16, fontWeight: 700, margin: "0 0 32px 0" }}>
-            Agora é hora de fazer esse investimento virar resultado.
+            {ETAPA_FINAL.parabens.cta}
           </p>
 
           {/* Progress dots */}
@@ -89,7 +89,7 @@ export default function EtapaFinal() {
             ))}
           </div>
           <p style={{ color: COLORS.success, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em", margin: "0 0 36px 0" }}>
-            PRIMEIRO PASSO CONCLUIDO
+            {ETAPA_FINAL.parabens.stepLabel}
           </p>
 
           {/* Card atendente */}
@@ -106,20 +106,18 @@ export default function EtapaFinal() {
               <Icon name="hand" size={28} color={COLORS.red} />
             </div>
             <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", margin: "0 0 6px 0" }}>
-              SUA ATENDENTE
+              {ETAPA_FINAL.atendenteLabel}
             </p>
             <p style={{ color: COLORS.text, fontSize: 22, fontWeight: 800, margin: "0 0 6px 0" }}>
               {userData.atendente}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 14, lineHeight: 1.5, margin: 0 }}>
-              Vai entrar em contato em até{" "}
-              <span style={{ color: COLORS.accent, fontWeight: 700 }}>1 dia útil</span>{" "}
-              pra iniciar a produção da sua campanha.
+              {ETAPA_FINAL.parabens.atendenteContact(userData.atendente)}
             </p>
           </div>
 
           <p style={{ color: COLORS.textDim, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-            A gente está junto com você. Boa campanha!
+            {ETAPA_FINAL.parabens.closing}
           </p>
         </div>
       </div>
@@ -130,36 +128,36 @@ export default function EtapaFinal() {
   // TELA DE RESUMO
   // ════════════════════════════════════════════════
   const briefLabel = userData.campaignBriefMode === "both"
-    ? "Texto + Áudio"
+    ? ETAPA_FINAL.resumo.briefModes.both
     : userData.campaignBriefMode === "audio"
-      ? "Áudio"
+      ? ETAPA_FINAL.resumo.briefModes.audio
       : userData.campaignBriefMode === "text"
-        ? "Texto"
+        ? ETAPA_FINAL.resumo.briefModes.text
         : null
 
   const iaBriefingStatus = userData.campaignBriefGenerationStatus === "done"
-    ? "Gerado com IA"
+    ? ETAPA_FINAL.resumo.iaBriefDone
     : userData.campaignBriefGenerationStatus === "error"
-      ? "Falha na geração IA"
+      ? ETAPA_FINAL.resumo.iaBriefError
       : null
 
   const summaryRows = [
     { label: "Celebridade", value: userData.celebName, icon: "star", color: COLORS.text },
     { label: "Praça", value: userData.praca, icon: "mapPin", color: COLORS.accent },
     { label: "Segmento", value: userData.segmento, icon: "tag", color: COLORS.warning },
-    { label: "Pacote", value: "2 vídeos + 4 estáticas", icon: "clapperboard", color: COLORS.text },
+    { label: "Pacote", value: ETAPA_FINAL.resumo.pacoteValue, icon: "clapperboard", color: COLORS.text },
     { label: "Vigência", value: userData.vigencia, icon: "calendarDays", color: COLORS.text },
-    { label: "Preparação", value: "15 dias (ativados)", icon: "clock", color: COLORS.warning },
-    { label: "Produção", value: userData.productionPath === "hybrid" ? "Personalizado" : "Aceleraí", icon: "handshake", color: userData.productionPath === "hybrid" ? COLORS.accent : COLORS.red },
+    { label: "Preparação", value: ETAPA_FINAL.resumo.preparacaoValue, icon: "clock", color: COLORS.warning },
+    { label: "Produção", value: userData.productionPath === "hybrid" ? ETAPA_FINAL.resumo.productionHybrid : ETAPA_FINAL.resumo.productionStandard, icon: "handshake", color: userData.productionPath === "hybrid" ? COLORS.accent : COLORS.red },
     ...(briefLabel ? [{ label: "Briefing", value: briefLabel, icon: "send", color: COLORS.accent }] : []),
     ...(iaBriefingStatus ? [{ label: "Briefing IA", value: iaBriefingStatus, icon: "zap", color: COLORS.accent }] : []),
   ];
 
-  const nextSteps = [
-    { num: "1", title: `Sua atendente ${userData.atendente} vai entrar em contato`, desc: "Em até 1 dia útil pra iniciar a produção da sua campanha", color: COLORS.red },
-    { num: "2", title: "START KIT em personalização", desc: "Em breve você receberá exemplos de peças para aumentar a eficiencia da sua campanha com ajuda de Agentes de IA desenvolvidos pelo nosso time.", color: COLORS.accent },
-    { num: "3", title: "Responda rápido", desc: "Quanto mais ágil for a comunicação, mais rápido suas peças ficam prontas", color: COLORS.warning },
-  ];
+  const nextStepsColors = [COLORS.red, COLORS.accent, COLORS.warning];
+  const nextSteps = ETAPA_FINAL.nextSteps(userData.atendente).map((step, i) => ({
+    ...step,
+    color: nextStepsColors[i],
+  }));
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.bg, padding: "0 0 40px 0" }}>
@@ -177,17 +175,17 @@ export default function EtapaFinal() {
             <Icon name="circleCheck" size={30} color={COLORS.accent} />
           </div>
           <h1 style={{ ...TYPE.h1, color: COLORS.text, margin: "0 0 6px 0" }}>
-            Tudo pronto. Sua campanha vai começar.
+            {ETAPA_FINAL.resumo.title}
           </h1>
           <p style={{ color: COLORS.textMuted, fontSize: 14, margin: 0 }}>
-            Você completou todas as etapas. Aqui está o resumo.
+            {ETAPA_FINAL.resumo.subtitle}
           </p>
         </div>
 
         {/* Resumo */}
         <div style={{ background: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`, padding: 20, marginBottom: 16 }}>
           <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", margin: "0 0 14px 0" }}>
-            RESUMO DA SUA CAMPANHA
+            {ETAPA_FINAL.resumo.cardLabel}
           </p>
           {summaryRows.map((row, i) => (
             <div key={i} style={{
@@ -207,7 +205,7 @@ export default function EtapaFinal() {
         {/* Próximos passos */}
         <div style={{ background: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`, padding: 20, marginBottom: 16 }}>
           <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", margin: "0 0 14px 0" }}>
-            PRÓXIMOS PASSOS
+            {ETAPA_FINAL.proximosPassosLabel}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {nextSteps.map((step) => (
@@ -249,10 +247,10 @@ export default function EtapaFinal() {
             <Icon name="hand" size={24} color={COLORS.red} />
           </div>
           <div>
-            <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>SUA ATENDENTE</p>
+            <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>{ETAPA_FINAL.atendenteLabel}</p>
             <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 800, margin: "0 0 4px 0" }}>{userData.atendente}</p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, margin: 0 }}>
-              Entrará em contato em até <span style={{ color: COLORS.accent, fontWeight: 600 }}>1 dia útil</span>
+              {ETAPA_FINAL.atendenteContactTime(userData.atendente)}
             </p>
           </div>
         </div>
@@ -269,12 +267,12 @@ export default function EtapaFinal() {
           }}
         >
           <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            Concluir Primeiro Passo
+            {ETAPA_FINAL.ctaButton}
             <Icon name="check" size={16} color={COLORS.text} />
           </span>
         </button>
         <p style={{ color: COLORS.textDim, fontSize: 11, textAlign: "center", marginTop: 12 }}>
-          Ao concluir, seu perfil completo é gerado automaticamente.
+          {ETAPA_FINAL.ctaMicro}
         </p>
       </div>
     </div>

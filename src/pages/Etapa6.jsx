@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
+import { ETAPA6 } from "../copy"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -20,27 +21,20 @@ export default function Etapa6() {
     return (
       <CompletionScreen
         icon="palette"
-        title="Etapa 6.1 concluída!"
-        description={`Seu atendente ${userData.atendente} vai te ajudar a organizar todos os materiais de identidade visual. Se tiver dúvidas sobre o que enviar, é só perguntar.`}
+        title={ETAPA6.completionTitle}
+        description={ETAPA6.completionDescription(userData.atendente)}
       />
     )
   }
-
-  const items = [
-    { icon: "palette", title: "Logo em alta resolução", desc: "PNG com fundo transparente, de preferência" },
-    { icon: "palette", title: "Cores principais da marca", desc: "Códigos hex (ex: #FF0000) ou referência visual" },
-    { icon: "type", title: "Fontes da comunicação", desc: "Nome das fontes usadas nos materiais da marca" },
-    { icon: "camera", title: "Referências visuais", desc: "Exemplos de peças, posts ou anúncios que você gosta" },
-  ]
 
   // ── Main Screen ──
   return (
     <PageLayout>
       <StepHeader
-        title="Sua identidade visual"
-        readTime="2 minutos"
+        title={ETAPA6.header.title}
+        readTime={ETAPA6.header.readTime}
         showPersonalized={true}
-        stepLabel="ETAPA 6.1 DE 8"
+        stepLabel={ETAPA6.header.stepLabel}
       />
 
       {/* Card 1 - Intro */}
@@ -59,14 +53,11 @@ export default function Etapa6() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <Icon name="palette" size={20} color={COLORS.text} />
           <h2 style={{ color: COLORS.text, fontSize: 17, fontWeight: 800, margin: 0 }}>
-            Suas peças ficam muito melhores com a sua cara
+            {ETAPA6.intro.title}
           </h2>
         </div>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-          Para que os criativos da sua campanha fiquem{" "}
-          <strong style={{ color: COLORS.text }}>alinhados com a identidade da sua marca</strong>,
-          precisamos de algumas referências visuais. Quanto mais material você enviar, mais{" "}
-          <strong style={{ color: COLORS.text }}>personalizado e profissional</strong> será o resultado.
+          {ETAPA6.intro.body}
         </p>
       </motion.div>
 
@@ -93,7 +84,7 @@ export default function Etapa6() {
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
-          A DIFERENÇA NA PRÁTICA
+          {ETAPA6.diferenca.label}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -109,11 +100,11 @@ export default function Etapa6() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <Icon name="circleCheck" size={14} color={COLORS.success} />
               <span style={{ color: COLORS.success, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>
-                COM REFERÊNCIAS
+                {ETAPA6.diferenca.comReferencias.label}
               </span>
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-              Peça alinhada com a identidade da sua marca, cores corretas, fontes consistentes e resultado profissional.
+              {ETAPA6.diferenca.comReferencias.desc}
             </p>
           </div>
 
@@ -129,11 +120,11 @@ export default function Etapa6() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <Icon name="alertTriangle" size={14} color={COLORS.danger} />
               <span style={{ color: COLORS.danger, fontSize: 12, fontWeight: 800, letterSpacing: "0.05em" }}>
-                SEM REFERÊNCIAS
+                {ETAPA6.diferenca.semReferencias.label}
               </span>
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-              Produção genérica, sem personalidade da marca, cores e fontes aproximadas e resultado que não representa sua empresa.
+              {ETAPA6.diferenca.semReferencias.desc}
             </p>
           </div>
         </div>
@@ -160,11 +151,11 @@ export default function Etapa6() {
             margin: "0 0 16px 0",
           }}
         >
-          Separe esses itens
+          {ETAPA6.itensTitle}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {items.map((item, i) => (
+          {ETAPA6.items.map((item, i) => (
             <div
               key={i}
               style={{
@@ -172,7 +163,7 @@ export default function Etapa6() {
                 alignItems: "flex-start",
                 gap: 12,
                 padding: "12px 0",
-                borderBottom: i < items.length - 1 ? `1px solid ${COLORS.border}` : "none",
+                borderBottom: i < ETAPA6.items.length - 1 ? `1px solid ${COLORS.border}` : "none",
               }}
             >
               <div
@@ -216,7 +207,7 @@ export default function Etapa6() {
         }}
       >
         <p style={{ color: COLORS.accent, fontSize: 13, fontWeight: 600, lineHeight: 1.6, margin: 0, textAlign: "center" }}>
-          Não tem nada disso organizado? Sem problema! Seu atendente vai te ajudar a reunir tudo. O importante é começar.
+          {ETAPA6.reassuringTip}
         </p>
       </motion.div>
 
@@ -272,7 +263,7 @@ export default function Etapa6() {
             )}
           </div>
           <p style={{ color: acknowledged ? COLORS.text : COLORS.textMuted, fontSize: 13, fontWeight: 600, margin: 0, lineHeight: 1.5 }}>
-            Entendi que preciso separar os materiais de identidade visual da minha marca para enviar ao atendente.
+            {ETAPA6.acknowledgement}
           </p>
         </motion.button>
       </motion.div>
@@ -281,7 +272,7 @@ export default function Etapa6() {
       <StickyFooter>
         <NavButtons
           onNext={() => setCompleted(true)}
-          nextLabel="Confirmar e avançar"
+          nextLabel={ETAPA6.navConfirm}
           nextDisabled={!acknowledged}
         />
       </StickyFooter>

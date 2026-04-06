@@ -8,12 +8,14 @@
 
 As seguintes mudanças de marca já foram implementadas e **não devem ser revertidas**:
 
-| Item | Estado atual | Arquivos |
-|------|-------------|----------|
-| **Vermelho da marca** | `#E8356D` (substitui o antigo `#E63333` em toda a base) | `src/theme/design-tokens.js`, `src/theme/global.css` |
-| **Gradientes CTA** | Início `#C42A56` (`COLORS.redGradientStart`), fim escuro `#9E2645` (`COLORS.redGradientEndDark`) | `design-tokens.js`, `NavButtons.jsx`, `CompletionScreen.jsx`, `Etapa1Hero.jsx`, `Etapa3.jsx` |
-| **Logo na TopBar** | Componente `src/components/TopBarLogo.jsx` renderiza `public/logo_acelerai_white_transp.png` | `TopBar.jsx`, `EtapaFinal.jsx`, `TudoPronto.jsx` |
-| **Logo no Hero** | Badge do Etapa1Hero usa `<TopBarLogo>` sem pill/container | `Etapa1Hero.jsx` |
+
+| Item                  | Estado atual                                                                                     | Arquivos                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| **Vermelho da marca** | `#E8356D` (substitui o antigo `#E63333` em toda a base)                                          | `src/theme/design-tokens.js`, `src/theme/global.css`                                         |
+| **Gradientes CTA**    | Início `#C42A56` (`COLORS.redGradientStart`), fim escuro `#9E2645` (`COLORS.redGradientEndDark`) | `design-tokens.js`, `NavButtons.jsx`, `CompletionScreen.jsx`, `Etapa1Hero.jsx`, `Etapa3.jsx` |
+| **Logo na TopBar**    | Componente `src/components/TopBarLogo.jsx` renderiza `public/logo_acelerai_white_transp.png`     | `TopBar.jsx`, `EtapaFinal.jsx`, `TudoPronto.jsx`                                             |
+| **Logo no Hero**      | Badge do Etapa1Hero usa `<TopBarLogo>` sem pill/container                                        | `Etapa1Hero.jsx`                                                                             |
+
 
 Toda referência a `#E63333`, `#CC2222` ou `#B22222` nesta spec deve ser lida como `#E8356D`, `COLORS.redGradientStart` e `COLORS.redGradientEndDark`, respectivamente. Toda referência a texto "ACELERAÍ" ou "PRIMEIRO PASSO" nas topbars deve ser lida como o componente `<TopBarLogo />`.
 
@@ -226,43 +228,45 @@ export default function Icon({
 
 Substituir **todos** os emojis no projeto seguindo este mapeamento. Onde um emoji aparece como `<span style={{ fontSize: N }}>EMOJI</span>`, trocar por `<Icon icon={LucideComponent} ... />`.
 
-| Emoji atual | Contexto no projeto | Ícone Lucide | Import |
-|---|---|---|---|
-| 🎬 | Produção / Aceleraí | `Clapperboard` | `import { Clapperboard } from 'lucide-react'` |
-| 🎯 | Você / Cliente | `Target` | `import { Target } from 'lucide-react'` |
-| ⭐ | Celebridade / Destaque | `Star` | `import { Star } from 'lucide-react'` |
-| 📱 | Canais digitais / Mobile | `Smartphone` | `import { Smartphone } from 'lucide-react'` |
-| 🚀 | Acelerar resultados | `TrendingUp` | `import { TrendingUp } from 'lucide-react'` |
-| 📍 | Praça / Localização | `MapPin` | `import { MapPin } from 'lucide-react'` |
-| 🏷 | Segmento | `Tag` | `import { Tag } from 'lucide-react'` |
-| ✏️ | Ajustes / Edição | `PenLine` | `import { PenLine } from 'lucide-react'` |
-| ⏱ | Prazo / Tempo | `Clock` | `import { Clock } from 'lucide-react'` |
-| 📅 | Vigência / Calendário | `CalendarDays` | `import { CalendarDays } from 'lucide-react'` |
-| 📩 | Contato / Mensagem | `Mail` | `import { Mail } from 'lucide-react'` |
-| ⚡ | Responda rápido | `Zap` | `import { Zap } from 'lucide-react'` |
-| 💬 | WhatsApp / Chat | `MessageCircle` | `import { MessageCircle } from 'lucide-react'` |
-| 🖥 | Plataforma | `Monitor` | `import { Monitor } from 'lucide-react'` |
-| 🔒 | Exclusividade | `Lock` | `import { Lock } from 'lucide-react'` |
-| 👁 | Revisão | `Eye` | `import { Eye } from 'lucide-react'` |
-| ✅ | Aprovado / Entrega | `CircleCheck` | `import { CircleCheck } from 'lucide-react'` |
-| 🚫 | Proibido | `Ban` | `import { Ban } from 'lucide-react'` |
-| ⚠️ | Alerta / Warning | `AlertTriangle` | `import { AlertTriangle } from 'lucide-react'` |
-| 💎 | Regra de ouro | `Gem` | `import { Gem } from 'lucide-react'` |
-| 🏢 | Franquias | `Building2` | `import { Building2 } from 'lucide-react'` |
-| 📺 | TV / Mídia | `Tv` | `import { Tv } from 'lucide-react'` |
-| 🔄 | Renovação | `RefreshCw` | `import { RefreshCw } from 'lucide-react'` |
-| 🔀 | Troca | `Shuffle` | `import { Shuffle } from 'lucide-react'` |
-| ⚖️ | Multa / Jurídico | `Scale` | `import { Scale } from 'lucide-react'` |
-| 🎨 | Identidade visual | `Palette` | `import { Palette } from 'lucide-react'` |
-| 🔤 | Fontes | `Type` | `import { Type } from 'lucide-react'` |
-| 📸 | Referências visuais | `Camera` | `import { Camera } from 'lucide-react'` |
-| 🤝 | Produção híbrida | `Handshake` | `import { Handshake } from 'lucide-react'` |
-| 👋 | Atendente | `Hand` | `import { Hand } from 'lucide-react'` |
-| 🎉 | Parabéns / Conclusão | `PartyPopper` | `import { PartyPopper } from 'lucide-react'` |
-| ✓ (texto) | Checkmark em botões/badges | `Check` | `import { Check } from 'lucide-react'` |
-| ✦ (texto) | Bullet decorativo em listas | `ChevronRight` | `import { ChevronRight } from 'lucide-react'` |
-| → (texto em botões) | Seta de navegação | `ArrowRight` | `import { ArrowRight } from 'lucide-react'` |
-| ← (texto em botões) | Seta de voltar | `ArrowLeft` | `import { ArrowLeft } from 'lucide-react'` |
+
+| Emoji atual         | Contexto no projeto         | Ícone Lucide    | Import                                         |
+| ------------------- | --------------------------- | --------------- | ---------------------------------------------- |
+| 🎬                  | Produção / Aceleraí         | `Clapperboard`  | `import { Clapperboard } from 'lucide-react'`  |
+| 🎯                  | Você / Cliente              | `Target`        | `import { Target } from 'lucide-react'`        |
+| ⭐                   | Celebridade / Destaque      | `Star`          | `import { Star } from 'lucide-react'`          |
+| 📱                  | Canais digitais / Mobile    | `Smartphone`    | `import { Smartphone } from 'lucide-react'`    |
+| 🚀                  | Acelerar resultados         | `TrendingUp`    | `import { TrendingUp } from 'lucide-react'`    |
+| 📍                  | Praça / Localização         | `MapPin`        | `import { MapPin } from 'lucide-react'`        |
+| 🏷                  | Segmento                    | `Tag`           | `import { Tag } from 'lucide-react'`           |
+| ✏️                  | Ajustes / Edição            | `PenLine`       | `import { PenLine } from 'lucide-react'`       |
+| ⏱                   | Prazo / Tempo               | `Clock`         | `import { Clock } from 'lucide-react'`         |
+| 📅                  | Vigência / Calendário       | `CalendarDays`  | `import { CalendarDays } from 'lucide-react'`  |
+| 📩                  | Contato / Mensagem          | `Mail`          | `import { Mail } from 'lucide-react'`          |
+| ⚡                   | Responda rápido             | `Zap`           | `import { Zap } from 'lucide-react'`           |
+| 💬                  | WhatsApp / Chat             | `MessageCircle` | `import { MessageCircle } from 'lucide-react'` |
+| 🖥                  | Plataforma                  | `Monitor`       | `import { Monitor } from 'lucide-react'`       |
+| 🔒                  | Exclusividade               | `Lock`          | `import { Lock } from 'lucide-react'`          |
+| 👁                  | Revisão                     | `Eye`           | `import { Eye } from 'lucide-react'`           |
+| ✅                   | Aprovado / Entrega          | `CircleCheck`   | `import { CircleCheck } from 'lucide-react'`   |
+| 🚫                  | Proibido                    | `Ban`           | `import { Ban } from 'lucide-react'`           |
+| ⚠️                  | Alerta / Warning            | `AlertTriangle` | `import { AlertTriangle } from 'lucide-react'` |
+| 💎                  | Regra de ouro               | `Gem`           | `import { Gem } from 'lucide-react'`           |
+| 🏢                  | Franquias                   | `Building2`     | `import { Building2 } from 'lucide-react'`     |
+| 📺                  | TV / Mídia                  | `Tv`            | `import { Tv } from 'lucide-react'`            |
+| 🔄                  | Renovação                   | `RefreshCw`     | `import { RefreshCw } from 'lucide-react'`     |
+| 🔀                  | Troca                       | `Shuffle`       | `import { Shuffle } from 'lucide-react'`       |
+| ⚖️                  | Multa / Jurídico            | `Scale`         | `import { Scale } from 'lucide-react'`         |
+| 🎨                  | Identidade visual           | `Palette`       | `import { Palette } from 'lucide-react'`       |
+| 🔤                  | Fontes                      | `Type`          | `import { Type } from 'lucide-react'`          |
+| 📸                  | Referências visuais         | `Camera`        | `import { Camera } from 'lucide-react'`        |
+| 🤝                  | Produção híbrida            | `Handshake`     | `import { Handshake } from 'lucide-react'`     |
+| 👋                  | Atendente                   | `Hand`          | `import { Hand } from 'lucide-react'`          |
+| 🎉                  | Parabéns / Conclusão        | `PartyPopper`   | `import { PartyPopper } from 'lucide-react'`   |
+| ✓ (texto)           | Checkmark em botões/badges  | `Check`         | `import { Check } from 'lucide-react'`         |
+| ✦ (texto)           | Bullet decorativo em listas | `ChevronRight`  | `import { ChevronRight } from 'lucide-react'`  |
+| → (texto em botões) | Seta de navegação           | `ArrowRight`    | `import { ArrowRight } from 'lucide-react'`    |
+| ← (texto em botões) | Seta de voltar              | `ArrowLeft`     | `import { ArrowLeft } from 'lucide-react'`     |
+
 
 ### 4.3. Regras para o ícone dentro de container
 
@@ -353,7 +357,7 @@ import celebrationAnimation from '../assets/lottie/celebration.json'
 
 ### 5.3. Obter os arquivos JSON de animação
 
-Criar o diretório `src/assets/lottie/` e baixar animações de https://lottiefiles.com:
+Criar o diretório `src/assets/lottie/` e baixar animações de [https://lottiefiles.com](https://lottiefiles.com):
 
 - **success.json**: Buscar por "success checkmark" — escolher uma animação limpa, verde, sem fundo.
 - **celebration.json**: Buscar por "confetti" ou "celebration" — escolher algo colorido mas sutil.
@@ -519,7 +523,7 @@ Existem padrões visuais que se repetem em várias etapas e devem virar componen
 
 > **Nota**: o componente `TopBarLogo.jsx` já existe e é reutilizado pela `TopBar`, `EtapaFinal` e `TudoPronto`. Não criar outro componente de logo.
 
-**`src/components/InfoCard.jsx`** — Card com ícone, título e descrição (usado em Etapa2 slides, Etapa3 "O que acontece agora", Etapa6 itens):
+`**src/components/InfoCard.jsx`** — Card com ícone, título e descrição (usado em Etapa2 slides, Etapa3 "O que acontece agora", Etapa6 itens):
 
 ```jsx
 import Icon from './Icon'
@@ -546,7 +550,7 @@ export default function InfoCard({ icon, iconColor, title, children, borderColor
 }
 ```
 
-**`src/components/AlertBox.jsx`** — Box de alerta/warning (usado em várias etapas):
+`**src/components/AlertBox.jsx**` — Box de alerta/warning (usado em várias etapas):
 
 ```jsx
 import Icon from './Icon'
@@ -575,7 +579,7 @@ export default function AlertBox({ icon = AlertTriangle, color = COLORS.warning,
 }
 ```
 
-**`src/components/BulletList.jsx`** — Lista com bullets customizados (substitui os `●` e `✦` repetidos):
+`**src/components/BulletList.jsx**` — Lista com bullets customizados (substitui os `●` e `✦` repetidos):
 
 ```jsx
 import { ChevronRight } from 'lucide-react'
@@ -602,55 +606,48 @@ Use esta checklist para validar que todas as mudanças foram aplicadas:
 
 ### Branding (já concluído — apenas validar que permanece intacto)
 
-- [x] Cor vermelha da marca é `#E8356D` em `design-tokens.js` e `global.css` (não `#E63333`)
-- [x] Gradientes CTA usam `COLORS.redGradientStart` / `COLORS.redGradientEndDark` (não `#CC2222` / `#B22222`)
-- [x] TopBar, EtapaFinal e TudoPronto renderizam `<TopBarLogo />` (logo PNG, não texto)
-- [x] Badge do Hero (Etapa1) renderiza logo sem container pill
+- Cor vermelha da marca é `#E8356D` em `design-tokens.js` e `global.css` (não `#E63333`)
+- Gradientes CTA usam `COLORS.redGradientStart` / `COLORS.redGradientEndDark` (não `#CC2222` / `#B22222`)
+- TopBar, EtapaFinal e TudoPronto renderizam `<TopBarLogo />` (logo PNG, não texto)
+- Badge do Hero (Etapa1) renderiza logo sem container pill
 
 ### Refatoração visual (a executar)
 
-- [ ] Tailwind CSS v4 configurado e funcionando (`@import "tailwindcss"` no global.css, plugin no vite.config.js)
-- [ ] `TYPE` adicionado como export nomeado em `src/theme/design-tokens.js` (não criar arquivo `tokens.js` separado)
-- [ ] Componente `src/components/Icon.jsx` criado
-- [ ] Componente `src/components/InfoCard.jsx` criado
-- [ ] Componente `src/components/AlertBox.jsx` criado
-- [ ] Componente `src/components/BulletList.jsx` criado
-- [ ] Diretório `src/assets/lottie/` criado com `success.json` e `celebration.json`
-- [ ] **ZERO emojis** restantes no código (buscar por padrões de emoji unicode em todos os `.jsx`)
-- [ ] `lucide-react` usado em todos os locais onde havia emojis
-- [ ] `CompletionScreen` usando animação Lottie de sucesso
-- [ ] `EtapaFinal` tela de parabéns usando animação Lottie de celebration
-- [ ] TopBar com `layoutId` nos progress dots
-- [ ] Hero (Etapa1) com parallax no glow usando `useScroll`/`useTransform`
-- [ ] Noise texture no background do Hero substituindo o grid overlay
-- [ ] Setas textuais (`→`, `←`) removidas de todos os `nextLabel`/`prevLabel` e substituídas por ícones Lucide dentro do NavButtons
-- [ ] Tokens de tipografia (`TYPE`) sendo usados nos componentes migrados
-- [ ] Nenhum texto ou lógica de negócio foi alterado
-- [ ] Branding (itens marcados acima) permanece intacto após toda a refatoração
+- Tailwind CSS v4 configurado e funcionando (`@import "tailwindcss"` no global.css, plugin no vite.config.js)
+- `TYPE` adicionado como export nomeado em `src/theme/design-tokens.js` (não criar arquivo `tokens.js` separado)
+- Componente `src/components/Icon.jsx` criado
+- Componente `src/components/InfoCard.jsx` criado
+- Componente `src/components/AlertBox.jsx` criado
+- Componente `src/components/BulletList.jsx` criado
+- Diretório `src/assets/lottie/` criado com `success.json` e `celebration.json`
+- **ZERO emojis** restantes no código (buscar por padrões de emoji unicode em todos os `.jsx`)
+- `lucide-react` usado em todos os locais onde havia emojis
+- `CompletionScreen` usando animação Lottie de sucesso
+- `EtapaFinal` tela de parabéns usando animação Lottie de celebration
+- TopBar com `layoutId` nos progress dots
+- Hero (Etapa1) com parallax no glow usando `useScroll`/`useTransform`
+- Noise texture no background do Hero substituindo o grid overlay
+- Setas textuais (`→`, `←`) removidas de todos os `nextLabel`/`prevLabel` e substituídas por ícones Lucide dentro do NavButtons
+- Tokens de tipografia (`TYPE`) sendo usados nos componentes migrados
+- Nenhum texto ou lógica de negócio foi alterado
+- Branding (itens marcados acima) permanece intacto após toda a refatoração
 
 ---
 
 ## 10. Notas importantes para o agente
 
 1. **Não alterar copy/textos**: Esta spec é exclusivamente visual. Os textos do onboarding foram escritos manualmente e não devem ser modificados.
-
 2. **Branding prevalece**: Cor `#E8356D`, gradientes `#C42A56`/`#9E2645`, logo PNG na TopBar e no Hero já foram implementados. Se qualquer etapa desta spec conflitar com o branding, o branding vence. Nunca reverter para `#E63333`, `#CC2222`, `#B22222`, texto "ACELERAÍ" ou "PRIMEIRO PASSO".
-
 3. **Design tokens existentes**: O arquivo `src/theme/design-tokens.js` já contém `colorHex`, `designTokens` com radius, space, fontSize, fontWeight, lineHeight, letterSpacing, gradient, elevation. **Não criar** `src/theme/tokens.js`. Adicionar `TYPE` como export nomeado no arquivo existente.
-
 4. **TopBarLogo.jsx existe**: Componente já criado em `src/components/TopBarLogo.jsx` para renderizar o logo da marca. Reutilizá-lo onde necessário; não criar outro.
-
 5. **Migração incremental**: Não tentar migrar tudo para Tailwind de uma vez. Focar primeiro nas mudanças de ícones e componentes novos, depois migrar estilos inline para classes Tailwind componente por componente.
-
 6. **Testar no mobile**: O projeto é mobile-first. Testar todas as mudanças em viewport de 375px.
-
 7. **Framer Motion já está instalado**: Não instalar novamente. Apenas expandir o uso das features já disponíveis (layoutId, useScroll, useTransform).
-
 8. **Prioridade de impacto visual** (fazer nesta ordem):
-   - Trocar emojis por Lucide icons (maior impacto imediato)
-   - Adicionar animações Lottie nas completion screens
-   - Melhorar animações do framer-motion
-   - Extrair componentes reutilizáveis
-   - Migrar para Tailwind
-
+  - Trocar emojis por Lucide icons (maior impacto imediato)
+  - Adicionar animações Lottie nas completion screens
+  - Melhorar animações do framer-motion
+  - Extrair componentes reutilizáveis
+  - Migrar para Tailwind
 9. **Lottie files**: Se não conseguir baixar os JSONs do LottieFiles, criar animações placeholder com CSS puro (ex: um círculo que escala com checkmark animado via keyframes). O importante é eliminar o emoji.
+

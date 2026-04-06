@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
+import { ETAPA7 } from "../copy"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -285,13 +286,9 @@ export default function Etapa7() {
     return (
       <CompletionScreen
         icon="trendingUp"
-        title="Etapa 8 concluída!"
-        description={
-          isHybrid
-            ? "A partir de agora, já estamos cuidando da produção do START KIT no modo personalizado. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha."
-            : "A partir de agora, já estamos cuidando da produção do START KIT. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha."
-        }
-        badge={isHybrid ? "PRODUÇÃO HÍBRIDA" : "PRODUÇÃO ACELERAÍ"}
+        title={ETAPA7.completionTitle}
+        description={isHybrid ? ETAPA7.completionHybrid : ETAPA7.completionStandard}
+        badge={isHybrid ? ETAPA7.completionBadgeHybrid : ETAPA7.completionBadgeStandard}
         badgeColor={isHybrid ? COLORS.accent : COLORS.red}
       />
     )
@@ -300,10 +297,10 @@ export default function Etapa7() {
   return (
     <PageLayout>
       <StepHeader
-        title="Modo avançado"
-        readTime="3 minutos"
+        title={ETAPA7.header.title}
+        readTime={ETAPA7.header.readTime}
         showPersonalized={true}
-        stepLabel="ETAPA 8 DE 8"
+        stepLabel={ETAPA7.header.stepLabel}
       />
 
       {/* Card 1 - Intro */}
@@ -322,13 +319,11 @@ export default function Etapa7() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <Icon name="clapperboard" size={20} color={COLORS.text} />
           <h2 style={{ color: COLORS.text, fontSize: 17, fontWeight: 800, margin: 0 }}>
-            Você tem estrutura para ir além?
+            {ETAPA7.intro.title}
           </h2>
         </div>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-          Alguns clientes possuem equipe de design ou produção própria e preferem ter{" "}
-          <strong style={{ color: COLORS.text }}>mais controle sobre os criativos finais</strong>.
-          Se esse é o seu caso, temos uma opção avançada para você.
+          {ETAPA7.intro.body}
         </p>
       </motion.div>
 
@@ -340,7 +335,7 @@ export default function Etapa7() {
         style={{ marginBottom: 20 }}
       >
         <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: "0 0 14px 0" }}>
-          Escolha seu caminho de produção:
+          {ETAPA7.pathLabel}
         </p>
 
         {/* Option: Standard */}
@@ -391,7 +386,7 @@ export default function Etapa7() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <Icon name="clapperboard" size={16} color={COLORS.text} />
                 <span style={{ color: COLORS.text, fontSize: 14, fontWeight: 700 }}>
-                  Produção pela Aceleraí
+                  {ETAPA7.standard.title}
                 </span>
                 <span
                   style={{
@@ -404,11 +399,11 @@ export default function Etapa7() {
                     letterSpacing: "0.05em",
                   }}
                 >
-                  PADRÃO
+                  {ETAPA7.standard.badge}
                 </span>
               </div>
               <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-                Nossa equipe cuida de tudo: roteiro, edição, design e entrega final dos criativos.
+                {ETAPA7.standard.desc}
               </p>
             </div>
           </div>
@@ -461,7 +456,7 @@ export default function Etapa7() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <Icon name="handshake" size={16} color={COLORS.text} />
                 <span style={{ color: COLORS.text, fontSize: 14, fontWeight: 700 }}>
-                  Personalizado (Avançado)
+                  {ETAPA7.hybrid.title}
                 </span>
                 <span
                   style={{
@@ -474,11 +469,11 @@ export default function Etapa7() {
                     letterSpacing: "0.05em",
                   }}
                 >
-                  AVANÇADO
+                  {ETAPA7.hybrid.badge}
                 </span>
               </div>
               <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-                Você personaliza sua campanha com informações essenciais.
+                {ETAPA7.hybrid.desc}
               </p>
             </div>
           </div>
@@ -506,12 +501,11 @@ export default function Etapa7() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <Icon name="ban" size={16} color={COLORS.danger} />
               <span style={{ color: COLORS.danger, fontSize: 13, fontWeight: 800 }}>
-                Aprovação obrigatória
+                {ETAPA7.hybridRules.aprovacao.title}
               </span>
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-              Todo material editado pela sua equipe <strong style={{ color: COLORS.text }}>precisa ser aprovado pela Aceleraí</strong> antes
-              de ir ao ar. Publicar sem aprovação pode resultar em suspensão da campanha.
+              {ETAPA7.hybridRules.aprovacao.body}
             </p>
           </div>
 
@@ -528,12 +522,11 @@ export default function Etapa7() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <Icon name="clock" size={16} color={COLORS.text} />
               <span style={{ color: COLORS.text, fontSize: 13, fontWeight: 800 }}>
-                3 dias úteis por lote
+                {ETAPA7.hybridRules.prazo.title}
               </span>
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-              Cada lote de materiais enviado para aprovação tem um prazo de até{" "}
-              <strong style={{ color: COLORS.text }}>3 dias úteis</strong> para revisão e feedback.
+              {ETAPA7.hybridRules.prazo.body}
             </p>
           </div>
 
@@ -548,15 +541,10 @@ export default function Etapa7() {
             }}
           >
             <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 800, margin: "0 0 12px 0" }}>
-              A celebridade pode rejeitar materiais que:
+              {ETAPA7.hybridRules.rejeicao.title}
             </p>
             <BulletList
-              items={[
-                "Alterem a aparência ou voz da celebridade de forma inadequada",
-                "Associem a imagem a conteúdo ofensivo ou polêmico",
-                "Desrespeitem as diretrizes de uso da imagem",
-                "Incluam promessas ou alegações não autorizadas",
-              ]}
+              items={ETAPA7.hybridRules.rejeicao.items}
               color={COLORS.danger}
               iconSize={12}
               itemColor={COLORS.textMuted}
@@ -574,15 +562,10 @@ export default function Etapa7() {
             }}
           >
             <p style={{ color: COLORS.accent, fontSize: 13, fontWeight: 800, margin: "0 0 12px 0" }}>
-              Recomendações para produção híbrida:
+              {ETAPA7.hybridRules.recomendacoes.title}
             </p>
             <BulletList
-              items={[
-                "Mantenha a qualidade visual dos materiais originais",
-                "Não distorça ou altere as proporções dos vídeos/fotos",
-                "Use as fontes e cores da marca de forma consistente",
-                "Envie os materiais para aprovação com antecedência",
-              ]}
+              items={ETAPA7.hybridRules.recomendacoes.items}
               color={COLORS.accent}
               iconSize={12}
               itemColor={COLORS.textMuted}
@@ -614,10 +597,10 @@ export default function Etapa7() {
             }}
           >
             <p style={{ color: COLORS.accent, fontSize: 12, fontWeight: 700, margin: "0 0 6px 0" }}>
-              Briefing avançado
+              {ETAPA7.hybridRules.briefingAvancado.title}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.6, margin: 0 }}>
-              Na produção híbrida, você receberá um briefing avançado com todas as especificações técnicas, formatos aceitos e diretrizes de edição para sua equipe seguir.
+              {ETAPA7.hybridRules.briefingAvancado.body}
             </p>
           </div>
         </motion.div>
@@ -641,10 +624,10 @@ export default function Etapa7() {
             <Icon name="circleCheck" size={18} color={COLORS.success} />
             <div>
               <p style={{ color: COLORS.success, fontSize: 14, fontWeight: 700, margin: "0 0 4px 0" }}>
-                Produção completa pela Aceleraí
+                {ETAPA7.standardConfirmation.title}
               </p>
               <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: 0 }}>
-                Nossa equipe vai cuidar de toda a produção dos seus criativos. Você só precisa enviar o briefing e aprovar os materiais finais.
+                {ETAPA7.standardConfirmation.body}
               </p>
             </div>
           </div>
@@ -657,12 +640,12 @@ export default function Etapa7() {
           onNext={handleComplete}
           nextLabel={
             productionPath !== "hybrid"
-              ? "Concluir e avançar"
+              ? ETAPA7.navConcluir
               : generationStatus === "idle"
-                ? "Gerar briefing IA"
+                ? ETAPA7.navGerarIA
                 : generationStatus === "success"
-                  ? "Concluir e avançar"
-                  : "Concluir sem briefing IA"
+                  ? ETAPA7.navConcluir
+                  : ETAPA7.navConcluirSemIA
           }
           nextDisabled={!canAdvance || isSubmitting}
         />
@@ -671,9 +654,9 @@ export default function Etapa7() {
       <ProcessingOverlay
         show={isSubmitting}
         messages={[
-          generationStatus === "idle" ? "Enviando briefing..." : "Gerando briefing com IA...",
-          "Salvando dados da campanha...",
-          "Quase pronto...",
+          generationStatus === "idle" ? ETAPA7.processingSubmit[0] : ETAPA7.processingGenerate[0],
+          ETAPA7.processingSubmit[1],
+          ETAPA7.processingSubmit[2],
         ]}
         duration={4000}
       />

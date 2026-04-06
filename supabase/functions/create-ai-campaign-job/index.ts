@@ -16,6 +16,12 @@ import {
   type FormatName,
 } from '../_shared/ai-campaign/prompt-builder.ts'
 import { log } from '../_shared/ai-campaign/logger.ts'
+import {
+  type NanoBananaDbConfig,
+  type DirectionMode,
+  loadNanoBananaConfig,
+  REFERENCE_BUCKET,
+} from '../_shared/nanobanana/config.ts'
 
 const GLOBAL_RULES = `# GLOBAL ART DIRECTION & ADVERTISING STANDARD (NANO BANANA)
 **Role:** SENIOR ADVERTISING ART DIRECTOR.
@@ -78,33 +84,6 @@ const FALLBACK_DIRECTION: Record<GroupName, string> = {
     'CREATIVE DIRECTION — RETAIL (Hard Sell & Impact).',
 }
 
-interface NanoBananaDbConfig {
-  global_rules: string
-  global_rules_version: string
-  prompt_version: string
-  worker_batch_size: number
-  url_expiry_seconds: number
-  direction_moderna: string
-  direction_clean: string
-  direction_retail: string
-  direction_moderna_mode: 'text' | 'image' | 'both'
-  direction_clean_mode: 'text' | 'image' | 'both'
-  direction_retail_mode: 'text' | 'image' | 'both'
-  direction_moderna_image_path: string | null
-  direction_clean_image_path: string | null
-  direction_retail_image_path: string | null
-  format_1_1: string
-  format_4_5: string
-  format_16_9: string
-  format_9_16: string
-  gemini_model_name: string
-  gemini_api_base_url: string
-  max_retries: number
-  max_image_download_bytes: number
-}
-
-type DirectionMode = 'text' | 'image' | 'both'
-
 interface ResolvedGroupDirection {
   text: string
   referenceImageUrl: string | undefined
@@ -118,7 +97,7 @@ async function readDirectionTextFromImage(
   nbConfig: NanoBananaDbConfig,
 ): Promise<string | null> {
   const { data: signedData } = await supabase.storage
-    .from('nanobanana-references')
+    .from(REFERENCE_BUCKET)
     .createSignedUrl(imagePath, urlExpirySec)
 
   const imageUrl = signedData?.signedUrl
@@ -208,7 +187,7 @@ async function resolveGroupDirections(
     if (mode === 'text' || !imagePath) return
 
     const { data: signedData } = await supabase.storage
-      .from('nanobanana-references')
+      .from(REFERENCE_BUCKET)
       .createSignedUrl(imagePath, urlExpirySec)
 
     const imageUrl = signedData?.signedUrl || undefined
@@ -227,26 +206,6 @@ async function resolveGroupDirections(
   }))
 
   return result
-}
-
-let _cachedNbConfig: NanoBananaDbConfig | null = null
-
-async function loadNanoBananaConfig(
-  supabase: ReturnType<typeof createClient>
-): Promise<NanoBananaDbConfig | null> {
-  if (_cachedNbConfig) return _cachedNbConfig
-  try {
-    const { data, error } = await supabase
-      .from('nanobanana_config')
-      .select('*')
-      .limit(1)
-      .single()
-    if (error || !data) return null
-    _cachedNbConfig = data as NanoBananaDbConfig
-    return _cachedNbConfig
-  } catch {
-    return null
-  }
 }
 
 function buildReferenceSignature(config?: NanoBananaDbConfig | null): string {

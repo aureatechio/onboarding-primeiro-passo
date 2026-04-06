@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
+import { ETAPA62 } from "../copy"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
@@ -51,16 +52,9 @@ async function saveIdentityToBackend(compraId, { choice, logoFile, colors, fontI
   }
 }
 
-const FONT_OPTIONS = [
-  { id: "inter", label: "Inter", preview: "Aa Bb Cc 123", family: "'Inter', sans-serif" },
-  { id: "jetbrains", label: "JetBrains Mono", preview: "Aa Bb Cc 123", family: "'JetBrains Mono', monospace" },
-  { id: "georgia", label: "Georgia", preview: "Aa Bb Cc 123", family: "Georgia, serif" },
-]
-
 const TOTAL_SLIDES = 5
-const SLIDE_LABELS = ["Logo", "Cores", "Fonte", "Imagens", "Observações"]
 
-function StatusChip({ done, requiredLabel = "Obrigatório", optionalLabel = "Opcional", isOptional = false }) {
+function StatusChip({ done, requiredLabel = ETAPA62.statusObrigatorio, optionalLabel = ETAPA62.statusOpcional, isOptional = false }) {
   if (isOptional) {
     return (
       <span style={{
@@ -79,7 +73,7 @@ function StatusChip({ done, requiredLabel = "Obrigatório", optionalLabel = "Opc
       background: done ? `${COLORS.success}18` : `${COLORS.warning}18`,
       color: done ? COLORS.success : COLORS.warning,
     }}>
-      {done ? "Concluído" : requiredLabel}
+      {done ? ETAPA62.statusConcluido : requiredLabel}
     </span>
   )
 }
@@ -333,13 +327,9 @@ export default function Etapa62() {
     return (
       <CompletionScreen
         icon={pendingMode ? "clock" : "circleCheck"}
-        title={pendingMode ? "Etapa 6.2 marcada como pendente" : "Etapa 6.2 concluída!"}
-        description={
-          pendingMode
-            ? "Você decidiu continuar depois. O prazo do contrato segue correndo e você pode completar os itens de identidade visual na sequência com seu atendente."
-            : "Perfeito. Sua etapa de bonificação foi preenchida e isso agiliza o atendimento para envio do seu Start Kit."
-        }
-        badge={pendingMode ? "PENDENTE" : "BONIFICAÇÃO ATIVA"}
+        title={pendingMode ? ETAPA62.completionPending.title : ETAPA62.completionDone.title}
+        description={pendingMode ? ETAPA62.completionPending.description : ETAPA62.completionDone.description}
+        badge={pendingMode ? ETAPA62.completionPending.badge : ETAPA62.completionDone.badge}
         badgeColor={pendingMode ? COLORS.warning : COLORS.success}
       />
     )
@@ -358,11 +348,10 @@ export default function Etapa62() {
         borderRadius: 16, padding: 22, marginBottom: 16,
       }}>
         <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 900, margin: "0 0 10px 0" }}>
-          GANHE UMA BONIFICAÇÃO DE PRAZO DE VEICULAÇÃO DA SUA CAMPANHA
+          {ETAPA62.bonificacaoTitle}
         </p>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-          <strong style={{ color: COLORS.text }}>O QUE VC PRECISA CONCLUIR?</strong> Adicione os
-          arquivos nos campos abaixo e agilize o atendimento.
+          {ETAPA62.bonificacaoBody}
         </p>
       </div>
 
@@ -372,8 +361,7 @@ export default function Etapa62() {
         borderRadius: 14, padding: 16, marginBottom: 16,
       }}>
         <p style={{ color: COLORS.success, fontSize: 13, fontWeight: 700, lineHeight: 1.6, margin: 0 }}>
-          <strong>O QUE VOCÊ VAI RECEBER?</strong> Em até 24h, você receberá o START KIT com 4
-          peças estáticas com conteúdo da sua campanha gerado por IA.
+          {ETAPA62.startKitInfo}
         </p>
       </div>
 
@@ -383,7 +371,7 @@ export default function Etapa62() {
           color: COLORS.text, fontSize: 14, fontWeight: 700,
         }}>
           <Icon name="palette" size={16} color={COLORS.text} />
-          Envie o logo da sua marca
+          {ETAPA62.logoLabel}
           <StatusChip done={Boolean(logoName)} />
         </legend>
 
@@ -420,12 +408,12 @@ export default function Etapa62() {
                   cursor: "pointer", padding: 0,
                 }}
               >
-                Trocar arquivo
+                {ETAPA62.logoChangeButton}
               </button>
             </div>
             {isExtracting && (
               <span style={{ color: COLORS.accent, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
-                Extraindo cores...
+                {ETAPA62.extractingColors}
               </span>
             )}
           </div>
@@ -445,10 +433,10 @@ export default function Etapa62() {
               color: logoValidationError ? COLORS.danger : COLORS.textMuted,
               fontSize: 14, fontWeight: 600,
             }}>
-              Selecionar logo
+              {ETAPA62.logoPlaceholder}
             </span>
             <span style={{ color: COLORS.textDim, fontSize: 11 }}>
-              PNG, JPG, SVG ou WebP (max. 5 MB)
+              {ETAPA62.logoHint}
             </span>
           </label>
         )}
@@ -477,7 +465,7 @@ export default function Etapa62() {
         color: COLORS.text, fontSize: 14, fontWeight: 700,
       }}>
         <Icon name="penLine" size={16} color={COLORS.text} />
-        Cores da sua marca
+        {ETAPA62.coresTitle}
       </div>
 
       {extractedColors.length > 0 && (
@@ -485,7 +473,7 @@ export default function Etapa62() {
           <p style={{
             color: COLORS.textMuted, fontSize: 12, fontWeight: 600, margin: "0 0 10px 0",
           }}>
-            Extraídas do logo ({extractedColors.length})
+            {ETAPA62.coresExtracted(extractedColors.length)}
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             {extractedColors.map((color, index) => (
@@ -509,7 +497,7 @@ export default function Etapa62() {
           borderRadius: 10, padding: 14, marginBottom: 16,
         }}>
           <p style={{ color: COLORS.warning, fontSize: 12, fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
-            Não foi possível extrair cores do logo. Adicione as cores da sua marca manualmente.
+            {ETAPA62.coresNoExtraction}
           </p>
         </div>
       )}
@@ -518,7 +506,7 @@ export default function Etapa62() {
         <p style={{
           color: COLORS.textMuted, fontSize: 12, fontWeight: 600, margin: "0 0 10px 0",
         }}>
-          Suas cores {customColors.length > 0 ? `(${customColors.length})` : ""}
+          {ETAPA62.coresCustomLabel(customColors.length)}
         </p>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           {customColors.map((color, index) => (
@@ -552,7 +540,7 @@ export default function Etapa62() {
       </div>
 
       <p style={{ color: COLORS.textDim, fontSize: 11, margin: "10px 0 0 0" }}>
-        Máximo 5 cores no total (extraídas + adicionadas) · {Math.max(0, 5 - allColors.length)} restantes
+        {ETAPA62.coresLimit(Math.max(0, 5 - allColors.length))}
       </p>
     </div>
   )
@@ -564,12 +552,12 @@ export default function Etapa62() {
         color: COLORS.text, fontSize: 14, fontWeight: 700,
       }}>
         <Icon name="type" size={16} color={COLORS.text} />
-        Escolha a fonte
+        {ETAPA62.fonteTitle}
         <StatusChip done={Boolean(selectedFont)} />
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
-        {FONT_OPTIONS.map((font) => {
+        {ETAPA62.fontOptions.map((font) => {
           const isSelected = selectedFont === font.id
           return (
             <button
@@ -619,7 +607,7 @@ export default function Etapa62() {
         color: COLORS.text, fontSize: 14, fontWeight: 700,
       }}>
         <Icon name="camera" size={16} color={COLORS.text} />
-        Imagens de campanha
+        {ETAPA62.imagensTitle}
         <StatusChip isOptional />
       </div>
 
@@ -662,10 +650,10 @@ export default function Etapa62() {
         >
           <Icon name="camera" size={24} color={COLORS.textDim} />
           <span style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: 600 }}>
-            {imagesFiles.length > 0 ? "Adicionar mais imagens" : "Selecionar imagens"}
+            {imagesFiles.length > 0 ? ETAPA62.imagensAdd : ETAPA62.imagensSelect}
           </span>
           <span style={{ color: COLORS.textDim, fontSize: 11 }}>
-            Peças da campanha para referência (max. 5)
+            {ETAPA62.imagensHint}
           </span>
         </label>
       )}
@@ -679,7 +667,7 @@ export default function Etapa62() {
         color: COLORS.text, fontSize: 14, fontWeight: 700,
       }}>
         <Icon name="penLine" size={16} color={COLORS.text} />
-        Observações para a campanha
+        {ETAPA62.notesTitle}
         <StatusChip isOptional />
       </div>
 
@@ -690,7 +678,7 @@ export default function Etapa62() {
           setCampaignNotes(val)
           updateUserData({ campaignNotes: val })
         }}
-        placeholder="Descreva o objetivo, tom ou qualquer detalhe que ajude na criação das peças..."
+        placeholder={ETAPA62.notesPlaceholder}
         maxLength={500}
         rows={5}
         style={{
@@ -737,10 +725,10 @@ export default function Etapa62() {
   return (
     <PageLayout>
       <StepHeader
-        title="Bonificação de prazo da sua campanha"
-        readTime="2 minutos"
+        title={ETAPA62.header.title}
+        readTime={ETAPA62.header.readTime}
         showPersonalized={true}
-        stepLabel="ETAPA 6.2 DE 8"
+        stepLabel={ETAPA62.header.stepLabel}
       />
 
       {!showMultistep && (
@@ -756,11 +744,10 @@ export default function Etapa62() {
             }}
           >
             <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 900, margin: "0 0 10px 0" }}>
-              GANHE UMA BONIFICAÇÃO DE PRAZO DE VEICULAÇÃO DA SUA CAMPANHA
+              {ETAPA62.bonificacaoTitle}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-              <strong style={{ color: COLORS.text }}>O QUE VC PRECISA CONCLUIR?</strong> Adicione os
-              arquivos nos campos abaixo e agilize o atendimento.
+              {ETAPA62.bonificacaoBody}
             </p>
           </motion.div>
 
@@ -774,19 +761,16 @@ export default function Etapa62() {
             }}
           >
             <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 800, margin: "0 0 8px 0" }}>
-              Como funciona
+              {ETAPA62.comoFunciona.title}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 10px 0" }}>
-              Dentro do prazo de 15 dias após a assinatura do seu contrato, você recebe, ao final dos
-              três meses de contrato, os dias que você conseguiu antecipar de prazo.
+              {ETAPA62.comoFunciona.body}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 6px 0" }}>
-              <strong style={{ color: COLORS.text }}>Exemplo A):</strong> Preenchendo ainda hoje (DIA DO
-              PRIMEIRO PASSO) você ganha + 15 dias de bonificação.
+              {ETAPA62.comoFunciona.exemploA}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-              <strong style={{ color: COLORS.text }}>Exemplo B):</strong> Preenchendo 5 dias corridos a
-              partir da data do contrato, você ganha + 10 dias de bonificação.
+              {ETAPA62.comoFunciona.exemploB}
             </p>
           </motion.div>
 
@@ -801,8 +785,7 @@ export default function Etapa62() {
             }}
           >
             <p style={{ color: COLORS.success, fontSize: 13, fontWeight: 700, lineHeight: 1.6, margin: 0 }}>
-              <strong>O QUE VOCÊ VAI RECEBER?</strong> Em até 24h, você receberá o START KIT com 4
-              peças estáticas com conteúdo da sua campanha gerado por IA.
+              {ETAPA62.startKitInfo}
             </p>
           </motion.div>
 
@@ -838,7 +821,7 @@ export default function Etapa62() {
                   {choice === "add_now" && <Icon name="check" size={11} color={COLORS.bg} />}
                 </div>
                 <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-                  Vou adicionar as minhas referências da identidade visual
+                  {ETAPA62.choiceAddNow}
                 </p>
               </div>
             </motion.button>
@@ -866,8 +849,7 @@ export default function Etapa62() {
                   {choice === "later" && <Icon name="check" size={11} color={COLORS.bg} />}
                 </div>
                 <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-                  Prefiro deixar para depois tendo ciência que o prazo do meu contrato está correndo
-                  desde já.
+                  {ETAPA62.choiceLater}
                 </p>
               </div>
             </motion.button>
@@ -876,7 +858,7 @@ export default function Etapa62() {
           <StickyFooter>
             <NavButtons
               onNext={choice === "later" ? handleConfirm : undefined}
-              nextLabel={isSaving ? "Salvando..." : "Confirmar e avançar com pendência"}
+              nextLabel={isSaving ? ETAPA62.navSaving : ETAPA62.navConfirmPending}
               nextDisabled={isSaving || choice !== "later"}
             />
           </StickyFooter>
@@ -896,7 +878,7 @@ export default function Etapa62() {
             letterSpacing: "0.06em", margin: "0 0 6px 0",
             fontFamily: "'JetBrains Mono', monospace",
           }}>
-            {SLIDE_LABELS[currentSlide]?.toUpperCase()} ({currentSlide + 1}/{TOTAL_SLIDES})
+            {ETAPA62.slideLabels[currentSlide]?.toUpperCase()} ({currentSlide + 1}/{TOTAL_SLIDES})
           </p>
 
           <SlideTransition
@@ -921,10 +903,10 @@ export default function Etapa62() {
               onNext={isLastSlide ? handleConfirm : nextSlide}
               nextLabel={
                 isSaving
-                  ? "Salvando..."
+                  ? ETAPA62.navSaving
                   : isLastSlide
-                    ? "Confirmar e enviar"
-                    : "Próximo"
+                    ? ETAPA62.navConfirm
+                    : ETAPA62.slideLabels[currentSlide + 1] ?? ETAPA62.navConfirm
               }
               nextDisabled={isSaving || !canAdvanceSlide(currentSlide)}
             />
@@ -944,7 +926,7 @@ export default function Etapa62() {
                   opacity: isSaving ? 0.5 : 1,
                 }}
               >
-                {isSaving ? "Salvando..." : "Continuar depois (marcar etapa como pendente)"}
+                {isSaving ? ETAPA62.navSaving : ETAPA62.navContinueLater}
               </button>
             )}
           </StickyFooter>
@@ -953,11 +935,7 @@ export default function Etapa62() {
 
       <ProcessingOverlay
         show={isSaving}
-        messages={[
-          "Enviando identidade visual...",
-          "Salvando logo e cores...",
-          "Quase pronto...",
-        ]}
+        messages={ETAPA62.processingMessages}
         duration={4000}
       />
     </PageLayout>

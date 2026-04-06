@@ -41,7 +41,7 @@ TASK-{YYYY-MM-DD}-{NNN}-{slug}.md
 
 | ID | Título | Módulo | Scale | Status | Prioridade |
 |----|--------|--------|-------|--------|------------|
-| [TASK-2026-04-06-001](./TASK-2026-04-06-001-conectar-copy-js-aos-componentes.md) | Conectar copy.js aos componentes de onboarding | onboarding | MEDIUM | enriquecida | media |
+| [TASK-2026-04-06-001](./TASK-2026-04-06-001-conectar-copy-js-aos-componentes.md) | Conectar copy.js aos componentes de onboarding | onboarding | MEDIUM | concluida | media |
 | [TASK-2026-04-06-002](./TASK-2026-04-06-002-tela-gerenciamento-copy-dashboard.md) | Criar tela de gerenciamento de copy no dashboard | dashboard | LARGE | enriquecida | media |
 | [TASK-2026-04-02-006](./TASK-2026-04-02-006-calibracao-polling-omie.md) | Calibração de polling OMIE | omie | — | triagem | — |
 | [TASK-2026-04-02-007](./TASK-2026-04-02-007-validacao-sync-vendedores.md) | Validação de sync de vendedores | omie | — | triagem | — |

@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
 import { TYPE } from "../theme/design-tokens";
+import { ETAPA1 } from "../copy";
 
 export default function Etapa1Hero() {
   const { userData, goNext } = useOnboarding();
@@ -12,13 +13,6 @@ export default function Etapa1Hero() {
   const glowY = useTransform(scrollY, [0, 300], [0, -80]);
   const glowScale = useTransform(scrollY, [0, 300], [1, 1.2]);
   const glowOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
-
-  const valueProps = [
-    "Entender como funciona a sua campanha",
-    "Conhecer os prazos e combinados",
-    "Saber as regras de uso da celebridade",
-    "Liberar a produção das suas peças",
-  ];
 
   const container = {
     hidden: { opacity: 0 },
@@ -124,7 +118,7 @@ export default function Etapa1Hero() {
               marginTop: 0,
             }}
           >
-            Olá, {userData.clientName}. Bem-vindo.
+            {ETAPA1.greeting(userData.clientName)}
           </motion.p>
 
           {/* Title */}
@@ -136,7 +130,7 @@ export default function Etapa1Hero() {
               margin: "0 0 24px 0",
             }}
           >
-            Primeiro Passo
+            {ETAPA1.title}
           </motion.h1>
 
           {/* Red accent line */}
@@ -161,7 +155,7 @@ export default function Etapa1Hero() {
               lineHeight: 1.6,
             }}
           >
-            Falta um passo entre você e a sua campanha com
+            {ETAPA1.subtitle}
           </motion.p>
 
           {/* Celebrity name */}
@@ -190,7 +184,7 @@ export default function Etapa1Hero() {
               textAlign: "left",
             }}
           >
-            {valueProps.map((text, i) => (
+            {ETAPA1.valueProps.map((text, i) => (
               <div
                 key={i}
                 style={{
@@ -199,7 +193,7 @@ export default function Etapa1Hero() {
                   gap: "12px",
                   padding: "10px 0",
                   borderBottom:
-                    i < valueProps.length - 1
+                    i < ETAPA1.valueProps.length - 1
                       ? `1px solid ${COLORS.border}`
                       : "none",
                 }}
@@ -257,7 +251,7 @@ export default function Etapa1Hero() {
                 color: COLORS.textDim,
               }}
             >
-              Tempo estimado: 15 minutos
+              {ETAPA1.estimatedTime}
             </span>
           </motion.div>
 
@@ -287,7 +281,7 @@ export default function Etapa1Hero() {
             }}
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              COMEÇAR AGORA
+              {ETAPA1.ctaButton}
               <Icon name="arrowRight" size={16} color={COLORS.text} />
             </span>
           </motion.button>
@@ -303,7 +297,7 @@ export default function Etapa1Hero() {
               maxWidth: "320px",
             }}
           >
-            Ao completar, sua equipe de produção é ativada automaticamente.
+            {ETAPA1.microCopy}
           </motion.p>
 
           {/* Progress dots */}
@@ -341,7 +335,7 @@ export default function Etapa1Hero() {
               color: COLORS.textDim,
             }}
           >
-            ETAPA 1 DE 7
+            {ETAPA1.stepLabel}
           </motion.span>
         </motion.div>
       </motion.div>

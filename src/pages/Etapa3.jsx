@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
+import { ETAPA3 } from "../copy";
 import { motion } from "framer-motion";
 import PageLayout from "../components/PageLayout";
 import StepHeader from "../components/StepHeader";
@@ -68,23 +69,6 @@ export default function Etapa3() {
       show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
     };
 
-    const nowItems = [
-      {
-        icon: "mail",
-        title: "Entraremos em contato",
-        desc: "Nossa equipe vai te procurar nos canais combinados.",
-      },
-      {
-        icon: "zap",
-        title: "Responda rápido",
-        desc: "Quanto mais rápido você responder, mais rápido sua campanha sai.",
-      },
-      {
-        icon: "clapperboard",
-        title: "A produção começa",
-        desc: "Assim que tudo estiver alinhado, iniciamos as peças.",
-      },
-    ];
 
     return (
       <div
@@ -136,7 +120,7 @@ export default function Etapa3() {
               letterSpacing: "-0.03em",
             }}
           >
-            Preparação ativada!
+            {ETAPA3.activation.title}
           </motion.h2>
 
           {/* Description */}
@@ -149,9 +133,7 @@ export default function Etapa3() {
               margin: "0 0 20px 0",
             }}
           >
-            A partir de agora, os 15 dias de preparação da sua campanha com{" "}
-            <strong style={{ color: COLORS.text }}>{userData.celebName}</strong>{" "}
-            começaram a contar. Fique atento aos prazos e responda rápido.
+            {ETAPA3.activation.description(userData.celebName)}
           </motion.p>
 
           {/* Badge */}
@@ -187,7 +169,7 @@ export default function Etapa3() {
                 fontFamily: "'JetBrains Mono', monospace",
               }}
             >
-              15 DIAS DE PREPARAÇÃO
+              {ETAPA3.activation.badge}
             </span>
           </motion.div>
 
@@ -213,9 +195,9 @@ export default function Etapa3() {
                 fontFamily: "'JetBrains Mono', monospace",
               }}
             >
-              O QUE ACONTECE AGORA
+              {ETAPA3.activation.cardLabel}
             </p>
-            {nowItems.map((ni, i) => (
+            {ETAPA3.activation.items.map((ni, i) => (
               <div
                 key={i}
                 style={{
@@ -224,7 +206,7 @@ export default function Etapa3() {
                   gap: 12,
                   padding: "12px 0",
                   borderBottom:
-                    i < nowItems.length - 1
+                    i < ETAPA3.activation.items.length - 1
                       ? `1px solid ${COLORS.border}`
                       : "none",
                 }}
@@ -266,8 +248,7 @@ export default function Etapa3() {
               lineHeight: 1.5,
             }}
           >
-            Na próxima etapa, você conhecerá as regras de uso da imagem da
-            celebridade.
+            {ETAPA3.activation.nextStepText}
           </motion.p>
 
           {/* CTA Button */}
@@ -291,7 +272,7 @@ export default function Etapa3() {
             }}
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              Continuar para Etapa 4
+              {ETAPA3.activation.ctaButton}
               <Icon name="arrowRight" size={16} color={COLORS.text} />
             </span>
           </motion.button>
@@ -329,7 +310,7 @@ export default function Etapa3() {
               fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            ETAPA 3 DE {totalSteps} CONCLUIDA
+            {ETAPA3.activation.stepLabel(totalSteps)}
           </motion.p>
         </motion.div>
       </div>
@@ -341,17 +322,7 @@ export default function Etapa3() {
     switch (currentSlide) {
       // ── Slide 3.1 ──────────────────────────────────────────────────
       case 0: {
-        const timeline = [
-          { label: "Assinatura do contrato", status: "done" },
-          { label: "Primeiro Passo", status: "current", tag: "AGORA" },
-          { label: "Preparação (Start Kit)", status: "next", tag: "EM BREVE" },
-          { label: "Briefing criativo", status: "future" },
-          { label: "Produção das peças", status: "future" },
-          { label: "Aprovação do cliente", status: "future" },
-          { label: "Aprovação com a Celebridade", status: "future" },
-          { label: "Entrega final", status: "future" },
-          { label: "Uso da campanha", status: "future" },
-        ];
+        const timeline = ETAPA3.timeline;
 
         const statusColor = (s) => {
           if (s === "done") return COLORS.success;
@@ -486,17 +457,8 @@ export default function Etapa3() {
 
       // ── Slide 3.2 ──────────────────────────────────────────────────
       case 1: {
-        const yourPart = [
-          "Responder ao briefing criativo",
-          "Enviar materiais solicitados (logo, textos, referências)",
-          "Aprovar ou solicitar ajustes nas peças",
-          "Cumprir os prazos de cada fase",
-        ];
-        const ourPart = [
-          "Criar o roteiro e direção criativa",
-          "Produzir as peças com a celebridade",
-          "Entregar dentro do prazo combinado",
-        ];
+        const yourPart = ETAPA3.suaParte.items;
+        const ourPart = ETAPA3.nossaParte.items;
 
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -538,7 +500,7 @@ export default function Etapa3() {
                     margin: 0,
                   }}
                 >
-                  A sua parte
+                  {ETAPA3.suaParte.label}
                 </p>
               </div>
               <BulletList items={yourPart} color={COLORS.accent} />
@@ -582,7 +544,7 @@ export default function Etapa3() {
                     margin: 0,
                   }}
                 >
-                  A parte da Aceleraí
+                  {ETAPA3.nossaParte.label}
                 </p>
               </div>
               <BulletList items={ourPart} color={COLORS.red} />
@@ -617,7 +579,7 @@ export default function Etapa3() {
                   lineHeight: 1.5,
                 }}
               >
-                O prazo do contrato começa a contar a partir da assinatura, não da entrega. Por isso, agilidade é tudo.
+                {ETAPA3.warningText}
               </p>
             </div>
 
@@ -670,7 +632,7 @@ export default function Etapa3() {
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
-                    CLIENTE ÁGIL
+                    {ETAPA3.clienteAgil.label}
                   </span>
                 </div>
                 <p
@@ -681,7 +643,7 @@ export default function Etapa3() {
                     lineHeight: 1.6,
                   }}
                 >
-                  Responde rápido, envia materiais no prazo, aprova sem demora. Resultado: campanha entregue dentro do previsto, com tempo de sobra para usar.
+                  {ETAPA3.clienteAgil.desc}
                 </p>
               </div>
 
@@ -732,7 +694,7 @@ export default function Etapa3() {
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
-                    CLIENTE QUE DEMOROU
+                    {ETAPA3.clienteDemorou.label}
                   </span>
                 </div>
                 <p
@@ -743,7 +705,7 @@ export default function Etapa3() {
                     lineHeight: 1.6,
                   }}
                 >
-                  Demora pra responder, atrasa envio de materiais, pede muitas alterações fora do escopo. Resultado: prazo do contrato corre, e o tempo de uso da campanha diminui.
+                  {ETAPA3.clienteDemorou.desc}
                 </p>
               </div>
             </div>
@@ -767,7 +729,7 @@ export default function Etapa3() {
                   lineHeight: 1.5,
                 }}
               >
-                Sua agilidade é o que garante o melhor resultado. O tempo é seu aliado — use-o bem.
+                {ETAPA3.agilidadeTip}
               </p>
             </div>
           </div>
@@ -817,7 +779,7 @@ export default function Etapa3() {
                       margin: 0,
                     }}
                   >
-                    WhatsApp
+                    {ETAPA3.whatsapp.title}
                   </p>
                   <p
                     style={{
@@ -826,7 +788,7 @@ export default function Etapa3() {
                       margin: "2px 0 0 0",
                     }}
                   >
-                    Canal principal de comunicação
+                    {ETAPA3.whatsapp.subtitle}
                   </p>
                 </div>
               </div>
@@ -838,7 +800,7 @@ export default function Etapa3() {
                   lineHeight: 1.6,
                 }}
               >
-                Todas as atualizações, solicitações de materiais e aprovações serão enviadas por WhatsApp. Mantenha as notificações ativas e responda o mais rápido possível.
+                {ETAPA3.whatsapp.desc}
               </p>
             </div>
 
@@ -881,7 +843,7 @@ export default function Etapa3() {
                       margin: 0,
                     }}
                   >
-                    Plataforma Aceleraí
+                    {ETAPA3.plataforma.title}
                   </p>
                   <p
                     style={{
@@ -890,7 +852,7 @@ export default function Etapa3() {
                       margin: "2px 0 0 0",
                     }}
                   >
-                    Acompanhamento e entregas
+                    {ETAPA3.plataforma.subtitle}
                   </p>
                 </div>
               </div>
@@ -902,7 +864,7 @@ export default function Etapa3() {
                   lineHeight: 1.6,
                 }}
               >
-                Pela plataforma você acompanha o status da campanha, faz upload de materiais e visualiza as entregas finais.
+                {ETAPA3.plataforma.desc}
               </p>
             </div>
 
@@ -928,7 +890,7 @@ export default function Etapa3() {
                   lineHeight: 1.5,
                 }}
               >
-                Mantenha os dois canais ativos. Demora na resposta impacta diretamente o prazo da sua campanha.
+                {ETAPA3.canaisTip}
               </p>
             </div>
           </div>
@@ -940,26 +902,16 @@ export default function Etapa3() {
     }
   };
 
-  const slideTags = [
-    "SLIDE 3.1",
-    "SLIDE 3.2",
-    "SLIDE 3.3",
-    "SLIDE 3.4",
-  ];
-  const slideTitles = [
-    "A linha do tempo da sua campanha",
-    "Preparação: 15 dias pra tudo acontecer",
-    "O tempo é seu aliado (se você for rápido)",
-    "Onde a gente se fala",
-  ];
+  const slideTags = ETAPA3.slideTags;
+  const slideTitles = ETAPA3.slideTitles;
 
   // ─── Main Screen ─────────────────────────────────────────────────────
   return (
     <PageLayout>
       <StepHeader
-        title="Prazos e combinados"
-        readTime="3 minutos"
-        alert="Ao concluir esta etapa, os 15 dias de preparação começam a contar"
+        title={ETAPA3.header.title}
+        readTime={ETAPA3.header.readTime}
+        alert={ETAPA3.header.alert}
       />
 
       {!showQuiz ? (
@@ -1012,8 +964,8 @@ export default function Etapa3() {
               onNext={nextSlide}
               nextLabel={
                 currentSlide < totalSlides - 1
-                  ? "Próximo"
-                  : "Revisar e confirmar"
+                  ? ETAPA3.navNextDefault
+                  : ETAPA3.navNextLast
               }
             />
           </StickyFooter>
@@ -1023,14 +975,10 @@ export default function Etapa3() {
           <QuizConfirmation
             icon="clock"
             iconBg={`${COLORS.warning}10`}
-            subtitle="Ao confirmar, a preparação de 15 dias inicia"
-            questions={[
-              "Entendi que o prazo do contrato conta a partir da assinatura e que minha agilidade impacta diretamente o resultado.",
-              "Sei que terei 15 dias de preparação e que preciso responder rapidamente a todas as solicitações.",
-              "Compreendo que atrasos da minha parte podem reduzir o tempo de uso da campanha.",
-            ]}
+            subtitle={ETAPA3.quizSubtitle}
+            questions={ETAPA3.quizQuestions}
             onAllConfirmed={(ready) => setQuizReady(ready)}
-            confirmMessage="Tudo certo! Você pode ativar a preparação."
+            confirmMessage={ETAPA3.quizConfirmMessage}
           />
 
           <StickyFooter>
@@ -1038,7 +986,7 @@ export default function Etapa3() {
               onPrev={prevSlide}
               onNext={() => setProcessing(true)}
               nextVariant="warning"
-              nextLabel="Confirmar e ativar preparação"
+              nextLabel={ETAPA3.navConfirmQuiz}
               nextDisabled={!quizReady}
             />
           </StickyFooter>
@@ -1047,12 +995,7 @@ export default function Etapa3() {
 
       <ProcessingOverlay
         show={processing}
-        messages={[
-          "Ativando preparação...",
-          "Notificando sua atendente...",
-          "Registrando prazos...",
-          "Tudo pronto!",
-        ]}
+        messages={ETAPA3.processingMessages}
         duration={2500}
         onComplete={() => {
           setProcessing(false);

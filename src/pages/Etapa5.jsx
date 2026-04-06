@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
+import { ETAPA5 } from "../copy"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -64,13 +65,13 @@ export default function Etapa5() {
     return (
       <CompletionScreen
         icon="smartphone"
-        title="Etapa 5 concluída!"
+        title={ETAPA5.completionTitle}
         description={
           trafficChoice === "yes"
-            ? "Excelente escolha! Você vai receber o PDF com as 10 superdicas de tráfego pago diretamente no seu WhatsApp. Enquanto isso, vamos seguir para a próxima etapa."
-            : "Sem problemas! Você pode solicitar o material sobre tráfego a qualquer momento com seu atendente. Vamos seguir para a próxima etapa."
+            ? ETAPA5.completionYes
+            : ETAPA5.completionNo
         }
-        badge={trafficChoice === "yes" ? "PDF SUPERDICAS SOLICITADO" : undefined}
+        badge={trafficChoice === "yes" ? ETAPA5.completionBadge : undefined}
         badgeColor={COLORS.accent}
       />
     )
@@ -80,8 +81,8 @@ export default function Etapa5() {
   return (
     <PageLayout>
       <StepHeader
-        title="Sua presença digital"
-        readTime="2 minutos"
+        title={ETAPA5.header.title}
+        readTime={ETAPA5.header.readTime}
         showPersonalized={true}
       />
 
@@ -89,16 +90,13 @@ export default function Etapa5() {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{ marginBottom: 16 }}>
         <InfoCard
           icon={Smartphone}
-          title="Seus criativos precisam de um palco"
+          title={ETAPA5.palco.title}
           iconColor={COLORS.red}
           borderColor={`${COLORS.red}25`}
           bgTint={`linear-gradient(135deg, ${COLORS.red}18, ${COLORS.red}08)`}
         >
           <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
-            De nada adianta ter vídeos incríveis com uma celebridade se seus{" "}
-            <strong style={{ color: COLORS.text }}>canais digitais não estão preparados</strong> para
-            receber essa audiência. Suas redes sociais, site e landing pages precisam estar{" "}
-            <strong style={{ color: COLORS.text }}>prontos para converter</strong>.
+            {ETAPA5.palco.body}
           </p>
         </InfoCard>
       </motion.div>
@@ -126,7 +124,7 @@ export default function Etapa5() {
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
-          PENSE ASSIM
+          {ETAPA5.penseAssim.label}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ flex: 1, textAlign: "center" }}>
@@ -153,10 +151,10 @@ export default function Etapa5() {
                 letterSpacing: "0.05em",
               }}
             >
-              A CELEBRIDADE
+              {ETAPA5.penseAssim.celebLabel}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, margin: 0 }}>
-              Atrai os olhares
+              {ETAPA5.penseAssim.celebDesc}
             </p>
           </div>
 
@@ -186,10 +184,10 @@ export default function Etapa5() {
                 letterSpacing: "0.05em",
               }}
             >
-              SEUS CANAIS
+              {ETAPA5.penseAssim.canaisLabel}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, margin: 0 }}>
-              Convertem em resultado
+              {ETAPA5.penseAssim.canaisDesc}
             </p>
           </div>
         </div>
@@ -205,7 +203,7 @@ export default function Etapa5() {
           }}
         >
           <p style={{ color: COLORS.warning, fontSize: 12, fontWeight: 600, lineHeight: 1.5, margin: 0, textAlign: "center" }}>
-            Imagine investir em uma vitrine incrível... e manter a loja trancada. Seus canais digitais são a porta de entrada.
+            {ETAPA5.penseAssim.warningTip}
           </p>
         </div>
       </motion.div>
@@ -226,18 +224,15 @@ export default function Etapa5() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
           <Icon name="trendingUp" size={20} color={COLORS.accent} />
           <h3 style={{ color: COLORS.accent, fontSize: 16, fontWeight: 800, margin: 0 }}>
-            Como acelerar seus resultados
+            {ETAPA5.trafego.title}
           </h3>
         </div>
         <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 16px 0" }}>
-          Empresas que investem em <strong style={{ color: COLORS.text }}>tráfego pago</strong> junto
-          com criativos de celebridade têm até{" "}
-          <strong style={{ color: COLORS.accent }}>21x mais visibilidade</strong> do que quem apenas
-          posta organicamente.
+          {ETAPA5.trafego.body}
         </p>
 
         <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 700, margin: "0 0 12px 0" }}>
-          Quer aprender mais sobre tráfego?
+          {ETAPA5.trafego.question}
         </p>
 
         {/* Option: Yes */}
@@ -286,7 +281,7 @@ export default function Etapa5() {
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: "0 0 2px 0" }}>
-                Sim, quero receber as 10 superdicas de tráfego pago
+                {ETAPA5.trafego.optionYes}
               </p>
               <span
                 style={{
@@ -301,7 +296,7 @@ export default function Etapa5() {
                   marginTop: 4,
                 }}
               >
-                PDF GRATUITO
+                {ETAPA5.trafego.optionYesBadge}
               </span>
             </div>
           </div>
@@ -351,7 +346,7 @@ export default function Etapa5() {
               )}
             </div>
             <p style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: 600, margin: 0 }}>
-              Agora não, quero seguir para a próxima etapa
+              {ETAPA5.trafego.optionNo}
             </p>
           </div>
         </motion.button>
@@ -393,7 +388,7 @@ export default function Etapa5() {
               setIsSubmitting(false)
             }
           }}
-          nextLabel={isSubmitting ? "Enviando..." : "Concluir e avançar"}
+          nextLabel={isSubmitting ? ETAPA5.navNextSubmitting : ETAPA5.navNext}
           nextDisabled={!trafficChoice || isSubmitting}
         />
       </StickyFooter>

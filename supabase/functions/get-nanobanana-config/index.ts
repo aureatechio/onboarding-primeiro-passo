@@ -6,6 +6,7 @@
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { REFERENCE_BUCKET, CONFIG_TABLE } from "../_shared/nanobanana/config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +15,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
-const REFERENCE_BUCKET = "nanobanana-references";
 const URL_EXPIRY_SECONDS = 60 * 30;
 
 function jsonResponse(body: Record<string, unknown>, status = 200) {
@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data, error } = await supabase
-      .from("nanobanana_config")
+      .from(CONFIG_TABLE)
       .select("*")
       .limit(1)
       .single();

@@ -4,6 +4,7 @@
  */
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
+import { type CategoryKey, VALID_CATEGORIES } from '../_shared/nanobanana/config.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,8 +12,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const VALID_CATEGORIES = ['moderna', 'clean', 'retail'] as const
-type Category = (typeof VALID_CATEGORIES)[number]
+type Category = CategoryKey
 
 const MAX_UPLOAD_BYTES = parseInt(
   Deno.env.get('NANOBANANA_MAX_REFERENCE_UPLOAD_BYTES') ?? String(10 * 1024 * 1024),

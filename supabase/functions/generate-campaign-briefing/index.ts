@@ -1,19 +1,30 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { corsHeaders, handleCors } from '../_shared/cors.ts'
+import { type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
+import { handleCors } from '../_shared/cors.ts'
 import { buildPerplexityPayload } from '../_shared/perplexity/prompt.ts'
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+import {
+  normalizeProviderResponse,
+  type NormalizedData,
+  type ProviderResponse,
+} from '../_shared/perplexity/normalize.ts'
+import {
+  AppError,
+  ProviderHttpError,
+  callProvider as sharedCallProvider,
+  loadDbConfig,
+  getConfiguredModel,
+  createServiceClient,
+  json,
+  asNonEmptyString,
+  isValidUuid,
+  isValidHttpUrl,
+  type PerplexityDbConfig,
+} from '../_shared/perplexity/client.ts'
 
 const CONTRACT_VERSION = 'v1.0.0'
 const PROMPT_VERSION = 'v1.0.0'
 const STRATEGY_VERSION = 'v1.0.0'
-const DEFAULT_MODEL = 'sonar'
-const DEFAULT_API_BASE_URL = 'https://api.perplexity.ai'
-const DEFAULT_TIMEOUT_MS = 15_000
 
-type GoalHint = 'awareness' | 'conversao' | 'retencao'
 type BriefingMode = 'text' | 'audio' | 'both'
 
 interface BriefingInput {
@@ -24,73 +35,11 @@ interface BriefingInput {
   context?: {
     segment?: string | null
     region?: string | null
-    campaign_goal_hint?: GoalHint | null
+    campaign_goal_hint?: 'awareness' | 'conversao' | 'retencao' | null
   }
   briefing_input?: {
-    mode?: 'text' | 'audio' | 'both' | null
+    mode?: BriefingMode | null
     text?: string | null
-  }
-}
-
-interface ProviderCitation {
-  title?: string
-  url?: string
-  date?: string | null
-}
-
-interface ProviderResponse {
-  id?: string
-  model?: string
-  usage?: Record<string, unknown>
-  choices?: Array<{
-    message?: {
-      content?: string
-    }
-  }>
-  search_results?: ProviderCitation[]
-}
-
-interface NormalizedInsight {
-  variacao: number
-  diferencial: string
-  formato: string
-  plataforma: string
-  gancho: string
-  chamada_principal: string
-  texto_apoio: string
-  cta: string
-  direcao_criativa: string
-}
-
-interface NormalizedBriefing {
-  sobre_empresa: string
-  publico_alvo: string
-  sobre_celebridade: string
-  objetivo_campanha: string
-  mensagem_central: string
-  tom_voz: string
-  pontos_prova: string[]
-  cta_principal: string
-  cta_secundario: string
-}
-
-interface NormalizedData {
-  compra_id: string
-  provider: 'perplexity'
-  model: string
-  contract_version: string
-  prompt_version: string
-  strategy_version: string
-  briefing: NormalizedBriefing
-  insights_pecas: NormalizedInsight[]
-  citacoes: Array<{
-    title: string
-    url: string
-    date: string | null
-  }>
-  raw: {
-    provider_response_id: string | null
-    usage: Record<string, unknown>
   }
 }
 
@@ -108,196 +57,22 @@ interface Dependencies {
       contract_version: string
       status: 'pending' | 'done' | 'error'
       error_code?: string | null
-    }
+    },
   ) => Promise<void>
   resolvePersistMode: (
     compraId: string,
-    fallbackMode: BriefingMode
+    fallbackMode: BriefingMode,
   ) => Promise<BriefingMode>
   now: () => number
 }
 
-type ErrorCode =
-  | 'INVALID_INPUT'
-  | 'PERPLEXITY_PROVIDER_ERROR'
-  | 'PERPLEXITY_TIMEOUT'
-  | 'INVALID_PROVIDER_RESPONSE'
-  | 'INTERNAL_ERROR'
-
-class AppError extends Error {
-  code: ErrorCode
-  httpStatus: number
-
-  constructor(code: ErrorCode, message: string, httpStatus: number) {
-    super(message)
-    this.code = code
-    this.httpStatus = httpStatus
-  }
-}
-
-class ProviderHttpError extends Error {
-  status: number
-  body: string
-
-  constructor(status: number, body: string) {
-    super(`Perplexity HTTP ${status}`)
-    this.status = status
-    this.body = body
-  }
-}
-
-function json(body: Record<string, unknown>, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
-}
-
-export function isValidUuid(value: string): boolean {
-  return UUID_REGEX.test(value.trim())
-}
-
-export function isValidHttpUrl(value: string): boolean {
-  try {
-    const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
-
-function asNonEmptyString(value: unknown): string {
-  if (typeof value !== 'string') return ''
-  return value.trim()
-}
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
 
 function sanitizeBriefingMode(value: unknown): BriefingMode | null {
   if (value === 'text' || value === 'audio' || value === 'both') return value
   return null
-}
-
-export function extractJsonObject(raw: string): Record<string, unknown> | null {
-  const direct = raw.trim()
-  try {
-    return JSON.parse(direct)
-  } catch {
-    // keep trying best-effort extraction below
-  }
-
-  const start = raw.indexOf('{')
-  const end = raw.lastIndexOf('}')
-  if (start < 0 || end <= start) return null
-
-  try {
-    return JSON.parse(raw.slice(start, end + 1))
-  } catch {
-    return null
-  }
-}
-
-function normalizeInsight(item: Record<string, unknown>, index: number): NormalizedInsight {
-  return {
-    variacao: index + 1,
-    diferencial: asNonEmptyString(item.diferencial),
-    formato: asNonEmptyString(item.formato),
-    plataforma: asNonEmptyString(item.plataforma),
-    gancho: asNonEmptyString(item.gancho),
-    chamada_principal: asNonEmptyString(item.chamada_principal),
-    texto_apoio: asNonEmptyString(item.texto_apoio),
-    cta: asNonEmptyString(item.cta),
-    direcao_criativa: asNonEmptyString(item.direcao_criativa),
-  }
-}
-
-function normalizeBriefingObject(input: Record<string, unknown>): NormalizedBriefing {
-  const points = Array.isArray(input.pontos_prova)
-    ? input.pontos_prova.map((point) => asNonEmptyString(point)).filter((point) => point.length > 0)
-    : []
-
-  return {
-    sobre_empresa: asNonEmptyString(input.sobre_empresa),
-    publico_alvo: asNonEmptyString(input.publico_alvo),
-    sobre_celebridade: asNonEmptyString(input.sobre_celebridade),
-    objetivo_campanha: asNonEmptyString(input.objetivo_campanha),
-    mensagem_central: asNonEmptyString(input.mensagem_central),
-    tom_voz: asNonEmptyString(input.tom_voz),
-    pontos_prova: points,
-    cta_principal: asNonEmptyString(input.cta_principal),
-    cta_secundario: asNonEmptyString(input.cta_secundario),
-  }
-}
-
-export function normalizeProviderResponse(
-  input: BriefingInput,
-  providerResponse: ProviderResponse,
-  fallbackModel: string
-): NormalizedData {
-  const content = providerResponse.choices?.[0]?.message?.content
-  if (!content || !content.trim()) {
-    throw new AppError(
-      'INVALID_PROVIDER_RESPONSE',
-      'Provider retornou resposta sem conteudo.',
-      502
-    )
-  }
-
-  const parsed = extractJsonObject(content)
-  if (!parsed) {
-    throw new AppError(
-      'INVALID_PROVIDER_RESPONSE',
-      'Nao foi possivel extrair JSON valido da resposta do provider.',
-      502
-    )
-  }
-
-  const briefingRaw = parsed.briefing
-  const insightsRaw = parsed.insights_pecas
-
-  if (
-    !briefingRaw ||
-    typeof briefingRaw !== 'object' ||
-    !Array.isArray(insightsRaw) ||
-    insightsRaw.length < 4
-  ) {
-    throw new AppError(
-      'INVALID_PROVIDER_RESPONSE',
-      'Resposta do provider nao atende estrutura minima de briefing.',
-      502
-    )
-  }
-
-  const normalizedBriefing = normalizeBriefingObject(
-    briefingRaw as Record<string, unknown>
-  )
-  const normalizedInsights = insightsRaw.map((item, idx) =>
-    normalizeInsight((item as Record<string, unknown>) ?? {}, idx)
-  )
-
-  const normalizedCitations = Array.isArray(providerResponse.search_results)
-    ? providerResponse.search_results
-        .map((item) => ({
-          title: asNonEmptyString(item?.title),
-          url: asNonEmptyString(item?.url),
-          date: item?.date ? asNonEmptyString(item.date) || null : null,
-        }))
-        .filter((item) => item.url.length > 0)
-    : []
-
-  return {
-    compra_id: input.compra_id,
-    provider: 'perplexity',
-    model: asNonEmptyString(providerResponse.model) || fallbackModel,
-    contract_version: CONTRACT_VERSION,
-    prompt_version: PROMPT_VERSION,
-    strategy_version: STRATEGY_VERSION,
-    briefing: normalizedBriefing,
-    insights_pecas: normalizedInsights,
-    citacoes: normalizedCitations,
-    raw: {
-      provider_response_id: providerResponse.id ?? null,
-      usage: providerResponse.usage ?? {},
-    },
-  }
 }
 
 function validateInput(body: unknown): BriefingInput {
@@ -334,10 +109,14 @@ function validateInput(body: unknown): BriefingInput {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Prompt payload builder
+// ---------------------------------------------------------------------------
+
 function buildPromptPayload(
   input: BriefingInput,
   model: string,
-  dbConfig: PerplexityDbConfig | null = null
+  dbConfig: PerplexityDbConfig | null = null,
 ): Record<string, unknown> {
   return buildPerplexityPayload(input, {
     model,
@@ -351,107 +130,17 @@ function buildPromptPayload(
   })
 }
 
-interface PerplexityDbConfig {
-  model: string
-  api_base_url: string
-  api_key?: string | null
-  timeout_ms: number
-  temperature: number
-  top_p: number
-  search_mode: string
-  search_recency_filter: string
-  system_prompt: string
-  user_prompt_template: string
-  insights_count: number
-  prompt_version: string
-  strategy_version: string
-  contract_version: string
-}
+// ---------------------------------------------------------------------------
+// Default dependency factory
+// ---------------------------------------------------------------------------
 
-let _cachedDbConfig: PerplexityDbConfig | null = null
-
-async function loadDbConfig(
-  supabase: ReturnType<typeof createClient>
-): Promise<PerplexityDbConfig | null> {
-  if (_cachedDbConfig) return _cachedDbConfig
-  try {
-    const { data, error } = await supabase
-      .from('perplexity_config')
-      .select('*')
-      .limit(1)
-      .single()
-    if (error || !data) return null
-    _cachedDbConfig = data as PerplexityDbConfig
-    return _cachedDbConfig
-  } catch {
-    return null
-  }
-}
-
-function createDependencies(): Dependencies & { supabase: ReturnType<typeof createClient> } {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  const envApiKey = Deno.env.get('PERPLEXITY_API_KEY') ?? ''
-  const model = Deno.env.get('PERPLEXITY_MODEL') ?? DEFAULT_MODEL
-  const apiBaseUrl = Deno.env.get('PERPLEXITY_API_BASE_URL') ?? DEFAULT_API_BASE_URL
-  const timeoutMs = Number(Deno.env.get('PERPLEXITY_TIMEOUT_MS') ?? DEFAULT_TIMEOUT_MS)
-
-  const supabase = createClient(supabaseUrl, serviceRoleKey)
+function createDependencies(): Dependencies & { supabase: SupabaseClient } {
+  const supabase = createServiceClient()
 
   return {
     callProvider: async (payload: Record<string, unknown>) => {
       const dbCfg = await loadDbConfig(supabase)
-      const dbApiKey = String(dbCfg?.api_key ?? '').trim()
-      const effectiveApiKey = dbApiKey || envApiKey
-
-      if (!effectiveApiKey) {
-        throw new AppError(
-          'INTERNAL_ERROR',
-          'PERPLEXITY_API_KEY nao configurada (nem no banco, nem no runtime).',
-          500
-        )
-      }
-
-      const effectiveTimeout = timeoutMs || dbCfg?.timeout_ms || DEFAULT_TIMEOUT_MS
-      const effectiveBaseUrl = apiBaseUrl || dbCfg?.api_base_url || DEFAULT_API_BASE_URL
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), effectiveTimeout)
-
-      try {
-        const response = await fetch(`${effectiveBaseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${effectiveApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...payload,
-            model,
-          }),
-          signal: controller.signal,
-        })
-
-        if (!response.ok) {
-          const body = await response.text()
-          throw new ProviderHttpError(response.status, body)
-        }
-
-        return (await response.json()) as ProviderResponse
-      } catch (error) {
-        if (error instanceof AppError || error instanceof ProviderHttpError) {
-          throw error
-        }
-        if (error instanceof Error && error.name === 'AbortError') {
-          throw new AppError(
-            'PERPLEXITY_TIMEOUT',
-            'Timeout ao chamar provider Perplexity.',
-            504
-          )
-        }
-        throw error
-      } finally {
-        clearTimeout(timer)
-      }
+      return sharedCallProvider(payload, dbCfg)
     },
     persistBriefing: async (compraId, payload) => {
       const { error } = await supabase.from('onboarding_briefings').upsert(
@@ -469,7 +158,7 @@ function createDependencies(): Dependencies & { supabase: ReturnType<typeof crea
           error_code: payload.error_code ?? null,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'compra_id' }
+        { onConflict: 'compra_id' },
       )
 
       if (error) {
@@ -481,7 +170,7 @@ function createDependencies(): Dependencies & { supabase: ReturnType<typeof crea
         throw new AppError(
           'INTERNAL_ERROR',
           'Falha ao persistir briefing gerado no banco.',
-          500
+          500,
         )
       }
     },
@@ -509,9 +198,9 @@ function createDependencies(): Dependencies & { supabase: ReturnType<typeof crea
   }
 }
 
-function getConfiguredModel(dbConfig: PerplexityDbConfig | null): string {
-  return Deno.env.get('PERPLEXITY_MODEL') ?? dbConfig?.model ?? DEFAULT_MODEL
-}
+// ---------------------------------------------------------------------------
+// Error mapping
+// ---------------------------------------------------------------------------
 
 function mapProviderError(error: unknown): AppError {
   if (error instanceof AppError) return error
@@ -523,27 +212,27 @@ function mapProviderError(error: unknown): AppError {
     return new AppError(
       'PERPLEXITY_PROVIDER_ERROR',
       'Falha de provider Perplexity ao gerar briefing.',
-      502
+      502,
     )
   }
   return new AppError('INTERNAL_ERROR', 'Erro interno inesperado.', 500)
 }
 
+// ---------------------------------------------------------------------------
+// Request handler
+// ---------------------------------------------------------------------------
+
 export async function handleRequest(
   req: Request,
-  deps: (Dependencies & { supabase?: ReturnType<typeof createClient> }) = createDependencies()
+  deps: (Dependencies & { supabase?: SupabaseClient }) = createDependencies(),
 ): Promise<Response> {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
 
   if (req.method !== 'POST') {
     return json(
-      {
-        success: false,
-        code: 'METHOD_NOT_ALLOWED',
-        message: 'Metodo invalido. Use POST.',
-      },
-      405
+      { success: false, code: 'METHOD_NOT_ALLOWED', message: 'Metodo invalido. Use POST.' },
+      405,
     )
   }
 
@@ -560,7 +249,7 @@ export async function handleRequest(
     input = validateInput(await req.json())
     persistMode = await deps.resolvePersistMode(
       input.compra_id,
-      sanitizeBriefingMode(input.briefing_input?.mode) ?? 'text'
+      sanitizeBriefingMode(input.briefing_input?.mode) ?? 'text',
     )
 
     console.log('[briefing.request.received]', {
@@ -593,10 +282,11 @@ export async function handleRequest(
     })
 
     const providerResponse = await deps.callProvider(providerPayload)
-    const normalized = normalizeProviderResponse(
+    const normalized: NormalizedData = normalizeProviderResponse(
       input,
       providerResponse,
-      configuredModel
+      configuredModel,
+      { contractVersion, promptVersion, strategyVersion },
     )
 
     await deps.persistBriefing(input.compra_id, {
@@ -664,12 +354,8 @@ export async function handleRequest(
     }
 
     return json(
-      {
-        success: false,
-        code: mapped.code,
-        message: mapped.message,
-      },
-      mapped.httpStatus
+      { success: false, code: mapped.code, message: mapped.message },
+      mapped.httpStatus,
     )
   }
 }

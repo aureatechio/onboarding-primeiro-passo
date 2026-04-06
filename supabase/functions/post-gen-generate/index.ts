@@ -11,38 +11,12 @@ import {
   BUCKET_NAME,
 } from '../_shared/garden/validate.ts'
 import { generateImage } from '../_shared/ai-campaign/image-generator.ts'
+import {
+  type NanoBananaDbConfig,
+  loadNanoBananaConfig,
+} from '../_shared/nanobanana/config.ts'
 
 const URL_EXPIRY_SECONDS = 7 * 24 * 60 * 60
-
-interface NanoBananaDbConfig {
-  gemini_model_name: string
-  gemini_api_base_url: string
-  max_retries: number
-  max_image_download_bytes: number
-  direction_moderna: string
-  direction_clean: string
-  direction_retail: string
-  format_1_1: string
-  format_4_5: string
-  format_16_9: string
-  format_9_16: string
-}
-
-async function loadNanoBananaConfig(
-  supabase: ReturnType<typeof createClient>,
-): Promise<NanoBananaDbConfig | null> {
-  try {
-    const { data, error } = await supabase
-      .from('nanobanana_config')
-      .select('*')
-      .limit(1)
-      .single()
-    if (error || !data) return null
-    return data as NanoBananaDbConfig
-  } catch {
-    return null
-  }
-}
 
 function mimeToExt(mime: string): string {
   if (mime.includes('jpeg') || mime.includes('jpg')) return 'jpg'
