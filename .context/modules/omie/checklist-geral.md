@@ -11,9 +11,9 @@
 - [x] Trigger fiscal por pagamento efetivo em metodo unico.  
   Evidencia: `supabase/functions/process-checkout/index.ts`, `supabase/functions/check-payment-status/index.ts`, `supabase/functions/cielo-webhook/index.ts`.
 - [x] Trigger fiscal em split com primeira sessao paga (`sessoes_pagas >= 1`).  
-  Evidencia: `supabase/functions/_shared/split.ts` (`shouldTriggerOmieEmission`).
+  Evidencia: logica `shouldTriggerOmieEmission` no pipeline de checkout (monorepo principal AUREA).
 - [x] Fallback defensivo do helper de split para nao perder faturamento.  
-  Evidencia: `supabase/functions/_shared/split.ts` (`split_counter_pending_after_completed`, `split_group_*_fallback`).
+  Evidencia: logica `split_counter_pending_after_completed` no pipeline de checkout (monorepo principal AUREA).
 - [x] Trigger fire-and-forget centralizado para `omie-orchestrator`.  
   Evidencia: `supabase/functions/_shared/pipeline/trigger-nfe.ts`.
 - [x] Orquestracao `cliente -> servico -> OS` implementada.  
@@ -27,12 +27,12 @@
 
 ## B) Retry e recuperacao
 
-- [x] Retry manual com `force=true` disponivel (dashboard).  
-  Evidencia: `apps/dashboard/src/components/StepDetail.tsx`.
+- [x] Retry manual com `force=true` disponivel (dashboard do monorepo principal).  
+  Evidencia: componente `StepDetail` em `apps/dashboard/src/components/` no **monorepo principal AUREA**.
 - [x] Upsert corretivo de OS por `compra_id` com fonte no banco (`AlterarOS`/`IncluirOS`).  
   Evidencia: `supabase/functions/omie-upsert-os/index.ts`.
 - [x] Preview read-only de upsert por `compra_id` no dashboard (sem side effects).  
-  Evidencia: `supabase/functions/omie-preview-upsert-os/index.ts`, `apps/dashboard/src/pages/OmieUpsertOs.tsx`.
+  Evidencia: `supabase/functions/omie-preview-upsert-os/index.ts` (UI em `apps/dashboard` no monorepo principal AUREA).
 - [x] Retry worker implementado para notas `awaiting_nfse`.  
   Evidencia: `supabase/functions/omie-nfse-retry-worker/index.ts`.
 - [x] Worker aplica cooldown, batch e limite de tentativas.  
@@ -48,8 +48,8 @@
   Evidencia: `supabase/migrations/20260220100000_create_omie_nfse_config.sql`.
 - [x] APIs admin para leitura/atualizacao da config ativa.  
   Evidencia: `supabase/functions/get-omie-nfse-config/index.ts`, `supabase/functions/update-omie-nfse-config/index.ts`.
-- [x] Tela de configuracao no dashboard para campos atuais.  
-  Evidencia: `apps/dashboard/src/pages/OmieNfseConfig.tsx`.
+- [x] Tela de configuracao no dashboard para campos atuais (monorepo principal).  
+  Evidencia: `supabase/functions/get-omie-nfse-config/index.ts`, `supabase/functions/update-omie-nfse-config/index.ts` (UI em `apps/dashboard` no monorepo principal AUREA).
 - [x] Parametros de categoria/conta propagados no payload da OS com fallback seguro.  
   Evidencia: `supabase/functions/omie-create-os/index.ts`.
 

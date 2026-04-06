@@ -40,15 +40,11 @@ Fonte canonica de defaults de polling:
 | `supabase/functions/get-omie-nfse-config/` | Leitura da configuracao fiscal ativa. |
 | `supabase/functions/update-omie-nfse-config/` | Atualizacao parcial da configuracao fiscal ativa. |
 | `supabase/functions/_shared/pipeline/` | Trigger compartilhado `triggerNfeEmission`. |
-| `supabase/functions/_shared/split.ts` | Decisao de trigger fiscal em split (`shouldTriggerOmieEmission`). |
 | `supabase/functions/_shared/omie/parcelas-builder.ts` | Builder canônico de parcelas OMIE espelhando checkout_sessions pagas (método, valor, vencimento). |
-| `apps/omie/src/` | Backend Express OMIE (webhooks CRM cliente/servico/OS). |
-| `apps/dashboard/src/pages/OmieNfseConfig.tsx` | UI admin de configuracao fiscal. |
-| `apps/dashboard/src/pages/Overview.tsx` | Seleção global de transações e ação de Upsert OS em massa. |
-| `apps/dashboard/src/pages/Clientes.tsx` | Gestão de clientes OMIE com backfill de endereço individual e em massa. |
 | `supabase/functions/omie-backfill-client-address/` | Backfill unitário de endereço de cliente OMIE (`dry_run`/`execute`). |
 | `supabase/functions/omie-backfill-client-address-batch/` | Orquestração de backfill em massa com seleção de JWT interno validada. |
-| `apps/dashboard/src/components/StepDetail.tsx` | Acoes manuais OMIE (`Upsert Servico`, `Upsert OS` e retry do orquestrador). |
+
+> **Nota:** O backend Express OMIE (`apps/omie/`), as páginas de administração do Dashboard (`OmieNfseConfig`, `OmieUpsertOs`, `Overview`, `Clientes`) e os componentes de ação manual (`StepDetail`) existem no **monorepo principal AUREA** e não neste repositório standalone.
 
 ### External Services
 
@@ -76,7 +72,6 @@ Fonte canonica de defaults de polling:
 | Backfill Address | `supabase/functions/omie-backfill-client-address/index.ts` | Backfill unitário de endereço com classificação `ready`/`manual_required`. |
 | Backfill Address Batch | `supabase/functions/omie-backfill-client-address-batch/index.ts` | Orquestra runs de backfill em massa com seleção de JWT interno validada. |
 | Trigger Helper | `supabase/functions/_shared/pipeline/trigger-nfe.ts` | Disparo fire-and-forget do `omie-orchestrator`. |
-| Split Decision | `supabase/functions/_shared/split.ts` | Regra de trigger em split e fallbacks defensivos. |
 | Parcelas Builder | `supabase/functions/_shared/omie/parcelas-builder.ts` | Constroi array `Parcelas` OMIE a partir de `checkout_sessions` pagas (split, boleto parcelado, etc.). |
 
 ## Data Flow
@@ -158,9 +153,10 @@ Fluxo de recuperacao:
 
 | Type | Location | Command |
 |------|----------|---------|
-| Unit | `apps/omie/tests/unit/` | `pnpm --filter @aurea/omie test` |
-| Integration | `apps/omie/tests/integration/` | `pnpm --filter @aurea/omie test` |
+| Unit | `supabase/functions/_shared/omie/` | `deno test supabase/functions/_shared/omie/ --allow-env` |
 | Operacional | Runbook/checklist | Execucao controlada por compra real |
+
+> **Nota:** Os testes unitários e de integração do backend Express OMIE (`apps/omie/tests/`) existem no **monorepo principal AUREA**.
 
 ## Conventions
 
