@@ -8,7 +8,6 @@ import Etapa4 from './pages/Etapa4';
 import Etapa5 from './pages/Etapa5';
 import Etapa6 from './pages/Etapa6';
 import Etapa62 from './pages/Etapa62';
-import Etapa7 from './pages/Etapa7';
 import EtapaFinal from './pages/EtapaFinal';
 import AiStep2Monitor from './pages/AiStep2Monitor';
 import PerplexityConfigPage from './pages/AiStep2Monitor/PerplexityConfigPage';
@@ -61,7 +60,6 @@ function StepRenderer({ step }) {
     case 5: return <ErrorBoundary key="e5"><Etapa5 /></ErrorBoundary>;
     case 6: return <ErrorBoundary key="e6"><Etapa6 /></ErrorBoundary>;
     case 7: return <ErrorBoundary key="e62"><Etapa62 /></ErrorBoundary>;
-    case 8: return <ErrorBoundary key="e7"><Etapa7 /></ErrorBoundary>;
     case 'final': return <ErrorBoundary key="ef"><EtapaFinal /></ErrorBoundary>;
     default: return <Etapa1Hero />;
   }

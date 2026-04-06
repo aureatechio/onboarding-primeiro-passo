@@ -258,28 +258,18 @@ export default function Etapa62() {
   }, [imagesFiles, updateUserData])
 
   const handleConfirm = useCallback(async () => {
-    if (choice === "add_now") {
-      const validation = validateAiStep2Inputs({
-        logoFile,
-        logoName,
-        colors: allColors,
-        fontId: selectedFont,
-      })
-      if (!validation.valid) return
-    }
-
     setSaveError(null)
     setIsSaving(true)
 
     try {
       if (hydrationCompraId) {
         const result = await saveIdentityToBackend(hydrationCompraId, {
-          choice,
-          logoFile: choice === "add_now" ? logoFile : null,
-          colors: choice === "add_now" ? allColors : [],
-          fontId: choice === "add_now" ? selectedFont : "",
-          imagesFiles: choice === "add_now" ? imagesFiles : [],
-          campaignNotes: choice === "add_now" ? campaignNotes : "",
+          choice: "later",
+          logoFile: null,
+          colors: [],
+          fontId: "",
+          imagesFiles: [],
+          campaignNotes: "",
         })
         if (!result.success && !result.skipped) {
           setSaveError(result.message || result.error || "Erro ao salvar identidade visual.")
@@ -288,18 +278,13 @@ export default function Etapa62() {
         }
       }
 
-      if (choice === "later") {
-        persist({ identityBonusPending: true })
-        setPendingMode(true)
-      } else {
-        persist({ identityBonusPending: false })
-        setPendingMode(false)
-      }
+      persist({ identityBonusPending: true })
+      setPendingMode(true)
       setCompleted(true)
     } finally {
       setIsSaving(false)
     }
-  }, [choice, logoFile, logoName, allColors, selectedFont, imagesFiles, campaignNotes, hydrationCompraId, persist])
+  }, [hydrationCompraId, persist])
 
   const handleContinueLater = useCallback(async () => {
     setSaveError(null)
@@ -789,77 +774,11 @@ export default function Etapa62() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            role="radiogroup"
-            aria-label="Escolha de identidade visual"
-            style={{ marginBottom: 16 }}
-          >
-            <motion.button
-              type="button"
-              onClick={() => handleSelectChoice("add_now")}
-              role="radio"
-              aria-checked={choice === "add_now"}
-              style={{
-                width: "100%", padding: 16, borderRadius: 12,
-                border: choice === "add_now" ? `2px solid ${COLORS.accent}` : `1px solid ${COLORS.border}`,
-                background: choice === "add_now" ? `${COLORS.accent}12` : COLORS.card,
-                cursor: "pointer", textAlign: "left",
-                marginBottom: 10, outline: "none",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                  border: choice === "add_now" ? `2px solid ${COLORS.accent}` : `2px solid ${COLORS.textDim}`,
-                  background: choice === "add_now" ? COLORS.accent : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.2s ease",
-                }}>
-                  {choice === "add_now" && <Icon name="check" size={11} color={COLORS.bg} />}
-                </div>
-                <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-                  {ETAPA62.choiceAddNow}
-                </p>
-              </div>
-            </motion.button>
-
-            <motion.button
-              type="button"
-              onClick={() => handleSelectChoice("later")}
-              role="radio"
-              aria-checked={choice === "later"}
-              style={{
-                width: "100%", padding: 16, borderRadius: 12,
-                border: choice === "later" ? `2px solid ${COLORS.warning}` : `1px solid ${COLORS.border}`,
-                background: choice === "later" ? `${COLORS.warning}10` : COLORS.card,
-                cursor: "pointer", textAlign: "left", outline: "none",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                  border: choice === "later" ? `2px solid ${COLORS.warning}` : `2px solid ${COLORS.textDim}`,
-                  background: choice === "later" ? COLORS.warning : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all 0.2s ease",
-                }}>
-                  {choice === "later" && <Icon name="check" size={11} color={COLORS.bg} />}
-                </div>
-                <p style={{ color: COLORS.text, fontSize: 13, fontWeight: 700, margin: 0 }}>
-                  {ETAPA62.choiceLater}
-                </p>
-              </div>
-            </motion.button>
-          </motion.div>
-
           <StickyFooter>
             <NavButtons
-              onNext={choice === "later" ? handleConfirm : undefined}
+              onNext={handleConfirm}
               nextLabel={isSaving ? ETAPA62.navSaving : ETAPA62.navConfirmPending}
-              nextDisabled={isSaving || choice !== "later"}
+              nextDisabled={isSaving}
             />
           </StickyFooter>
         </>

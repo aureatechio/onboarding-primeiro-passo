@@ -296,7 +296,7 @@ export const ETAPA4 = {
     },
     canaisDigitais: {
       title: 'Canais digitais',
-      allowed: 'Incluir os canais tiktok, youtube, linkedin e google;',
+      allowed: 'Instagram, Facebook, Tiktok, Youtube, Linkedin, Google, Site e Tráfego Pago - Uso liberado com peças aprovadas;',
       forbidden: 'WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade nesses canais.',
     },
     regrasPublicacao: {

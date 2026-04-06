@@ -10,7 +10,7 @@ import {
 
 const OnboardingContext = createContext(null);
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 7;
 const STORAGE_KEY_BASE = 'primeiro-passo-state';
 
 const STEP_TITLES = {
@@ -21,7 +21,6 @@ const STEP_TITLES = {
   5: 'Sua presenca digital',
   6: 'Sua identidade visual (6.1)',
   7: 'Bonificacao de prazo (6.2)',
-  8: 'Modo avancado',
   final: 'Resumo final',
 };
 
@@ -168,7 +167,7 @@ export function OnboardingProvider({ children }) {
   const goNext = useCallback(() => {
     const step = currentStepRef.current;
     completeStep(step);
-    const next = step === 'final' ? 'done' : step === 8 ? 'final' : step + 1;
+    const next = step === 'final' ? 'done' : step === 7 ? 'final' : step + 1;
     setDirection(1);
     setCurrentStep(next);
     window.scrollTo({ top: 0 });
