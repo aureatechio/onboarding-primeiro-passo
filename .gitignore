@@ -49,5 +49,11 @@ plan/*.pdf
 # Repositório onboarding aninhado (não é submódulo registrado)
 onboarding-primeiro-passo-repo/
 
+# Artefatos do monorepo AUREA (extraídos — não pertencem a este repo standalone)
+apps/
+packages/
+pnpm-workspace.yaml
+turbo.json
+
 # Arquivos ZIP avulsos gerados localmente
 ziivcLKj
