@@ -5,11 +5,16 @@ import { corsHeaders, handleCors } from '../_shared/cors.ts'
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-type RetryMode = 'single' | 'failed'
+type RetryMode = 'single' | 'failed' | 'category'
+
+const VALID_MODES: RetryMode[] = ['single', 'failed', 'category']
+const VALID_GROUPS = ['moderna', 'clean', 'retail']
+const REGENERABLE_STATUSES = ['failed', 'completed']
 
 interface RetryBody {
   job_id?: string
   asset_id?: string
+  group_name?: string
   mode?: RetryMode
 }
 
@@ -37,7 +42,10 @@ Deno.serve(async (req) => {
 
   const jobId = (body.job_id || '').trim()
   const assetId = (body.asset_id || '').trim()
-  const mode: RetryMode = body.mode === 'single' ? 'single' : 'failed'
+  const groupName = (body.group_name || '').trim().toLowerCase()
+  const mode: RetryMode = VALID_MODES.includes(body.mode as RetryMode)
+    ? (body.mode as RetryMode)
+    : 'failed'
 
   if (!jobId || !UUID_REGEX.test(jobId)) {
     return json({ success: false, code: 'INVALID_JOB_ID', message: 'job_id invalido.' }, 400)
@@ -45,6 +53,12 @@ Deno.serve(async (req) => {
   if (mode === 'single' && (!assetId || !UUID_REGEX.test(assetId))) {
     return json(
       { success: false, code: 'INVALID_ASSET_ID', message: 'asset_id invalido para mode=single.' },
+      400,
+    )
+  }
+  if (mode === 'category' && !VALID_GROUPS.includes(groupName)) {
+    return json(
+      { success: false, code: 'INVALID_GROUP', message: 'group_name invalido para mode=category.' },
       400,
     )
   }
@@ -105,6 +119,17 @@ Deno.serve(async (req) => {
       return json({ success: false, code: 'ASSET_NOT_FOUND', message: 'Asset nao encontrado para este job.' }, 404)
     }
     targets = [singleAsset]
+  } else if (mode === 'category') {
+    const { data: groupAssets, error: groupError } = await supabase
+      .from('ai_campaign_assets')
+      .select('id, status, group_name, format')
+      .eq('job_id', jobId)
+      .eq('group_name', groupName)
+
+    if (groupError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar assets da categoria.' }, 500)
+    }
+    targets = groupAssets || []
   } else {
     const { data: failedAssets, error: failedError } = await supabase
       .from('ai_campaign_assets')
@@ -127,12 +152,25 @@ Deno.serve(async (req) => {
     })
   }
 
-  if (targets.some((target) => target.status !== 'failed')) {
+  if (mode === 'failed' && targets.some((t) => t.status !== 'failed')) {
     return json(
       {
         success: false,
         code: 'INVALID_ASSET_STATE',
         message: 'Retry permitido apenas para assets com status failed.',
+      },
+      409,
+    )
+  }
+  if (
+    (mode === 'single' || mode === 'category') &&
+    targets.some((t) => !REGENERABLE_STATUSES.includes(t.status))
+  ) {
+    return json(
+      {
+        success: false,
+        code: 'INVALID_ASSET_STATE',
+        message: 'Regeneracao permitida apenas para assets completed ou failed.',
       },
       409,
     )
@@ -187,6 +225,7 @@ Deno.serve(async (req) => {
     job_id: jobId,
     compra_id: job.compra_id,
     mode,
+    ...(mode === 'category' ? { group_name: groupName } : {}),
     retried_count: targetIds.length,
     target_asset_ids: targetIds,
     trigger: {

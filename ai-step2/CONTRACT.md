@@ -220,17 +220,21 @@ interface AiCampaignError {
 ### `retry-ai-campaign-assets` (POST)
 
 - Classificacao JWT: **publica** (`--no-verify-jwt`) com validacoes server-side de estado.
-- Objetivo: reprocessar assets com falha para um `job_id` existente.
+- Objetivo: reprocessar assets com falha ou regenerar assets concluidos para um `job_id` existente.
 - Body:
   - `job_id` (obrigatorio)
-  - `mode` opcional: `single | failed` (default `failed`)
+  - `mode` opcional: `single | failed | category` (default `failed`)
   - `asset_id` obrigatorio quando `mode = single`
+  - `group_name` obrigatorio quando `mode = category` (`moderna | clean | retail`)
 - Regras:
-  - Retry permitido apenas para assets `failed`.
+  - `mode = failed`: retry permitido apenas para assets `failed`.
+  - `mode = single`: regeneracao permitida para assets `completed` ou `failed`.
+  - `mode = category`: regenera todos os assets (4 formatos) de um `group_name`, aceita `completed` ou `failed`.
   - Bloqueia retry quando houver assets `pending/processing` no job (`JOB_BUSY`).
   - Prepara assets alvo para `pending` e dispara `create-ai-campaign-job` para retomar processamento.
 - Saida:
-  - `success`, `job_id`, `compra_id`, `retried_count`, `target_asset_ids[]`, status do disparo.
+  - `success`, `job_id`, `compra_id`, `mode`, `retried_count`, `target_asset_ids[]`, status do disparo.
+  - Inclui `group_name` na resposta quando `mode = category`.
 
 ## 6. Schema Supabase (migration)
 

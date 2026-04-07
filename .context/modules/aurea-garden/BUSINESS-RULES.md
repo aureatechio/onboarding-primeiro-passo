@@ -180,3 +180,16 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 **Bucket:** `aurea-garden-assets` (privado, sem acesso publico).
 
 **Fonte:** `post-gen-generate/index.ts`, `post-turbo-generate/index.ts`, `_shared/garden/validate.ts` (BUCKET_NAME)
+
+## 16. Regeneracao de Assets Completed
+
+**Regra:** Assets com status `completed` podem ser regenerados (nao apenas `failed`). A regeneracao reseta o asset para `pending`, limpa `image_url`/`width`/`height`, e re-dispara o pipeline com o mesmo prompt. A variacao no resultado depende do nao-determinismo do modelo Gemini.
+
+**Modos suportados:**
+- `mode = single`: regenera 1 asset individual (por `asset_id`), aceita `completed` ou `failed`
+- `mode = category`: regenera todos os 4 formatos de uma categoria (`group_name`), aceita `completed` ou `failed`
+- `mode = failed`: mantido — retries apenas assets `failed` (retrocompativel)
+
+**Guard:** `JOB_BUSY` impede regeneracao enquanto houver assets `pending`/`processing` no job.
+
+**Fonte:** `retry-ai-campaign-assets/index.ts`

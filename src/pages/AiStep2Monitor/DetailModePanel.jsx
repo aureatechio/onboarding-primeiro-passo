@@ -1,4 +1,4 @@
-import { AlertTriangle, Image as ImageIcon, Loader2, RotateCcw } from 'lucide-react'
+import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, RotateCcw } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import DataRow from './components/DataRow'
@@ -21,8 +21,10 @@ export default function DetailModePanel({
   onGalleryCategoryChange,
   onRetrySingleAsset,
   onRetryFailedAssets,
+  onRetryCategory,
   retryingAssetId,
   retryingAll,
+  retryingCategory,
 }) {
   const groupedAssets = ASSET_GROUPS.map((group) => ({
     ...group,
@@ -163,9 +165,53 @@ export default function DetailModePanel({
             </div>
           ) : (
             <div>
-              <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary, marginBottom: 10 }}>
-                {currentGroup?.label || 'Categoria'}
-              </h3>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                }}
+              >
+                <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary, margin: 0 }}>
+                  {currentGroup?.label || 'Categoria'}
+                </h3>
+                {currentGroup && currentGroup.items.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => onRetryCategory(currentGroup.key)}
+                    disabled={
+                      retryingCategory === currentGroup.key || retryingAll ||
+                      currentGroup.items.some((a) => a.status === 'pending' || a.status === 'processing')
+                    }
+                    title="Regenerar todas as imagens desta categoria"
+                    style={{
+                      border: `1px solid ${monitorTheme.borderStrong}`,
+                      background: monitorTheme.pageBg,
+                      color: monitorTheme.textSecondary,
+                      borderRadius: monitorRadius.md,
+                      padding: '6px 10px',
+                      cursor:
+                        retryingCategory === currentGroup.key || retryingAll
+                          ? 'not-allowed'
+                          : 'pointer',
+                      opacity: retryingCategory === currentGroup.key || retryingAll ? 0.7 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {retryingCategory === currentGroup.key ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <RotateCcw size={13} />
+                    )}
+                    Regenerar categoria
+                  </button>
+                ) : null}
+              </div>
               {!currentGroup || currentGroup.items.length === 0 ? (
                 <div
                   style={{
@@ -277,7 +323,7 @@ export default function DetailModePanel({
                             <button
                               type="button"
                               onClick={() => onRetrySingleAsset(asset.id)}
-                              disabled={isRetryingThis || retryingAll}
+                              disabled={isRetryingThis || retryingAll || retryingCategory === asset.group_name}
                               title="Reprocessar esta imagem"
                               style={{
                                 border: `1px solid ${monitorTheme.dangerBorder}`,
@@ -297,6 +343,32 @@ export default function DetailModePanel({
                                 <Loader2 size={14} className="animate-spin" />
                               ) : (
                                 <RotateCcw size={14} />
+                              )}
+                            </button>
+                          ) : asset.status === 'completed' ? (
+                            <button
+                              type="button"
+                              onClick={() => onRetrySingleAsset(asset.id)}
+                              disabled={isRetryingThis || retryingAll || retryingCategory === asset.group_name}
+                              title="Regenerar imagem — gera uma nova versao"
+                              style={{
+                                border: `1px solid ${monitorTheme.borderStrong}`,
+                                background: monitorTheme.pageBg,
+                                color: monitorTheme.textMuted,
+                                borderRadius: monitorRadius.md,
+                                width: 30,
+                                height: 30,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: isRetryingThis || retryingAll ? 'not-allowed' : 'pointer',
+                                opacity: isRetryingThis || retryingAll ? 0.6 : 1,
+                              }}
+                            >
+                              {isRetryingThis ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <RefreshCw size={14} />
                               )}
                             </button>
                           ) : null}

@@ -21,6 +21,7 @@ export default function AiStep2Monitor() {
     actionSuccess,
     retryingAssetId,
     retryingAll,
+    retryingCategory,
     lastUpdatedAt,
     compraId,
     jobId,
@@ -37,6 +38,7 @@ export default function AiStep2Monitor() {
     reload,
     retrySingleAsset,
     retryFailedAssets,
+    retryCategory,
   } = useAiCampaignMonitor()
 
   const [viewerIndex, setViewerIndex] = useState(-1)
@@ -221,8 +223,10 @@ export default function AiStep2Monitor() {
                 onOpenViewer={openViewerByAsset}
                 onRetrySingleAsset={retrySingleAsset}
                 onRetryFailedAssets={retryFailedAssets}
+                onRetryCategory={retryCategory}
                 retryingAssetId={retryingAssetId}
                 retryingAll={retryingAll}
+                retryingCategory={retryingCategory}
               />
             )}
       {!isListMode && currentAsset ? (

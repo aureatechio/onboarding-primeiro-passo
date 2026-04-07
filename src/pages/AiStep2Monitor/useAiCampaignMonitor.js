@@ -70,6 +70,7 @@ export function useAiCampaignMonitor() {
   const [actionSuccess, setActionSuccess] = useState('')
   const [retryingAssetId, setRetryingAssetId] = useState('')
   const [retryingAll, setRetryingAll] = useState(false)
+  const [retryingCategory, setRetryingCategory] = useState('')
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
 
   const baseUrl = import.meta.env.VITE_SUPABASE_URL || ''
@@ -371,6 +372,21 @@ export function useAiCampaignMonitor() {
     return response
   }, [jobId, retryRequest])
 
+  const retryCategory = useCallback(
+    async (groupName) => {
+      if (!jobId || !groupName) return { ok: false, message: 'job_id/group_name ausente.' }
+      setRetryingCategory(groupName)
+      const response = await retryRequest({
+        job_id: jobId,
+        mode: 'category',
+        group_name: groupName,
+      })
+      setRetryingCategory('')
+      return response
+    },
+    [jobId, retryRequest]
+  )
+
   return {
     data,
     loading,
@@ -380,6 +396,7 @@ export function useAiCampaignMonitor() {
     actionSuccess,
     retryingAssetId,
     retryingAll,
+    retryingCategory,
     lastUpdatedAt,
     compraId,
     jobId,
@@ -397,5 +414,6 @@ export function useAiCampaignMonitor() {
     reload: fetchData,
     retrySingleAsset,
     retryFailedAssets,
+    retryCategory,
   }
 }
