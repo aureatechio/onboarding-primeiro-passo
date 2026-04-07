@@ -1,0 +1,56 @@
+---
+description: Obrigar consulta de documentacao em temas Onboarding (formulario, identidade visual, briefing, pipeline)
+alwaysApply: false
+globs:
+  - "src/pages/Etapa*.jsx"
+  - "src/pages/TudoPronto.jsx"
+  - "src/context/OnboardingContext.jsx"
+  - "src/copy.js"
+  - "supabase/functions/get-onboarding-data/**"
+  - "supabase/functions/save-onboarding-identity/**"
+  - "supabase/functions/save-campaign-briefing/**"
+  - "supabase/functions/generate-campaign-briefing/**"
+  - "supabase/functions/create-ai-campaign-job/**"
+  - ".context/modules/onboarding/**"
+  - "docs/mapeamento-formulario-onboarding.md"
+---
+
+# Onboarding "Primeiro Passo": formulario, identidade visual, briefing, pipeline
+
+## Gate obrigatorio ANTES de agir
+
+1. **Identificar tipo de tarefa** e consultar ordem de leitura:
+   - Ler `.context/modules/onboarding/DOC-READING-ORDER.md` — identifica quais docs sao obrigatorios para o tipo de tarefa
+   - Ler `.context/modules/onboarding/BUSINESS-RULES.md` — 15 regras criticas
+
+2. **Ler docs na ordem indicada pelo DOC-READING-ORDER:**
+   - SEMPRE: `.context/modules/onboarding/README.md`
+   - SEMPRE: `docs/mapeamento-formulario-onboarding.md` — referencia canonica de campos e mapeamento DB
+   - Condicional: docs especificos do tipo de tarefa (ver DOC-READING-ORDER)
+
+3. **Responder com base em evidencia:**
+   - Citar documentacao consultada
+   - Respeitar as 15 business rules (especialmente: UNIQUE constraints, production_path side effects, copy centralizada)
+   - Todas as Edge Functions de onboarding sao publicas (`--no-verify-jwt`)
+
+## Referencia canonica
+
+`docs/mapeamento-formulario-onboarding.md` contem:
+- Campos de cada etapa (tipo, validacao, obrigatoriedade)
+- Mapeamento campo → coluna no banco
+- Schema das tabelas
+- Storage bucket e paths
+- Endpoints e payloads
+- Campos que NAO persistem no banco
+
+## Edge Functions Onboarding
+
+**Leitura:** `get-onboarding-data`
+**Escrita:** `save-onboarding-identity`, `save-campaign-briefing`, `generate-campaign-briefing`
+**Pipeline:** `create-ai-campaign-job` (disparado automaticamente)
+
+## Frontend
+
+**Etapas:** `Etapa1Hero.jsx` → `Etapa2.jsx` → `Etapa3.jsx` → `Etapa4.jsx` → `Etapa5.jsx` → `Etapa6.jsx` / `Etapa62.jsx` → `EtapaFinal.jsx` → `TudoPronto.jsx`
+**Contexto:** `OnboardingContext.jsx` (estado global, navegacao, persistencia)
+**Copy:** `src/copy.js` (UNICA fonte de verdade para textos)
