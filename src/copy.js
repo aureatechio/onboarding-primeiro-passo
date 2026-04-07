@@ -504,49 +504,11 @@ export const ETAPA62 = {
     exemploB: 'Exemplo B): Preenchendo 5 dias corridos a partir da data do contrato, você ganha + 10 dias de bonificação.',
   },
 
-  // ── Escolha ──
-  choiceAddNow: 'Vou adicionar as minhas referências da identidade visual',
-  choiceLater: 'Prefiro deixar para depois tendo ciência que o prazo do meu contrato está correndo desde já.',
-
-  // ── Slide labels ──
-  slideLabels: ['Logo', 'Cores', 'Fonte', 'Imagens', 'Observações'],
-
-  // ── Slide: Logo ──
-  logoLabel: 'Envie o logo da sua marca',
+  // ── Logo (modo simplificado) ──
+  logoLabel: 'Logo da sua marca',
   logoPlaceholder: 'Selecionar logo',
   logoHint: 'PNG, JPG, SVG ou WebP (max. 5 MB)',
   logoChangeButton: 'Trocar arquivo',
-  extractingColors: 'Extraindo cores...',
-
-  // ── Slide: Cores ──
-  coresTitle: 'Cores da sua marca',
-  coresExtracted: (count) => `Extraídas do logo (${count})`,
-  coresNoExtraction: 'Não foi possível extrair cores do logo. Adicione as cores da sua marca manualmente.',
-  coresCustomLabel: (count) => `Suas cores ${count > 0 ? `(${count})` : ''}`,
-  coresLimit: (remaining) => `Máximo 5 cores no total (extraídas + adicionadas) · ${remaining} restantes`,
-
-  // ── Slide: Fonte ──
-  fonteTitle: 'Escolha a fonte',
-  fontOptions: [
-    { id: 'inter', label: 'Inter', preview: 'Aa Bb Cc 123', family: "'Inter', sans-serif" },
-    { id: 'jetbrains', label: 'JetBrains Mono', preview: 'Aa Bb Cc 123', family: "'JetBrains Mono', monospace" },
-    { id: 'georgia', label: 'Georgia', preview: 'Aa Bb Cc 123', family: 'Georgia, serif' },
-  ],
-
-  // ── Slide: Imagens ──
-  imagensTitle: 'Imagens de campanha',
-  imagensAdd: 'Adicionar mais imagens',
-  imagensSelect: 'Selecionar imagens',
-  imagensHint: 'Peças da campanha para referência (max. 5)',
-
-  // ── Slide: Observações ──
-  notesTitle: 'Observações para a campanha',
-  notesPlaceholder: 'Descreva o objetivo, tom ou qualquer detalhe que ajude na criação das peças...',
-
-  // ── Status chips ──
-  statusObrigatorio: 'Obrigatório',
-  statusOpcional: 'Opcional',
-  statusConcluido: 'Concluído',
 
   // ── Modo simplificado ──
   modoSimplificado: {
@@ -561,8 +523,8 @@ export const ETAPA62 = {
 
   // ── Navigation ──
   navConfirm: 'Confirmar e enviar',
-  navConfirmPending: 'Confirmar e avançar',
-  navContinueLater: 'Continuar depois (marcar etapa como pendente)',
+  navConfirmPending: 'Quero a bonificação',
+  navContinueLater: 'Prefiro fazer depois',
   navSaving: 'Salvando...',
 
   // ── Processing ──
