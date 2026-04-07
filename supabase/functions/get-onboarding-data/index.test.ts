@@ -71,7 +71,7 @@ Deno.test('handleRequest returns COMPRA_NOT_ELIGIBLE', async () => {
   assertEquals(body.code, 'COMPRA_NOT_ELIGIBLE')
 })
 
-Deno.test('handleRequest returns payload when compra is eligible', async () => {
+Deno.test('handleRequest returns payload when compra is eligible and identity is null', async () => {
   const req = new Request(
     'https://example.com/functions/v1/get-onboarding-data?compra_id=11111111-1111-1111-1111-111111111111',
     { method: 'GET' }
@@ -91,15 +91,74 @@ Deno.test('handleRequest returns payload when compra is eligible', async () => {
         vigencia: '3 meses',
         atendente: 'Yasmin',
         atendenteGenero: 'f',
+        identity: null,
       },
     }),
   })
   const body = (await response.json()) as {
     success: boolean
-    data: { clientName: string }
+    data: { clientName: string; identity: null }
   }
 
   assertEquals(response.status, 200)
   assertEquals(body.success, true)
   assertEquals(body.data.clientName, 'Maria')
+  assertEquals(body.data.identity, null)
+})
+
+Deno.test('handleRequest returns payload with identity when already saved', async () => {
+  const req = new Request(
+    'https://example.com/functions/v1/get-onboarding-data?compra_id=11111111-1111-1111-1111-111111111111',
+    { method: 'GET' }
+  )
+
+  const response = await handleRequest(req, {
+    fetchOnboardingData: async () => ({
+      found: true,
+      eligible: true,
+      data: {
+        compra_id: '11111111-1111-1111-1111-111111111111',
+        clientName: 'Maria',
+        celebName: 'Rodrigo Faro',
+        praca: 'Sao Paulo - Capital',
+        segmento: 'Odontologia',
+        pacote: '2 videos + 4 estaticas',
+        vigencia: '3 meses',
+        atendente: 'Yasmin',
+        atendenteGenero: 'f',
+        identity: {
+          choice: 'add_now',
+          logo_path: '11111111-1111-1111-1111-111111111111/logo.png',
+          brand_palette: ['#d4ba71', '#423617'],
+          font_choice: 'inter',
+          campaign_images_paths: [],
+          campaign_notes: 'Site: https://maria.com.br | Instagram: https://www.instagram.com/maria',
+          production_path: 'standard',
+          updated_at: '2026-04-06T17:38:02.696Z',
+        },
+      },
+    }),
+  })
+  const body = (await response.json()) as {
+    success: boolean
+    data: {
+      clientName: string
+      identity: {
+        choice: string
+        logo_path: string
+        brand_palette: string[]
+        font_choice: string
+        campaign_notes: string
+        production_path: string
+      }
+    }
+  }
+
+  assertEquals(response.status, 200)
+  assertEquals(body.success, true)
+  assertEquals(body.data.identity?.choice, 'add_now')
+  assertEquals(body.data.identity?.logo_path, '11111111-1111-1111-1111-111111111111/logo.png')
+  assertEquals(body.data.identity?.brand_palette, ['#d4ba71', '#423617'])
+  assertEquals(body.data.identity?.font_choice, 'inter')
+  assertEquals(body.data.identity?.production_path, 'standard')
 })

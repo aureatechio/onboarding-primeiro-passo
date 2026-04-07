@@ -32,6 +32,28 @@ interface AtendenteRow {
   genero: string
 }
 
+interface OnboardingIdentityRow {
+  choice: string | null
+  logo_path: string | null
+  brand_palette: string[] | null
+  font_choice: string | null
+  campaign_images_paths: string[] | null
+  campaign_notes: string | null
+  production_path: string | null
+  updated_at: string | null
+}
+
+export interface IdentityPayload {
+  choice: string | null
+  logo_path: string | null
+  brand_palette: string[]
+  font_choice: string | null
+  campaign_images_paths: string[]
+  campaign_notes: string | null
+  production_path: string | null
+  updated_at: string | null
+}
+
 export interface OnboardingDataPayload {
   compra_id: string
   clientName: string
@@ -42,6 +64,7 @@ export interface OnboardingDataPayload {
   vigencia: string
   atendente: string
   atendenteGenero: string
+  identity: IdentityPayload | null
 }
 
 interface OnboardingLookupResult {
@@ -113,7 +136,7 @@ export function createDependencies(): Dependencies {
 
       const valorTotal = Number(compraRow.valor_total ?? 0)
 
-      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes] =
+      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes, identityRes] =
         await Promise.all([
           compraRow.cliente_id
             ? supabase
@@ -145,12 +168,33 @@ export function createDependencies(): Dependencies {
                 .eq('id', compraRow.segmento)
                 .maybeSingle()
             : Promise.resolve({ data: null, error: null }),
+          supabase
+            .from('onboarding_identity')
+            .select(
+              'choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, updated_at'
+            )
+            .eq('compra_id', compraRow.id)
+            .maybeSingle(),
         ])
 
       const cliente = (clienteRes.data as ClienteRow | null) ?? null
       const atendente = (atendenteRes.data as AtendenteRow | null) ?? null
       const celebridade = (celebridadeRes.data as NomeRow | null) ?? null
       const segmento = (segmentoRes.data as NomeRow | null) ?? null
+      const identityRow = (identityRes.data as OnboardingIdentityRow | null) ?? null
+
+      const identity: IdentityPayload | null = identityRow
+        ? {
+            choice: identityRow.choice ?? null,
+            logo_path: identityRow.logo_path ?? null,
+            brand_palette: identityRow.brand_palette ?? [],
+            font_choice: identityRow.font_choice ?? null,
+            campaign_images_paths: identityRow.campaign_images_paths ?? [],
+            campaign_notes: identityRow.campaign_notes ?? null,
+            production_path: identityRow.production_path ?? null,
+            updated_at: identityRow.updated_at ?? null,
+          }
+        : null
 
       const data: OnboardingDataPayload = {
         compra_id: compraRow.id,
@@ -166,6 +210,7 @@ export function createDependencies(): Dependencies {
         vigencia: formatVigencia(compraRow.tempoocomprado, compraRow.vigencia_meses),
         atendente: atendente?.nome?.trim() || 'Equipe Acelerai',
         atendenteGenero: atendente?.genero ?? 'f',
+        identity,
       }
 
       return {
