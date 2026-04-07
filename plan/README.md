@@ -2,6 +2,12 @@
 
 ## Indice ativo
 
+- `2026-04-07-alavancas-ab-sacred-face-aspect-ratio.md`
+  Plano de implementação das Alavancas A+B para corrigir dois problemas de geração de imagens IA: distorção de proporção (aspectRatio nativo na generationConfig) e pose alterada da celebridade (reformulação do Sacred Face com safe zones e prompt mais imperativo). Bump de versão para v1.1.0.
+
+- `2026-04-07-alavanca-d-composicao-hibrida-celebridade.md`
+  Spec backlog para composição híbrida programática: Gemini gera apenas fundo+layout, celebridade é composta via Sharp WASM com regras determinísticas por grupo×formato. Elimina estruturalmente qualquer possibilidade de alteração da celebridade. Pré-requisito: validar se A+B são suficientes.
+
 - `2026-04-07-compra-id-comando-onboarding.md`
   Plano de atualização do slash command `.cursor/commands/compra-id.md`: foco diagnóstico onboarding (identity, briefing, job IA), query SQL principal, limites de `activity_logs`, uso de `get_logs` para Edge Functions, checklist alinhado ao schema.
 
