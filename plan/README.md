@@ -2,6 +2,9 @@
 
 ## Indice ativo
 
+- `2026-04-07-compra-id-comando-onboarding.md`
+  Plano de atualização do slash command `.cursor/commands/compra-id.md`: foco diagnóstico onboarding (identity, briefing, job IA), query SQL principal, limites de `activity_logs`, uso de `get_logs` para Edge Functions, checklist alinhado ao schema.
+
 - `2026-04-06-melhoria-modulo-perplexity.md` ✓ **Concluido**
   Consolidacao arquitetural e SDD do modulo Perplexity: shared client extraido (client.ts), 6 functionSpec.md criados, 50 testes unitarios (normalize/prompt/discover/client), update-perplexity-config protegido com requireAdminPassword, CLAUDE.md e CONTRACT.md atualizados, CHECKLIST-DEPLOY-EDGE-FUNCTIONS.md criado. Meta atingida: Perplexity alinhado ao padrao de qualidade do modulo OMIE.
 
@@ -21,7 +24,7 @@
   Checklist operacional recorrente para deploy de Edge Functions com classificacao correta de JWT. Referencia: `docs/edge-functions-publicas-e-protegidas.md`.
 
 - `2026-03-31-perplexity-test-page-autofill-backlog.md`  
-  Backlog executavel para evoluir a pagina de testes Perplexity com auto-preenchimento de fontes (site/redes/fontes relevantes), botao de sugestao de briefing e plano de reuso no onboarding Etapa 8.
+  Backlog executavel para evoluir a pagina de testes Perplexity com auto-preenchimento de fontes (site/redes/fontes relevantes), botao de sugestao de briefing e plano de reuso no onboarding.
 
 - `2026-03-31-aurea-garden-post-tools-backlog.md`  
   Backlog executavel para implementar a sessao "Aurea Garden" no monitor ai-step2 com duas ferramentas: Post Turbo (image-to-image) e Post Gen (prompt-to-image), incluindo contrato backend, observabilidade e rollout.
