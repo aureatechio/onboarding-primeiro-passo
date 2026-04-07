@@ -253,6 +253,7 @@ function json(body: Record<string, unknown>, status = 200): Response {
 
 interface CreateJobBody {
   compra_id: string
+  job_id?: string
 }
 
 Deno.serve(async (req) => {
@@ -273,7 +274,7 @@ Deno.serve(async (req) => {
     return json({ success: false, code: 'INVALID_BODY', message: 'Body JSON invalido.' }, 400)
   }
 
-  const { compra_id } = body
+  const { compra_id, job_id: forceJobId } = body
 
   if (!compra_id) {
     return json({ success: false, code: 'MISSING_REQUIRED_FIELDS', message: 'Campo obrigatorio: compra_id.' }, 400)
@@ -400,12 +401,23 @@ Deno.serve(async (req) => {
   )
 
   // --- 7. Idempotency check ---
-  const { data: existingJob } = await supabase
-    .from('ai_campaign_jobs')
-    .select('id, status, total_generated')
-    .eq('compra_id', compra_id)
-    .eq('input_hash', inputHash)
-    .maybeSingle()
+  // When forceJobId is provided (from retry flow), look up by ID directly to avoid
+  // hash mismatch when NanoBanana config changed between original creation and retry.
+  const existingJobQuery = forceJobId
+    ? supabase
+        .from('ai_campaign_jobs')
+        .select('id, status, total_generated')
+        .eq('id', forceJobId)
+        .eq('compra_id', compra_id)
+        .maybeSingle()
+    : supabase
+        .from('ai_campaign_jobs')
+        .select('id, status, total_generated')
+        .eq('compra_id', compra_id)
+        .eq('input_hash', inputHash)
+        .maybeSingle()
+
+  const { data: existingJob } = await existingJobQuery
 
   if (existingJob) {
     if (existingJob.status === 'completed') {

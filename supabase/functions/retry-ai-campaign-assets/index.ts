@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
   const { data: job, error: jobError } = await supabase
     .from('ai_campaign_jobs')
-    .select('id, compra_id, status')
+    .select('id, compra_id, status, updated_at')
     .eq('id', jobId)
     .maybeSingle()
 
@@ -83,6 +83,8 @@ Deno.serve(async (req) => {
     return json({ success: false, code: 'JOB_NOT_FOUND', message: 'Job nao encontrado.' }, 404)
   }
 
+  const STUCK_AGE_MINUTES = 10
+
   const { data: busyAssets, error: busyError } = await supabase
     .from('ai_campaign_assets')
     .select('id')
@@ -92,15 +94,30 @@ Deno.serve(async (req) => {
   if (busyError) {
     return json({ success: false, code: 'DB_ERROR', message: 'Erro ao validar estado do job.' }, 500)
   }
+
   if ((busyAssets?.length || 0) > 0) {
-    return json(
-      {
-        success: false,
-        code: 'JOB_BUSY',
-        message: 'Job ainda em andamento. Aguarde finalizar antes de um novo reprocessamento.',
-      },
-      409,
-    )
+    const nowMs = Date.now()
+    const stuckCutoffMs = STUCK_AGE_MINUTES * 60_000
+    const jobUpdatedAtMs = job.updated_at ? Date.parse(job.updated_at) : NaN
+    const jobIsStale = !Number.isNaN(jobUpdatedAtMs) && nowMs - jobUpdatedAtMs >= stuckCutoffMs
+
+    if (jobIsStale) {
+      const staleIds = (busyAssets || []).map((a: { id: string }) => a.id)
+      await supabase
+        .from('ai_campaign_assets')
+        .update({ status: 'failed' })
+        .in('id', staleIds)
+        .eq('job_id', jobId)
+    } else {
+      return json(
+        {
+          success: false,
+          code: 'JOB_BUSY',
+          message: 'Job ainda em andamento. Aguarde finalizar antes de um novo reprocessamento.',
+        },
+        409,
+      )
+    }
   }
 
   let targets: Array<{ id: string; status: string; group_name: string; format: string }> = []
@@ -203,7 +220,7 @@ Deno.serve(async (req) => {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${serviceRoleKey}`,
     },
-    body: JSON.stringify({ compra_id: job.compra_id }),
+    body: JSON.stringify({ compra_id: job.compra_id, job_id: jobId }),
   })
 
   if (!triggerResponse.ok) {

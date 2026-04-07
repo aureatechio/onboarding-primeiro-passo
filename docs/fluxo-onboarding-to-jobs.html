@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxo: Onboarding → Geração de Jobs — Aceleraí</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #384ffe;
+    --blue-light: #e8ebff;
+    --blue-dark: #2a3bcc;
+    --red: #ff0058;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    padding: 40px 24px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--blue);
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-top: 8px;
+  }
+
+  .phase {
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .phase-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .phase-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .phase-subtitle {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+
+  .steps-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-left: 48px;
+  }
+
+  .step-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 16px 18px;
+    flex: 1;
+    min-width: 180px;
+    max-width: 260px;
+    position: relative;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .step-card:hover {
+    box-shadow: 0 4px 16px rgba(56, 79, 254, 0.1);
+    border-color: var(--blue);
+  }
+
+  .step-card .step-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+
+  .step-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .step-card p {
+    font-size: 12px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  .step-card .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+
+  .badge-fn { background: #ede9fe; color: #7c3aed; }
+  .badge-db { background: #fef3c7; color: #b45309; }
+  .badge-storage { background: #d1fae5; color: #065f46; }
+  .badge-ai { background: #fce7f3; color: #be185d; }
+  .badge-user { background: var(--blue-light); color: var(--blue); }
+
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0 8px 48px;
+  }
+
+  .connector svg {
+    display: block;
+  }
+
+  .phase-crm .phase-number { background: var(--gray-700); }
+  .phase-crm .step-card { border-left: 3px solid var(--gray-300); }
+
+  .phase-gate .phase-number { background: var(--amber); }
+  .phase-gate .step-card { border-left: 3px solid var(--amber); }
+
+  .phase-onboarding .phase-number { background: var(--blue); }
+  .phase-onboarding .step-card { border-left: 3px solid var(--blue); }
+
+  .phase-identity .phase-number { background: #8b5cf6; }
+  .phase-identity .step-card { border-left: 3px solid #8b5cf6; }
+
+  .phase-trigger .phase-number { background: var(--red); }
+  .phase-trigger .step-card { border-left: 3px solid var(--red); background: #fff5f8; }
+
+  .phase-pipeline .phase-number { background: var(--green); }
+  .phase-pipeline .step-card { border-left: 3px solid var(--green); }
+
+  .phase-output .phase-number { background: #0ea5e9; }
+  .phase-output .step-card { border-left: 3px solid #0ea5e9; }
+
+  .legend {
+    margin-top: 40px;
+    padding: 20px 24px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+  }
+
+  .legend h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--gray-700);
+  }
+
+  .legend-items {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  .tables-section {
+    margin-top: 32px;
+    padding: 24px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+  }
+
+  .tables-section h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--gray-700);
+  }
+
+  .table-flow {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .table-box {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 200px;
+    flex: 1;
+  }
+
+  .table-box .table-name {
+    background: var(--gray-100);
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .table-box .table-fields {
+    padding: 8px 12px;
+  }
+
+  .table-box .table-fields p {
+    font-size: 11px;
+    color: var(--gray-500);
+    line-height: 1.8;
+    font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+  }
+
+  .arrow-between {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-300);
+    font-size: 24px;
+    flex-shrink: 0;
+    padding-top: 20px;
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-left: 48px;
+  }
+
+  .group-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .group-card h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .group-card p {
+    font-size: 11px;
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+
+  .group-moderna { border-top: 3px solid #111; }
+  .group-moderna h4 { color: #111; }
+  .group-clean { border-top: 3px solid #6366f1; }
+  .group-clean h4 { color: #6366f1; }
+  .group-retail { border-top: 3px solid var(--red); }
+  .group-retail h4 { color: var(--red); }
+
+  .formats-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .format-tag {
+    font-size: 9px;
+    font-weight: 600;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .summary-bar {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .summary-item {
+    text-align: center;
+  }
+
+  .summary-item .num {
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .summary-item .label {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .steps-row { flex-direction: column; padding-left: 0; }
+    .step-card { max-width: 100%; }
+    .groups-grid { grid-template-columns: 1fr; padding-left: 0; }
+    .connector { padding-left: 0; }
+    .summary-bar { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Onboarding → Geração de Jobs</h1>
+    <p>Fluxo simplificado · Do preenchimento do formulário até a entrega dos 12 criativos IA</p>
+  </header>
+
+  <!-- PHASE 1: CRM -->
+  <div class="phase phase-crm">
+    <div class="phase-header">
+      <div class="phase-number">1</div>
+      <div>
+        <div class="phase-title">CRM — Pré-Onboarding</div>
+        <div class="phase-subtitle">Venda, aprovação, contrato e pagamento</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: var(--gray-500)">Vendedor</div>
+        <h3>Proposta criada</h3>
+        <p>Celebridade selecionada, região, prazo e valor definidos.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--gray-500)">Gestor</div>
+        <h3>Venda aprovada</h3>
+        <p>Gestor confere e aprova a venda no CRM.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--gray-500)">Cliente</div>
+        <h3>Contrato + Pagamento</h3>
+        <p>Assinatura digital (ClickSign) e checkout realizado.</p>
+        <span class="badge badge-db">compras</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 2: GATE -->
+  <div class="phase phase-gate">
+    <div class="phase-header">
+      <div class="phase-number">2</div>
+      <div>
+        <div class="phase-title">Gate de Elegibilidade</div>
+        <div class="phase-subtitle">Condição obrigatória para acessar o formulário</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: var(--amber)">Validação</div>
+        <h3>checkout_status = 'pago'</h3>
+        <p>Pagamento confirmado no checkout integrado.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--amber)">Validação</div>
+        <h3>clicksign_status = 'Assinado'</h3>
+        <p>Contrato assinado digitalmente via ClickSign.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--amber)">Resultado</div>
+        <h3>compra_id liberado</h3>
+        <p>UUID único da compra habilita o acesso ao formulário. Sem JWT — segurança por UUID.</p>
+        <span class="badge badge-fn">get-onboarding-data</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#384ffe" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 3: ONBOARDING FORM -->
+  <div class="phase phase-onboarding">
+    <div class="phase-header">
+      <div class="phase-number">3</div>
+      <div>
+        <div class="phase-title">Formulário de Onboarding</div>
+        <div class="phase-subtitle">8 etapas — React SPA multistep (estado em localStorage)</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: var(--blue)">Etapa 1</div>
+        <h3>Hero / Boas-vindas</h3>
+        <p>Apresentação da celebridade contratada e contextualização.</p>
+        <span class="badge badge-user">front-end</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--blue)">Etapas 2–4</div>
+        <h3>Slides + Quizzes</h3>
+        <p>Conteúdo educativo com confirmação de ciência (checkboxes). Não persistem no banco.</p>
+        <span class="badge badge-user">front-end</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--blue)">Etapa 5</div>
+        <h3>Tela informativa</h3>
+        <p>Orientações sobre o que vem a seguir no processo.</p>
+        <span class="badge badge-user">front-end</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--blue)">Etapa 6.1</div>
+        <h3>Informações da marca</h3>
+        <p>Coleta de dados básicos (site, Instagram, etc.).</p>
+        <span class="badge badge-user">front-end</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#8b5cf6" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 4: IDENTITY + BRIEFING -->
+  <div class="phase phase-identity">
+    <div class="phase-header">
+      <div class="phase-number">4</div>
+      <div>
+        <div class="phase-title">Identidade Visual + Briefing</div>
+        <div class="phase-subtitle">Coleta de ativos — dados persistidos no Supabase</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: #8b5cf6">Etapa 6.2</div>
+        <h3>Upload de identidade</h3>
+        <p>Logo, paleta de cores, fonte, imagens de campanha (até 5), notas de campanha.</p>
+        <span class="badge badge-fn">save-onboarding-identity</span>
+        <span class="badge badge-storage">bucket: onboarding-identity</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: #8b5cf6">Etapa 7</div>
+        <h3>Briefing de campanha</h3>
+        <p>Texto livre e/ou gravação de áudio (WebM). Sugestão via IA com Perplexity Sonar.</p>
+        <span class="badge badge-fn">save-campaign-briefing</span>
+        <span class="badge badge-ai">generate-campaign-briefing</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: #8b5cf6">Etapa Final</div>
+        <h3>Resumo + Confirmação</h3>
+        <p>Revisão de todos os dados. Cliente confirma e conclui o onboarding.</p>
+        <span class="badge badge-db">onboarding_identity</span>
+        <span class="badge badge-db">onboarding_briefings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#ff0058" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 5: TRIGGER -->
+  <div class="phase phase-trigger">
+    <div class="phase-header">
+      <div class="phase-number">5</div>
+      <div>
+        <div class="phase-title">Disparo Automático</div>
+        <div class="phase-subtitle">Fire-and-forget — server-to-server com service role</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: var(--red)">Trigger</div>
+        <h3>save-campaign-briefing → create-ai-campaign-job</h3>
+        <p>Ao salvar o briefing (path <strong>hybrid</strong>), o backend dispara automaticamente a criação do Job IA. O frontend não bloqueia — resposta imediata.</p>
+        <span class="badge badge-fn">create-ai-campaign-job</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--red)">Validações internas</div>
+        <h3>Elegibilidade + Idempotência</h3>
+        <p>Revalida checkout + contrato. Verifica <code>compra_id + input_hash</code> para evitar duplicação.</p>
+        <span class="badge badge-db">ai_campaign_jobs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 6: PIPELINE -->
+  <div class="phase phase-pipeline">
+    <div class="phase-header">
+      <div class="phase-number">6</div>
+      <div>
+        <div class="phase-title">Pipeline de Geração (ai-step2)</div>
+        <div class="phase-subtitle">Orquestrador + 12 Workers paralelos — Gemini API</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: var(--green)">Orquestrador</div>
+        <h3>Monta contexto completo</h3>
+        <p>Lê identidade, celebridade, logo (signed URLs), paleta, NanoBanana config. Cria Job + 12 assets pendentes.</p>
+        <span class="badge badge-db">ai_campaign_jobs</span>
+        <span class="badge badge-db">ai_campaign_assets × 12</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--green)">Workers (×12)</div>
+        <h3>generate-ai-campaign-image</h3>
+        <p>Cada worker gera 1 imagem via Gemini com prompt multimodal. Upload no Storage. Retry: 2× com backoff.</p>
+        <span class="badge badge-ai">Gemini API</span>
+        <span class="badge badge-storage">bucket: ai-campaign-assets</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: var(--green)">Reconciliação</div>
+        <h3>Fechamento do Job</h3>
+        <p>Atualiza status: <strong>completed</strong> (12/12), <strong>partial</strong> (alguns falharam) ou <strong>failed</strong>. Erros logados.</p>
+        <span class="badge badge-db">ai_campaign_errors</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUPS -->
+  <div style="padding-left: 48px; margin-top: 16px; margin-bottom: 8px;">
+    <p style="font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px;">3 Grupos Criativos × 4 Formatos = 12 Imagens</p>
+  </div>
+  <div class="groups-grid">
+    <div class="group-card group-moderna">
+      <h4>Moderna</h4>
+      <p>Fundo escuro, hero cinematográfico, tipografia bold condensed</p>
+      <div class="formats-row">
+        <span class="format-tag">1:1</span>
+        <span class="format-tag">4:5</span>
+        <span class="format-tag">16:9</span>
+        <span class="format-tag">9:16</span>
+      </div>
+    </div>
+    <div class="group-card group-clean">
+      <h4>Clean</h4>
+      <p>Fundo branco, editorial split, tipografia light/serif</p>
+      <div class="formats-row">
+        <span class="format-tag">1:1</span>
+        <span class="format-tag">4:5</span>
+        <span class="format-tag">16:9</span>
+        <span class="format-tag">9:16</span>
+      </div>
+    </div>
+    <div class="group-card group-retail">
+      <h4>Retail</h4>
+      <p>Cor sólida da marca, blocos geométricos, CTA explícito</p>
+      <div class="formats-row">
+        <span class="format-tag">1:1</span>
+        <span class="format-tag">4:5</span>
+        <span class="format-tag">16:9</span>
+        <span class="format-tag">9:16</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTOR -->
+  <div class="connector">
+    <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#0ea5e9" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+
+  <!-- PHASE 7: OUTPUT -->
+  <div class="phase phase-output">
+    <div class="phase-header">
+      <div class="phase-number">7</div>
+      <div>
+        <div class="phase-title">Entrega + Operação</div>
+        <div class="phase-subtitle">Monitoramento, retry e galeria operacional</div>
+      </div>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-label" style="color: #0ea5e9">Polling</div>
+        <h3>get-ai-campaign-status</h3>
+        <p>Frontend consulta status do Job e progresso dos assets via polling.</p>
+        <span class="badge badge-fn">get-ai-campaign-status</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: #0ea5e9">Monitor</div>
+        <h3>AiStep2Monitor</h3>
+        <p>Painel operacional com lista de jobs, diagnósticos, inconsistências e galeria por abas.</p>
+        <span class="badge badge-fn">get-ai-campaign-monitor</span>
+      </div>
+      <div class="step-card">
+        <div class="step-label" style="color: #0ea5e9">Retry</div>
+        <h3>retry-ai-campaign-assets</h3>
+        <p>Reprocessa assets falhos (lote ou unitário) ou regenera assets completos por categoria.</p>
+        <span class="badge badge-fn">retry-ai-campaign-assets</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div class="num">8</div>
+      <div class="label">Etapas do Formulário</div>
+    </div>
+    <div class="summary-item">
+      <div class="num">4</div>
+      <div class="label">Tabelas Envolvidas</div>
+    </div>
+    <div class="summary-item">
+      <div class="num">12</div>
+      <div class="label">Imagens por Job</div>
+    </div>
+    <div class="summary-item">
+      <div class="num">3</div>
+      <div class="label">Grupos Criativos</div>
+    </div>
+    <div class="summary-item">
+      <div class="num">4</div>
+      <div class="label">Formatos por Grupo</div>
+    </div>
+  </div>
+
+  <!-- DATA FLOW -->
+  <div class="tables-section">
+    <h4>Fluxo de Dados — Tabelas Principais</h4>
+    <div class="table-flow">
+      <div class="table-box">
+        <div class="table-name">compras</div>
+        <div class="table-fields">
+          <p>id (compra_id) <em>PK</em></p>
+          <p>checkout_status</p>
+          <p>clicksign_status</p>
+          <p>celebridade → FK</p>
+          <p>valor_total</p>
+        </div>
+      </div>
+      <div class="arrow-between">→</div>
+      <div class="table-box">
+        <div class="table-name">onboarding_identity</div>
+        <div class="table-fields">
+          <p>compra_id <em>UNIQUE</em></p>
+          <p>logo_path</p>
+          <p>brand_palette[]</p>
+          <p>font_choice</p>
+          <p>campaign_images_paths[]</p>
+          <p>production_path</p>
+        </div>
+      </div>
+      <div class="arrow-between">→</div>
+      <div class="table-box">
+        <div class="table-name">onboarding_briefings</div>
+        <div class="table-fields">
+          <p>compra_id <em>UNIQUE</em></p>
+          <p>briefing_text</p>
+          <p>audio_path</p>
+          <p>audio_duration_sec</p>
+        </div>
+      </div>
+      <div class="arrow-between">→</div>
+      <div class="table-box">
+        <div class="table-name">ai_campaign_jobs</div>
+        <div class="table-fields">
+          <p>compra_id → FK</p>
+          <p>status</p>
+          <p>input_hash <em>SHA-256</em></p>
+          <p>total_expected: 12</p>
+          <p>total_generated</p>
+        </div>
+      </div>
+      <div class="arrow-between">→</div>
+      <div class="table-box">
+        <div class="table-name">ai_campaign_assets</div>
+        <div class="table-fields">
+          <p>job_id → FK</p>
+          <p>group_name</p>
+          <p>format</p>
+          <p>image_url</p>
+          <p>status</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <h4>Legenda</h4>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="badge badge-fn" style="margin: 0;">fn</span>
+        Edge Function (Supabase)
+      </div>
+      <div class="legend-item">
+        <span class="badge badge-db" style="margin: 0;">db</span>
+        Tabela no banco
+      </div>
+      <div class="legend-item">
+        <span class="badge badge-storage" style="margin: 0;">storage</span>
+        Bucket de storage
+      </div>
+      <div class="legend-item">
+        <span class="badge badge-ai" style="margin: 0;">ai</span>
+        Chamada a provedor IA
+      </div>
+      <div class="legend-item">
+        <span class="badge badge-user" style="margin: 0;">front</span>
+        Interação do usuário
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; margin-top: 32px; color: var(--gray-500); font-size: 11px;">
+    Aceleraí · Onboarding Primeiro Passo · Gerado em Abril 2026
+  </footer>
+
+</div>
+</body>
+</html>

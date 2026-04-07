@@ -234,6 +234,8 @@ export default function DetailModePanel({
                   {currentGroup.items.map((asset, index) => {
                     const ratio = ASPECT_RATIOS[asset.format] || ASPECT_RATIOS['1:1']
                     const isFailed = asset.status === 'failed'
+                    const isPendingOrProcessing =
+                      asset.status === 'pending' || asset.status === 'processing'
                     const isRetryingThis = retryingAssetId === asset.id
 
                     return (
@@ -289,7 +291,11 @@ export default function DetailModePanel({
                                   background: monitorTheme.pageBg,
                                 }}
                               >
-                                <ImageIcon size={28} />
+                                {isPendingOrProcessing ? (
+                                  <Loader2 size={28} className="animate-spin" />
+                                ) : (
+                                  <ImageIcon size={28} />
+                                )}
                               </div>
                             )}
                           </div>
@@ -371,6 +377,12 @@ export default function DetailModePanel({
                                 <RefreshCw size={14} />
                               )}
                             </button>
+                          ) : isPendingOrProcessing ? (
+                            <Loader2
+                              size={14}
+                              className="animate-spin"
+                              style={{ color: monitorTheme.textMuted }}
+                            />
                           ) : null}
                         </div>
                       </div>

@@ -610,6 +610,71 @@ Deno.serve(async (req) => {
     }
     errors = (errorsRes.data || []) as Array<Record<string, unknown>>
 
+    const nowMs = Date.now()
+    const stuckCutoffMs = STUCK_ASSET_AGE_MINUTES * 60_000
+    const jobUpdatedAtMs = job.updated_at ? Date.parse(String(job.updated_at)) : NaN
+    const jobIsRecentlyActive = !Number.isNaN(jobUpdatedAtMs) && nowMs - jobUpdatedAtMs < stuckCutoffMs
+
+    const staleAssetIds: string[] = []
+    if (!jobIsRecentlyActive) {
+      for (const asset of assets) {
+        const status = String(asset.status || '')
+        if (status === 'pending' || status === 'processing') {
+          staleAssetIds.push(String(asset.id))
+        }
+      }
+    }
+
+    if (staleAssetIds.length > 0) {
+      await supabase
+        .from('ai_campaign_assets')
+        .update({ status: 'failed' })
+        .in('id', staleAssetIds)
+        .eq('job_id', String(job.id))
+
+      for (const asset of assets) {
+        if (staleAssetIds.includes(String(asset.id))) {
+          asset.status = 'failed'
+          await supabase.from('ai_campaign_errors').insert({
+            job_id: String(job.id),
+            group_name: String(asset.group_name || ''),
+            format: String(asset.format || ''),
+            error_type: 'stale_pending_auto_reconciled',
+            error_message: `Asset stuck in non-terminal status for >${STUCK_ASSET_AGE_MINUTES}min. Auto-reconciled to failed by monitor.`,
+            attempt: 1,
+          })
+        }
+      }
+
+      const reconciledCompleted = assets.filter((a) => String(a.status) === 'completed').length
+      const reconciledFailed = assets.filter((a) => String(a.status) === 'failed').length
+      const reconciledStatus =
+        reconciledCompleted === assets.length && assets.length > 0
+          ? 'completed'
+          : reconciledCompleted > 0
+            ? 'partial'
+            : 'failed'
+
+      await supabase
+        .from('ai_campaign_jobs')
+        .update({
+          status: reconciledStatus,
+          total_generated: reconciledCompleted,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', String(job.id))
+
+      job.status = reconciledStatus
+      job.total_generated = reconciledCompleted
+
+      const { data: freshErrors } = await supabase
+        .from('ai_campaign_errors')
+        .select('id, group_name, format, error_type, error_message, attempt, created_at')
+        .eq('job_id', job.id)
+        .order('created_at')
+      errors = (freshErrors || []) as Array<Record<string, unknown>>
+    }
+
     const statusCounts = {
       total: assets.length,
       completed: 0,
