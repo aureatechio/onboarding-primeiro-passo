@@ -154,6 +154,8 @@ interface AiCampaignError {
 - Quando `production_path = 'standard'`, dispara `create-ai-campaign-job` em background (fire-and-forget, server-to-server com service role).
 - Retorna `{ success, data: { identity_id, logo_path, campaign_images_count } }`.
 
+> **Nota de comportamento atual do frontend (Etapa 6.2):** Os botões de escolha `add_now` / `later` foram removidos da UI. O frontend envia sempre `choice: "later"` com `logo: null`, `brand_palette: []`, `font_choice: ""`, `campaign_images: []`. O campo `production_path = 'standard'` não é disparado pelo fluxo do onboarding neste momento. O schema do banco e o contrato do endpoint permanecem compatíveis com `add_now` para uso futuro ou via admin.
+
 ### `create-ai-campaign-job` (POST)
 
 - Classificacao JWT: **publica no gateway** (`--no-verify-jwt`) com autenticacao **interna obrigatoria** via bearer service role.
@@ -174,7 +176,7 @@ interface AiCampaignError {
 ### Trigger automatico da geracao (onboarding -> ai-step2)
 
 - Path `hybrid`: `save-campaign-briefing` dispara `create-ai-campaign-job` apos upsert do briefing.
-- Path `standard`: `save-onboarding-identity` dispara `create-ai-campaign-job` quando recebe `production_path = 'standard'`.
+- Path `standard`: `save-onboarding-identity` dispara `create-ai-campaign-job` quando recebe `production_path = 'standard'`. **Atualmente nao acionado pelo frontend** (UI de escolha removida; frontend envia sempre `choice: "later"`).
 - Em ambos os casos, o trigger e fire-and-forget e nao bloqueia o response da etapa no frontend.
 
 ### `get-ai-campaign-status` (GET)
