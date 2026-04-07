@@ -15,7 +15,7 @@ O onboarding "Primeiro Passo" é um formulário multistep em React SPA (Vite) co
 ```
 Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela de ativação)
 → Etapa 4 (4 slides + quiz) → Etapa 5 (tela única) → Etapa 6 (6.1 — tela única)
-→ Etapa 6.2 (modo simplificado OU 5 slides avançado)
+→ Etapa 6.2 (apresentação da bonificação → modo simplificado: logo + site + instagram)
 → Etapa 7 (escolha de caminho + briefing condicional) → Etapa Final (resumo → parabéns)
 ```
 
@@ -41,14 +41,10 @@ Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela
 | `trafficChoice` | `'yes' \| 'no' \| null` | `null` | Escolha de material de tráfego (Etapa 5) |
 | `productionPath` | `'standard' \| 'hybrid' \| null` | `null` | Caminho de produção (Etapa 7) |
 | `identityBonusChoice` | `'add_now' \| 'later' \| null` | `null` | Escolha de identidade visual (Etapa 6.2) |
-| `identityBonusLogoName` | string | `''` | Nome do arquivo de logo enviado |
-| `identityBonusExtractedColors` | string[] | `[]` | Cores extraídas do logo |
-| `identityBonusCustomColors` | string[] | `[]` | Cores adicionadas manualmente |
-| `identityBonusColors` | string[] | `[]` | Combinação das duas listas de cores |
-| `identityBonusFont` | string | `''` | ID da fonte selecionada |
-| `identityBonusImagesCount` | number | `0` | Qtd de imagens enviadas |
-| `identityBonusPending` | boolean | `false` | Se deixou para depois |
-| `campaignNotes` | string | `''` | Observações livres da campanha |
+| `identityBonusPending` | boolean | `false` | Se deixou para depois (derivado de `choice === 'later'`) |
+| `campaignNotes` | string | `''` | Site + Instagram concatenados como `"Site: ... \| Instagram: ..."` (Etapa 6.2) |
+| `siteUrl` | string | `''` | Site da empresa (Etapa 6.2) |
+| `instagramHandle` | string | `''` | Handle do Instagram sem @ (Etapa 6.2) |
 | `campaignBriefMode` | `'text' \| 'audio' \| 'both' \| null` | `null` | Modo do briefing (Etapa 7 hybrid) |
 | `campaignBriefText` | string | `''` | Texto do briefing |
 | `campaignCompanySite` | string | `''` | Site da empresa (briefing) |
@@ -270,67 +266,42 @@ Tela com resumo:
 
 ---
 
-## Etapa 6.2 — Bonificação de prazo (Identidade Visual Avançada)
+## Etapa 6.2 — Bonificação de prazo
 
 **Arquivo:** `src/pages/Etapa62.jsx`
 **Copy:** `ETAPA62` em `src/copy.js`
-**Tipo:** Tela com 3 modos: introdução → modo simplificado → modo avançado (5 slides)
+**Tipo:** Tela com 2 modos: apresentação da bonificação → modo simplificado (logo + site + instagram)
 
-### Fluxo de decisão
+> **Nota:** O modo avançado de 5 slides (logo, cores, fonte, imagens, observações) foi removido. Os campos `brand_palette`, `font_choice` e `campaign_images_paths` podem ser gravados por outras ferramentas (AiStep2Monitor) mas não são mais coletados pelo onboarding.
+
+### Fluxo de estados
 
 ```
-Tela Intro (bonificação + como funciona) → Botão "Confirmar e avançar"
-    ↓
-Modo Simplificado (logo opcional + site + instagram + cores auto)
-    ↓ (Botão "Confirmar e enviar")
-CompletionScreen
+[choice == null] → Tela de apresentação (bonificação + como funciona)
+    ├── Botão "Quero a bonificação" → Modo simplificado → salva choice: 'add_now' → CompletionScreen "Bonificação Ativa"
+    └── Botão "Prefiro fazer depois" → salva choice: 'later' → CompletionScreen "Pendente"
+
+[choice == 'add_now'] → CompletionScreen "Bonificação Ativa" (direto, sem formulário)
+[choice == 'later']   → CompletionScreen "Pendente" (direto, sem formulário)
 ```
 
-O **modo avançado** (`choice === "add_now"`) é acessível via código mas o fluxo padrão atual navega pelo modo simplificado.
+**Inicialização correta:** ao montar o componente, se `userData.identityBonusChoice` já está definido (vindo do servidor ou localStorage), o componente inicia com `completed = true` — sem reabrir o formulário.
 
-### Modo Simplificado — Campos de formulário
+### Campos do modo simplificado
 
 | Campo | Tipo | Obrigatório | Validação | Persiste em |
 |-------|------|-------------|-----------|-------------|
-| Logo da marca | File upload (imagem) | Opcional | PNG, JPG, SVG, WebP, max 5 MB | `userData.identityBonusLogoName` + `logoFile` |
-| Cores da marca | Color swatches (auto-extraídas + manuais) | Opcional (aparece após logo) | Max 5 cores total | `userData.identityBonusColors` |
+| Logo da marca | File upload (imagem) | Opcional | PNG, JPG, SVG, WebP, max 5 MB | `logoFile` (local, não persiste no contexto) |
 | Site da empresa | URL input | Opcional | Validação de URL | `userData.siteUrl` |
 | Perfil do Instagram | Text input com prefixo `https://www.instagram.com/` | Opcional | Regex de handle (letras, números, `.`, `_`) | `userData.instagramHandle` |
-
-### Modo Avançado (5 slides) — Campos de formulário
-
-| Slide | Campo | Tipo | Obrigatório | Validação | Persiste em |
-|-------|-------|------|-------------|-----------|-------------|
-| 1 — Logo | Upload de logo | File input (imagem) | **Sim** (para avançar slide) | PNG, JPG, SVG, WebP ≤ 5 MB (`validateLogoFile()`) | `identityBonusLogoName` |
-| 2 — Cores | Cores extraídas | Color swatch (readonly badge "LOGO") | Auto | Extraídas via `extractColorsFromImage()` | `identityBonusExtractedColors` |
-| 2 — Cores | Cores manuais | Color picker + botão adicionar | Opcional | Max 5 total (extraídas + custom) | `identityBonusCustomColors` |
-| 3 — Fonte | Seleção de fonte | Radio group (3 opções) | **Sim** (para avançar slide) | Uma opção deve ser selecionada | `identityBonusFont` |
-| 4 — Imagens | Imagens de campanha | File upload múltiplo | Opcional | Até 5 imagens | `identityBonusImagesCount` |
-| 5 — Observações | Notas da campanha | Textarea (max 500 chars) | Opcional | Max 500 caracteres | `campaignNotes` |
-
-**Opções de fonte (slide 3):**
-
-| ID | Label | Família CSS |
-|----|-------|-------------|
-| `inter` | Inter | `'Inter', sans-serif` |
-| `jetbrains` | JetBrains Mono | `'JetBrains Mono', monospace` |
-| `georgia` | Georgia | `Georgia, serif` |
-
-### Status Chips
-
-Cada campo exibe um chip de status:
-- **Obrigatório** (amarelo): campo ainda não preenchido
-- **Concluído** (verde): campo preenchido
-- **Opcional** (cinza): campo não obrigatório
 
 ### Backend
 
 Ao confirmar, chama `saveIdentityToBackend()` → `POST /functions/v1/save-onboarding-identity` (FormData):
-- `compra_id`, `choice`, `logo` (file), `brand_palette` (JSON), `font_choice`, `campaign_notes`, `campaign_images` (múltiplos files)
+- `compra_id`, `choice: 'add_now'`, `logo` (file, se enviado), `campaign_notes` (formato `"Site: ... | Instagram: ..."`)
 
-### Botão alternativo
-
-No modo avançado, slide 0 (se logo não preenchido): **"Continuar depois (marcar etapa como pendente)"** → salva `choice: 'later'` no backend
+Ao clicar "Prefiro fazer depois":
+- `compra_id`, `choice: 'later'`
 
 ---
 
@@ -474,16 +445,15 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 |------------|-----|-----------|
 | `PageLayout` | Todas as etapas (exceto 1 e Final) | Container padrão com TopBar + padding |
 | `StepHeader` | Todas (exceto 1 e Final) | Tag, título, tempo de leitura, alert |
-| `SlideDots` | Etapas 2, 3, 4, 6.2 | Indicador de slides (clicável) |
-| `SlideTransition` | Etapas 2, 3, 4, 6.2 | Animação + swipe entre slides |
+| `SlideDots` | Etapas 2, 3, 4 | Indicador de slides (clicável) |
+| `SlideTransition` | Etapas 2, 3, 4 | Animação + swipe entre slides |
 | `NavButtons` | Todas (exceto 1 e Final) | Botões Voltar/Avançar no footer |
 | `StickyFooter` | Todas (exceto 1 e Final) | Footer fixo na base |
 | `QuizConfirmation` | Etapas 2, 3, 4 | Lista de checkboxes obrigatórios |
 | `CompletionScreen` | Etapas 2, 4, 5, 6, 6.2, 7 | Tela de transição "Etapa X concluída!" |
 | `ProcessingOverlay` | Etapas 2, 3, 4, 6.2, 7 | Overlay com mensagens sequenciais durante salvamento |
 | `CampaignBriefing` | Etapa 7 (hybrid) | Formulário de briefing (texto + áudio + site) |
-| `ThumbnailPreview` | Etapa 6.2 | Preview de imagem com botão remover |
-| `ColorSwatch` | Etapa 6.2 | Color picker com badge e botão remover |
+| `ColorSwatch` | AiStep2Monitor (PostGen, PostTurbo) | Color picker com badge e botão remover |
 | `InfoCard` | Etapa 5 | Card com ícone, título e conteúdo |
 | `BulletList` | Etapas 2, 3, 7 | Lista com bullets coloridos |
 | `Icon` | Todas | Wrapper de ícones Lucide |
@@ -499,11 +469,7 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | 4 | Quiz (5 checkboxes) | Confirmação | Sim | Não (apenas progresso) |
 | 5 | Tráfego pago (radio) | Seleção | Sim | Webhook externo |
 | 6.1 | Checkbox de entendimento | Confirmação | Sim | Não |
-| 6.2 | Logo | File upload | Opcional (simplificado) / Obrig. (avançado) | `save-onboarding-identity` |
-| 6.2 | Cores | Color picker | Opcional | `save-onboarding-identity` |
-| 6.2 | Fonte | Radio (3 opções) | Obrig. (avançado) | `save-onboarding-identity` |
-| 6.2 | Imagens campanha | File upload múltiplo | Opcional | `save-onboarding-identity` |
-| 6.2 | Observações | Textarea (500 chars) | Opcional | `save-onboarding-identity` |
+| 6.2 | Logo | File upload | Opcional | `save-onboarding-identity` |
 | 6.2 | Site | URL input | Opcional | `save-onboarding-identity` |
 | 6.2 | Instagram | Text input | Opcional | `save-onboarding-identity` |
 | 7 | Caminho de produção | Radio (2 opções) | Sim | `save-onboarding-identity` |
@@ -561,11 +527,11 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 | `id` | uuid | NO | `gen_random_uuid()` | — | — | PK gerada automaticamente |
 | `compra_id` | uuid | NO | — | `compra_id` (query param) | Init | FK → `compras.id` (UNIQUE) |
 | `choice` | text | NO | — | Escolha de identidade (`'add_now'` / `'later'`) | 6.2 | Se o cliente enviou material agora ou depois |
-| `logo_path` | text | YES | null | Upload de logo (file) | 6.2 | Path no storage: `{compra_id}/logo.{ext}` |
-| `brand_palette` | text[] | NO | `'{}'` | Cores extraídas + cores manuais | 6.2 | Array de hex colors (max 8) |
-| `font_choice` | text | YES | null | Seleção de fonte (radio: `inter` / `jetbrains` / `georgia`) | 6.2 | ID da fonte selecionada |
-| `campaign_images_paths` | text[] | YES | `'{}'` | Upload de imagens de campanha (múltiplo, max 5) | 6.2 | Paths no storage: `{compra_id}/img_{N}.{ext}` |
-| `campaign_notes` | text | YES | null | Textarea de observações (max 500 no front / 2000 no back) | 6.2 | Texto livre com notas da campanha. No modo simplificado, recebe `"Site: ... \| Instagram: ..."` |
+| `logo_path` | text | YES | null | Upload de logo (file, opcional) | 6.2 | Path no storage: `{compra_id}/logo.{ext}` |
+| `brand_palette` | text[] | NO | `'{}'` | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | Array de hex colors |
+| `font_choice` | text | YES | null | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | ID da fonte selecionada |
+| `campaign_images_paths` | text[] | YES | `'{}'` | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | Paths no storage |
+| `campaign_notes` | text | YES | null | Site + Instagram concatenados | 6.2 | Formato: `"Site: https://... \| Instagram: https://www.instagram.com/handle"` |
 | `production_path` | text | YES | null | Radio: `'standard'` / `'hybrid'` | 7 | Caminho de produção escolhido |
 | `created_at` | timestamptz | NO | `now()` | — | — | Data de criação do registro |
 | `updated_at` | timestamptz | NO | `now()` | — | — | Atualizada a cada upsert |
@@ -622,6 +588,38 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 
 **Relação:** Tabela mestre. O formulário **lê** desta tabela na inicialização via `get-onboarding-data`.
 **Escrita pelo formulário:** Nenhuma (somente leitura)
+
+**Payload de retorno do `get-onboarding-data`:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "compra_id": "uuid",
+    "clientName": "...",
+    "celebName": "...",
+    "praca": "...",
+    "segmento": "...",
+    "pacote": "...",
+    "vigencia": "...",
+    "atendente": "...",
+    "atendenteGenero": "f",
+    "identity": {
+      "choice": "add_now",
+      "logo_path": "{compra_id}/logo.jpeg",
+      "brand_palette": ["#d4ba71", "#423617"],
+      "font_choice": "inter",
+      "campaign_images_paths": [],
+      "campaign_notes": "Site: https://... | Instagram: https://www.instagram.com/handle",
+      "production_path": "standard",
+      "updated_at": "2026-04-06T17:38:02Z"
+    }
+  }
+}
+```
+
+`identity` é `null` quando o cliente ainda não preencheu a Etapa 6.2. O `OnboardingContext` faz parse do `campaign_notes` para extrair `siteUrl` e `instagramHandle` de volta, restaurando o estado dos campos no modo simplificado.
+
 **Colunas usadas na hidratação:**
 
 | Coluna DB | Tipo | Mapeamento p/ `userData` | Join/Lookup |
@@ -734,11 +732,7 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 | 2,3,4 | Quiz checkboxes | — | — | — | Nenhum (só progresso local) |
 | 5 | Tráfego radio (yes/no) | `trafficChoice` | — | — | Webhook externo |
 | 6.1 | Checkbox entendimento | — | — | — | Nenhum (só progresso local) |
-| 6.2 | Upload de logo | `identityBonusLogoName` | `onboarding_identity` | `logo_path` | Escrita (Storage) |
-| 6.2 | Cores (auto + manual) | `identityBonusColors` | `onboarding_identity` | `brand_palette` | Escrita |
-| 6.2 | Seleção de fonte | `identityBonusFont` | `onboarding_identity` | `font_choice` | Escrita |
-| 6.2 | Upload imagens campanha | `identityBonusImagesCount` | `onboarding_identity` | `campaign_images_paths` | Escrita (Storage) |
-| 6.2 | Observações (textarea) | `campaignNotes` | `onboarding_identity` | `campaign_notes` | Escrita |
+| 6.2 | Upload de logo (opcional) | `logoFile` (local) | `onboarding_identity` | `logo_path` | Escrita (Storage) |
 | 6.2 | Site da empresa (URL) | `siteUrl` | `onboarding_identity` | `campaign_notes` (concatenado) | Escrita |
 | 6.2 | Perfil Instagram | `instagramHandle` | `onboarding_identity` | `campaign_notes` (concatenado) | Escrita |
 | 6.2 | Escolha add_now/later | `identityBonusChoice` | `onboarding_identity` | `choice` | Escrita |
