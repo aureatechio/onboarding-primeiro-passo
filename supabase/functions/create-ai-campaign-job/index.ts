@@ -75,6 +75,14 @@ Before output, verify:
 **You are the Director. If an instruction makes the ad "ugly" or "amateur", adapt it to maintain premium quality.**`
 
 const URL_EXPIRY_SECONDS = parseInt(Deno.env.get('AI_CAMPAIGN_URL_EXPIRY_SECONDS') ?? '604800', 10)
+
+const FORMAT_TO_ASPECT_RATIO: Record<string, string> = {
+  '1:1': '1:1',
+  '4:5': '4:5',
+  '16:9': '16:9',
+  '9:16': '9:16',
+}
+
 const FALLBACK_DIRECTION: Record<GroupName, string> = {
   moderna:
     'CREATIVE DIRECTION — MODERNA (Dark & Bold).',
@@ -628,6 +636,7 @@ async function dispatchWorkers(
               client_logo_url: clientLogoUrl,
               campaign_image_url: campaignImageUrl,
               reference_image_url: resolvedDirections?.[asset.group_name as GroupName]?.referenceImageUrl,
+              aspect_ratio: FORMAT_TO_ASPECT_RATIO[asset.format],
               prompt,
               gemini_model_name: nbConfig?.gemini_model_name,
               gemini_api_base_url: nbConfig?.gemini_api_base_url,

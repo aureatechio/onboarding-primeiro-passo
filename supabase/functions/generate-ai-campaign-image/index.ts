@@ -27,6 +27,7 @@ interface WorkerBody {
   gemini_api_base_url?: string
   max_retries?: number
   max_image_download_bytes?: number
+  aspect_ratio?: string
   prompt: string
 }
 
@@ -62,6 +63,7 @@ Deno.serve(async (req) => {
     gemini_api_base_url,
     max_retries,
     max_image_download_bytes,
+    aspect_ratio,
     prompt,
   } = body
 
@@ -98,6 +100,7 @@ Deno.serve(async (req) => {
         baseUrl: gemini_api_base_url,
         maxRetries: max_retries,
         maxImageDownloadBytes: max_image_download_bytes,
+        aspectRatio: aspect_ratio,
       },
     )
 

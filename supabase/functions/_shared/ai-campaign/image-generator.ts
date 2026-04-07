@@ -15,6 +15,7 @@ interface GenerateImageOverrides {
   baseUrl?: string
   maxRetries?: number
   maxImageDownloadBytes?: number
+  aspectRatio?: string
 }
 
 export async function generateImage(
@@ -68,6 +69,7 @@ export async function generateImage(
         imageInputs,
         overrides?.modelName,
         overrides?.baseUrl,
+        overrides?.aspectRatio,
       )
       if (result.success) return result
       lastError = result.error || 'Gemini returned non-success'
@@ -179,6 +181,7 @@ async function callGemini(
   imageInputs: ImageInput[],
   modelNameOverride?: string,
   baseUrlOverride?: string,
+  aspectRatio?: string,
 ): Promise<GenerateImageResult> {
   const parts: Record<string, unknown>[] = []
 
@@ -197,6 +200,7 @@ async function callGemini(
     contents: [{ parts }],
     generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
+      ...(aspectRatio ? { imageConfig: { aspectRatio } } : {}),
     },
   }
 

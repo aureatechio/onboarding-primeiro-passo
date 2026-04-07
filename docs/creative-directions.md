@@ -14,20 +14,21 @@ Os valores abaixo são os **defaults hardcoded**. Podem ser sobrescritos via pai
 
 ```
 CREATIVE DIRECTION — MODERNA (Dark & Bold)
-- Background: Black / dark solid.
-- Celebrity: Hero framing, 70-80% of the frame, cinematic lighting.
-- Layout: Asymmetric, photo dominates, text anchored at the bottom.
+⚠️ SACRED FACE RULE APPLIES: Do NOT draw or render the celebrity. Leave the safe zone empty for compositing.
+- Background: Black / dark solid, cinematic gradient.
+- Celebrity Safe Zone: Reserve center area, ~75% of canvas height, for a standing figure. Design cinematic lighting on the background to complement a hero figure standing there.
+- Layout: Asymmetric, safe zone dominates, text anchored at the bottom.
 - Typography: Ultra-bold condensed, impactful, max contrast.
 - Reference mood: Nike campaign poster / movie poster aesthetic.
 ```
 
-| Atributo     | Descrição                                      |
-| ------------ | ---------------------------------------------- |
-| Fundo        | Preto / escuro sólido                          |
-| Celebridade  | Herói 70–80% do frame, iluminação cinematográfica |
-| Layout       | Assimétrico, foto domina, texto na base        |
-| Tipografia   | Ultra-bold condensed, impactante, máximo contraste |
-| Referência   | Nike campaign poster / movie poster aesthetic  |
+| Atributo     | Descrição                                                               |
+| ------------ | ----------------------------------------------------------------------- |
+| Fundo        | Preto / escuro sólido, gradiente cinematográfico                       |
+| Safe Zone    | Área central, ~75% da altura do canvas, reservada para figura em pé   |
+| Layout       | Assimétrico, safe zone domina, texto na base                           |
+| Tipografia   | Ultra-bold condensed, impactante, máximo contraste                     |
+| Referência   | Nike campaign poster / movie poster aesthetic                           |
 
 ---
 
@@ -37,20 +38,21 @@ CREATIVE DIRECTION — MODERNA (Dark & Bold)
 
 ```
 CREATIVE DIRECTION — CLEAN (White & Editorial)
+⚠️ SACRED FACE RULE APPLIES: Do NOT draw or render the celebrity. Leave the safe zone empty for compositing.
 - Background: Pure white.
-- Celebrity: Clean photo floating on white, positioned at the right side.
-- Layout: Editorial split 30/70 with a text column on the left.
+- Celebrity Safe Zone: Reserve right 60% of canvas for a floating figure on white. Design subtle editorial shadows to complement a figure positioned there.
+- Layout: Editorial split — left 40%: text column with generous whitespace.
 - Typography: Light or regular serif/sans-serif with generous whitespace.
 - Reference mood: Vogue editorial / Apple product ad aesthetic.
 ```
 
-| Atributo     | Descrição                                         |
-| ------------ | ------------------------------------------------- |
-| Fundo        | Branco puro                                       |
-| Celebridade  | Foto limpa flutuando no branco, canto direito     |
-| Layout       | Split editorial 30/70 com coluna de texto à esquerda |
-| Tipografia   | Light/regular serif ou sans-serif, muito espaço  |
-| Referência   | Vogue editorial / Apple product ad aesthetic      |
+| Atributo     | Descrição                                                                  |
+| ------------ | -------------------------------------------------------------------------- |
+| Fundo        | Branco puro                                                                |
+| Safe Zone    | 60% direito do canvas reservado para figura flutuante                     |
+| Layout       | Split editorial — esquerda 40%: coluna de texto com muito espaço          |
+| Tipografia   | Light/regular serif ou sans-serif, muito espaço                           |
+| Referência   | Vogue editorial / Apple product ad aesthetic                               |
 
 ---
 
@@ -60,20 +62,21 @@ CREATIVE DIRECTION — CLEAN (White & Editorial)
 
 ```
 CREATIVE DIRECTION — RETAIL (Bold & Commercial)
+⚠️ SACRED FACE RULE APPLIES: Do NOT draw or render the celebrity. Leave the safe zone empty for compositing.
 - Background: Solid brand color.
-- Celebrity: Cut-out standing, right side, breaking out of the frame.
-- Layout: Hard geometric blocks, badges, price callouts if applicable.
+- Celebrity Safe Zone: Reserve right 55% of canvas for a standing figure, may bleed off right edge. Design the background to complement a standing cut-out figure there.
+- Layout: Left side: hard geometric blocks, badges, price callouts, CTA.
 - Typography: All-caps condensed, maximum contrast, scannable CTA.
 - Reference mood: Casas Bahia / Magazine Luiza promotional ad aesthetic.
 ```
 
-| Atributo     | Descrição                                              |
-| ------------ | ------------------------------------------------------ |
-| Fundo        | Cor sólida da marca                                    |
-| Celebridade  | Cut-out em pé, lado direito, quebra a moldura          |
-| Layout       | Geométrico duro, blocos e badges                       |
-| Tipografia   | All-caps condensed, máximo contraste, CTA escaneável   |
-| Referência   | Casas Bahia / Magazine Luiza promotional ad aesthetic  |
+| Atributo     | Descrição                                                                        |
+| ------------ | -------------------------------------------------------------------------------- |
+| Fundo        | Cor sólida da marca                                                              |
+| Safe Zone    | 55% direito do canvas reservado para figura em pé, pode sangrar na borda direita |
+| Layout       | Esquerda: blocos geométricos, badges, price callouts, CTA                        |
+| Tipografia   | All-caps condensed, máximo contraste, CTA escaneável                            |
+| Referência   | Casas Bahia / Magazine Luiza promotional ad aesthetic                            |
 
 ---
 

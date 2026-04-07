@@ -1,5 +1,5 @@
-export const PROMPT_VERSION = 'v1.0.0'
-export const GLOBAL_RULES_VERSION = 'v1.0.0'
+export const PROMPT_VERSION = 'v1.1.0'
+export const GLOBAL_RULES_VERSION = 'v1.1.0'
 
 export const GROUPS = ['moderna', 'clean', 'retail'] as const
 export const FORMATS = ['1:1', '4:5', '16:9', '9:16'] as const
