@@ -38,6 +38,13 @@ primeiro-passo-app/
 │           ├── garden/           # Garden validation
 │           ├── nanobanana/       # NanoBanana config types, loader, constants
 │           │   └── config.ts     # NanoBananaDbConfig, loadNanoBananaConfig, CategoryKey, DirectionMode
+│           ├── enrichment/      # Onboarding enrichment pipeline shared modules
+│           │   ├── config.ts         # EnrichmentConfig loader (re-exports config-types.ts)
+│           │   ├── config-types.ts   # EnrichmentConfig interface, constants, resolvePromptTemplate
+│           │   ├── gemini-client.ts  # callGeminiText with retry + bytesToBase64
+│           │   ├── color-extractor.ts # extractColorsFromImage, extractColorsViaGemini, extractColorsFromCss
+│           │   ├── css-scraper.ts    # fetchAndParseCss, extractFontsFromCss
+│           │   └── font-detector.ts  # detectAndValidateFont (waterfall: CSS → Gemini → fallback)
 │           └── admin-auth.ts     # Admin password guard (x-admin-password header)
 ├── ai-step2/                     # AI Campaign Pipeline docs
 │   ├── PRD.md                    # Product requirements
@@ -185,6 +192,9 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 **Onboarding:**
 `get-onboarding-data`, `save-onboarding-identity`
 
+**Enrichment (pipeline automatico):**
+`onboarding-enrichment`, `get-enrichment-status`, `get-enrichment-config`, `update-enrichment-config`
+
 **AI Campaign Pipeline:**
 `create-ai-campaign-job`, `get-ai-campaign-status`, `get-ai-campaign-monitor`, `save-campaign-briefing`, `generate-ai-campaign-image`, `retry-ai-campaign-assets`, `read-nanobanana-reference`
 
@@ -304,6 +314,7 @@ Operational tasks (bugs, requests, fixes) go in `tasks/` with naming `TASK-YYYY-
 | `aurea-garden`        | Post Gen, Post Turbo, geracao de criativos IA, galeria, NanoBanana   |
 | `nova-tarefa`         | /nova-tarefa + relato → cria e enriquece tarefa operacional completa |
 | `task-enricher`       | Enriquecer tarefa operacional existente, preparar para execução      |
+| `sdd-spec-creator`   | Criar/documentar functionSpec.md (SDD) para qualquer componente      |
 
 ## AI Agent Workflow
 

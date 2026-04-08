@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700');
+
+:root {
+  --brand-color: #ff6b35;
+  --accent: #004e89;
+  --bg-light: #f0f0f0;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  color: #2d2d2d;
+  background-color: rgb(250, 250, 250);
+}
+
+h1 {
+  font-family: 'Roboto', sans-serif;
+  color: #ff6b35;
+}
+
+h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', sans-serif;
+}
+
+.hero {
+  background: #004e89;
+  color: #ffffff;
+}
+
+.card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}

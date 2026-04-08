@@ -2,6 +2,24 @@
 
 ## Indice ativo
 
+- `2026-04-08-onboarding-enrichment-master.md` **← PIPELINE NOVO**
+  Plano orquestrador do pipeline de enriquecimento automatico pos-onboarding. Cliente envia logo/site/instagram, sistema extrai cores, detecta fonte, gera briefing via Perplexity e dispara campanha IA. 5 blocos sequenciais com dependencias explicitas, criterios de conclusao e rollback.
+
+- `2026-04-08-enrichment-bloco1-schema.md`
+  Bloco 1: Migrations (colunas site_url/instagram_handle em onboarding_identity, tabela onboarding_enrichment_jobs, tabela enrichment_config) e modulo _shared/enrichment/config.ts.
+
+- `2026-04-08-enrichment-bloco2-shared.md`
+  Bloco 2: Modulos shared color-extractor.ts, css-scraper.ts, font-detector.ts com testes unitarios.
+
+- `2026-04-08-enrichment-bloco3-edge-functions.md`
+  Bloco 3: Edge Functions onboarding-enrichment (orquestrador), get-enrichment-status, get/update-enrichment-config, alteracoes em save-onboarding-identity e create-ai-campaign-job.
+
+- `2026-04-08-enrichment-bloco4-frontend.md`
+  Bloco 4: Alteracoes em Etapa62, OnboardingContext, EtapaFinal, get-onboarding-data. Remocao de Etapa7.jsx e limpeza de copy/CopyEditor.
+
+- `2026-04-08-enrichment-bloco5-integracao.md`
+  Bloco 5: Integracao briefing→prompt-builder, 5 testes end-to-end, atualizacao de CLAUDE.md, CONTRACT.md, mapeamento e docs do modulo onboarding.
+
 - `2026-04-07-alavancas-ab-sacred-face-aspect-ratio.md`
   Plano de implementação das Alavancas A+B para corrigir dois problemas de geração de imagens IA: distorção de proporção (aspectRatio nativo na generationConfig) e pose alterada da celebridade (reformulação do Sacred Face com safe zones e prompt mais imperativo). Bump de versão para v1.1.0.
 

@@ -314,22 +314,21 @@ Deno.serve(async (req) => {
     return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar identidade visual.' }, 500)
   }
 
-  if (!identity || !identity.logo_path || !identity.brand_palette?.length || !identity.font_choice) {
+  if (!identity || !identity.brand_palette?.length || !identity.font_choice) {
     return json({
       success: false,
       code: 'IDENTITY_NOT_FOUND',
-      message: 'Identidade visual incompleta. Preencha logo, cores e fonte na Etapa 6.2 do onboarding.',
+      message: 'Identidade visual incompleta. Preencha cores e fonte na Etapa 6.2 do onboarding.',
     }, 422)
   }
 
-  // --- 3. Generate signed URL for logo ---
-  const { data: logoSignedData } = await supabase.storage
-    .from('onboarding-identity')
-    .createSignedUrl(identity.logo_path, URL_EXPIRY_SECONDS)
-
-  const clientLogoUrl = logoSignedData?.signedUrl || ''
-  if (!clientLogoUrl) {
-    return json({ success: false, code: 'LOGO_URL_ERROR', message: 'Nao foi possivel gerar URL do logo.' }, 500)
+  // --- 3. Generate signed URL for logo (optional — enrichment may run without logo) ---
+  let clientLogoUrl = ''
+  if (identity.logo_path) {
+    const { data: logoSignedData } = await supabase.storage
+      .from('onboarding-identity')
+      .createSignedUrl(identity.logo_path, URL_EXPIRY_SECONDS)
+    clientLogoUrl = logoSignedData?.signedUrl || ''
   }
 
   // --- 4. Generate signed URLs for campaign images ---
@@ -378,7 +377,31 @@ Deno.serve(async (req) => {
     }, 422)
   }
 
-  // --- 5b. Load NanoBanana config from DB (fallback to hardcoded) ---
+  // --- 5b. Load briefing from onboarding_briefings (enrichment pipeline) ---
+  let enrichedNotes = identity.campaign_notes || ''
+  {
+    const { data: briefingRow } = await supabase
+      .from('onboarding_briefings')
+      .select('briefing_json, status')
+      .eq('compra_id', compra_id)
+      .eq('status', 'done')
+      .maybeSingle()
+
+    if (briefingRow?.briefing_json) {
+      const b = briefingRow.briefing_json as Record<string, unknown>
+      const parts: string[] = []
+      if (b.objetivo_campanha) parts.push(`Objetivo: ${b.objetivo_campanha}`)
+      if (b.publico_alvo) parts.push(`Público: ${b.publico_alvo}`)
+      if (b.tom_voz) parts.push(`Tom: ${b.tom_voz}`)
+      if (b.mensagem_central) parts.push(`Mensagem: ${b.mensagem_central}`)
+      if (b.cta_principal) parts.push(`CTA: ${b.cta_principal}`)
+      if (parts.length > 0) {
+        enrichedNotes = parts.join(' | ') + (enrichedNotes ? ` | ${enrichedNotes}` : '')
+      }
+    }
+  }
+
+  // --- 5c. Load NanoBanana config from DB (fallback to hardcoded) ---
   const nbConfig = await loadNanoBananaConfig(supabase)
   const effectiveGlobalRules = nbConfig?.global_rules ?? GLOBAL_RULES
   const effectivePromptVersion = nbConfig?.prompt_version ?? PROMPT_VERSION
@@ -391,7 +414,7 @@ Deno.serve(async (req) => {
     celebName,
     brandPalette: identity.brand_palette,
     fontChoice: identity.font_choice,
-    campaignNotes: identity.campaign_notes,
+    campaignNotes: enrichedNotes,
   }
 
   const inputHash = await computeInputHashAsync(

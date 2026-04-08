@@ -9,6 +9,9 @@ const MAX_LOGO_SIZE = 5 * 1024 * 1024
 const MAX_PALETTE_COLORS = 8
 const MAX_FONT_LENGTH = 100
 const MAX_NOTES_LENGTH = 2000
+const MAX_URL_LENGTH = 500
+const MAX_HANDLE_LENGTH = 30
+const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/
 const MAX_CAMPAIGN_IMAGES = 5
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp']
@@ -16,15 +19,15 @@ const BUCKET_NAME = 'onboarding-identity'
 const VALID_CHOICES = ['add_now', 'later']
 const VALID_PRODUCTION_PATHS = ['standard', 'hybrid']
 
-async function triggerAiCampaignJob(compraId: string): Promise<void> {
+async function triggerEnrichmentPipeline(compraId: string): Promise<void> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error('[save-onboarding-identity] missing env for ai job trigger')
+    console.error('[save-onboarding-identity] missing env for enrichment trigger')
     return
   }
 
-  const endpoint = `${supabaseUrl}/functions/v1/create-ai-campaign-job`
+  const endpoint = `${supabaseUrl}/functions/v1/onboarding-enrichment`
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -36,16 +39,29 @@ async function triggerAiCampaignJob(compraId: string): Promise<void> {
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(`create-ai-campaign-job HTTP ${response.status}: ${body.substring(0, 200)}`)
+    throw new Error(`onboarding-enrichment HTTP ${response.status}: ${body.substring(0, 200)}`)
   }
 
   const data = await response.json()
-  console.log('[save-onboarding-identity] ai job trigger response:', {
+  console.log('[save-onboarding-identity] enrichment trigger response:', {
     success: data?.success ?? false,
     status: data?.status ?? null,
     job_id: data?.job_id ?? null,
   })
 }
+
+// Legacy trigger — kept as documented fallback. Uncomment to bypass enrichment pipeline.
+// async function triggerAiCampaignJob(compraId: string): Promise<void> {
+//   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+//   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+//   if (!supabaseUrl || !serviceRoleKey) return
+//   const endpoint = `${supabaseUrl}/functions/v1/create-ai-campaign-job`
+//   await fetch(endpoint, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceRoleKey}` },
+//     body: JSON.stringify({ compra_id: compraId }),
+//   })
+// }
 
 function json(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -83,6 +99,8 @@ Deno.serve(async (req) => {
     let fontChoice = ''
     let campaignNotes = ''
     let productionPath: string | null = null
+    let siteUrl = ''
+    let instagramHandle = ''
     const campaignImages: File[] = []
 
     if (contentType.includes('multipart/form-data')) {
@@ -91,6 +109,8 @@ Deno.serve(async (req) => {
       choice = (formData.get('choice') as string)?.trim() ?? ''
       fontChoice = (formData.get('font_choice') as string)?.trim() ?? ''
       campaignNotes = (formData.get('campaign_notes') as string)?.trim() ?? ''
+      siteUrl = (formData.get('site_url') as string)?.trim() ?? ''
+      instagramHandle = (formData.get('instagram_handle') as string)?.trim().replace(/^@/, '') ?? ''
       const prodPath = (formData.get('production_path') as string)?.trim() ?? ''
       if (prodPath && VALID_PRODUCTION_PATHS.includes(prodPath)) {
         productionPath = prodPath
@@ -118,6 +138,8 @@ Deno.serve(async (req) => {
       choice = (body.choice ?? '').trim()
       fontChoice = (body.font_choice ?? '').trim()
       campaignNotes = (body.campaign_notes ?? '').trim()
+      siteUrl = (body.site_url ?? '').trim()
+      instagramHandle = (body.instagram_handle ?? '').trim().replace(/^@/, '')
       if (body.brand_palette && Array.isArray(body.brand_palette)) {
         brandPalette = body.brand_palette.map(String)
       }
@@ -150,6 +172,15 @@ Deno.serve(async (req) => {
       }
       if (campaignNotes.length > MAX_NOTES_LENGTH) {
         return json({ success: false, code: 'NOTES_TOO_LONG', message: `Notas excedem ${MAX_NOTES_LENGTH} chars.` }, 400)
+      }
+      if (siteUrl && siteUrl.length > MAX_URL_LENGTH) {
+        return json({ success: false, code: 'URL_TOO_LONG', message: `site_url excede ${MAX_URL_LENGTH} chars.` }, 400)
+      }
+      if (siteUrl && !siteUrl.startsWith('http://') && !siteUrl.startsWith('https://')) {
+        return json({ success: false, code: 'INVALID_URL', message: 'site_url deve comecar com http:// ou https://.' }, 400)
+      }
+      if (instagramHandle && !INSTAGRAM_HANDLE_RE.test(instagramHandle)) {
+        return json({ success: false, code: 'INVALID_HANDLE', message: 'instagram_handle invalido (alfanumerico, . e _, max 30 chars).' }, 400)
       }
       if (campaignImages.length > MAX_CAMPAIGN_IMAGES) {
         return json({ success: false, code: 'TOO_MANY_IMAGES', message: `Maximo ${MAX_CAMPAIGN_IMAGES} imagens.` }, 400)
@@ -218,7 +249,13 @@ Deno.serve(async (req) => {
     if (fontChoice) upsertData.font_choice = fontChoice
     if (imagesPaths.length > 0) upsertData.campaign_images_paths = imagesPaths
     if (campaignNotes) upsertData.campaign_notes = campaignNotes
-    if (productionPath !== null) upsertData.production_path = productionPath
+    if (siteUrl) upsertData.site_url = siteUrl
+    if (instagramHandle) upsertData.instagram_handle = instagramHandle
+    if (siteUrl || instagramHandle) {
+      upsertData.production_path = 'standard'
+    } else if (productionPath !== null) {
+      upsertData.production_path = productionPath
+    }
 
     const { data, error } = await supabase
       .from('onboarding_identity')
@@ -231,11 +268,11 @@ Deno.serve(async (req) => {
       return json({ success: false, code: 'DB_ERROR', message: 'Falha ao salvar identidade visual.' }, 500)
     }
 
-    if (productionPath === 'standard') {
+    if (siteUrl || instagramHandle) {
       try {
-        await triggerAiCampaignJob(compraId)
+        await triggerEnrichmentPipeline(compraId)
       } catch (triggerError) {
-        console.error('[save-onboarding-identity] trigger error:', triggerError)
+        console.error('[save-onboarding-identity] enrichment trigger error:', triggerError)
       }
     }
 
