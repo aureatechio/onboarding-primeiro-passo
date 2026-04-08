@@ -40,6 +40,8 @@ interface OnboardingIdentityRow {
   campaign_images_paths: string[] | null
   campaign_notes: string | null
   production_path: string | null
+  site_url: string | null
+  instagram_handle: string | null
   updated_at: string | null
 }
 
@@ -51,6 +53,8 @@ export interface IdentityPayload {
   campaign_images_paths: string[]
   campaign_notes: string | null
   production_path: string | null
+  site_url: string | null
+  instagram_handle: string | null
   updated_at: string | null
 }
 
@@ -171,7 +175,7 @@ export function createDependencies(): Dependencies {
           supabase
             .from('onboarding_identity')
             .select(
-              'choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, updated_at'
+              'choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, site_url, instagram_handle, updated_at'
             )
             .eq('compra_id', compraRow.id)
             .maybeSingle(),
@@ -192,6 +196,8 @@ export function createDependencies(): Dependencies {
             campaign_images_paths: identityRow.campaign_images_paths ?? [],
             campaign_notes: identityRow.campaign_notes ?? null,
             production_path: identityRow.production_path ?? null,
+            site_url: identityRow.site_url ?? null,
+            instagram_handle: identityRow.instagram_handle ?? null,
             updated_at: identityRow.updated_at ?? null,
           }
         : null

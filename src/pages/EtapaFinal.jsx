@@ -127,20 +127,6 @@ export default function EtapaFinal() {
   // ════════════════════════════════════════════════
   // TELA DE RESUMO
   // ════════════════════════════════════════════════
-  const briefLabel = userData.campaignBriefMode === "both"
-    ? ETAPA_FINAL.resumo.briefModes.both
-    : userData.campaignBriefMode === "audio"
-      ? ETAPA_FINAL.resumo.briefModes.audio
-      : userData.campaignBriefMode === "text"
-        ? ETAPA_FINAL.resumo.briefModes.text
-        : null
-
-  const iaBriefingStatus = userData.campaignBriefGenerationStatus === "done"
-    ? ETAPA_FINAL.resumo.iaBriefDone
-    : userData.campaignBriefGenerationStatus === "error"
-      ? ETAPA_FINAL.resumo.iaBriefError
-      : null
-
   const summaryRows = [
     { label: "Celebridade", value: userData.celebName, icon: "star", color: COLORS.text },
     { label: "Praça", value: userData.praca, icon: "mapPin", color: COLORS.accent },
@@ -148,9 +134,6 @@ export default function EtapaFinal() {
     { label: "Pacote", value: ETAPA_FINAL.resumo.pacoteValue, icon: "clapperboard", color: COLORS.text },
     { label: "Vigência", value: userData.vigencia, icon: "calendarDays", color: COLORS.text },
     { label: "Preparação", value: ETAPA_FINAL.resumo.preparacaoValue, icon: "clock", color: COLORS.warning },
-    { label: "Produção", value: userData.productionPath === "hybrid" ? ETAPA_FINAL.resumo.productionHybrid : ETAPA_FINAL.resumo.productionStandard, icon: "handshake", color: userData.productionPath === "hybrid" ? COLORS.accent : COLORS.red },
-    ...(briefLabel ? [{ label: "Briefing", value: briefLabel, icon: "send", color: COLORS.accent }] : []),
-    ...(iaBriefingStatus ? [{ label: "Briefing IA", value: iaBriefingStatus, icon: "zap", color: COLORS.accent }] : []),
   ];
 
   const nextStepsColors = [COLORS.red, COLORS.accent, COLORS.warning];

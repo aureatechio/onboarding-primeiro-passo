@@ -85,32 +85,8 @@ function getStorageKey(compraId) {
   return `${STORAGE_KEY_BASE}:${compraId}`;
 }
 
-// Extrai siteUrl e instagramHandle do campo campaign_notes concatenado.
-// Formato gravado pelo modo simplificado: "Site: https://... | Instagram: https://www.instagram.com/handle"
-function parseCampaignNotes(notes) {
-  if (!notes) return { siteUrl: '', instagramHandle: '' };
-  let siteUrl = '';
-  let instagramHandle = '';
-  const parts = notes.split('|').map((s) => s.trim());
-  for (const part of parts) {
-    if (part.startsWith('Site: ')) {
-      siteUrl = part.slice('Site: '.length).trim();
-    } else if (part.startsWith('Instagram: ')) {
-      const raw = part.slice('Instagram: '.length).trim();
-      // Extrai o handle do final da URL (https://www.instagram.com/handle)
-      const match = raw.match(/instagram\.com\/([a-zA-Z0-9._]+)\/?$/);
-      instagramHandle = match ? match[1] : raw;
-    }
-  }
-  return { siteUrl, instagramHandle };
-}
-
 function mapRemotePayloadToUserData(payload) {
   const identity = payload?.identity ?? null;
-
-  const { siteUrl, instagramHandle } = identity?.campaign_notes
-    ? parseCampaignNotes(identity.campaign_notes)
-    : { siteUrl: '', instagramHandle: '' };
 
   return {
     ...INITIAL_USER_DATA,
@@ -122,12 +98,11 @@ function mapRemotePayloadToUserData(payload) {
     vigencia: sanitizeString(payload?.vigencia, INITIAL_USER_DATA.vigencia),
     atendente: sanitizeString(payload?.atendente, INITIAL_USER_DATA.atendente),
     atendenteGenero: payload?.atendenteGenero === 'm' ? 'm' : 'f',
-    // Identidade visual já salva no servidor
     identityBonusChoice: identity?.choice ?? null,
     identityBonusPending: identity?.choice === 'later',
     campaignNotes: identity?.campaign_notes ?? '',
-    siteUrl,
-    instagramHandle,
+    siteUrl: identity?.site_url ?? '',
+    instagramHandle: identity?.instagram_handle ?? '',
     productionPath: identity?.production_path ?? null,
     trafficChoice: null,
   };

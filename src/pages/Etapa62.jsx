@@ -11,7 +11,7 @@ import Icon from "../components/Icon"
 import StickyFooter from "../components/StickyFooter"
 import ProcessingOverlay from "../components/ProcessingOverlay"
 
-async function saveIdentityToBackend(compraId, { choice, logoFile, campaignNotes }) {
+async function saveIdentityToBackend(compraId, { choice, logoFile, siteUrl, instagramHandle }) {
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
   if (!supabaseUrl) {
     console.warn("[etapa62] VITE_SUPABASE_URL missing, skipping identity save")
@@ -24,7 +24,13 @@ async function saveIdentityToBackend(compraId, { choice, logoFile, campaignNotes
 
   if (choice === "add_now") {
     if (logoFile) formData.append("logo", logoFile)
-    if (campaignNotes) formData.append("campaign_notes", campaignNotes)
+    if (siteUrl) formData.append("site_url", siteUrl)
+    if (instagramHandle) formData.append("instagram_handle", instagramHandle)
+
+    const parts = []
+    if (siteUrl) parts.push(`Site: ${siteUrl}`)
+    if (instagramHandle) parts.push(`Instagram: https://www.instagram.com/${instagramHandle}`)
+    if (parts.length) formData.append("campaign_notes", parts.join(' | '))
   }
 
   try {
@@ -141,14 +147,11 @@ export default function Etapa62() {
     setIsSaving(true)
     try {
       if (hydrationCompraId) {
-        const instagramFullUrl = instagramHandle ? `https://www.instagram.com/${instagramHandle}` : ''
-        const parts = []
-        if (siteUrl) parts.push(`Site: ${siteUrl}`)
-        if (instagramFullUrl) parts.push(`Instagram: ${instagramFullUrl}`)
         const result = await saveIdentityToBackend(hydrationCompraId, {
           choice: 'add_now',
           logoFile,
-          campaignNotes: parts.join(' | '),
+          siteUrl,
+          instagramHandle,
         })
         if (!result.success && !result.skipped) {
           setSaveError(result.message || result.error || 'Erro ao salvar identidade visual.')
