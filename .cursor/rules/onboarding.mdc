@@ -11,6 +11,10 @@ globs:
   - "supabase/functions/save-campaign-briefing/**"
   - "supabase/functions/generate-campaign-briefing/**"
   - "supabase/functions/create-ai-campaign-job/**"
+  - "supabase/functions/onboarding-enrichment/**"
+  - "supabase/functions/get-enrichment-status/**"
+  - "supabase/functions/get-enrichment-config/**"
+  - "supabase/functions/update-enrichment-config/**"
   - ".context/modules/onboarding/**"
   - "docs/mapeamento-formulario-onboarding.md"
 ---
@@ -21,7 +25,7 @@ globs:
 
 1. **Identificar tipo de tarefa** e consultar ordem de leitura:
    - Ler `.context/modules/onboarding/DOC-READING-ORDER.md` — identifica quais docs sao obrigatorios para o tipo de tarefa
-   - Ler `.context/modules/onboarding/BUSINESS-RULES.md` — 15 regras criticas
+   - Ler `.context/modules/onboarding/BUSINESS-RULES.md` — regras criticas (incl. enrichment)
 
 2. **Ler docs na ordem indicada pelo DOC-READING-ORDER:**
    - SEMPRE: `.context/modules/onboarding/README.md`
@@ -30,7 +34,7 @@ globs:
 
 3. **Responder com base em evidencia:**
    - Citar documentacao consultada
-   - Respeitar as 15 business rules (especialmente: UNIQUE constraints, production_path side effects, copy centralizada)
+   - Respeitar as business rules (UNIQUE constraints, disparo enrichment site/Instagram, copy centralizada)
    - Todas as Edge Functions de onboarding sao publicas (`--no-verify-jwt`)
 
 ## Referencia canonica
@@ -45,9 +49,9 @@ globs:
 
 ## Edge Functions Onboarding
 
-**Leitura:** `get-onboarding-data`
-**Escrita:** `save-onboarding-identity`, `save-campaign-briefing`, `generate-campaign-briefing`
-**Pipeline:** `create-ai-campaign-job` (disparado automaticamente)
+**Leitura:** `get-onboarding-data`, `get-enrichment-status`
+**Escrita:** `save-onboarding-identity`, `save-campaign-briefing` (legado), `generate-campaign-briefing` (via enrichment)
+**Pipeline:** `onboarding-enrichment` (quando site ou Instagram) → fase final chama `create-ai-campaign-job`
 
 ## Frontend
 

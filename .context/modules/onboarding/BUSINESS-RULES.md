@@ -16,24 +16,28 @@ O campo `onboarding_identity.choice` aceita apenas `add_now` e `later`. Validaca
 
 ## 4. Production path aceita apenas 'standard' ou 'hybrid'
 
-O campo `onboarding_identity.production_path` aceita apenas `standard` e `hybrid`. Qualquer outro valor e ignorado silenciosamente.
+O campo `onboarding_identity.production_path` aceita apenas `standard` e `hybrid`. Qualquer outro valor e ignorado silenciosamente. Se `site_url` ou `instagram_handle` forem enviados no upsert, o backend forca `production_path = 'standard'`.
 
-## 5. Efeito colateral: production_path 'standard' dispara AI job
+## 5. Disparo do enrichment: site OU Instagram
 
-Quando `save-onboarding-identity` salva `production_path = 'standard'`, ele chama automaticamente `create-ai-campaign-job`. Isso significa que trocar o production_path para standard pode disparar geracao de imagens IA.
+Quando `save-onboarding-identity` conclui com sucesso e **`site_url` ou `instagram_handle`** esta preenchido, o backend chama `onboarding-enrichment` (fire-and-forget). Sem ambos vazios (e sem trigger alternativo), o pipeline de enrichment **nao** inicia.
+
+`choice: 'later'` sem preencher site/Instagram tipicamente nao dispara enrichment (e nao atende a condicao acima).
 
 ## 6. Elegibilidade bloqueia onboarding
 
 O formulario nao carrega se a compra nao for elegivel. A regra e:
 `(checkout_status === 'pago' || vendaaprovada === true) && clicksign_status === 'Assinado'`
 
+O pipeline `onboarding-enrichment` exige ainda `checkout_status = 'pago'` e `clicksign_status = 'Assinado'` (ver functionSpec).
+
 ## 7. Storage: bucket privado, paths por compra_id
 
 O bucket `onboarding-identity` e privado. Todos os uploads usam o padrao `{compra_id}/logo.{ext}` ou `{compra_id}/img_{N}.{ext}`. O campo `logo_path` no banco armazena o path relativo, nao a URL completa.
 
-## 8. Modo simplificado concatena site e instagram em campaign_notes
+## 8. Site e Instagram: colunas dedicadas + campaign_notes legado
 
-No modo simplificado da Etapa 6.2, site e instagram sao concatenados em `campaign_notes` no formato `"Site: ... | Instagram: ..."`. Nao ha colunas separadas para eles.
+`onboarding_identity.site_url` e `onboarding_identity.instagram_handle` sao a fonte de verdade para o backend e enrichment. O frontend pode ainda enviar `campaign_notes` com texto concatenado por compatibilidade; a hidratacao usa as colunas `site_url` / `instagram_handle` quando presentes.
 
 ## 9. Quiz checkboxes nao persistem no banco
 
@@ -59,6 +63,14 @@ Todos os textos do formulario vem de `src/copy.js`. Nunca hardcode textos direta
 
 Ao alterar schema de `onboarding_identity` ou `onboarding_briefings`, sempre criar nova migration. Regra do projeto inteiro.
 
-## 15. Briefing audio salvo como blob webm
+## 15. Briefing audio salvo como blob webm (legado)
 
-O audio do briefing e gravado no browser como WebM e enviado via FormData com filename `briefing.webm`. O backend salva no storage e registra `audio_path` + `audio_duration_sec`.
+O fluxo manual com audio em `save-campaign-briefing` grava WebM no browser. O caminho principal de briefing hoje e IA via enrichment (`generate-campaign-briefing`).
+
+## 16. Um job de enrichment por compra
+
+`onboarding_enrichment_jobs.compra_id` e UNIQUE. Reexecucoes fazem upsert no mesmo registro. Retry por fase via body `retry_from_phase` (ver functionSpec).
+
+## 17. Briefing no prompt de imagem
+
+`create-ai-campaign-job` le `onboarding_briefings` com `status = 'done'` e passa `briefing` / `insightsPecas` estruturados para `buildPrompt`. Mudanca no briefing altera `input_hash` e pode criar novo job de campanha.

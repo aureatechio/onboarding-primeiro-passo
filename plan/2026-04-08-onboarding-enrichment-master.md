@@ -16,8 +16,8 @@ Este plano orquestra a implementacao completa em 5 blocos sequenciais com depend
 | 1     | Schema e infraestrutura | `2026-04-08-enrichment-bloco1-schema.md`         | Nenhuma      | Rapido     | **Concluido** |
 | 2     | Modulos shared          | `2026-04-08-enrichment-bloco2-shared.md`         | Bloco 1      | Medio      | **Concluido** |
 | 3     | Edge Functions          | `2026-04-08-enrichment-bloco3-edge-functions.md` | Blocos 1 + 2 | Grande     | **Concluido** |
-| 4     | Frontend                | `2026-04-08-enrichment-bloco4-frontend.md`       | Blocos 1 + 3 | Medio      | Pendente     |
-| 5     | Integracao e teste      | `2026-04-08-enrichment-bloco5-integracao.md`     | Blocos 1-4   | Medio      | Pendente     |
+| 4     | Frontend                | `2026-04-08-enrichment-bloco4-frontend.md`       | Blocos 1 + 3 | Medio      | **Concluido** |
+| 5     | Integracao e teste      | `2026-04-08-enrichment-bloco5-integracao.md`     | Blocos 1-4   | Medio      | **Concluido (doc + script cleanup)** — E2E manual no ambiente conforme necessario |
 
 
 ## Grafo de dependencia

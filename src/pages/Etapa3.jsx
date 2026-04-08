@@ -25,7 +25,7 @@ export default function Etapa3() {
   const [slideDirection, setSlideDirection] = useState(1);
   const [quizReady, setQuizReady] = useState(false);
 
-  const totalSlides = 4;
+  const totalSlides = 5;
 
   const goToSlide = (index) => {
     setSlideDirection(index > currentSlide ? 1 : -1);
@@ -455,8 +455,156 @@ export default function Etapa3() {
         );
       }
 
-      // ── Slide 3.2 ──────────────────────────────────────────────────
+      // ── Slide 3.2 — Prazos de Produção ────────────────────────────
       case 1: {
+        const prazos = ETAPA3.prazosProducao;
+        return (
+          <div>
+            <div
+              style={{
+                background: COLORS.card,
+                borderRadius: 14,
+                border: `1px solid ${COLORS.warning}25`,
+                padding: "20px 20px 12px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 18,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    background: `${COLORS.warning}15`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="clock" size={18} color={COLORS.warning} />
+                </div>
+                <p
+                  style={{
+                    color: COLORS.warning,
+                    fontSize: 14,
+                    fontWeight: 800,
+                    margin: 0,
+                  }}
+                >
+                  {prazos.cardTitle}
+                </p>
+              </div>
+
+              {prazos.items.map((item, i) => {
+                const isAlert = item.alert;
+                const color = isAlert ? COLORS.danger : COLORS.textMuted;
+                const isLast = i === prazos.items.length - 1;
+
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 12,
+                      paddingBottom: isLast ? 8 : 14,
+                      marginBottom: isLast ? 0 : 14,
+                      borderBottom: isLast
+                        ? "none"
+                        : `1px solid ${COLORS.border}`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 8,
+                        background: isAlert
+                          ? `${COLORS.danger}12`
+                          : `${COLORS.border}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      <Icon
+                        name={item.icon}
+                        size={14}
+                        color={isAlert ? COLORS.danger : COLORS.textDim}
+                      />
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          color: isAlert ? COLORS.danger : COLORS.text,
+                          fontSize: 13,
+                          fontWeight: isAlert ? 700 : 600,
+                          margin: 0,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        style={{
+                          color,
+                          fontSize: 12,
+                          fontWeight: isAlert ? 600 : 400,
+                          margin: "3px 0 0 0",
+                          lineHeight: 1.4,
+                          fontStyle: isAlert ? "normal" : "normal",
+                        }}
+                      >
+                        {isAlert ? "⚠ " : ""}
+                        {item.prazo}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Alert tip */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                background: `${COLORS.accent}08`,
+                border: `1px solid ${COLORS.accent}20`,
+                borderRadius: 12,
+                padding: 14,
+                marginTop: 16,
+              }}
+            >
+              <Icon name="zap" size={14} color={COLORS.accent} />
+              <p
+                style={{
+                  color: COLORS.accent,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                {prazos.alertTip}
+              </p>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Slide 3.3 — Responsabilidades ─────────────────────────────
+      case 2: {
         const yourPart = ETAPA3.suaParte.items;
         const ourPart = ETAPA3.nossaParte.items;
 
@@ -553,8 +701,8 @@ export default function Etapa3() {
         );
       }
 
-      // ── Slide 3.3 ──────────────────────────────────────────────────
-      case 2: {
+      // ── Slide 3.4 — Cenários ────────────────────────────────────────
+      case 3: {
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Warning box */}
@@ -736,8 +884,8 @@ export default function Etapa3() {
         );
       }
 
-      // ── Slide 3.4 ──────────────────────────────────────────────────
-      case 3: {
+      // ── Slide 3.5 — Canais ──────────────────────────────────────────
+      case 4: {
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* WhatsApp card */}

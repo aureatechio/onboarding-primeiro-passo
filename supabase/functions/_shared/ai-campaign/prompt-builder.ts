@@ -1,4 +1,4 @@
-export const PROMPT_VERSION = 'v1.1.1'
+export const PROMPT_VERSION = 'v1.2.0'
 export const GLOBAL_RULES_VERSION = 'v1.1.1'
 
 export const GROUPS = ['moderna', 'clean', 'retail'] as const
@@ -35,6 +35,26 @@ const FORMAT_INSTRUCTIONS: Record<FormatName, string> = {
   '9:16': 'OUTPUT FORMAT: Vertical Story 9:16 (1080x1920 px). Full vertical, celebrity top, text/CTA bottom third.',
 }
 
+export interface BriefingContext {
+  objetivo_campanha?: string
+  publico_alvo?: string
+  tom_voz?: string
+  mensagem_central?: string
+  cta_principal?: string
+}
+
+export interface InsightPeca {
+  variacao: number
+  diferencial?: string
+  formato?: string
+  plataforma?: string
+  gancho?: string
+  chamada_principal?: string
+  texto_apoio?: string
+  cta?: string
+  direcao_criativa?: string
+}
+
 export interface PromptInput {
   globalRules: string
   clientName: string
@@ -42,6 +62,8 @@ export interface PromptInput {
   brandPalette: string[]
   fontChoice: string
   campaignNotes?: string
+  briefing?: BriefingContext
+  insightsPecas?: InsightPeca[]
 }
 
 export interface PromptOverrides {
@@ -53,7 +75,8 @@ export function buildPrompt(
   input: PromptInput,
   group: GroupName,
   format: FormatName,
-  overrides?: PromptOverrides
+  overrides?: PromptOverrides,
+  variationIndex?: number,
 ): string {
   const gd = overrides?.groupDirections ?? GROUP_DIRECTIONS
   const fi = overrides?.formatInstructions ?? FORMAT_INSTRUCTIONS
@@ -72,6 +95,36 @@ export function buildPrompt(
 
   if (input.campaignNotes?.trim()) {
     sections.push(`- Additional Notes: ${input.campaignNotes.trim()}`)
+  }
+
+  if (input.briefing) {
+    const b = input.briefing
+    const briefingLines: string[] = []
+    if (b.objetivo_campanha) briefingLines.push(`- Objective: ${b.objetivo_campanha}`)
+    if (b.publico_alvo) briefingLines.push(`- Target Audience: ${b.publico_alvo}`)
+    if (b.tom_voz) briefingLines.push(`- Tone of Voice: ${b.tom_voz}`)
+    if (b.mensagem_central) briefingLines.push(`- Core Message: ${b.mensagem_central}`)
+    if (b.cta_principal) briefingLines.push(`- Primary CTA: ${b.cta_principal}`)
+    if (briefingLines.length > 0) {
+      sections.push('', '---', '', '## CAMPAIGN CONTEXT (from AI Briefing)')
+      sections.push(...briefingLines)
+    }
+  }
+
+  const insight = variationIndex != null
+    ? input.insightsPecas?.find((p) => p.variacao === variationIndex)
+    : undefined
+  if (insight) {
+    const insightLines: string[] = []
+    if (insight.gancho) insightLines.push(`- Hook: ${insight.gancho}`)
+    if (insight.chamada_principal) insightLines.push(`- Main Call: ${insight.chamada_principal}`)
+    if (insight.texto_apoio) insightLines.push(`- Support Text: ${insight.texto_apoio}`)
+    if (insight.cta) insightLines.push(`- CTA: ${insight.cta}`)
+    if (insight.direcao_criativa) insightLines.push(`- Creative Direction: ${insight.direcao_criativa}`)
+    if (insightLines.length > 0) {
+      sections.push('', '---', '', '## CREATIVE DIRECTION (from AI Insights)')
+      sections.push(...insightLines)
+    }
   }
 
   sections.push('', '---', '')
@@ -99,6 +152,8 @@ export async function computeInputHashAsync(
     brandPalette: [...input.brandPalette].sort(),
     fontChoice: input.fontChoice,
     campaignNotes: input.campaignNotes?.trim() || '',
+    briefing: input.briefing ?? null,
+    insightsPecas: input.insightsPecas ?? null,
     campaignImageUrl: campaignImageUrl?.trim() || '',
     referenceSignature: referenceSignature?.trim() || '',
     promptVersion: PROMPT_VERSION,

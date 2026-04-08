@@ -132,13 +132,14 @@ export const ETAPA2 = {
 export const ETAPA3 = {
   header: {
     title: 'Prazos e combinados',
-    readTime: '3 minutos',
+    readTime: '4 minutos',
     alert: 'Ao concluir esta etapa, os 15 dias de preparação começam a contar',
   },
 
-  slideTags: ['SLIDE 3.1', 'SLIDE 3.2', 'SLIDE 3.3', 'SLIDE 3.4'],
+  slideTags: ['SLIDE 3.1', 'SLIDE 3.2', 'SLIDE 3.3', 'SLIDE 3.4', 'SLIDE 3.5'],
   slideTitles: [
     'A linha do tempo da sua campanha',
+    'Prazos reais de cada fase',
     'Preparação: 15 dias pra tudo acontecer',
     'O tempo é seu aliado (se você for rápido)',
     'Onde a gente se fala',
@@ -157,7 +158,23 @@ export const ETAPA3 = {
     { label: 'Uso da campanha', status: 'future' },
   ],
 
-  // ── Slide 3.2 — Responsabilidades ──
+  // ── Slide 3.2 — Prazos de Produção ──
+  prazosProducao: {
+    cardTitle: 'Prazos de cada etapa',
+    items: [
+      { label: 'Roteiro pronto', prazo: 'Até 1 dia útil após envio do briefing', icon: 'fileText' },
+      { label: 'Ajuste de roteiro', prazo: 'Até 1 dia útil por rodada (ilimitados nessa fase)', icon: 'penLine' },
+      { label: 'Após aprovação do roteiro', prazo: 'Não é mais possível alterar', icon: 'lock', alert: true },
+      { label: 'Campanha pronta', prazo: 'Até 3 dias úteis após roteiro aprovado', icon: 'clapperboard' },
+      { label: 'Ajuste de peças', prazo: 'Até 1 dia útil por rodada (2 levas contratuais)', icon: 'refreshCw' },
+      { label: 'Aprovação da celebridade', prazo: 'Até 3 dias úteis', icon: 'star' },
+      { label: 'Após aprovação da celebridade', prazo: 'Não é mais possível alterar', icon: 'lock', alert: true },
+      { label: 'Troca de oferta', prazo: 'Até 1 dia útil', icon: 'shuffle' },
+    ],
+    alertTip: 'Os prazos acima são dias úteis e contam a partir da ação anterior. Sua agilidade nas respostas acelera todo o processo.',
+  },
+
+  // ── Slide 3.3 — Responsabilidades ──
   suaParte: {
     label: 'A sua parte',
     items: [
@@ -176,7 +193,7 @@ export const ETAPA3 = {
     ],
   },
 
-  // ── Slide 3.3 — Cenários ──
+  // ── Slide 3.4 — Cenários ──
   warningText: 'O prazo do contrato começa a contar a partir da assinatura, não da entrega. Por isso, agilidade é tudo.',
   clienteAgil: {
     label: 'CLIENTE ÁGIL',
@@ -188,7 +205,7 @@ export const ETAPA3 = {
   },
   agilidadeTip: 'Sua agilidade é o que garante o melhor resultado. O tempo é seu aliado — use-o bem.',
 
-  // ── Slide 3.4 — Canais ──
+  // ── Slide 3.5 — Canais ──
   whatsapp: {
     title: 'WhatsApp',
     subtitle: 'Canal principal de comunicação',
@@ -548,100 +565,6 @@ export const ETAPA62 = {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ETAPA 7 — Modo avançado (Briefing da campanha)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-export const ETAPA7 = {
-  header: {
-    title: 'Modo avançado',
-    readTime: '3 minutos',
-    stepLabel: 'ETAPA 8 DE 8',
-  },
-
-  // ── Card 1 — Intro ──
-  intro: {
-    title: 'Você tem estrutura para ir além?',
-    body: 'Alguns clientes possuem equipe de design ou produção própria e preferem ter mais controle sobre os criativos finais. Se esse é o seu caso, temos uma opção avançada para você.',
-  },
-
-  // ── Escolha de caminho ──
-  pathLabel: 'Escolha seu caminho de produção:',
-  standard: {
-    title: 'Produção pela Aceleraí',
-    badge: 'PADRÃO',
-    desc: 'Nossa equipe cuida de tudo: roteiro, edição, design e entrega final dos criativos.',
-  },
-  hybrid: {
-    title: 'Personalizado (Avançado)',
-    badge: 'AVANÇADO',
-    desc: 'Você personaliza sua campanha com informações essenciais.',
-  },
-
-  // ── Hybrid rules ──
-  hybridRules: {
-    aprovacao: {
-      title: 'Aprovação obrigatória',
-      body: 'Todo material editado pela sua equipe precisa ser aprovado pela Aceleraí antes de ir ao ar. Publicar sem aprovação pode resultar em suspensão da campanha.',
-    },
-    prazo: {
-      title: '3 dias úteis por lote',
-      body: 'Cada lote de materiais enviado para aprovação tem um prazo de até 3 dias úteis para revisão e feedback.',
-    },
-    rejeicao: {
-      title: 'A celebridade pode rejeitar materiais que:',
-      items: [
-        'Alterem a aparência ou voz da celebridade de forma inadequada',
-        'Associem a imagem a conteúdo ofensivo ou polêmico',
-        'Desrespeitem as diretrizes de uso da imagem',
-        'Incluam promessas ou alegações não autorizadas',
-      ],
-    },
-    recomendacoes: {
-      title: 'Recomendações para produção híbrida:',
-      items: [
-        'Mantenha a qualidade visual dos materiais originais',
-        'Não distorça ou altere as proporções dos vídeos/fotos',
-        'Use as fontes e cores da marca de forma consistente',
-        'Envie os materiais para aprovação com antecedência',
-      ],
-    },
-    briefingAvancado: {
-      title: 'Briefing avançado',
-      body: 'Na produção híbrida, você receberá um briefing avançado com todas as especificações técnicas, formatos aceitos e diretrizes de edição para sua equipe seguir.',
-    },
-  },
-
-  // ── Standard confirmation ──
-  standardConfirmation: {
-    title: 'Produção completa pela Aceleraí',
-    body: 'Nossa equipe vai cuidar de toda a produção dos seus criativos. Você só precisa enviar o briefing e aprovar os materiais finais.',
-  },
-
-  // ── Navigation ──
-  navConcluir: 'Concluir e avançar',
-  navGerarIA: 'Gerar briefing IA',
-  navConcluirSemIA: 'Concluir sem briefing IA',
-
-  // ── Processing ──
-  processingSubmit: [
-    'Enviando briefing...',
-    'Salvando dados da campanha...',
-    'Quase pronto...',
-  ],
-  processingGenerate: [
-    'Gerando briefing com IA...',
-    'Salvando dados da campanha...',
-    'Quase pronto...',
-  ],
-
-  // ── Completion ──
-  completionTitle: 'Etapa 8 concluída!',
-  completionHybrid: 'A partir de agora, já estamos cuidando da produção do START KIT no modo personalizado. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha.',
-  completionStandard: 'A partir de agora, já estamos cuidando da produção do START KIT. Em até 24h, você receberá sugestões de criativos para iniciar sua jornada com equipes exclusivas para aperfeiçoar sua campanha.',
-  completionBadgeHybrid: 'PRODUÇÃO HÍBRIDA',
-  completionBadgeStandard: 'PRODUÇÃO ACELERAÍ',
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ETAPA FINAL — Resumo + Parabéns
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export const ETAPA_FINAL = {
@@ -652,15 +575,6 @@ export const ETAPA_FINAL = {
     cardLabel: 'RESUMO DA SUA CAMPANHA',
     pacoteValue: '2 vídeos + 4 estáticas',
     preparacaoValue: '15 dias (ativados)',
-    productionHybrid: 'Personalizado',
-    productionStandard: 'Aceleraí',
-    briefModes: {
-      both: 'Texto + Áudio',
-      audio: 'Áudio',
-      text: 'Texto',
-    },
-    iaBriefDone: 'Gerado com IA',
-    iaBriefError: 'Falha na geração IA',
   },
 
   // ── Próximos passos ──

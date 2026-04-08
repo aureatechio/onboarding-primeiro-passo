@@ -2,14 +2,14 @@
 
 ## Escopo
 
-Formulario multistep React SPA que guia o cliente apos a compra: desde boas-vindas ate envio de identidade visual, briefing de campanha e ativacao de producao. Tudo vinculado a um `compra_id` (UUID).
+Formulario multistep React SPA que guia o cliente apos a compra: desde boas-vindas ate envio de identidade visual (logo, site, Instagram) e ativacao de producao. Tudo vinculado a um `compra_id` (UUID). O briefing de campanha e gerado automaticamente pelo pipeline de enrichment (Perplexity + extracao de cores/fonte), nao por formulario manual do cliente.
 
 ## Referencia canonica
 
 O documento **`docs/mapeamento-formulario-onboarding.md`** e a referencia completa com:
 - Todos os campos de cada etapa (tipo, validacao, obrigatoriedade)
 - Mapeamento campo do formulario → coluna no banco de dados
-- Schema das tabelas (`onboarding_identity`, `onboarding_briefings`, `compras`, `ai_campaign_jobs`)
+- Schema das tabelas (`onboarding_identity`, `onboarding_briefings`, `onboarding_enrichment_jobs`, `compras`, `ai_campaign_jobs`)
 - Storage bucket, constraints, efeitos colaterais
 - Endpoints e payloads
 
@@ -20,8 +20,10 @@ O documento **`docs/mapeamento-formulario-onboarding.md`** e a referencia comple
 ```
 Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + ativacao)
 → Etapa 4 (4 slides + quiz) → Etapa 5 (tela unica) → Etapa 6.1 (tela unica)
-→ Etapa 6.2 (identidade visual) → Etapa 7 (briefing campanha) → Etapa Final (resumo + parabens)
+→ Etapa 6.2 (identidade visual: logo + site + Instagram) → Etapa Final (resumo + parabens)
 ```
+
+No `App.jsx`, o indice de passo 7 renderiza `Etapa62` (nao existe mais `Etapa7.jsx`).
 
 ## Arquivos-chave
 
@@ -38,20 +40,26 @@ Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + ativ
 | Tabela | Relacao | Escrita por |
 |--------|---------|-------------|
 | `onboarding_identity` | 1:1 por `compra_id` (UNIQUE) | `save-onboarding-identity` |
-| `onboarding_briefings` | 1:1 por `compra_id` (UNIQUE) | `save-campaign-briefing` |
+| `onboarding_briefings` | 1:1 por `compra_id` (UNIQUE) | `generate-campaign-briefing` (pipeline enrichment) ou `save-campaign-briefing` (legado) |
+| `onboarding_enrichment_jobs` | 1:1 por `compra_id` (UNIQUE) | `onboarding-enrichment` |
+| `enrichment_config` | Singleton (1 row) | `update-enrichment-config` / migration |
 | `compras` | Tabela mestre | Somente leitura pelo onboarding |
-| `ai_campaign_jobs` | N:1 por `compra_id` | `create-ai-campaign-job` (automatico) |
+| `ai_campaign_jobs` | N:1 por `compra_id` | `create-ai-campaign-job` (tipicamente fase 4 do enrichment) |
 
 ## Edge Functions
 
 | Funcao | Tipo | JWT |
 |--------|------|-----|
 | `get-onboarding-data` | Leitura (hidratacao) | `--no-verify-jwt` (publico) |
-| `save-onboarding-identity` | Escrita (identidade + production_path) | `--no-verify-jwt` (publico) |
-| `save-campaign-briefing` | Escrita (briefing texto/audio) | `--no-verify-jwt` (publico) |
-| `generate-campaign-briefing` | Escrita (briefing IA via Perplexity) | `--no-verify-jwt` (publico) |
+| `save-onboarding-identity` | Escrita identidade + disparo enrichment condicional | `--no-verify-jwt` (publico) |
+| `onboarding-enrichment` | Pipeline 4 fases (service role) | `--no-verify-jwt` + auth interna service role |
+| `get-enrichment-status` | Leitura status job | `--no-verify-jwt` (publico) |
+| `get-enrichment-config` | Leitura config singleton | `--no-verify-jwt` (publico) |
+| `update-enrichment-config` | Escrita config | `--no-verify-jwt` + `x-admin-password` |
+| `generate-campaign-briefing` | Briefing IA (Perplexity), chamado pelo enrichment | `--no-verify-jwt` (publico) |
+| `save-campaign-briefing` | Legado / fluxos operacionais | `--no-verify-jwt` (publico) |
 
-Todas as funcoes de onboarding sao **publicas** (`--no-verify-jwt`): o SPA nao tem autenticacao JWT.
+Todas as funcoes consumidas pelo SPA de onboarding sao **publicas** no gateway (`--no-verify-jwt`); `onboarding-enrichment` so aceita bearer **service role**.
 
 ## Storage
 
@@ -59,9 +67,16 @@ Bucket `onboarding-identity` (privado). Paths:
 - `{compra_id}/logo.{ext}` — logo da marca
 - `{compra_id}/img_{N}.{ext}` — imagens de campanha
 
-## Pipeline pos-onboarding
+## Pipeline pos-onboarding (enrichment)
 
-Quando `production_path = 'standard'` e salvo em `onboarding_identity`, a funcao `save-onboarding-identity` dispara automaticamente `create-ai-campaign-job`, que inicia a geracao de assets IA. O pipeline e documentado em `ai-step2/CONTRACT.md`.
+Quando o cliente salva identidade com **`site_url` ou `instagram_handle`** preenchidos (`choice: add_now`), `save-onboarding-identity` dispara `onboarding-enrichment`. O pipeline:
+
+1. Extrai paleta (`brand_palette`) — logo, site CSS ou fallback
+2. Detecta fonte (`font_choice`) — CSS do site, Gemini ou fallback
+3. Gera briefing via `generate-campaign-briefing` → `onboarding_briefings`
+4. Chama `create-ai-campaign-job` (logo opcional; paleta e fonte obrigatorias para qualidade)
+
+Detalhes: `supabase/functions/onboarding-enrichment/functionSpec.md` e `ai-step2/CONTRACT.md`.
 
 ## Elegibilidade
 

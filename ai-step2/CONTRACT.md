@@ -40,6 +40,9 @@ O orquestrador recebe apenas `compra_id` no body. Os demais inputs sao lidos dir
 | Nome do cliente | `clientes` | `nome` / `nome_fantasia` |
 | Nome da celebridade | `celebridadesReferencia` | `nome` |
 | Global rules | Hardcoded | Constante `GLOBAL_RULES` no orquestrador |
+| Briefing estruturado (opcional) | `onboarding_briefings` | `briefing_json` com `status = 'done'` (campos `objetivo_campanha`, `publico_alvo`, `tom_voz`, `mensagem_central`, `cta_principal`, `insights_pecas`) |
+
+O orquestrador monta `PromptInput` com `briefing?: BriefingContext` e `insightsPecas?: InsightPeca[]` (ver `_shared/ai-campaign/prompt-builder.ts`). O `buildPrompt` adiciona secoes `## CAMPAIGN CONTEXT (from AI Briefing)` e, por variacao, `## CREATIVE DIRECTION (from AI Insights)` quando houver dados. Se nao houver briefing, o prompt segue como antes (retrocompativel). O `computeInputHashAsync` inclui `briefing` e `insightsPecas` no hash para idempotencia.
 
 ### Limites de input (configuraveis via env var)
 
@@ -148,13 +151,14 @@ interface AiCampaignError {
 
 - Classificacao JWT: **publica** (`--no-verify-jwt`) — consumida pelo frontend onboarding.
 - Aceita `multipart/form-data` ou `application/json`.
-- Campos: `compra_id`, `choice` (`add_now`|`later`), `logo` (File), `brand_palette` (JSON string), `font_choice`, `campaign_images` (File[], max 5), `campaign_notes`, `production_path`.
+- Campos: `compra_id`, `choice` (`add_now`|`later`), `logo` (File), `brand_palette` (JSON string), `font_choice`, `campaign_images` (File[], max 5), `campaign_notes`, `site_url`, `instagram_handle`, `production_path` (legado).
 - Faz upload de logo e imagens para bucket `onboarding-identity`.
 - Upsert em tabela `onboarding_identity` (onConflict: `compra_id`).
-- Quando `production_path = 'standard'`, dispara `create-ai-campaign-job` em background (fire-and-forget, server-to-server com service role).
+- Se `site_url` **ou** `instagram_handle` estiver preenchido apos o upsert, dispara `onboarding-enrichment` em background (service role, fire-and-forget). Esse pipeline extrai cores/fonte, gera briefing via Perplexity e chama `create-ai-campaign-job` na fase final.
+- Se houver `site_url` ou `instagram_handle`, o backend forca `production_path = 'standard'` no upsert.
 - Retorna `{ success, data: { identity_id, logo_path, campaign_images_count } }`.
 
-> **Nota de comportamento atual do frontend (Etapa 6.2):** Os botões de escolha `add_now` / `later` foram removidos da UI. O frontend envia sempre `choice: "later"` com `logo: null`, `brand_palette: []`, `font_choice: ""`, `campaign_images: []`. O campo `production_path = 'standard'` não é disparado pelo fluxo do onboarding neste momento. O schema do banco e o contrato do endpoint permanecem compatíveis com `add_now` para uso futuro ou via admin.
+> **Nota:** O fluxo hibrido manual (Etapa 7 / `production_path: hybrid`) foi descontinuado no frontend. `save-campaign-briefing` permanece disponivel para compatibilidade ou fluxos operacionais, mas o caminho principal e enrichment + briefing automatico.
 
 ### `create-ai-campaign-job` (POST)
 
@@ -175,9 +179,20 @@ interface AiCampaignError {
 
 ### Trigger automatico da geracao (onboarding -> ai-step2)
 
-- Path `hybrid`: `save-campaign-briefing` dispara `create-ai-campaign-job` apos upsert do briefing.
-- Path `standard`: `save-onboarding-identity` dispara `create-ai-campaign-job` quando recebe `production_path = 'standard'`. **Atualmente nao acionado pelo frontend** (UI de escolha removida; frontend envia sempre `choice: "later"`).
-- Em ambos os casos, o trigger e fire-and-forget e nao bloqueia o response da etapa no frontend.
+- **Principal:** `save-onboarding-identity` dispara `onboarding-enrichment` quando `site_url` ou `instagram_handle` esta presente. O enrichment (4 fases) termina chamando `create-ai-campaign-job` com identidade ja enriquecida (`brand_palette`, `font_choice`) e, se sucesso na fase 3, `onboarding_briefings` com `briefing_json`.
+- **Legado:** `save-campaign-briefing` pode ainda disparar `create-ai-campaign-job` em cenarios hibridos/operacionais (ver implementacao da funcao).
+- Em todos os casos o trigger e fire-and-forget e nao bloqueia a resposta HTTP ao cliente.
+
+### Pipeline de enrichment (referencia)
+
+| Funcao | Metodo | Papel |
+|--------|--------|-------|
+| `onboarding-enrichment` | POST | Orquestra fases (cores, fonte, briefing, campanha); auth interna service role |
+| `get-enrichment-status` | GET | Polling por `compra_id` |
+| `get-enrichment-config` | GET | Le singleton `enrichment_config` |
+| `update-enrichment-config` | POST | Atualiza singleton (guard admin conforme spec) |
+
+Tabela `onboarding_enrichment_jobs` (1 row por `compra_id`, UNIQUE): status global, `phase_*_status` por fase, `phases_log` (jsonb), `campaign_job_id` opcional. Detalhe completo: `supabase/functions/onboarding-enrichment/functionSpec.md`.
 
 ### `get-ai-campaign-status` (GET)
 
@@ -250,6 +265,8 @@ CREATE TABLE onboarding_identity (
   font_choice text,
   campaign_images_paths text[] DEFAULT '{}',
   campaign_notes text,
+  site_url text,
+  instagram_handle text,
   production_path text CHECK (production_path IS NULL OR production_path IN ('standard', 'hybrid')),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
@@ -306,7 +323,7 @@ CREATE TABLE ai_campaign_errors (
 
 ## 7. Idempotencia
 
-Chave: `compra_id` + `input_hash` (SHA-256 de inputs canonizados, incluindo `campaign_image_url`).
+Chave: `compra_id` + `input_hash` (SHA-256 de inputs canonizados, incluindo `campaign_image_url`, `campaignNotes`, `briefing` e `insightsPecas` conforme `computeInputHashAsync` em `prompt-builder.ts`).
 
 Se ja existe job com mesmo `compra_id + input_hash`:
 - Se `status = 'completed'`: retornar resultado existente.
@@ -403,13 +420,13 @@ No pipeline de geracao:
 
 ## 10. Prompt version
 
-Formato: `v1.0.0` (semver).
-Incremento em minor quando mudar template; major quando mudar global-rules.
+Formato: `v1.x.y` (semver em `PROMPT_VERSION` em `_shared/ai-campaign/prompt-builder.ts`).
+Incremento em minor quando mudar template de prompt; major quando mudar global-rules de forma incompativel.
 
 ### GLOBAL_RULES_VERSION
 
-`GLOBAL_RULES_VERSION` (atualmente `v1.0.0`) e exportada em `_shared/ai-campaign/prompt-builder.ts`.
-Incluida no calculo do `input_hash` — qualquer mudanca invalida cache de idempotencia.
+`GLOBAL_RULES_VERSION` e exportada em `_shared/ai-campaign/prompt-builder.ts`.
+Incluida no calculo do `input_hash` junto com `PROMPT_VERSION` — qualquer mudanca invalida cache de idempotencia.
 
 ## 11. Variaveis de ambiente configuraveis
 

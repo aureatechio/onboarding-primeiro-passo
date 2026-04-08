@@ -1,6 +1,6 @@
 # Mapeamento do Formulário Multistep — Onboarding "Primeiro Passo"
 
-> **Gerado em:** 2026-04-07
+> **Gerado em:** 2026-04-07 · **Atualizado:** 2026-04-08 (enrichment, remoção Etapa 7 no produto)
 > **URL base:** `http://localhost:5173/?compra_id={UUID}`
 > **Fonte de dados:** Código-fonte das páginas (`src/pages/`) + `src/copy.js` + inspeção via browser
 
@@ -8,16 +8,17 @@
 
 ## Visão Geral
 
-O onboarding "Primeiro Passo" é um formulário multistep em React SPA (Vite) com **8 telas sequenciais** (Etapa 1 → 7 + Etapa Final), onde cada etapa pode conter sub-slides internos (carrossel). O fluxo navega para frente via `goNext()` do `OnboardingContext` e não permite voltar para etapas anteriores (apenas dentro dos slides da mesma etapa).
+O onboarding "Primeiro Passo" é um formulário multistep em React SPA (Vite) com **7 passos no wizard** (`TOTAL_STEPS = 7`); o último passo antes da Etapa Final é a **Etapa 6.2** (renderizada no índice de etapa 7 no `App.jsx`). Cada etapa pode conter sub-slides internos (carrossel). O fluxo navega para frente via `goNext()` do `OnboardingContext` e não permite voltar para etapas anteriores (apenas dentro dos slides da mesma etapa).
 
 ### Fluxo de Navegação
 
 ```
-Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela de ativação)
+Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (5 slides + quiz + tela de ativação)
 → Etapa 4 (4 slides + quiz) → Etapa 5 (tela única) → Etapa 6 (6.1 — tela única)
-→ Etapa 6.2 (apresentação da bonificação → modo simplificado: logo + site + instagram)
-→ Etapa 7 (escolha de caminho + briefing condicional) → Etapa Final (resumo → parabéns)
+→ Etapa 6.2 (logo + site + Instagram) → Etapa Final (resumo → parabéns)
 ```
+
+**Removido do produto:** Etapa 7 (caminho standard/hybrid e briefing manual). O briefing estruturado é gerado pelo pipeline **onboarding-enrichment** após salvar site e/ou Instagram.
 
 ### Estado global
 
@@ -39,13 +40,13 @@ Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela
 | `atendente` | string | `'Equipe Acelerai'` | Nome do atendente |
 | `atendenteGenero` | `'m' \| 'f'` | `'f'` | Gênero do atendente |
 | `trafficChoice` | `'yes' \| 'no' \| null` | `null` | Escolha de material de tráfego (Etapa 5) |
-| `productionPath` | `'standard' \| 'hybrid' \| null` | `null` | Caminho de produção (Etapa 7) |
+| `productionPath` | `'standard' \| 'hybrid' \| null` | `null` | Legado / hidratação de `production_path` (sem Etapa 7 no fluxo atual) |
 | `identityBonusChoice` | `'add_now' \| 'later' \| null` | `null` | Escolha de identidade visual (Etapa 6.2) |
 | `identityBonusPending` | boolean | `false` | Se deixou para depois (derivado de `choice === 'later'`) |
-| `campaignNotes` | string | `''` | Site + Instagram concatenados como `"Site: ... \| Instagram: ..."` (Etapa 6.2) |
+| `campaignNotes` | string | `''` | Opcional; legado/compat — frontend pode enviar concatenação; backend persiste também em `site_url` / `instagram_handle` |
 | `siteUrl` | string | `''` | Site da empresa (Etapa 6.2) |
 | `instagramHandle` | string | `''` | Handle do Instagram sem @ (Etapa 6.2) |
-| `campaignBriefMode` | `'text' \| 'audio' \| 'both' \| null` | `null` | Modo do briefing (Etapa 7 hybrid) |
+| `campaignBriefMode` | `'text' \| 'audio' \| 'both' \| null` | `null` | Legado (fluxo manual removido); pode existir em estado hidratado antigo |
 | `campaignBriefText` | string | `''` | Texto do briefing |
 | `campaignCompanySite` | string | `''` | Site da empresa (briefing) |
 | `campaignBriefAudioDurationSec` | number | `0` | Duração do áudio |
@@ -128,7 +129,7 @@ Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela
 
 **Arquivo:** `src/pages/Etapa3.jsx`
 **Copy:** `ETAPA3` em `src/copy.js`
-**Tipo:** Carrossel (4 slides) + Quiz + Tela de Ativação
+**Tipo:** Carrossel (5 slides) + Quiz + Tela de Ativação
 
 ### Header alert
 `"Ao concluir esta etapa, os 15 dias de preparação começam a contar"`
@@ -138,11 +139,25 @@ Etapa 1 (Hero) → Etapa 2 (4 slides + quiz) → Etapa 3 (4 slides + quiz + tela
 | Slide | Tag | Título | Conteúdo |
 |-------|-----|--------|----------|
 | 3.1 | `SLIDE 3.1` | A linha do tempo da sua campanha | Timeline vertical (9 items: done → current → next → future) |
-| 3.2 | `SLIDE 3.2` | Preparação: 15 dias pra tudo acontecer | Card "A sua parte" (4 items) + "A parte da Aceleraí" (3 items) |
-| 3.3 | `SLIDE 3.3` | O tempo é seu aliado (se você for rápido) | Warning box + cenário "CLIENTE ÁGIL" vs. "CLIENTE QUE DEMOROU" |
-| 3.4 | `SLIDE 3.4` | Onde a gente se fala | Cards: WhatsApp (canal principal) + Plataforma Aceleraí (entregas) |
+| 3.2 | `SLIDE 3.2` | Prazos reais de cada fase | Card com ícone de relógio, lista vertical com 8 prazos de produção. Itens de alerta (não é mais possível alterar) destacados em vermelho (danger) |
+| 3.3 | `SLIDE 3.3` | Preparação: 15 dias pra tudo acontecer | Card "A sua parte" (4 items) + "A parte da Aceleraí" (3 items) |
+| 3.4 | `SLIDE 3.4` | O tempo é seu aliado (se você for rápido) | Warning box + cenário "CLIENTE ÁGIL" vs. "CLIENTE QUE DEMOROU" |
+| 3.5 | `SLIDE 3.5` | Onde a gente se fala | Cards: WhatsApp (canal principal) + Plataforma Aceleraí (entregas) |
 
-### Quiz (após slide 3.4)
+### Prazos de Produção (Slide 3.2 — regras fixas, não dependem do contrato)
+
+| Fase | Prazo |
+|------|-------|
+| Roteiro pronto | Até 1 dia útil após envio do briefing |
+| Ajuste de roteiro | Até 1 dia útil por rodada (ilimitados nessa fase) |
+| Após aprovação do roteiro | **Não é mais possível alterar** ⚠ |
+| Campanha pronta | Até 3 dias úteis após roteiro aprovado |
+| Ajuste de peças | Até 1 dia útil por rodada (2 levas contratuais) |
+| Aprovação da celebridade | Até 3 dias úteis |
+| Após aprovação da celebridade | **Não é mais possível alterar** ⚠ |
+| Troca de oferta | Até 1 dia útil |
+
+### Quiz (após slide 3.5)
 
 | # | Pergunta (checkbox) |
 |---|---------------------|
@@ -298,76 +313,20 @@ Tela com resumo:
 ### Backend
 
 Ao confirmar, chama `saveIdentityToBackend()` → `POST /functions/v1/save-onboarding-identity` (FormData):
-- `compra_id`, `choice: 'add_now'`, `logo` (file, se enviado), `campaign_notes` (formato `"Site: ... | Instagram: ..."`)
+- `compra_id`, `choice: 'add_now'`, `logo` (file, se enviado), `site_url`, `instagram_handle`, e opcionalmente `campaign_notes` (concat legado)
+
+Se `site_url` ou `instagram_handle` estiver preenchido, o backend dispara **`onboarding-enrichment`** (assíncrono): cores, fonte, briefing Perplexity, depois `create-ai-campaign-job`.
 
 Ao clicar "Prefiro fazer depois":
-- `compra_id`, `choice: 'later'`
+- `compra_id`, `choice: 'later'` — sem enrichment (a menos que site/Instagram tenham sido enviados na mesma requisição; na prática o fluxo "depois" não envia URLs).
 
 ---
 
-## Etapa 7 — Modo Avançado (Briefing da Campanha)
+## Etapa 7 — Removida (histórico)
 
-**Arquivo:** `src/pages/Etapa7.jsx`
-**Copy:** `ETAPA7` em `src/copy.js`
-**Tipo:** Tela com escolha de caminho (radio) + formulário condicional de briefing
+A tela **`Etapa7.jsx`** foi removida do repositório. O fluxo **standard / hybrid** com briefing manual não faz mais parte do onboarding do cliente. Briefing estruturado (`onboarding_briefings.briefing_json`) passa a ser preenchido principalmente por **`generate-campaign-briefing`** dentro do pipeline **`onboarding-enrichment`**.
 
-### Card introdutório
-
-**"Você tem estrutura para ir além?"** — Explica opção para clientes com equipe própria.
-
-### Campos de formulário
-
-| Campo | Tipo | Obrigatório | Validação | Persiste em |
-|-------|------|-------------|-----------|-------------|
-| Caminho de produção | Radio group (2 opções) | Sim | Uma opção selecionada | `userData.productionPath` |
-
-**Opções de caminho:**
-
-| Valor | Título | Badge | Descrição |
-|-------|--------|-------|-----------|
-| `"standard"` | Produção pela Aceleraí | `PADRÃO` | Nossa equipe cuida de tudo |
-| `"hybrid"` | Personalizado (Avançado) | `AVANÇADO` | Você personaliza com informações essenciais |
-
-### Se `"standard"` selecionado
-
-Exibe confirmação verde: "Produção completa pela Aceleraí" → botão "Concluir e avançar" habilitado.
-
-### Se `"hybrid"` selecionado — Campos adicionais
-
-Exibe 4 cards de regras + formulário de briefing:
-
-| Campo | Tipo | Obrigatório | Validação | Persiste em |
-|-------|------|-------------|-----------|-------------|
-| Texto do briefing | Textarea (componente `CampaignBriefing`) | Condicional (texto ou áudio) | Min 50 chars, max 5000 chars | `campaignBriefText` |
-| Áudio do briefing | Gravação de áudio (botão gravar) | Condicional (texto ou áudio) | Duração > 0 | blob + `campaignBriefAudioDurationSec` |
-| Site da empresa | URL input | Sim (para gerar IA) | URL válida (http/https) | `campaignCompanySite` |
-
-**Regras de validação para avançar (hybrid):**
-- Pelo menos texto válido OU áudio válido
-- `briefMode` calculado: `"both"` (ambos) / `"text"` / `"audio"` / `null`
-
-### Cards de regras exibidos no modo hybrid
-
-1. **Aprovação obrigatória** — todo material precisa aprovação antes de publicar
-2. **3 dias úteis por lote** — prazo de revisão
-3. **Celebridade pode rejeitar** — 4 razões listadas
-4. **Recomendações** — 4 itens de boas práticas
-5. **Briefing avançado** — info sobre especificações técnicas
-
-### Backend
-
-1. **Save briefing:** `POST /functions/v1/save-campaign-briefing` (FormData: `compra_id`, `mode`, `text`, `audio`, `audio_duration_sec`)
-2. **Update production path:** `POST /functions/v1/save-onboarding-identity` (JSON: `compra_id`, `choice: 'add_now'`, `production_path`)
-3. **Generate AI briefing:** `POST /functions/v1/generate-campaign-briefing` (JSON: `compra_id`, `company_name`, `company_site`, `celebrity_name`, `context`, `briefing_input`)
-
-### Navegação condicional do botão
-
-| Estado | Label do botão |
-|--------|----------------|
-| `standard` | "Concluir e avançar" |
-| `hybrid` + `generationStatus === "idle"` | "Gerar briefing IA" |
-| `hybrid` + `generationStatus === "success"` | "Concluir e avançar" |
-| `hybrid` + `generationStatus === "error"` | "Concluir sem briefing IA" |
+Endpoints legados (`save-campaign-briefing`, `generate-campaign-briefing` direto do browser em fluxos especiais) permanecem documentados em `ai-step2/CONTRACT.md` e nas Edge Functions.
 
 ---
 
@@ -450,12 +409,12 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | `NavButtons` | Todas (exceto 1 e Final) | Botões Voltar/Avançar no footer |
 | `StickyFooter` | Todas (exceto 1 e Final) | Footer fixo na base |
 | `QuizConfirmation` | Etapas 2, 3, 4 | Lista de checkboxes obrigatórios |
-| `CompletionScreen` | Etapas 2, 4, 5, 6, 6.2, 7 | Tela de transição "Etapa X concluída!" |
-| `ProcessingOverlay` | Etapas 2, 3, 4, 6.2, 7 | Overlay com mensagens sequenciais durante salvamento |
-| `CampaignBriefing` | Etapa 7 (hybrid) | Formulário de briefing (texto + áudio + site) |
+| `CompletionScreen` | Etapas 2, 4, 5, 6, 6.2 | Tela de transição "Etapa X concluída!" |
+| `ProcessingOverlay` | Etapas 2, 3, 4, 6.2 | Overlay com mensagens sequenciais durante salvamento |
+| `CampaignBriefing` | Legado / ferramentas internas | Componente de briefing (texto + áudio + site); não usado no fluxo principal pós-remoção da Etapa 7 |
 | `ColorSwatch` | AiStep2Monitor (PostGen, PostTurbo) | Color picker com badge e botão remover |
 | `InfoCard` | Etapa 5 | Card com ícone, título e conteúdo |
-| `BulletList` | Etapas 2, 3, 7 | Lista com bullets coloridos |
+| `BulletList` | Etapas 2, 3 | Lista com bullets coloridos |
 | `Icon` | Todas | Wrapper de ícones Lucide |
 
 ---
@@ -470,12 +429,8 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | 5 | Tráfego pago (radio) | Seleção | Sim | Webhook externo |
 | 6.1 | Checkbox de entendimento | Confirmação | Sim | Não |
 | 6.2 | Logo | File upload | Opcional | `save-onboarding-identity` |
-| 6.2 | Site | URL input | Opcional | `save-onboarding-identity` |
-| 6.2 | Instagram | Text input | Opcional | `save-onboarding-identity` |
-| 7 | Caminho de produção | Radio (2 opções) | Sim | `save-onboarding-identity` |
-| 7 | Briefing texto | Textarea | Condicional (hybrid) | `save-campaign-briefing` |
-| 7 | Briefing áudio | Gravação | Condicional (hybrid) | `save-campaign-briefing` |
-| 7 | Site empresa | URL input | Condicional (hybrid + IA) | `generate-campaign-briefing` |
+| 6.2 | Site | URL input | Opcional | `save-onboarding-identity` → coluna `site_url` (+ enrichment se houver site ou IG) |
+| 6.2 | Instagram | Text input | Opcional | `save-onboarding-identity` → coluna `instagram_handle` |
 | Final | Botão "Concluir" | Click | Sim | Não |
 
 ---
@@ -485,9 +440,10 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | Endpoint | Método | Etapa | Payload |
 |----------|--------|-------|---------|
 | `get-onboarding-data` | GET | Inicialização | `?compra_id={uuid}` |
-| `save-onboarding-identity` | POST | 6.2, 7 | FormData ou JSON |
-| `save-campaign-briefing` | POST | 7 (hybrid) | FormData |
-| `generate-campaign-briefing` | POST | 7 (hybrid) | JSON |
+| `save-onboarding-identity` | POST | 6.2 | FormData ou JSON |
+| `get-enrichment-status` | GET | Final / monitor (opcional) | `?compra_id={uuid}` |
+| `save-campaign-briefing` | POST | Legado / fluxos especiais | FormData |
+| `generate-campaign-briefing` | POST | Chamado pelo `onboarding-enrichment` (fase briefing) | JSON (service role) |
 | Webhook tráfego | POST | 5 | `{ url: string }` |
 
 ---
@@ -499,13 +455,17 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 ### Diagrama de Relacionamento
 
 ```
-compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
+compras (1) ──── (0..1) onboarding_identity       [UNIQUE compra_id]
    │
-   ├──── (0..1) onboarding_briefings          [UNIQUE compra_id]
+   ├──── (0..1) onboarding_briefings             [UNIQUE compra_id]
    │
-   └──── (0..N) ai_campaign_jobs              [FK compra_id]
+   ├──── (0..1) onboarding_enrichment_jobs       [UNIQUE compra_id]
+   │
+   └──── (0..N) ai_campaign_jobs                 [FK compra_id]
                     │
                     └──── (0..N) ai_campaign_assets  [FK job_id]
+
+enrichment_config (singleton, 1 row) — prompts/timeouts do pipeline enrichment
 ```
 
 ### Storage Bucket
@@ -520,7 +480,7 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 
 **Relação:** 1 linha por compra (UNIQUE em `compra_id`)
 **Escrita:** Edge Function `save-onboarding-identity` (upsert por `compra_id`)
-**Etapas do formulário que alimentam:** Etapa 6.2, Etapa 7
+**Etapas do formulário que alimentam:** Etapa 6.2
 
 | Coluna DB | Tipo | Nullable | Default | Campo do Formulário | Etapa | Descrição |
 |-----------|------|----------|---------|---------------------|-------|-----------|
@@ -528,11 +488,13 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 | `compra_id` | uuid | NO | — | `compra_id` (query param) | Init | FK → `compras.id` (UNIQUE) |
 | `choice` | text | NO | — | Escolha de identidade (`'add_now'` / `'later'`) | 6.2 | Se o cliente enviou material agora ou depois |
 | `logo_path` | text | YES | null | Upload de logo (file, opcional) | 6.2 | Path no storage: `{compra_id}/logo.{ext}` |
-| `brand_palette` | text[] | NO | `'{}'` | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | Array de hex colors |
-| `font_choice` | text | YES | null | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | ID da fonte selecionada |
+| `brand_palette` | text[] | NO | `'{}'` | Preenchido pelo enrichment (fase cores) ou AiStep2Monitor | — | Array de hex colors |
+| `font_choice` | text | YES | null | Preenchido pelo enrichment (fase fonte) ou AiStep2Monitor | — | Nome da fonte |
 | `campaign_images_paths` | text[] | YES | `'{}'` | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | Paths no storage |
-| `campaign_notes` | text | YES | null | Site + Instagram concatenados | 6.2 | Formato: `"Site: https://... \| Instagram: https://www.instagram.com/handle"` |
-| `production_path` | text | YES | null | Radio: `'standard'` / `'hybrid'` | 7 | Caminho de produção escolhido |
+| `campaign_notes` | text | YES | null | Opcional / legado (concatenação) | 6.2 | Compatibilidade; preferir `site_url` / `instagram_handle` |
+| `site_url` | text | YES | null | URL do site | 6.2 | Dispara enrichment quando preenchido (ou com `instagram_handle`) |
+| `instagram_handle` | text | YES | null | Handle sem `@` | 6.2 | Dispara enrichment quando preenchido (ou com `site_url`) |
+| `production_path` | text | YES | null | Backend força `'standard'` se site/IG presentes; senão legado | — | Valores: `'standard'` / `'hybrid'` |
 | `created_at` | timestamptz | NO | `now()` | — | — | Data de criação do registro |
 | `updated_at` | timestamptz | NO | `now()` | — | — | Atualizada a cada upsert |
 
@@ -550,15 +512,15 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 | Choice: valores aceitos | `add_now`, `later` |
 | Production path: valores | `standard`, `hybrid` |
 
-**Efeito colateral:** Quando `production_path === 'standard'`, o backend dispara `create-ai-campaign-job` automaticamente.
+**Efeito colateral:** Quando `site_url` ou `instagram_handle` está preenchido após o upsert, o backend dispara **`onboarding-enrichment`** (não dispara mais `create-ai-campaign-job` diretamente a partir deste endpoint).
 
 ---
 
 ### Tabela: `onboarding_briefings`
 
 **Relação:** 1 linha por compra (UNIQUE em `compra_id`)
-**Escrita:** Edge Function `save-campaign-briefing` (upsert por `compra_id`)
-**Etapa do formulário que alimenta:** Etapa 7 (caminho `hybrid`)
+**Escrita:** `generate-campaign-briefing` (via pipeline `onboarding-enrichment`, fase briefing) ou `save-campaign-briefing` (legado)
+**Etapa do formulário que alimenta:** Nenhuma no fluxo principal (briefing IA automático após Etapa 6.2 com site/Instagram)
 
 | Coluna DB | Tipo | Nullable | Default | Campo do Formulário | Etapa | Descrição |
 |-----------|------|----------|---------|---------------------|-------|-----------|
@@ -608,9 +570,11 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
       "choice": "add_now",
       "logo_path": "{compra_id}/logo.jpeg",
       "brand_palette": ["#d4ba71", "#423617"],
-      "font_choice": "inter",
+      "font_choice": "Inter",
       "campaign_images_paths": [],
       "campaign_notes": "Site: https://... | Instagram: https://www.instagram.com/handle",
+      "site_url": "https://example.com",
+      "instagram_handle": "handle",
       "production_path": "standard",
       "updated_at": "2026-04-06T17:38:02Z"
     }
@@ -618,7 +582,7 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 }
 ```
 
-`identity` é `null` quando o cliente ainda não preencheu a Etapa 6.2. O `OnboardingContext` faz parse do `campaign_notes` para extrair `siteUrl` e `instagramHandle` de volta, restaurando o estado dos campos no modo simplificado.
+`identity` é `null` quando o cliente ainda não preencheu a Etapa 6.2. O `OnboardingContext` hidrata `siteUrl` e `instagramHandle` a partir de `identity.site_url` e `identity.instagram_handle`; `campaignNotes` vem de `identity.campaign_notes` (texto legado/compat, independente das colunas).
 
 **Colunas usadas na hidratação:**
 
@@ -672,7 +636,7 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 ### Tabela: `ai_campaign_jobs` (downstream — pós-formulário)
 
 **Relação:** N linhas por compra (histórico de jobs)
-**Criada por:** `create-ai-campaign-job` (disparado automaticamente quando `production_path = 'standard'`)
+**Criada por:** `create-ai-campaign-job` (tipicamente ao final do pipeline `onboarding-enrichment`, fase campanha)
 
 | Coluna DB | Tipo | Nullable | Default | Descrição |
 |-----------|------|----------|---------|-----------|
@@ -733,19 +697,12 @@ compras (1) ──── (0..1) onboarding_identity   [UNIQUE compra_id]
 | 5 | Tráfego radio (yes/no) | `trafficChoice` | — | — | Webhook externo |
 | 6.1 | Checkbox entendimento | — | — | — | Nenhum (só progresso local) |
 | 6.2 | Upload de logo (opcional) | `logoFile` (local) | `onboarding_identity` | `logo_path` | Escrita (Storage) |
-| 6.2 | Site da empresa (URL) | `siteUrl` | `onboarding_identity` | `campaign_notes` (concatenado) | Escrita |
-| 6.2 | Perfil Instagram | `instagramHandle` | `onboarding_identity` | `campaign_notes` (concatenado) | Escrita |
+| 6.2 | Site da empresa (URL) | `siteUrl` | `onboarding_identity` | `site_url` (+ opcional `campaign_notes`) | Escrita |
+| 6.2 | Perfil Instagram | `instagramHandle` | `onboarding_identity` | `instagram_handle` (+ opcional `campaign_notes`) | Escrita |
 | 6.2 | Escolha add_now/later | `identityBonusChoice` | `onboarding_identity` | `choice` | Escrita |
-| 7 | Radio standard/hybrid | `productionPath` | `onboarding_identity` | `production_path` | Escrita |
-| 7 | Briefing texto | `campaignBriefText` | `onboarding_briefings` | `brief_text` | Escrita |
-| 7 | Briefing áudio | (blob) | `onboarding_briefings` | `audio_path` | Escrita (Storage) |
-| 7 | Duração do áudio | `campaignBriefAudioDurationSec` | `onboarding_briefings` | `audio_duration_sec` | Escrita |
-| 7 | Modo do briefing | `campaignBriefMode` | `onboarding_briefings` | `mode` | Escrita |
-| 7 | Site empresa (briefing IA) | `campaignCompanySite` | `onboarding_briefings` | via `generate-campaign-briefing` → `briefing_json` | Escrita (input p/ IA) |
-| 7 | Briefing gerado IA | `campaignGeneratedBriefing` | `onboarding_briefings` | `briefing_json` | Escrita (backend) |
-| 7 | Citações IA | `campaignBriefCitations` | `onboarding_briefings` | `citations_json` | Escrita (backend) |
-| 7 | Status geração IA | `campaignBriefGenerationStatus` | `onboarding_briefings` | `status` | Escrita (backend) |
-| 7 | Código erro IA | `campaignBriefErrorCode` | `onboarding_briefings` | `error_code` | Escrita (backend) |
+| — | (pipeline enrichment) | — | `onboarding_enrichment_jobs` | várias | Escrita (`onboarding-enrichment`) |
+| — | Briefing IA automático | — | `onboarding_briefings` | `briefing_json`, `status`, etc. | Escrita (`generate-campaign-briefing` via enrichment) |
+| — | Campanha 12 criativos | — | `ai_campaign_jobs` + `ai_campaign_assets` | — | Escrita (`create-ai-campaign-job`) |
 
 ---
 

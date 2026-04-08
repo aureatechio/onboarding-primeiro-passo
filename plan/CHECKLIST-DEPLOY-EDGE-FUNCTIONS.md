@@ -56,6 +56,15 @@
 | `get-onboarding-data` | Pública | Nenhum | `supabase functions deploy get-onboarding-data --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `save-onboarding-identity` | Pública | Nenhum | `supabase functions deploy save-onboarding-identity --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 
+## Enrichment (onboarding automático)
+
+| Função | JWT | Guard | Comando de deploy |
+|--------|-----|-------|-------------------|
+| `onboarding-enrichment` | Pública | `requireServiceRole` (bearer service role) | `supabase functions deploy onboarding-enrichment --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
+| `get-enrichment-status` | Pública | Nenhum | `supabase functions deploy get-enrichment-status --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
+| `get-enrichment-config` | Pública | Nenhum | `supabase functions deploy get-enrichment-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
+| `update-enrichment-config` | Pública | `requireAdminPassword` (`x-admin-password`) | `supabase functions deploy update-enrichment-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
+
 ## OMIE
 
 | Função | JWT | Guard | Comando de deploy |

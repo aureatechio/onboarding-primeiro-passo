@@ -9,7 +9,6 @@ export const ETAPAS_META = [
   { id: 'etapa5',      label: 'Etapa 5 — Presença digital',       exportKey: 'ETAPA5' },
   { id: 'etapa6',      label: 'Etapa 6 — Identidade visual',      exportKey: 'ETAPA6' },
   { id: 'etapa62',     label: 'Etapa 6.2 — Bonificação',          exportKey: 'ETAPA62' },
-  { id: 'etapa7',      label: 'Etapa 7 — Modo avançado',          exportKey: 'ETAPA7' },
   { id: 'etapaFinal',  label: 'Etapa Final — Parabéns',           exportKey: 'ETAPA_FINAL' },
 ]
 

@@ -14,6 +14,8 @@ import {
   type PromptOverrides,
   type GroupName,
   type FormatName,
+  type BriefingContext,
+  type InsightPeca,
 } from '../_shared/ai-campaign/prompt-builder.ts'
 import { log } from '../_shared/ai-campaign/logger.ts'
 import {
@@ -378,7 +380,8 @@ Deno.serve(async (req) => {
   }
 
   // --- 5b. Load briefing from onboarding_briefings (enrichment pipeline) ---
-  let enrichedNotes = identity.campaign_notes || ''
+  let briefingContext: BriefingContext | undefined
+  let insightsPecas: InsightPeca[] | undefined
   {
     const { data: briefingRow } = await supabase
       .from('onboarding_briefings')
@@ -389,14 +392,29 @@ Deno.serve(async (req) => {
 
     if (briefingRow?.briefing_json) {
       const b = briefingRow.briefing_json as Record<string, unknown>
-      const parts: string[] = []
-      if (b.objetivo_campanha) parts.push(`Objetivo: ${b.objetivo_campanha}`)
-      if (b.publico_alvo) parts.push(`Público: ${b.publico_alvo}`)
-      if (b.tom_voz) parts.push(`Tom: ${b.tom_voz}`)
-      if (b.mensagem_central) parts.push(`Mensagem: ${b.mensagem_central}`)
-      if (b.cta_principal) parts.push(`CTA: ${b.cta_principal}`)
-      if (parts.length > 0) {
-        enrichedNotes = parts.join(' | ') + (enrichedNotes ? ` | ${enrichedNotes}` : '')
+      briefingContext = {
+        objetivo_campanha: typeof b.objetivo_campanha === 'string' ? b.objetivo_campanha : undefined,
+        publico_alvo: typeof b.publico_alvo === 'string' ? b.publico_alvo : undefined,
+        tom_voz: typeof b.tom_voz === 'string' ? b.tom_voz : undefined,
+        mensagem_central: typeof b.mensagem_central === 'string' ? b.mensagem_central : undefined,
+        cta_principal: typeof b.cta_principal === 'string' ? b.cta_principal : undefined,
+      }
+      const hasAnyField = Object.values(briefingContext).some(Boolean)
+      if (!hasAnyField) briefingContext = undefined
+
+      if (Array.isArray(b.insights_pecas)) {
+        insightsPecas = (b.insights_pecas as Record<string, unknown>[]).map((p) => ({
+          variacao: typeof p.variacao === 'number' ? p.variacao : 0,
+          diferencial: typeof p.diferencial === 'string' ? p.diferencial : undefined,
+          formato: typeof p.formato === 'string' ? p.formato : undefined,
+          plataforma: typeof p.plataforma === 'string' ? p.plataforma : undefined,
+          gancho: typeof p.gancho === 'string' ? p.gancho : undefined,
+          chamada_principal: typeof p.chamada_principal === 'string' ? p.chamada_principal : undefined,
+          texto_apoio: typeof p.texto_apoio === 'string' ? p.texto_apoio : undefined,
+          cta: typeof p.cta === 'string' ? p.cta : undefined,
+          direcao_criativa: typeof p.direcao_criativa === 'string' ? p.direcao_criativa : undefined,
+        }))
+        if (insightsPecas.length === 0) insightsPecas = undefined
       }
     }
   }
@@ -414,7 +432,9 @@ Deno.serve(async (req) => {
     celebName,
     brandPalette: identity.brand_palette,
     fontChoice: identity.font_choice,
-    campaignNotes: enrichedNotes,
+    campaignNotes: identity.campaign_notes || '',
+    briefing: briefingContext,
+    insightsPecas,
   }
 
   const inputHash = await computeInputHashAsync(
@@ -646,12 +666,14 @@ async function dispatchWorkers(
   for (let index = 0; index < assets.length; index += batchSize) {
     const batch = assets.slice(index, index + batchSize)
     const settled = await Promise.allSettled(
-      batch.map(async (asset) => {
+      batch.map(async (asset, batchIdx) => {
+        const variationIndex = index + batchIdx + 1
         const prompt = buildPrompt(
           promptInput,
           asset.group_name as GroupName,
           asset.format as FormatName,
           promptOverrides,
+          variationIndex,
         )
 
         try {
