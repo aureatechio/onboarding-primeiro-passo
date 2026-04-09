@@ -43,10 +43,6 @@ TASK-{YYYY-MM-DD}-{NNN}-{slug}.md
 |----|--------|--------|-------|--------|------------|
 | [TASK-2026-04-06-001](./TASK-2026-04-06-001-conectar-copy-js-aos-componentes.md) | Conectar copy.js aos componentes de onboarding | onboarding | MEDIUM | concluida | media |
 | [TASK-2026-04-06-002](./TASK-2026-04-06-002-tela-gerenciamento-copy-dashboard.md) | Criar tela de gerenciamento de copy no dashboard | dashboard | LARGE | enriquecida | media |
-| [TASK-2026-04-02-006](./TASK-2026-04-02-006-calibracao-polling-omie.md) | Calibração de polling OMIE | omie | — | triagem | — |
-| [TASK-2026-04-02-007](./TASK-2026-04-02-007-validacao-sync-vendedores.md) | Validação de sync de vendedores | omie | — | triagem | — |
-| [TASK-2026-04-02-008](./TASK-2026-04-02-008-validacao-retry-worker-producao.md) | Validação de retry worker em produção | shared | — | triagem | — |
-| [TASK-2026-04-02-009](./TASK-2026-04-02-009-data-competencia-os-omie.md) | Data de competência na OS OMIE | omie | — | triagem | — |
 
 ---
 
@@ -56,7 +52,7 @@ Tasks movidas para `tasks/arquivo/` por referenciarem apps que não existem nest
 
 | ID | Título | Motivo do arquivamento |
 |----|--------|------------------------|
-| TASK-2026-04-02-002 | Tipo de venda nas características da OS | Referencia apps/omie e apps/dashboard (monorepo principal) |
+| TASK-2026-04-02-002 | Tipo de venda nas características da OS | Referenciava integração OMIE (removida deste repo) |
 | TASK-2026-04-02-003 | Forma de pagamento boleto parcelado no dashboard | 100% sobre apps/dashboard (monorepo principal) |
 | TASK-2026-04-02-004 | Badge de versão no checkout overview | 100% sobre apps/dashboard (monorepo principal) |
 

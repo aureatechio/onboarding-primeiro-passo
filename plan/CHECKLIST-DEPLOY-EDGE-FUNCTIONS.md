@@ -65,20 +65,6 @@
 | `get-enrichment-config` | Pública | Nenhum | `supabase functions deploy get-enrichment-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `update-enrichment-config` | Pública | `requireAdminPassword` (`x-admin-password`) | `supabase functions deploy update-enrichment-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 
-## OMIE
-
-| Função | JWT | Guard | Comando de deploy |
-|--------|-----|-------|-------------------|
-| `omie-orchestrator` | Protegida | JWT padrão | `supabase functions deploy omie-orchestrator --project-ref awqtzoefutnfmnbomujt` |
-| `omie-create-os` | Protegida | JWT padrão | `supabase functions deploy omie-create-os --project-ref awqtzoefutnfmnbomujt` |
-| `omie-upsert-os` | Protegida | JWT padrão | `supabase functions deploy omie-upsert-os --project-ref awqtzoefutnfmnbomujt` |
-| `omie-upsert-os-batch` | Protegida | JWT padrão | `supabase functions deploy omie-upsert-os-batch --project-ref awqtzoefutnfmnbomujt` |
-| `omie-upsert-service` | Protegida | JWT padrão | `supabase functions deploy omie-upsert-service --project-ref awqtzoefutnfmnbomujt` |
-| `omie-push-vendedores` | Protegida | JWT padrão | `supabase functions deploy omie-push-vendedores --project-ref awqtzoefutnfmnbomujt` |
-| `omie-sync-vendedores` | Protegida | JWT padrão | `supabase functions deploy omie-sync-vendedores --project-ref awqtzoefutnfmnbomujt` |
-| `get-omie-nfse-config` | Protegida | JWT padrão | `supabase functions deploy get-omie-nfse-config --project-ref awqtzoefutnfmnbomujt` |
-| `update-omie-nfse-config` | Protegida | JWT padrão | `supabase functions deploy update-omie-nfse-config --project-ref awqtzoefutnfmnbomujt` |
-
 ## Notas
 
 - **Pública + Guard**: a função é deployada com `--no-verify-jwt` (Supabase não valida JWT na edge), mas o código valida acesso internamente via `requireAdminPassword` ou `requireServiceRole`.

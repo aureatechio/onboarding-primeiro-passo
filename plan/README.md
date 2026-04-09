@@ -38,9 +38,6 @@
 - `2026-04-06-limpeza-pos-extracao-monorepo.md` ✓ **Concluido**
   Limpeza pós-extração: git tracking, dead code _shared/, reescrita de CLAUDE.md, CONTEXT-MAP.md, .cursor/ e .context/modules/omie/ para repo standalone. Arquivamento de tasks e plans do monorepo.
 
-- `2026-04-02-melhoria-contexto-omie.md` ✓ **Concluido**
-  Plano executavel para melhorar a engenharia de contexto do modulo OMIE: DOC-READING-ORDER condicional, BUSINESS-RULES.md com regras criticas do codigo, reescrita da rule OMIE, registro completo no CLAUDE.md, 6 functionSpecs faltantes, atualizacao de specs e skill. Meta: eliminar falhas de primeira tentativa por contexto insuficiente.
-
 - `2026-04-02-otimizacao-engenharia-contexto.md`
   Plano executado para reduzir ruido de contexto de IA: limpeza de regras/agents redundantes, globs contextuais, consolidacao de `CLAUDE.md` + `AGENTS.md`, criacao de `CONTEXT-MAP.md` e `apps/dashboard/AGENTS.md`.
 
@@ -64,9 +61,6 @@
 
 - `2026-03-16-contrato-nao-gerado-dual-payment.md`  
   Incidente: contrato ClickSign nao gerado em compra com dual payment (2x PIX). Analise de causa raiz com comparacao contra compra com contrato OK. Conclusao: disparo de contrato e independente do checkout e nao foi executado.
-
-- `2026-03-16-envio-boleto-omie-split.md` (plano Cursor)  
-  Correcao de `cEnvBoleto` em split/dual payment. Query complementar detecta boleto entre sessoes pagas com precedencia sobre `cEnvPix`. Afeta `omie-orchestrator`, `omie-upsert-os`, `omie-preview-upsert-os`.
 
 - `2026-03-17-checkout-health-monitor.md`  
   Pagina de monitoramento de saude do checkout no dashboard. Consome views SQL de observabilidade existentes (SLA, divergencias, webhook signal) com Recharts e Realtime. Opcao A (client-side queries).
@@ -109,9 +103,6 @@
 
 - Orchestrator + Identity Persistence ai-step2 (`ai-step2_orchestrator_+_identity_e84fa105.plan.md`, plano Cursor)  
   Refatoracao da pipeline de geracao de imagens AI para pattern orquestrador com worker individual (resolve wall-clock limit). Persistencia completa dos inputs de identidade visual do onboarding (logo, cores, fonte, imagens, notas) no banco de dados com upload para Storage. Nova tabela `onboarding_identity`, bucket `onboarding-identity`, Edge Functions `save-onboarding-identity` (publica) e `generate-ai-campaign-image` (publica no gateway com `--no-verify-jwt`, autenticacao interna via bearer service role).
-
-- `2026-03-30-omie-env-link-nfse.md`
-  Fix: `cEnvLink` hardcoded `'N'` no bloco fiscal-only de `omie-create-os`. Campo separado de `cEnvBoleto`/`cEnvPix` (não é flag de pagamento). `omie-upsert-os` passa `enviarLinkNfse: true`.
 
 - `2026-03-30-fix-dashboard-tsconfig-es2021.md`
   Fix: build do dashboard falha na Vercel — `tsconfig.app.json` com `target/lib ES2020` não reconhece `replaceAll` (ES2021). Eleva target e lib para ES2021.

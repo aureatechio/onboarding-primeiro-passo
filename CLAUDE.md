@@ -17,7 +17,7 @@ primeiro-passo-app/
 │   └── copy.js                   # Content copy for onboarding steps
 ├── supabase/
 │   ├── migrations/               # Schema migrations (never edit existing ones)
-│   └── functions/                # 31 Edge Functions (Deno) + _shared/
+│   └── functions/                # 26 Edge Functions (Deno) + _shared/
 │       └── _shared/              # Shared Deno utilities
 │           ├── cors.ts           # CORS + jsonResponse
 │           ├── auth.ts           # JWT auth helpers
@@ -25,8 +25,6 @@ primeiro-passo-app/
 │           ├── audit-logger.ts
 │           ├── service-role-auth.ts
 │           ├── operational-events*.ts
-│           ├── omie/             # OMIE utilities (canonical-os-payload, etc.)
-│           ├── pipeline/         # trigger-nfe.ts
 │           ├── email/            # Resend provider
 │           ├── perplexity/       # Perplexity AI integration
 │           │   ├── client.ts     # Shared provider client, errors, config loader
@@ -55,7 +53,6 @@ primeiro-passo-app/
 ├── .context/modules/
 │   ├── onboarding/              # Onboarding context engineering
 │   ├── aurea-garden/            # Aurea Garden context engineering
-│   └── omie/                    # OMIE integration context engineering
 ├── .cursor/
 │   ├── rules/                    # Always-apply Cursor rules (MDC)
 │   ├── skills/                   # Cursor skills (SKILL.md per skill)
@@ -211,22 +208,11 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 **NanoBanana (config):**
 `get-nanobanana-config`, `update-nanobanana-config`
 
-**OMIE (fluxo automatico):**
-`omie-orchestrator`, `omie-create-os`
-
-**OMIE (correcao):**
-`omie-upsert-os`, `omie-upsert-os-batch`, `omie-upsert-service`
-
-**OMIE (vendedores):**
-`omie-push-vendedores`, `omie-sync-vendedores`
-
-**OMIE (config):**
-`get-omie-nfse-config`, `update-omie-nfse-config`
 
 ## Code Style
 
 - **ESLint** + **Prettier**: no semicolons, single quotes, 2 spaces, trailing comma es5, **printWidth 100**, arrowParens always, endOfLine LF
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:` — use scopes: `feat(onboarding):`, `fix(omie):`, `feat(ai-campaign):`
+- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:` — use scopes: `feat(onboarding):`, `feat(ai-campaign):`
 - Unused vars prefixed with `_` are allowed (`@typescript-eslint/no-unused-vars` ignores `^_`)
 - **Acelerai brand:** primary `#384ffe` (Acelerai Blue), destructive `#ff0058` (RED CRM). Font: Inter (Google Fonts CDN)
 
@@ -247,16 +233,6 @@ When working on onboarding code (form steps, identity, briefing, post-onboarding
 5. `supabase/functions/<function>/index.ts` — implementation of the target function
 
 **Key constraint:** The form has no JWT authentication. All onboarding Edge Functions are public (`--no-verify-jwt`). Security relies on UUID non-guessability.
-
-## OMIE Integration Context
-
-When working on OMIE-related code, consult these docs in order:
-
-1. `.context/modules/omie/DOC-READING-ORDER.md` — identifies which docs to read for each task type
-2. `.context/modules/omie/README.md` — internal architecture and patterns
-3. `.context/modules/omie/BUSINESS-RULES.md` — critical business logic not in specs
-4. `supabase/functions/<function>/functionSpec.md` — spec of the target function
-5. Related plans in `plan/`
 
 ## Aurea Garden Context (Post Gen + Post Turbo)
 
@@ -297,7 +273,7 @@ All 3 functions deploy with `--no-verify-jwt` because the frontend has no JWT/lo
 
 ## SDD Convention (functionSpec.md)
 
-Some Edge Functions use Spec Driven Development: a `functionSpec.md` file alongside `index.ts` defines the function's contract. Check for existing specs before modifying OMIE, NFe, Aurea Garden, or NanoBanana functions.
+Some Edge Functions use Spec Driven Development: a `functionSpec.md` file alongside `index.ts` defines the function's contract. Check for existing specs before modifying Aurea Garden or NanoBanana functions.
 
 ## Plan Convention
 
@@ -311,7 +287,6 @@ Operational tasks (bugs, requests, fixes) go in `tasks/` with naming `TASK-YYYY-
 
 | Skill                 | Trigger                                                              |
 | --------------------- | -------------------------------------------------------------------- |
-| `omie-integracao`     | OMIE API, payload, clientes/serviços/OS integration                  |
 | `aurea-garden`        | Post Gen, Post Turbo, geracao de criativos IA, galeria, NanoBanana   |
 | `nova-tarefa`         | /nova-tarefa + relato → cria e enriquece tarefa operacional completa |
 | `task-enricher`       | Enriquecer tarefa operacional existente, preparar para execução      |
@@ -330,6 +305,5 @@ Operational tasks (bugs, requests, fixes) go in `tasks/` with naming `TASK-YYYY-
 - `tasks/` — Operational tasks (`TASK-YYYY-MM-DD-NNN-slug.md`). Enrich with skill `task-enricher`.
 - `docs/` — Reference documentation (form mapping, etc.). Update `mapeamento-formulario-onboarding.md` when adding/removing form fields.
 - `.context/modules/onboarding/` — Onboarding module documentation and business rules.
-- `.context/modules/omie/` — OMIE module documentation and architecture context.
 - `.context/modules/aurea-garden/` — Aurea Garden (Post Gen + Post Turbo) module documentation.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
