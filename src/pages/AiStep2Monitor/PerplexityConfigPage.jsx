@@ -525,7 +525,10 @@ export default function PerplexityConfigPage() {
     try {
       const res = await fetch(`${SUPABASE_URL}/functions/v1/update-perplexity-config`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-password': 'megazord',
+        },
         body: JSON.stringify(changed),
       })
       const data = await res.json()
