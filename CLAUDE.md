@@ -109,6 +109,7 @@ React 19 + Vite SPA (Vercel project: **onboarding-primeiro-passo**).
 
 **Flow:** Etapa1Hero → Etapa2 → Etapa3 → Etapa4 → Etapa5 → Etapa6 / Etapa62 → EtapaFinal → TudoPronto
 
+- When the client saves identity with `site_url` or `instagram_handle`, `save-onboarding-identity` triggers the **enrichment pipeline** (`onboarding-enrichment`): extracts colors/font, generates briefing via Perplexity, and creates AI campaign job. Config in singleton table `enrichment_config`.
 - State is managed by `OnboardingContext` in `src/context/`
 - `AiStep2Monitor` page — AI campaign monitoring panel (sub-pages: Garden, PostGen, PostTurbo, NanoBanana config)
 - No TypeScript — project uses JSX/JS
