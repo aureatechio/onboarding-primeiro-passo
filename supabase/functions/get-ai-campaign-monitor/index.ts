@@ -122,6 +122,84 @@ async function resolveNamesByCompraIds(
   return { compraMap, clientNameMap, celebrityNameMap }
 }
 
+interface AvailablePurchase {
+  compra_id: string
+  clientName: string
+  celebName: string
+  label: string
+  eligible: boolean
+  eligibility_reason: string | null
+  checkout_status: string | null
+  clicksign_status: string | null
+  vendaaprovada: boolean | null
+  onboarding_access_status: string | null
+}
+
+async function resolveAvailablePurchases(
+  supabase: ReturnType<typeof createClient>
+): Promise<AvailablePurchase[]> {
+  const { data: comprasRows, error: comprasError } = await supabase
+    .from('compras')
+    .select('id, cliente_id, celebridade, checkout_status, clicksign_status, vendaaprovada, created_at')
+    .eq('clicksign_status', 'Assinado')
+    .order('created_at', { ascending: false })
+    .limit(200)
+
+  if (comprasError || !comprasRows || comprasRows.length === 0) return []
+
+  const compraIds = comprasRows.map((row) => row.id)
+
+  const [namesResult, accessResult] = await Promise.all([
+    resolveNamesByCompraIds(supabase, compraIds),
+    supabase
+      .from('onboarding_access')
+      .select('compra_id, status, allowed_until')
+      .in('compra_id', compraIds),
+  ])
+
+  const { compraMap, clientNameMap, celebrityNameMap } = namesResult
+  const accessByCompra: Record<string, { status: string; allowed_until: string | null }> = {}
+  for (const row of accessResult.data || []) {
+    accessByCompra[row.compra_id] = { status: row.status, allowed_until: row.allowed_until }
+  }
+
+  return comprasRows.map((row) => {
+    const compraInfo = compraMap[row.id] || { cliente_id: null, celebridade: null }
+    const clientName = compraInfo.cliente_id
+      ? (clientNameMap[compraInfo.cliente_id] || 'Cliente')
+      : 'Cliente'
+    const celebName = compraInfo.celebridade
+      ? (celebrityNameMap[compraInfo.celebridade] || 'Celebridade contratada')
+      : 'Celebridade contratada'
+
+    const isPaid = row.checkout_status === 'pago'
+    const access = accessByCompra[row.id]
+    let manuallyAllowed = false
+    if (access?.status === 'allowed') {
+      const notExpired = !access.allowed_until ||
+        new Date(access.allowed_until).getTime() >= Date.now()
+      if (notExpired) manuallyAllowed = true
+    }
+
+    const eligible = isPaid || manuallyAllowed
+    let eligibilityReason: string | null = null
+    if (!eligible) eligibilityReason = 'compra_nao_paga'
+
+    return {
+      compra_id: row.id,
+      clientName,
+      celebName,
+      label: `${clientName} - ${celebName}`,
+      eligible,
+      eligibility_reason: eligibilityReason,
+      checkout_status: row.checkout_status,
+      clicksign_status: row.clicksign_status,
+      vendaaprovada: row.vendaaprovada,
+      onboarding_access_status: access?.status ?? null,
+    }
+  })
+}
+
 async function resolveEligibleOnboardingPurchases(
   supabase: ReturnType<typeof createClient>
 ): Promise<
@@ -132,54 +210,15 @@ async function resolveEligibleOnboardingPurchases(
     label: string
   }>
 > {
-  const { data: comprasRows, error: comprasError } = await supabase
-    .from('compras')
-    .select('id, cliente_id, celebridade, checkout_status, clicksign_status, vendaaprovada, created_at')
-    .eq('clicksign_status', 'Assinado')
-    .eq('checkout_status', 'pago')
-    .order('created_at', { ascending: false })
-    .limit(200)
-
-  if (comprasError || !comprasRows || comprasRows.length === 0) return []
-
-  const compraIds = comprasRows.map((row) => row.id)
-  const { data: jobRows, error: jobsError } = await supabase
-    .from('ai_campaign_jobs')
-    .select('compra_id')
-    .in('compra_id', compraIds)
-
-  if (jobsError) return []
-
-  const processedCompraIds = new Set(
-    (jobRows || [])
-      .map((row) => row.compra_id)
-      .filter((compraId): compraId is string => Boolean(compraId))
-  )
-  const pendingRows = comprasRows.filter((row) => !processedCompraIds.has(row.id))
-  if (pendingRows.length === 0) return []
-
-  const pendingIds = pendingRows.map((row) => row.id)
-  const { compraMap, clientNameMap, celebrityNameMap } = await resolveNamesByCompraIds(
-    supabase,
-    pendingIds
-  )
-
-  return pendingRows.map((row) => {
-    const compraInfo = compraMap[row.id] || { cliente_id: null, celebridade: null }
-    const clientName = compraInfo.cliente_id
-      ? (clientNameMap[compraInfo.cliente_id] || 'Cliente')
-      : 'Cliente'
-    const celebName = compraInfo.celebridade
-      ? (celebrityNameMap[compraInfo.celebridade] || 'Celebridade contratada')
-      : 'Celebridade contratada'
-
-    return {
-      compra_id: row.id,
+  const all = await resolveAvailablePurchases(supabase)
+  return all
+    .filter((p) => p.eligible)
+    .map(({ compra_id, clientName, celebName, label }) => ({
+      compra_id,
       clientName,
       celebName,
-      label: `${clientName} - ${celebName}`,
-    }
-  })
+      label,
+    }))
 }
 
 async function resolvePerplexityBriefingCompraIds(
@@ -373,12 +412,20 @@ Deno.serve(async (req) => {
     const compraIds = Array.from(
       new Set((listedJobs || []).map((job) => String(job.compra_id)))
     ) as string[]
-    const [{ compraMap, clientNameMap, celebrityNameMap }, briefingCompraIds, eligiblePurchases] =
+    const [{ compraMap, clientNameMap, celebrityNameMap }, briefingCompraIds, availablePurchases] =
       await Promise.all([
         resolveNamesByCompraIds(supabase, compraIds),
         resolvePerplexityBriefingCompraIds(supabase, compraIds),
-        resolveEligibleOnboardingPurchases(supabase),
+        resolveAvailablePurchases(supabase),
       ])
+    const eligiblePurchases = availablePurchases
+      .filter((p) => p.eligible)
+      .map(({ compra_id, clientName, celebName, label }) => ({
+        compra_id,
+        clientName,
+        celebName,
+        label,
+      }))
 
     const items = (listedJobs || []).map((job) => {
       const totalExpected = Number(job.total_expected || 12)
@@ -456,6 +503,7 @@ Deno.serve(async (req) => {
       summary,
       items,
       eligible_purchases: eligiblePurchases,
+      available_purchases: availablePurchases,
     })
   }
 
