@@ -26,10 +26,14 @@ Quando `save-onboarding-identity` conclui com sucesso e **`site_url` ou `instagr
 
 ## 6. Elegibilidade bloqueia onboarding
 
-O formulario nao carrega se a compra nao for elegivel. A regra e:
+O formulario nao carrega se a compra nao for elegivel. A regra base e:
 `(checkout_status === 'pago' || vendaaprovada === true) && clicksign_status === 'Assinado'`
 
-O pipeline `onboarding-enrichment` exige ainda `checkout_status = 'pago'` e `clicksign_status = 'Assinado'` (ver functionSpec).
+Adicionalmente, existe a tabela `onboarding_access` que permite override manual. Se `onboarding_access.status = 'allowed'` (e nao expirado via `allowed_until`), a compra e considerada elegivel mesmo sem `checkout_status = 'pago'`.
+
+O pipeline `onboarding-enrichment` e `create-ai-campaign-job` usam `checkAiCampaignEligibility` que aceita: `clicksign_status = 'Assinado'` + (`checkout_status = 'pago'` OR `onboarding_access.status = 'allowed'`).
+
+Toda liberacao manual e rastreada em `onboarding_access_events` (append-only audit trail) com motivo, responsavel e timestamp.
 
 ## 7. Storage: bucket privado, paths por compra_id
 

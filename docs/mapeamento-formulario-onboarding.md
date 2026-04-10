@@ -601,7 +601,11 @@ enrichment_config (singleton, 1 row) — prompts/timeouts do pipeline enrichment
 | `vendaaprovada` | boolean | Elegibilidade | `true` = elegível (ou `checkout_status === 'pago'`) |
 | `valor_total` | numeric | → atendente lookup | Usado para buscar atendente por faixa de valor |
 
-**Regra de elegibilidade:** `(checkout_status === 'pago' || vendaaprovada === true) && clicksign_status === 'Assinado'`
+**Regra de elegibilidade (formulario):** `(checkout_status === 'pago' || vendaaprovada === true || onboarding_access.status === 'allowed') && clicksign_status === 'Assinado'`
+
+**Regra de elegibilidade (pipeline AI):** `clicksign_status === 'Assinado' && (checkout_status === 'pago' || onboarding_access.status === 'allowed')`
+
+Tabelas de rastreabilidade: `onboarding_access` (estado atual) + `onboarding_access_events` (historico imutavel)
 
 **Lookup do atendente:**
 

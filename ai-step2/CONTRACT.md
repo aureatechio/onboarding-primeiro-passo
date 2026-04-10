@@ -5,11 +5,14 @@
 Fluxo de geracao so e habilitado quando:
 
 ```
-compras.checkout_status = 'pago'
-AND compras.clicksign_status = 'Assinado'
+compras.clicksign_status = 'Assinado'
+AND (
+  compras.checkout_status = 'pago'
+  OR onboarding_access.status = 'allowed' (nao expirado)
+)
 ```
 
-Observacao: `vendaaprovada = true` isoladamente nao qualifica compra como elegivel para criacao de job.
+Observacao: `vendaaprovada = true` isoladamente nao qualifica compra como elegivel para criacao de job. Porem, um admin pode liberar manualmente via `set-onboarding-access` (action=allow), que registra override rastreavel em `onboarding_access` + `onboarding_access_events`.
 
 Resposta de bloqueio padrao:
 
@@ -217,7 +220,8 @@ Tabela `onboarding_enrichment_jobs` (1 row por `compra_id`, UNIQUE): status glob
   - cada item inclui diagnostico operacional: `failed_assets_count`, `stuck_assets_count`, `last_error_type`, `last_error_at`, `has_inconsistency`, `inconsistency_flags[]`
   - `pagination` com `page`, `limit`, `total`, `total_pages`
   - `summary` com totais por status (`pending`, `processing`, `completed`, `partial`, `failed`) e `total`
-  - `eligible_purchases[]` com pendencias aptas ao disparo manual no monitor, restritas a `checkout_status = 'pago'` e `clicksign_status = 'Assinado'` (sem job existente)
+  - `eligible_purchases[]` (retrocompativel) com pendencias aptas ao disparo, filtradas por elegibilidade
+  - `available_purchases[]` com todas as vendas com contrato assinado (pagas e nao pagas), incluindo: `compra_id`, `label`, `eligible`, `eligibility_reason`, `checkout_status`, `clicksign_status`, `vendaaprovada`, `onboarding_access_status`
 - Payload de detalhe:
   - `mode: "detail"` (implícito por estrutura atual)
   - `job` + `progress` (status/contadores)
@@ -231,6 +235,15 @@ Tabela `onboarding_enrichment_jobs` (1 row por `compra_id`, UNIQUE): status glob
   - `onboarding.compra`, `onboarding.identity`, `onboarding.briefing`
   - signed URLs de uploads (`logo`, `imagens`, `audio`) e assets gerados
 - Mantem rate-limit in-memory por IP (mesmo baseline do endpoint de status).
+
+### `set-onboarding-access` (POST)
+
+- Classificacao JWT: **publica** (`--no-verify-jwt`) com guard admin (`x-admin-password`).
+- Objetivo: liberar, bloquear ou revogar acesso ao onboarding para uma compra.
+- Body: `compra_id`, `action` (`allow|revoke|block`), `reason_code` (`negotiated_payment_terms|manual_exception|revoked_by_admin|other`), `notes` (opcional), `allowed_until` (opcional), `actor_id` (opcional).
+- Faz UPSERT em `onboarding_access` e trigger grava evento em `onboarding_access_events`.
+- Retorna `{ success, access, message }`.
+- Ver `functionSpec.md` completo em `supabase/functions/set-onboarding-access/functionSpec.md`.
 
 ### `retry-ai-campaign-assets` (POST)
 
@@ -321,6 +334,37 @@ CREATE TABLE ai_campaign_errors (
 );
 ```
 
+### Controle de acesso ao onboarding
+
+```sql
+CREATE TABLE onboarding_access (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  compra_id uuid NOT NULL UNIQUE REFERENCES compras(id) ON DELETE CASCADE,
+  status text NOT NULL DEFAULT 'blocked'
+    CHECK (status IN ('blocked', 'allowed', 'revoked')),
+  reason_code text NOT NULL DEFAULT 'auto',
+  notes text,
+  allowed_until timestamptz,
+  updated_by text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE onboarding_access_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  compra_id uuid NOT NULL REFERENCES compras(id) ON DELETE CASCADE,
+  from_status text,
+  to_status text NOT NULL,
+  reason_code text NOT NULL,
+  notes text,
+  actor_id text,
+  actor_role text NOT NULL DEFAULT 'system',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+Trigger `trg_onboarding_access_audit` grava evento automaticamente em INSERT/UPDATE.
+
 ## 7. Idempotencia
 
 Chave: `compra_id` + `input_hash` (SHA-256 de inputs canonizados, incluindo `campaign_image_url`, `campaignNotes`, `briefing` e `insightsPecas` conforme `computeInputHashAsync` em `prompt-builder.ts`).
@@ -390,6 +434,7 @@ Consumidores: `create-ai-campaign-job`, `post-gen-generate`, `post-turbo-generat
 
 | Funcao | JWT deploy | Auth aplicada |
 |--------|-----------|---------------|
+| `set-onboarding-access` | `--no-verify-jwt` | `x-admin-password` via `_shared/admin-auth.ts` |
 | `get-nanobanana-config` | `--no-verify-jwt` | Nenhuma (leitura publica) |
 | `update-nanobanana-config` | `--no-verify-jwt` | `x-admin-password` via `_shared/admin-auth.ts` |
 | `read-nanobanana-reference` | `--no-verify-jwt` | `x-admin-password` via `_shared/admin-auth.ts` |
