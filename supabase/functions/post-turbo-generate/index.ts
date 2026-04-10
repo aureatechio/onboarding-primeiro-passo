@@ -12,6 +12,7 @@ import { generateImage } from '../_shared/ai-campaign/image-generator.ts'
 import {
   type NanoBananaDbConfig,
   loadNanoBananaConfig,
+  buildImageOverrides,
   VALID_CATEGORIES,
 } from '../_shared/nanobanana/config.ts'
 
@@ -272,18 +273,14 @@ Deno.serve(async (req) => {
         const logoSlot = logoSignedUrl || signedSource.signedUrl
         const campaignSlot = productSignedUrl
 
+        const overrides = buildImageOverrides(config)
         const result = await generateImage(
           fullPrompt,
           celebritySlot,
           logoSlot,
           campaignSlot,
           signedSource.signedUrl, // base image always as reference
-          {
-            modelName: config?.gemini_model_name,
-            baseUrl: config?.gemini_api_base_url,
-            maxRetries: config?.max_retries ?? 2,
-            maxImageDownloadBytes: config?.max_image_download_bytes,
-          },
+          overrides,
         )
 
         const durationMs = Date.now() - startMs

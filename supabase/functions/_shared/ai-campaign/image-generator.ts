@@ -10,12 +10,17 @@ export interface GenerateImageResult {
 const DEFAULT_MAX_RETRIES = 2
 const RETRY_DELAYS = [1000, 3000]
 
-interface GenerateImageOverrides {
+export interface GenerateImageOverrides {
   modelName?: string
   baseUrl?: string
   maxRetries?: number
   maxImageDownloadBytes?: number
   aspectRatio?: string
+  temperature?: number
+  topP?: number
+  topK?: number
+  safetySettings?: Array<{ category: string; threshold: string }>
+  systemInstruction?: string
 }
 
 export async function generateImage(
@@ -63,14 +68,19 @@ export async function generateImage(
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const result = await callGemini(
+      const result = await callGemini({
         apiKey,
         prompt,
         imageInputs,
-        overrides?.modelName,
-        overrides?.baseUrl,
-        overrides?.aspectRatio,
-      )
+        modelName: overrides?.modelName,
+        baseUrl: overrides?.baseUrl,
+        aspectRatio: overrides?.aspectRatio,
+        temperature: overrides?.temperature,
+        topP: overrides?.topP,
+        topK: overrides?.topK,
+        safetySettings: overrides?.safetySettings,
+        systemInstructionText: overrides?.systemInstruction,
+      })
       if (result.success) return result
       lastError = result.error || 'Gemini returned non-success'
 
@@ -175,17 +185,24 @@ async function prepareImageInputs(
   return inputs
 }
 
-async function callGemini(
-  apiKey: string,
-  prompt: string,
-  imageInputs: ImageInput[],
-  modelNameOverride?: string,
-  baseUrlOverride?: string,
-  aspectRatio?: string,
-): Promise<GenerateImageResult> {
+interface CallGeminiOptions {
+  apiKey: string
+  prompt: string
+  imageInputs: ImageInput[]
+  modelName?: string
+  baseUrl?: string
+  aspectRatio?: string
+  temperature?: number
+  topP?: number
+  topK?: number
+  safetySettings?: Array<{ category: string; threshold: string }>
+  systemInstructionText?: string
+}
+
+async function callGemini(opts: CallGeminiOptions): Promise<GenerateImageResult> {
   const parts: Record<string, unknown>[] = []
 
-  for (const img of imageInputs) {
+  for (const img of opts.imageInputs) {
     parts.push({
       inlineData: {
         mimeType: img.mimeType,
@@ -194,20 +211,43 @@ async function callGemini(
     })
   }
 
-  parts.push({ text: prompt })
+  parts.push({ text: opts.prompt })
 
-  const requestBody = {
-    contents: [{ parts }],
-    generationConfig: {
-      responseModalities: ['TEXT', 'IMAGE'],
-      ...(aspectRatio ? { imageConfig: { aspectRatio } } : {}),
-    },
+  const generationConfig: Record<string, unknown> = {
+    responseModalities: ['TEXT', 'IMAGE'],
+  }
+  if (opts.aspectRatio) {
+    generationConfig.imageConfig = { aspectRatio: opts.aspectRatio }
+  }
+  if (opts.temperature !== undefined) {
+    generationConfig.temperature = opts.temperature
+  }
+  if (opts.topP !== undefined) {
+    generationConfig.topP = opts.topP
+  }
+  if (opts.topK !== undefined) {
+    generationConfig.topK = opts.topK
   }
 
-  const modelName = modelNameOverride
+  const requestBody: Record<string, unknown> = {
+    contents: [{ parts }],
+    generationConfig,
+  }
+
+  if (opts.safetySettings) {
+    requestBody.safetySettings = opts.safetySettings
+  }
+
+  if (opts.systemInstructionText) {
+    requestBody.systemInstruction = {
+      parts: [{ text: opts.systemInstructionText }],
+    }
+  }
+
+  const modelName = opts.modelName
     || Deno.env.get('GEMINI_MODEL_NAME')
     || 'gemini-3-pro-image-preview'
-  const baseUrl = baseUrlOverride
+  const baseUrl = opts.baseUrl
     || Deno.env.get('GEMINI_API_BASE_URL')
     || 'https://generativelanguage.googleapis.com/v1beta'
   const endpoint = `${baseUrl}/models/${modelName}:generateContent`
@@ -216,7 +256,7 @@ async function callGemini(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
+      'x-goog-api-key': opts.apiKey,
     },
     body: JSON.stringify(requestBody),
   })

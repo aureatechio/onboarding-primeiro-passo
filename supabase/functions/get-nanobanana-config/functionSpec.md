@@ -51,6 +51,11 @@ Retorna a configuração singleton do NanoBanana (geração de criativos com Gem
 | `direction_*_mode` | `text` |
 | `direction_*_image_path` | `null` |
 | `format_*` | `""` |
+| `temperature` | `1.0` |
+| `top_p` | `0.95` |
+| `top_k` | `40` |
+| `safety_preset` | `default` |
+| `use_system_instruction` | `false` |
 
 ## Response (200)
 
@@ -83,6 +88,11 @@ Retorna a configuração singleton do NanoBanana (geração de criativos com Gem
     "format_4_5": "...",
     "format_16_9": "...",
     "format_9_16": "...",
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 40,
+    "safety_preset": "default",
+    "use_system_instruction": false,
     "updated_at": "2026-04-06T12:00:00.000Z"
   }
 }

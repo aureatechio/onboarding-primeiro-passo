@@ -51,6 +51,27 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 | `url_expiry_seconds` | 3600 | 2592000 |
 | `max_image_download_bytes` | 1048576 (1 MB) | 52428800 (50 MB) |
 
+#### Float
+| Campo | Min | Max |
+|-------|-----|-----|
+| `temperature` | 0.0 | 2.0 |
+| `top_p` | 0.0 | 1.0 |
+
+#### Inteiro (geração)
+| Campo | Min | Max |
+|-------|-----|-----|
+| `top_k` | 1 | 100 |
+
+#### Enum
+| Campo | Valores |
+|-------|---------|
+| `safety_preset` | `default` \| `relaxed` \| `permissive` \| `strict` |
+
+#### Boolean
+| Campo | Descrição |
+|-------|-----------|
+| `use_system_instruction` | Envia global_rules como systemInstruction separado na API Gemini |
+
 #### Imagens (apenas via multipart/form-data)
 | Campo | Descrição |
 |-------|-----------|
@@ -69,7 +90,8 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 3. Campo string vazio (quando enviado) → 400 `VALIDATION_ERROR`
 4. `gemini_api_base_url` sem `https://` → 400 `VALIDATION_ERROR`
 5. `direction_*_mode` fora de `text|image|both` → 400 `VALIDATION_ERROR`
-6. Numérico fora do range → 400 `VALIDATION_ERROR`
+6. Numérico ou float fora do range → 400 `VALIDATION_ERROR`
+6b. `safety_preset` fora de `default|relaxed|permissive|strict` → 400 `VALIDATION_ERROR`
 7. Imagem com mime inválido (não PNG/JPEG/WEBP) → 400 `VALIDATION_ERROR`
 8. Imagem acima do limite de bytes → 400 `VALIDATION_ERROR`
 9. **Regra crítica:** após aplicar updates, o texto de direção de cada categoria (`direction_moderna`, `direction_clean`, `direction_retail`) deve ser não-vazio (considerando valor existente + alteração). Se ficar vazio → 400 `VALIDATION_ERROR`
@@ -123,6 +145,11 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
     "format_4_5": "...",
     "format_16_9": "...",
     "format_9_16": "...",
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 40,
+    "safety_preset": "default",
+    "use_system_instruction": false,
     "updated_at": "2026-04-06T12:00:00.000Z"
   }
 }
@@ -135,7 +162,7 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 
 ## Shared Module
 
-- Importa `CategoryKey`, `DirectionMode`, `REFERENCE_BUCKET`, `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE` de `_shared/nanobanana/config.ts`
+- Importa `CategoryKey`, `DirectionMode`, `REFERENCE_BUCKET`, `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `VALID_SAFETY_PRESETS`, `CONFIG_TABLE` de `_shared/nanobanana/config.ts`
 
 ## Error Handling
 

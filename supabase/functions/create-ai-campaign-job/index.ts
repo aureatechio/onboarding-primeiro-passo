@@ -22,6 +22,7 @@ import {
   type NanoBananaDbConfig,
   type DirectionMode,
   loadNanoBananaConfig,
+  resolveSafetyPreset,
   REFERENCE_BUCKET,
 } from '../_shared/nanobanana/config.ts'
 
@@ -427,7 +428,7 @@ Deno.serve(async (req) => {
 
   // --- 6. Build prompt input and compute hash ---
   const promptInput: PromptInput = {
-    globalRules: effectiveGlobalRules,
+    globalRules: nbConfig?.use_system_instruction ? '' : effectiveGlobalRules,
     clientName,
     celebName,
     brandPalette: identity.brand_palette,
@@ -699,6 +700,13 @@ async function dispatchWorkers(
               gemini_api_base_url: nbConfig?.gemini_api_base_url,
               max_retries: nbConfig?.max_retries,
               max_image_download_bytes: nbConfig?.max_image_download_bytes,
+              temperature: nbConfig?.temperature,
+              top_p: nbConfig?.top_p,
+              top_k: nbConfig?.top_k,
+              safety_settings: nbConfig ? resolveSafetyPreset(nbConfig.safety_preset) : undefined,
+              system_instruction_text: nbConfig?.use_system_instruction
+                ? nbConfig.global_rules
+                : undefined,
             }),
           })
 

@@ -29,6 +29,11 @@ interface WorkerBody {
   max_image_download_bytes?: number
   aspect_ratio?: string
   prompt: string
+  temperature?: number
+  top_p?: number
+  top_k?: number
+  safety_settings?: Array<{ category: string; threshold: string }>
+  system_instruction_text?: string
 }
 
 Deno.serve(async (req) => {
@@ -65,6 +70,11 @@ Deno.serve(async (req) => {
     max_image_download_bytes,
     aspect_ratio,
     prompt,
+    temperature,
+    top_p,
+    top_k,
+    safety_settings,
+    system_instruction_text,
   } = body
 
   if (!job_id || !asset_id || !compra_id || !group_name || !format || !celebrity_png_url || !prompt) {
@@ -101,6 +111,11 @@ Deno.serve(async (req) => {
         maxRetries: max_retries,
         maxImageDownloadBytes: max_image_download_bytes,
         aspectRatio: aspect_ratio,
+        temperature,
+        topP: top_p,
+        topK: top_k,
+        safetySettings: safety_settings,
+        systemInstruction: system_instruction_text,
       },
     )
 

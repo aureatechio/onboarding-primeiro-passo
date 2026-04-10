@@ -12,6 +12,7 @@ import {
   REFERENCE_BUCKET,
   VALID_CATEGORIES,
   VALID_DIRECTION_MODES,
+  VALID_SAFETY_PRESETS,
   CONFIG_TABLE,
 } from "../_shared/nanobanana/config.ts";
 import { requireAdminPassword } from "../_shared/admin-auth.ts";
@@ -70,6 +71,12 @@ function validateInt(val: unknown, min: number, max: number): number | null {
   return n;
 }
 
+function validateFloat(val: unknown, min: number, max: number): number | null {
+  const n = Number(val);
+  if (Number.isNaN(n) || n < min || n > max) return null;
+  return n;
+}
+
 function directionTextField(category: CategoryKey): DirectionTextField {
   return `direction_${category}` as DirectionTextField;
 }
@@ -125,7 +132,7 @@ async function parsePayload(req: Request): Promise<ParsedPayload | Response> {
         continue;
       }
 
-      if (key.match(/^(max_retries|worker_batch_size|url_expiry_seconds|max_image_download_bytes)$/)) {
+      if (key.match(/^(max_retries|worker_batch_size|url_expiry_seconds|max_image_download_bytes|temperature|top_p|top_k)$/)) {
         updateData[key] = Number(rawValue);
         continue;
       }
@@ -299,6 +306,43 @@ Deno.serve(async (req: Request) => {
       updateData.max_image_download_bytes = val;
     }
 
+    // --- Float fields ---
+
+    if (body["temperature"] !== undefined) {
+      const val = validateFloat(body["temperature"], 0.0, 2.0);
+      if (val === null) return validationError("temperature deve ser número entre 0.0 e 2.0");
+      updateData.temperature = val;
+    }
+
+    if (body["top_p"] !== undefined) {
+      const val = validateFloat(body["top_p"], 0.0, 1.0);
+      if (val === null) return validationError("top_p deve ser número entre 0.0 e 1.0");
+      updateData.top_p = val;
+    }
+
+    if (body["top_k"] !== undefined) {
+      const val = validateInt(body["top_k"], 1, 100);
+      if (val === null) return validationError("top_k deve ser inteiro entre 1 e 100");
+      updateData.top_k = val;
+    }
+
+    // --- Enum field ---
+
+    if (body["safety_preset"] !== undefined) {
+      const val = String(body["safety_preset"]).trim();
+      if (!(VALID_SAFETY_PRESETS as readonly string[]).includes(val)) {
+        return validationError("safety_preset deve ser 'default', 'relaxed', 'permissive' ou 'strict'");
+      }
+      updateData.safety_preset = val;
+    }
+
+    // --- Boolean field ---
+
+    if (body["use_system_instruction"] !== undefined) {
+      const raw = body["use_system_instruction"];
+      updateData.use_system_instruction = raw === true || raw === "true";
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -426,6 +470,11 @@ Deno.serve(async (req: Request) => {
         format_4_5: updated?.format_4_5,
         format_16_9: updated?.format_16_9,
         format_9_16: updated?.format_9_16,
+        temperature: updated?.temperature ?? 1.0,
+        top_p: updated?.top_p ?? 0.95,
+        top_k: updated?.top_k ?? 40,
+        safety_preset: updated?.safety_preset ?? "default",
+        use_system_instruction: updated?.use_system_instruction ?? false,
         updated_at: updated?.updated_at,
       },
     });

@@ -12,10 +12,12 @@ import {
   Image as ImageIcon,
   Trash2,
   ScanText,
+  HelpCircle,
 } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
+import FieldInfoModal from './components/FieldInfoModal'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'megazord'
@@ -90,6 +92,178 @@ const DIRECTION_MODE_OPTIONS = [
   { value: 'image', label: 'Referencia Power' },
 ]
 
+const SAFETY_PRESET_OPTIONS = [
+  { value: 'default', label: 'Default (padrao Gemini)' },
+  { value: 'relaxed', label: 'Relaxado (bloqueia apenas alto risco)' },
+  { value: 'permissive', label: 'Permissivo (sem bloqueios)' },
+  { value: 'strict', label: 'Estrito (bloqueia medio e acima)' },
+]
+
+const TOOLTIPS = {
+  gemini_model_name: {
+    title: 'Model Name',
+    description:
+      'Identificador do modelo Gemini usado para gerar imagens. Determina a qualidade, velocidade e capacidades disponiveis.',
+    examples: [
+      'gemini-2.0-flash-exp — modelo rapido e experimental, ideal para testes',
+      'gemini-3-pro-image-preview — modelo mais recente com melhor qualidade de imagem',
+    ],
+  },
+  gemini_api_base_url: {
+    title: 'API Base URL',
+    description:
+      'URL base da API Gemini. Normalmente nao precisa ser alterada, a menos que use um proxy ou endpoint customizado.',
+    examples: [
+      'https://generativelanguage.googleapis.com — endpoint padrao da Google',
+      'https://generativelanguage.googleapis.com/v1beta — versao beta com recursos mais recentes',
+    ],
+  },
+  max_retries: {
+    title: 'Max Retries',
+    description:
+      'Numero maximo de tentativas quando a geracao de imagem falha. Cada tentativa tem um delay progressivo (1s, 3s).',
+    examples: [
+      '0 — sem retentativas, falha imediata (util para debug)',
+      '3 — tres tentativas com delays progressivos (recomendado para producao)',
+    ],
+  },
+  worker_batch_size: {
+    title: 'Worker Batch Size',
+    description:
+      'Quantas imagens sao geradas em paralelo por batch. Valores maiores sao mais rapidos mas consomem mais cota da API.',
+    examples: [
+      '2 — conservador, ideal para contas com baixa cota de API',
+      '8 — agressivo, ideal para grandes campanhas com alta cota',
+    ],
+  },
+  url_expiry_seconds: {
+    title: 'URL Expiry',
+    description:
+      'Tempo de vida (em segundos) das URLs assinadas geradas para os workers de geracao. Nao afeta a preview no frontend (que usa 30min fixo).',
+    examples: [
+      '86400 — 24 horas (padrao, suficiente para a maioria dos jobs)',
+      '604800 — 7 dias (para campanhas que demoram para processar)',
+    ],
+  },
+  max_image_download_bytes: {
+    title: 'Max Image Download',
+    description:
+      'Tamanho maximo (em bytes) de cada imagem de entrada (celebridade, logo, campanha). Imagens acima desse limite sao ignoradas.',
+    examples: [
+      '10485760 — 10 MB (padrao, cobre a maioria dos casos)',
+      '31457280 — 30 MB (para imagens de altissima resolucao)',
+    ],
+  },
+  temperature: {
+    title: 'Temperature',
+    description:
+      'Controla a aleatoriedade da geracao. Valores baixos produzem resultados mais consistentes e previsiveis; valores altos geram mais variedade e criatividade.',
+    examples: [
+      '0.5 — mais previsivel e consistente (bom para identidade visual rigida)',
+      '1.5 — mais criativo e variado (bom para explorar ideias diferentes)',
+    ],
+  },
+  top_p: {
+    title: 'Top P (Nucleus Sampling)',
+    description:
+      'Limiar de amostragem por probabilidade acumulada. O modelo considera apenas tokens cuja probabilidade somada atinge esse valor. Complementa a temperature.',
+    examples: [
+      '0.8 — mais focado, menos variedade nas saidas',
+      '0.95 — equilibrio padrao entre qualidade e diversidade',
+    ],
+  },
+  top_k: {
+    title: 'Top K',
+    description:
+      'Numero maximo de tokens candidatos considerados a cada passo da geracao. Limita o pool de opcoes do modelo.',
+    examples: [
+      '10 — muito restrito, resultados mais previsiveis e seguros',
+      '40 — padrao equilibrado entre diversidade e coerencia',
+    ],
+  },
+  safety_preset: {
+    title: 'Safety Settings',
+    description:
+      'Nivel de filtragem de conteudo da API Gemini. Define o quao agressivamente a API bloqueia conteudo potencialmente sensivel nas imagens geradas.',
+    examples: [
+      'Permissivo — sem bloqueios, ideal para criativos publicitarios que podem ter conteudo ousado',
+      'Estrito — bloqueia medio e acima, ideal para marcas conservadoras ou conteudo infantil',
+    ],
+  },
+  use_system_instruction: {
+    title: 'System Instruction',
+    description:
+      'Quando ativado, o texto das Global Rules e enviado como "systemInstruction" separado na API Gemini, ao inves de embutido no corpo do prompt. O modelo trata system instructions com maior prioridade, o que pode melhorar a aderencia as regras.',
+    examples: [
+      'Desativado — Global Rules aparecem no inicio do prompt (comportamento atual)',
+      'Ativado — Global Rules vao como systemInstruction, separando regras do conteudo criativo',
+    ],
+  },
+  global_rules: {
+    title: 'Global Rules',
+    description:
+      'Regras mestras de direcao artistica aplicadas a TODAS as geracoes. Define o papel do modelo, restricoes obrigatorias (Sacred Face), tipografia, paleta e portoes de qualidade.',
+    examples: [
+      'Regra Sacred Face — protege a imagem da celebridade contra alteracoes',
+      'Regra Monochromatic Color — forca uso exclusivo da paleta da marca',
+    ],
+  },
+  global_rules_version: {
+    title: 'Global Rules Version',
+    description:
+      'Versionamento semantico das Global Rules. Usado para invalidar hashes de cache quando as regras mudam, forcando re-geracao dos criativos.',
+    examples: [
+      'v1.0.0 — versao inicial das regras',
+      'v1.1.1 — apos ajuste na regra Sacred Face (collage technique)',
+    ],
+  },
+  direction_mode: {
+    title: 'Modo de Uso da IA',
+    description:
+      'Define como o modelo utiliza o prompt textual e a imagem de referencia ao gerar os criativos para esta direcao criativa.',
+    examples: [
+      'Apenas texto — modelo usa somente o prompt escrito como guia de estilo',
+      'Prompt + Imagem — combina o prompt com uma imagem de referencia para guiar o estilo visual',
+    ],
+  },
+  direction_text: {
+    title: 'Prompt de Direcao Criativa',
+    description:
+      'Instrucoes especificas de estilo visual para esta categoria. Define background, posicionamento da celebridade, tipografia e mood reference.',
+    examples: [
+      'MODERNA: Background escuro, layout assimetrico, tipografia ultra-bold, vibe cinematic',
+      'CLEAN: Background branco, editorial split 40/60, tipografia light com whitespace generoso',
+    ],
+  },
+  direction_image: {
+    title: 'Imagem de Referencia',
+    description:
+      'Imagem enviada junto com o prompt para guiar o estilo visual da geracao. O modelo imita a tecnica visual (vetor, 3D, colagem) mas usa a paleta da marca.',
+    examples: [
+      'Upload de poster Nike como referencia para direcao Moderna (fundo escuro, tipografia bold)',
+      'Upload de anuncio Apple como referencia para direcao Clean (minimalismo, whitespace)',
+    ],
+  },
+  format_instruction: {
+    title: 'Instrucao de Formato',
+    description:
+      'Instrucoes especificas para o aspect ratio deste formato. Define layout, composicao e posicionamento de elementos para as dimensoes exatas.',
+    examples: [
+      '1:1 (1080x1080) — composicao centralizada, ideal para feed do Instagram',
+      '9:16 (1080x1920) — vertical full, celebridade no topo, CTA no terco inferior',
+    ],
+  },
+  prompt_version: {
+    title: 'Prompt Version',
+    description:
+      'Versao do template de prompt. Mudancas invalidam hashes de cache e forcam re-geracao. Atualize ao alterar a estrutura do prompt.',
+    examples: [
+      'v1.0.0 — template inicial sem briefing AI',
+      'v1.2.0 — template com suporte a briefing AI e insights por peca',
+    ],
+  },
+}
+
 const uploadCardStyle = {
   border: `1px dashed ${monitorTheme.borderStrong}`,
   borderRadius: monitorRadius.md,
@@ -162,12 +336,43 @@ const TABS = [
   { id: 'formats', label: 'Formatos & Versao', icon: Ratio },
 ]
 
-function Field({ label, hint, children }) {
+function Field({ label, hint, children, tooltip }) {
+  const [infoOpen, setInfoOpen] = useState(false)
   return (
     <div style={{ marginBottom: 16 }}>
-      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label style={labelStyle}>{label}</label>
+        {tooltip && (
+          <button
+            type="button"
+            onClick={() => setInfoOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              color: monitorTheme.textMuted,
+              display: 'inline-flex',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+            aria-label={`Informacoes sobre ${label}`}
+          >
+            <HelpCircle size={14} />
+          </button>
+        )}
+      </div>
       {hint && <p style={hintStyle}>{hint}</p>}
       {children}
+      {tooltip && (
+        <FieldInfoModal
+          open={infoOpen}
+          onClose={() => setInfoOpen(false)}
+          title={tooltip.title || label}
+          description={tooltip.description}
+          examples={tooltip.examples}
+        />
+      )}
     </div>
   )
 }
@@ -489,32 +694,64 @@ export default function NanoBananaConfigPage() {
       {activeTab === 'provider' && (
         <div style={cardStyle}>
           <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Provider (Gemini)</h3>
-          <Field label="Model Name">
+          <Field label="Model Name" tooltip={TOOLTIPS.gemini_model_name}>
             <input style={inputStyle} value={form.gemini_model_name} onChange={(e) => updateField('gemini_model_name', e.target.value)} />
           </Field>
-          <Field label="API Base URL">
+          <Field label="API Base URL" tooltip={TOOLTIPS.gemini_api_base_url}>
             <input style={inputStyle} value={form.gemini_api_base_url} onChange={(e) => updateField('gemini_api_base_url', e.target.value)} />
           </Field>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
-            <Field label="Max Retries" hint="0 a 10">
+            <Field label="Max Retries" hint="0 a 10" tooltip={TOOLTIPS.max_retries}>
               <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_retries} onChange={(e) => updateField('max_retries', Number(e.target.value))} min={0} max={10} />
             </Field>
-            <Field label="Worker Batch Size" hint="1 a 12">
+            <Field label="Worker Batch Size" hint="1 a 12" tooltip={TOOLTIPS.worker_batch_size}>
               <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.worker_batch_size} onChange={(e) => updateField('worker_batch_size', Number(e.target.value))} min={1} max={12} />
             </Field>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
-            <Field label="URL Expiry" hint="3600 a 2592000">
+            <Field label="URL Expiry" hint="3600 a 2592000" tooltip={TOOLTIPS.url_expiry_seconds}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.url_expiry_seconds} onChange={(e) => updateField('url_expiry_seconds', Number(e.target.value))} min={3600} max={2592000} step={3600} />
                 <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>s</span>
               </div>
             </Field>
-            <Field label="Max Image Download" hint="1048576 a 52428800">
+            <Field label="Max Image Download" hint="1048576 a 52428800" tooltip={TOOLTIPS.max_image_download_bytes}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.max_image_download_bytes} onChange={(e) => updateField('max_image_download_bytes', Number(e.target.value))} min={1048576} max={52428800} step={1048576} />
                 <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>bytes</span>
               </div>
+            </Field>
+          </div>
+
+          <h4 style={{ ...TYPE.bodySmall, fontWeight: 700, marginTop: 20, marginBottom: 12, borderTop: `1px solid ${monitorTheme.border}`, paddingTop: 16 }}>
+            Parametros de Geracao (Gemini API)
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-5">
+            <Field label="Temperature" hint="0.0 a 2.0" tooltip={TOOLTIPS.temperature}>
+              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.temperature ?? 1.0} onChange={(e) => updateField('temperature', parseFloat(e.target.value))} min={0} max={2} step={0.1} />
+            </Field>
+            <Field label="Top P" hint="0.0 a 1.0" tooltip={TOOLTIPS.top_p}>
+              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.top_p ?? 0.95} onChange={(e) => updateField('top_p', parseFloat(e.target.value))} min={0} max={1} step={0.05} />
+            </Field>
+            <Field label="Top K" hint="1 a 100" tooltip={TOOLTIPS.top_k}>
+              <input type="number" style={{ ...numberInputStyle, width: '100%' }} value={form.top_k ?? 40} onChange={(e) => updateField('top_k', parseInt(e.target.value, 10))} min={1} max={100} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5">
+            <Field label="Safety Settings" tooltip={TOOLTIPS.safety_preset}>
+              <select style={selectStyle} value={form.safety_preset || 'default'} onChange={(e) => updateField('safety_preset', e.target.value)}>
+                {SAFETY_PRESET_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="System Instruction" tooltip={TOOLTIPS.use_system_instruction}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 4 }}>
+                <input type="checkbox" checked={form.use_system_instruction || false} onChange={(e) => updateField('use_system_instruction', e.target.checked)} />
+                <span style={{ ...TYPE.bodySmall, color: monitorTheme.textSecondary }}>
+                  Enviar Global Rules como systemInstruction
+                </span>
+              </label>
             </Field>
           </div>
         </div>
@@ -523,12 +760,12 @@ export default function NanoBananaConfigPage() {
       {activeTab === 'rules' && (
         <div style={cardStyle}>
           <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 12 }}>Global Rules (Prompt Mestre)</h3>
-          <textarea style={textareaStyle} rows={20} value={form.global_rules} onChange={(e) => updateField('global_rules', e.target.value)} />
-          <div style={{ marginTop: 12 }}>
-            <Field label="Global Rules Version">
-              <input style={{ ...inputStyle, maxWidth: 300 }} value={form.global_rules_version} onChange={(e) => updateField('global_rules_version', e.target.value)} />
-            </Field>
-          </div>
+          <Field label="Global Rules" tooltip={TOOLTIPS.global_rules}>
+            <textarea style={textareaStyle} rows={20} value={form.global_rules} onChange={(e) => updateField('global_rules', e.target.value)} />
+          </Field>
+          <Field label="Global Rules Version" tooltip={TOOLTIPS.global_rules_version}>
+            <input style={{ ...inputStyle, maxWidth: 300 }} value={form.global_rules_version} onChange={(e) => updateField('global_rules_version', e.target.value)} />
+          </Field>
         </div>
       )}
 
@@ -547,6 +784,7 @@ export default function NanoBananaConfigPage() {
                 <Field
                   label="Modo de uso da IA"
                   hint="Define como o modelo usa o prompt e a imagem de referência ao gerar os criativos."
+                  tooltip={TOOLTIPS.direction_mode}
                 >
                   <select
                     style={selectStyle}
@@ -558,7 +796,7 @@ export default function NanoBananaConfigPage() {
                     ))}
                   </select>
                 </Field>
-                <Field label="Prompt de direção criativa">
+                <Field label="Prompt de direção criativa" tooltip={TOOLTIPS.direction_text}>
                   <textarea
                     style={textareaStyle}
                     rows={8}
@@ -567,7 +805,7 @@ export default function NanoBananaConfigPage() {
                   />
                 </Field>
                 {showImageUpload && (
-                  <Field label="Imagem de referência (PNG/JPG/WEBP)">
+                  <Field label="Imagem de referência (PNG/JPG/WEBP)" tooltip={TOOLTIPS.direction_image}>
                     <ReferenceImageUpload
                       id={`onboarding-ref-${key}`}
                       selectedFile={referenceFiles[key]}
@@ -590,16 +828,16 @@ export default function NanoBananaConfigPage() {
           <div style={cardStyle}>
             <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Formatos de Saida</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-5">
-              <Field label="1:1 (1080x1080)">
+              <Field label="1:1 (1080x1080)" tooltip={TOOLTIPS.format_instruction}>
                 <textarea style={textareaStyle} rows={3} value={form.format_1_1} onChange={(e) => updateField('format_1_1', e.target.value)} />
               </Field>
-              <Field label="4:5 (1080x1350)">
+              <Field label="4:5 (1080x1350)" tooltip={TOOLTIPS.format_instruction}>
                 <textarea style={textareaStyle} rows={3} value={form.format_4_5} onChange={(e) => updateField('format_4_5', e.target.value)} />
               </Field>
-              <Field label="16:9 (1920x1080)">
+              <Field label="16:9 (1920x1080)" tooltip={TOOLTIPS.format_instruction}>
                 <textarea style={textareaStyle} rows={3} value={form.format_16_9} onChange={(e) => updateField('format_16_9', e.target.value)} />
               </Field>
-              <Field label="9:16 (1080x1920)">
+              <Field label="9:16 (1080x1920)" tooltip={TOOLTIPS.format_instruction}>
                 <textarea style={textareaStyle} rows={3} value={form.format_9_16} onChange={(e) => updateField('format_9_16', e.target.value)} />
               </Field>
             </div>
@@ -607,7 +845,7 @@ export default function NanoBananaConfigPage() {
 
           <div style={cardStyle}>
             <h3 style={{ ...TYPE.bodySmall, fontWeight: 700, marginBottom: 16 }}>Versionamento</h3>
-            <Field label="Prompt Version">
+            <Field label="Prompt Version" tooltip={TOOLTIPS.prompt_version}>
               <input style={{ ...inputStyle, maxWidth: 400 }} value={form.prompt_version} onChange={(e) => updateField('prompt_version', e.target.value)} />
             </Field>
           </div>

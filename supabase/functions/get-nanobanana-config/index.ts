@@ -105,6 +105,11 @@ Deno.serve(async (req: Request) => {
         format_4_5: data?.format_4_5 ?? "",
         format_16_9: data?.format_16_9 ?? "",
         format_9_16: data?.format_9_16 ?? "",
+        temperature: data?.temperature ?? 1.0,
+        top_p: data?.top_p ?? 0.95,
+        top_k: data?.top_k ?? 40,
+        safety_preset: data?.safety_preset ?? "default",
+        use_system_instruction: data?.use_system_instruction ?? false,
         updated_at: data?.updated_at ?? null,
       },
     });

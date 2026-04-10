@@ -14,6 +14,7 @@ import { generateImage } from '../_shared/ai-campaign/image-generator.ts'
 import {
   type NanoBananaDbConfig,
   loadNanoBananaConfig,
+  buildImageOverrides,
 } from '../_shared/nanobanana/config.ts'
 
 const URL_EXPIRY_SECONDS = 7 * 24 * 60 * 60
@@ -202,18 +203,14 @@ Deno.serve(async (req) => {
         // generateImage espera (prompt, celebrity, logo, campaign?, reference?)
         // Aqui: celebrity = placeholder vazio, logo = logo do cliente
         const placeholderUrl = logoSignedUrl || ''
+        const overrides = buildImageOverrides(config)
         const result = await generateImage(
           fullPrompt,
           placeholderUrl || 'https://placehold.co/1x1.png', // placeholder minimo se nao tiver logo
           logoSignedUrl || 'https://placehold.co/1x1.png',
           undefined,
           undefined,
-          {
-            modelName: config?.gemini_model_name,
-            baseUrl: config?.gemini_api_base_url,
-            maxRetries: config?.max_retries ?? 2,
-            maxImageDownloadBytes: config?.max_image_download_bytes,
-          },
+          overrides,
         )
 
         const durationMs = Date.now() - startMs
