@@ -31,6 +31,8 @@ export default function AiStep2Monitor() {
     listCelebrity,
     listCompra,
     eligiblePurchases,
+    availablePurchases,
+    releaseOnboarding,
     updateListFilters,
     openJobDetail,
     backToList,
@@ -204,7 +206,8 @@ export default function AiStep2Monitor() {
                 listStatus={listStatus}
                 listCelebrity={listCelebrity}
                 listCompra={listCompra}
-                eligiblePurchases={eligiblePurchases}
+                availablePurchases={availablePurchases}
+                releaseOnboarding={releaseOnboarding}
                 openJobDetail={openJobDetail}
                 updateListFilters={updateListFilters}
               />

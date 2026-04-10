@@ -407,6 +407,43 @@ export function useAiCampaignMonitor() {
     listCelebrity,
     listCompra,
     eligiblePurchases: data?.eligible_purchases || [],
+    availablePurchases: data?.available_purchases || [],
+    releaseOnboarding: async (compraId, reasonCode, notes) => {
+      if (!baseUrl) {
+        setActionError('VITE_SUPABASE_URL nao configurada.')
+        return { ok: false }
+      }
+      try {
+        setActionError('')
+        setActionSuccess('')
+        const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'megazord'
+        const response = await fetch(`${baseUrl}/functions/v1/set-onboarding-access`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-password': adminPassword,
+          },
+          body: JSON.stringify({
+            compra_id: compraId,
+            action: 'allow',
+            reason_code: reasonCode || 'manual_exception',
+            notes: notes || '',
+            actor_id: 'monitor-admin',
+          }),
+        })
+        const result = await response.json()
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.message || 'Falha ao liberar onboarding.')
+        }
+        setActionSuccess(result?.message || 'Onboarding liberado com sucesso.')
+        await fetchData({ silent: true, force: true })
+        return { ok: true, result }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erro inesperado ao liberar.'
+        setActionError(message)
+        return { ok: false, message }
+      }
+    },
     updateListFilters,
     openJobDetail,
     backToList,

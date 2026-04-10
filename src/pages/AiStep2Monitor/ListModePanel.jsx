@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { STATUS_OPTIONS } from './constants'
 import StatusBadge from './components/StatusBadge'
@@ -12,18 +13,46 @@ export default function ListModePanel({
   listStatus,
   listCelebrity,
   listCompra,
-  eligiblePurchases,
+  availablePurchases,
+  releaseOnboarding,
   openJobDetail,
   updateListFilters,
 }) {
+  const [releasing, setReleasing] = useState(false)
+  const [showReleaseConfirm, setShowReleaseConfirm] = useState(false)
+  const [releaseNotes, setReleaseNotes] = useState('')
+  const [releaseReason, setReleaseReason] = useState('negotiated_payment_terms')
+
   const celebrityOptions = uniqueNonEmpty(listItems.map((item) => item.celebrity_name))
-  const compraOptions = eligiblePurchases.map((purchase) => ({
+  const compraOptions = (availablePurchases || []).map((purchase) => ({
     value: purchase.compra_id,
-    label: purchase.label,
+    label: purchase.eligible
+      ? `✅ ${purchase.label}`
+      : `🔒 ${purchase.label}`,
+    eligible: purchase.eligible,
+    eligibilityReason: purchase.eligibility_reason,
+    onboardingAccessStatus: purchase.onboarding_access_status,
   }))
+
+  const selectedPurchase = (availablePurchases || []).find(
+    (p) => p.compra_id === listCompra,
+  )
+  const isSelectedEligible = selectedPurchase?.eligible ?? false
+  const isSelectedBlocked = listCompra && !isSelectedEligible
+  const canOpenForm = listCompra && isSelectedEligible
+
   const filteredItems = listCelebrity
     ? listItems.filter((item) => item.celebrity_name === listCelebrity)
     : listItems
+
+  async function handleRelease() {
+    if (!listCompra || releasing) return
+    setReleasing(true)
+    await releaseOnboarding(listCompra, releaseReason, releaseNotes)
+    setReleasing(false)
+    setShowReleaseConfirm(false)
+    setReleaseNotes('')
+  }
 
   return (
     <>
@@ -68,14 +97,18 @@ export default function ListModePanel({
           gridTemplateColumns:
             'minmax(0,2fr) minmax(170px,auto) minmax(180px,1fr) minmax(200px,1fr) 120px',
           gap: designTokens.space[4],
+          alignItems: 'center',
         }}
       >
         <select
           value={listCompra}
-          onChange={(event) => updateListFilters({ compra: event.target.value, page: 1 })}
+          onChange={(event) => {
+            updateListFilters({ compra: event.target.value, page: 1 })
+            setShowReleaseConfirm(false)
+          }}
           style={selectStyles}
         >
-          <option value="">Compra elegivel (paga + contrato assinado)</option>
+          <option value="">Todas as vendas (contrato assinado)</option>
           {compraOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -105,29 +138,152 @@ export default function ListModePanel({
             </option>
           ))}
         </select>
+        {isSelectedBlocked ? (
+          <button
+            type="button"
+            onClick={() => setShowReleaseConfirm(true)}
+            disabled={releasing}
+            style={{
+              ...releaseButtonStyles,
+              opacity: releasing ? 0.65 : 1,
+              cursor: releasing ? 'wait' : 'pointer',
+            }}
+          >
+            {releasing ? 'Liberando...' : 'Liberar Onboarding'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              if (!canOpenForm) return
+              window.open(buildOnboardingFormUrl(listCompra), '_blank', 'noopener,noreferrer')
+            }}
+            disabled={!canOpenForm}
+            style={{
+              ...highlightActionButtonStyles,
+              opacity: canOpenForm ? 1 : 0.65,
+              cursor: canOpenForm ? 'pointer' : 'not-allowed',
+            }}
+          >
+            Abrir formulario
+          </button>
+        )}
         <button
           type="button"
           onClick={() => {
-            if (!listCompra) return
-            window.open(buildOnboardingFormUrl(listCompra), '_blank', 'noopener,noreferrer')
+            updateListFilters({ compra: '', status: '', celebrity: '', page: 1 })
+            setShowReleaseConfirm(false)
           }}
-          disabled={!listCompra}
-          style={{
-            ...highlightActionButtonStyles,
-            opacity: listCompra ? 1 : 0.65,
-            cursor: listCompra ? 'pointer' : 'not-allowed',
-          }}
-        >
-          Abrir formulario
-        </button>
-        <button
-          type="button"
-          onClick={() => updateListFilters({ compra: '', status: '', celebrity: '', page: 1 })}
           style={actionButtonStyles}
         >
           Limpar
         </button>
       </div>
+
+      {selectedPurchase && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: designTokens.space[5],
+            padding: '8px 14px',
+            borderRadius: monitorRadius.md,
+            background: isSelectedEligible ? monitorTheme.completedBg : monitorTheme.pendingBg,
+            border: `1px solid ${isSelectedEligible ? monitorTheme.completedText : monitorTheme.pendingText}30`,
+          }}
+        >
+          <span style={{
+            ...TYPE.bodySmall,
+            fontWeight: 700,
+            color: isSelectedEligible ? monitorTheme.completedText : monitorTheme.pendingText,
+          }}>
+            {isSelectedEligible ? 'Elegivel' : 'Bloqueada'}
+          </span>
+          {!isSelectedEligible && selectedPurchase.eligibility_reason && (
+            <span style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>
+              — {eligibilityReasonLabel(selectedPurchase.eligibility_reason)}
+            </span>
+          )}
+          {selectedPurchase.onboarding_access_status === 'allowed' && (
+            <span style={{
+              ...eligibilityBadgeStyle,
+              background: monitorTheme.completedBg,
+              color: monitorTheme.completedText,
+            }}>
+              Liberado manualmente
+            </span>
+          )}
+          <span style={{ ...TYPE.caption, color: monitorTheme.textMuted, marginLeft: 'auto' }}>
+            checkout: {selectedPurchase.checkout_status || '?'} | contrato: {selectedPurchase.clicksign_status || '?'}
+          </span>
+        </div>
+      )}
+
+      {showReleaseConfirm && isSelectedBlocked && (
+        <div
+          style={{
+            border: `1px solid ${monitorTheme.borderStrong}`,
+            borderRadius: monitorRadius.xl,
+            padding: designTokens.space[6],
+            marginBottom: designTokens.space[6],
+            background: monitorTheme.cardMutedBg,
+          }}
+        >
+          <p style={{ ...TYPE.bodySmall, fontWeight: 700, color: monitorTheme.textPrimary, marginBottom: 10 }}>
+            Confirmar liberacao de onboarding
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <label style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'block', marginBottom: 4 }}>
+                Motivo
+              </label>
+              <select
+                value={releaseReason}
+                onChange={(e) => setReleaseReason(e.target.value)}
+                style={selectStyles}
+              >
+                <option value="negotiated_payment_terms">Pagamento negociado</option>
+                <option value="manual_exception">Excecao manual</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'block', marginBottom: 4 }}>
+                Observacao (opcional)
+              </label>
+              <input
+                type="text"
+                value={releaseNotes}
+                onChange={(e) => setReleaseNotes(e.target.value)}
+                placeholder="Ex: Aprovado pelo comercial em 10/04"
+                maxLength={500}
+                style={{ ...selectStyles, width: '100%', boxSizing: 'border-box' }}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              type="button"
+              onClick={handleRelease}
+              disabled={releasing}
+              style={{
+                ...releaseButtonStyles,
+                opacity: releasing ? 0.65 : 1,
+              }}
+            >
+              {releasing ? 'Liberando...' : 'Confirmar liberacao'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowReleaseConfirm(false)}
+              style={actionButtonStyles}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       <section style={{ border: `1px solid ${monitorTheme.border}`, borderRadius: monitorRadius.xl, overflow: 'hidden', width: '100%' }}>
         <div
@@ -265,6 +421,35 @@ const highlightActionButtonStyles = {
   borderRadius: monitorRadius.sm,
   padding: '8px 12px',
   fontWeight: 700,
+}
+
+const releaseButtonStyles = {
+  border: 'none',
+  background: '#f59e0b',
+  color: '#1a1a1a',
+  borderRadius: monitorRadius.sm,
+  padding: '8px 12px',
+  fontWeight: 700,
+  cursor: 'pointer',
+}
+
+const eligibilityBadgeStyle = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '2px 8px',
+  borderRadius: 999,
+  fontSize: 11,
+  fontWeight: 600,
+}
+
+function eligibilityReasonLabel(reason) {
+  const map = {
+    compra_nao_paga: 'Pagamento pendente',
+    contrato_nao_assinado: 'Contrato nao assinado',
+    db_error: 'Erro interno',
+    compra_not_found: 'Compra nao encontrada',
+  }
+  return map[reason] || reason
 }
 
 function buildOnboardingFormUrl(compraId) {
