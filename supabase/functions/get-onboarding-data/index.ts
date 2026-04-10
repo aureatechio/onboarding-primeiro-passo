@@ -132,7 +132,22 @@ export function createDependencies(): Dependencies {
       const hasApprovedPayment =
         compraRow.checkout_status === 'pago' || compraRow.vendaaprovada === true
       const hasSignedContract = compraRow.clicksign_status === 'Assinado'
-      const isEligible = hasApprovedPayment && hasSignedContract
+      let isEligible = hasApprovedPayment && hasSignedContract
+
+      if (!isEligible && hasSignedContract) {
+        const { data: accessRow } = await supabase
+          .from('onboarding_access')
+          .select('status, allowed_until')
+          .eq('compra_id', compraRow.id)
+          .eq('status', 'allowed')
+          .maybeSingle()
+
+        if (accessRow) {
+          const notExpired = !accessRow.allowed_until ||
+            new Date(accessRow.allowed_until).getTime() >= Date.now()
+          if (notExpired) isEligible = true
+        }
+      }
 
       if (!isEligible) {
         return { found: true, eligible: false, data: null }

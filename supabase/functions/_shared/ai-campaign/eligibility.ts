@@ -34,17 +34,41 @@ export async function checkAiCampaignEligibility(
     return { eligible: false, reason: 'compra_not_found', compra: null }
   }
 
-  const isPaid = compra.checkout_status === 'pago'
-
-  if (!isPaid) {
-    return { eligible: false, reason: 'compra_nao_paga', compra }
-  }
-
   const isSigned = compra.clicksign_status === 'Assinado'
-
   if (!isSigned) {
     return { eligible: false, reason: 'contrato_nao_assinado', compra }
   }
 
-  return { eligible: true, reason: null, compra }
+  const isPaid = compra.checkout_status === 'pago'
+  if (isPaid) {
+    return { eligible: true, reason: null, compra }
+  }
+
+  const manuallyAllowed = await hasOnboardingAccessOverride(supabase, compraId)
+  if (manuallyAllowed) {
+    return { eligible: true, reason: null, compra }
+  }
+
+  return { eligible: false, reason: 'compra_nao_paga', compra }
+}
+
+export async function hasOnboardingAccessOverride(
+  supabase: SupabaseClient,
+  compraId: string,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('onboarding_access')
+    .select('status, allowed_until')
+    .eq('compra_id', compraId)
+    .eq('status', 'allowed')
+    .maybeSingle()
+
+  if (error || !data) return false
+
+  if (data.allowed_until) {
+    const expiresAt = new Date(data.allowed_until)
+    if (expiresAt.getTime() < Date.now()) return false
+  }
+
+  return true
 }
