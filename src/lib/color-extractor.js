@@ -116,6 +116,26 @@ function samplePixels(imageData) {
   return pixels
 }
 
+function extractColorsFromCanvas(canvas, maxColors) {
+  const ctx = canvas.getContext('2d')
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const pixels = samplePixels(imageData)
+
+  if (pixels.length === 0) return []
+
+  const depth = Math.ceil(Math.log2(maxColors + 2))
+  const quantized = medianCut([...pixels], depth)
+  const unique = deduplicateColors(quantized)
+
+  const sorted = unique.sort((a, b) => {
+    const [, sA] = rgbToHsl(a[0], a[1], a[2])
+    const [, sB] = rgbToHsl(b[0], b[1], b[2])
+    return sB - sA
+  })
+
+  return sorted.slice(0, maxColors).map((c) => rgbToHex(c[0], c[1], c[2]))
+}
+
 export async function extractColorsFromImage(file, maxColors = 3) {
   if (!file) return []
   if (file.type === 'image/svg+xml') return []
@@ -131,24 +151,36 @@ export async function extractColorsFromImage(file, maxColors = 3) {
     const ctx = canvas.getContext('2d')
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const pixels = samplePixels(imageData)
-
-    if (pixels.length === 0) return []
-
-    const depth = Math.ceil(Math.log2(maxColors + 2))
-    const quantized = medianCut([...pixels], depth)
-    const unique = deduplicateColors(quantized)
-
-    const sorted = unique.sort((a, b) => {
-      const [, sA] = rgbToHsl(a[0], a[1], a[2])
-      const [, sB] = rgbToHsl(b[0], b[1], b[2])
-      return sB - sA
-    })
-
-    return sorted.slice(0, maxColors).map((c) => rgbToHex(c[0], c[1], c[2]))
+    return extractColorsFromCanvas(canvas, maxColors)
   } catch (err) {
     console.error('[color-extractor] extraction failed:', err)
     return []
   }
+}
+
+/**
+ * Extract colors from any supported file type (including PDF and SVG).
+ * Uses fileToCanvas for non-standard image types, falls back to extractColorsFromImage for raster.
+ */
+export async function extractColorsFromFile(file, maxColors = 2) {
+  if (!file) return []
+
+  const ext = (file.name || '').split('.').pop()?.toLowerCase()
+  const isPdf = file.type === 'application/pdf' || ext === 'pdf'
+  const isSvg = file.type === 'image/svg+xml' || ext === 'svg'
+  const isHeic = ['heic', 'heif'].includes(ext) ||
+    file.type.includes('heic') || file.type.includes('heif')
+
+  if (isPdf || isSvg || isHeic) {
+    try {
+      const { fileToCanvas } = await import('./file-to-canvas')
+      const canvas = await fileToCanvas(file)
+      if (!canvas) return []
+      return extractColorsFromCanvas(canvas, maxColors)
+    } catch {
+      return []
+    }
+  }
+
+  return extractColorsFromImage(file, maxColors)
 }

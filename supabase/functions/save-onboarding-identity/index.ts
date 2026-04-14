@@ -14,7 +14,10 @@ const MAX_HANDLE_LENGTH = 30
 const INSTAGRAM_HANDLE_RE = /^[a-zA-Z0-9._]{1,30}$/
 const MAX_CAMPAIGN_IMAGES = 5
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp']
+const ALLOWED_IMAGE_TYPES = [
+  'image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp',
+  'image/heic', 'image/heif', 'application/pdf',
+]
 const BUCKET_NAME = 'onboarding-identity'
 const VALID_CHOICES = ['add_now', 'later']
 const VALID_PRODUCTION_PATHS = ['standard', 'hybrid']
@@ -78,6 +81,9 @@ function getFileExtension(file: File): string {
   if (mime.includes('svg')) return 'svg'
   if (mime.includes('png')) return 'png'
   if (mime.includes('webp')) return 'webp'
+  if (mime.includes('pdf')) return 'pdf'
+  if (mime.includes('heic')) return 'heic'
+  if (mime.includes('heif')) return 'heif'
   return 'jpg'
 }
 
@@ -161,7 +167,10 @@ Deno.serve(async (req) => {
           return json({ success: false, code: 'LOGO_TOO_LARGE', message: 'Logo excede 5 MB.' }, 400)
         }
         if (!ALLOWED_IMAGE_TYPES.some((t) => logoFile!.type.startsWith(t))) {
-          return json({ success: false, code: 'INVALID_LOGO_TYPE', message: 'Formato de logo nao suportado (use PNG, JPG, SVG ou WebP).' }, 400)
+          const ext = getFileExtension(logoFile!)
+          if (!['heic', 'heif'].includes(ext)) {
+            return json({ success: false, code: 'INVALID_LOGO_TYPE', message: 'Formato de logo nao suportado (use PNG, JPG, PDF, WebP, SVG, HEIC ou HEIF).' }, 400)
+          }
         }
       }
       if (brandPalette.length > MAX_PALETTE_COLORS) {

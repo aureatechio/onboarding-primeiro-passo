@@ -40,6 +40,7 @@ const INITIAL_USER_DATA = {
   campaignNotes: '',
   siteUrl: '',
   instagramHandle: '',
+  brandPalette: [],
   campaignBriefMode: null,
   campaignBriefText: '',
   campaignCompanySite: '',
@@ -103,6 +104,7 @@ function mapRemotePayloadToUserData(payload) {
     campaignNotes: identity?.campaign_notes ?? '',
     siteUrl: identity?.site_url ?? '',
     instagramHandle: identity?.instagram_handle ?? '',
+    brandPalette: identity?.brand_palette ?? [],
     productionPath: identity?.production_path ?? null,
     trafficChoice: null,
   };
@@ -164,9 +166,30 @@ export function OnboardingProvider({ children }) {
   currentStepRef.current = currentStep;
   const storageCompraIdRef = useRef(storageCompraId);
   storageCompraIdRef.current = storageCompraId;
+  const userDataRef = useRef(userData);
+  userDataRef.current = userData;
 
   const completeStep = useCallback((step) => {
     setCompletedSteps((prev) => new Set([...prev, step]));
+  }, []);
+
+  const saveProgressToBackend = useCallback(async (compraId, step, nextStep, extraData = {}) => {
+    const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || '').trim();
+    if (!supabaseUrl || !compraId) return;
+    try {
+      await fetch(`${supabaseUrl}/functions/v1/save-onboarding-progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          compra_id: compraId,
+          step: String(step),
+          current_step: String(nextStep),
+          ...extraData,
+        }),
+      });
+    } catch (err) {
+      console.error('[onboarding] progress save failed:', err);
+    }
   }, []);
 
   const goNext = useCallback(() => {
@@ -176,7 +199,14 @@ export function OnboardingProvider({ children }) {
     setDirection(1);
     setCurrentStep(next);
     window.scrollTo({ top: 0 });
-  }, [completeStep]);
+
+    // Fire-and-forget backend save
+    const extraData = {};
+    if (step === 5 && userDataRef.current.trafficChoice) {
+      extraData.traffic_choice = userDataRef.current.trafficChoice;
+    }
+    saveProgressToBackend(storageCompraIdRef.current, step, next, extraData);
+  }, [completeStep, saveProgressToBackend]);
 
   const goToStep = useCallback((step) => {
     const curr = currentStepRef.current;
@@ -242,12 +272,33 @@ export function OnboardingProvider({ children }) {
         return;
       }
 
+      // Hydrate progress from backend (cross-device resume)
+      const progress = payload.data?.progress;
+      if (progress) {
+        const backendSteps = new Set(progress.completedSteps || []);
+        setCompletedSteps((prev) => new Set([...prev, ...backendSteps]));
+
+        // Advance currentStep if backend is ahead (never regress)
+        if (progress.currentStep) {
+          const stepOrder = [1, 2, 3, 4, 5, 6, 7, 'final', 'done'];
+          const localIdx = stepOrder.indexOf(currentStepRef.current);
+          const backendVal = progress.currentStep === 'final' || progress.currentStep === 'done'
+            ? progress.currentStep
+            : Number(progress.currentStep);
+          const backendIdx = stepOrder.indexOf(backendVal);
+          if (backendIdx > localIdx) {
+            setCurrentStep(backendVal);
+          }
+        }
+      }
+
       setUserData((prev) => {
         const fromServer = mapRemotePayloadToUserData(payload.data);
         return {
           ...fromServer,
           // Preserva campos que só existem localmente (não persistem no banco)
-          trafficChoice: prev.trafficChoice ?? fromServer.trafficChoice,
+          // trafficChoice agora pode vir do progress do backend
+          trafficChoice: prev.trafficChoice ?? progress?.trafficChoice ?? fromServer.trafficChoice,
           campaignBriefMode: prev.campaignBriefMode ?? fromServer.campaignBriefMode,
           campaignBriefText: prev.campaignBriefText || fromServer.campaignBriefText,
           campaignBriefAudioDurationSec: prev.campaignBriefAudioDurationSec || fromServer.campaignBriefAudioDurationSec,
@@ -256,6 +307,7 @@ export function OnboardingProvider({ children }) {
           campaignGeneratedBriefing: prev.campaignGeneratedBriefing ?? fromServer.campaignGeneratedBriefing,
           campaignGeneratedInsights: prev.campaignGeneratedInsights?.length ? prev.campaignGeneratedInsights : fromServer.campaignGeneratedInsights,
           campaignBriefCitations: prev.campaignBriefCitations?.length ? prev.campaignBriefCitations : fromServer.campaignBriefCitations,
+          brandPalette: prev.brandPalette?.length ? prev.brandPalette : fromServer.brandPalette,
         };
       });
       setHydrationCompraId(compraId);

@@ -524,8 +524,15 @@ export const ETAPA62 = {
   // ── Logo (modo simplificado) ──
   logoLabel: 'Logo da sua marca',
   logoPlaceholder: 'Selecionar logo',
-  logoHint: 'PNG, JPG, SVG ou WebP (max. 5 MB)',
+  logoHint: 'PNG, JPG, PDF, WebP, SVG, HEIC ou HEIF (max. 5 MB)',
   logoChangeButton: 'Trocar arquivo',
+
+  // ── Paleta de cores ──
+  colorPaletteLabel: 'Cores da sua marca',
+  colorPaletteHint: 'Extraídas automaticamente do logo. Edite ou adicione novas.',
+  colorPaletteAddButton: 'Adicionar cor',
+  colorPaletteExtracting: 'Extraindo cores...',
+  colorPaletteMax: 'Máximo de 8 cores atingido.',
 
   // ── Modo simplificado ──
   modoSimplificado: {
