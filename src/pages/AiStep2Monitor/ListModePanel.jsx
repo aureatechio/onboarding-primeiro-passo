@@ -636,6 +636,7 @@ const compraOptionStyles = {
   display: 'block',
   width: '100%',
   minWidth: 0,
+  flexShrink: 0,
   border: 'none',
   padding: '8px 12px',
   fontSize: 13,
