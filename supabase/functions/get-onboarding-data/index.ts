@@ -32,6 +32,20 @@ interface AtendenteRow {
   genero: string
 }
 
+interface OnboardingProgressRow {
+  step1_completed_at: string | null
+  step2_completed_at: string | null
+  step3_completed_at: string | null
+  step4_completed_at: string | null
+  step5_completed_at: string | null
+  step6_completed_at: string | null
+  step7_completed_at: string | null
+  step_final_completed_at: string | null
+  traffic_choice: string | null
+  current_step: string
+  completed_at: string | null
+}
+
 interface OnboardingIdentityRow {
   choice: string | null
   logo_path: string | null
@@ -58,6 +72,14 @@ export interface IdentityPayload {
   updated_at: string | null
 }
 
+export interface ProgressPayload {
+  completedSteps: number[]
+  currentStep: string
+  trafficChoice: string | null
+  completedAt: string | null
+  stepTimestamps: Record<string, string>
+}
+
 export interface OnboardingDataPayload {
   compra_id: string
   clientName: string
@@ -69,6 +91,7 @@ export interface OnboardingDataPayload {
   atendente: string
   atendenteGenero: string
   identity: IdentityPayload | null
+  progress: ProgressPayload | null
 }
 
 interface OnboardingLookupResult {
@@ -155,7 +178,7 @@ export function createDependencies(): Dependencies {
 
       const valorTotal = Number(compraRow.valor_total ?? 0)
 
-      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes, identityRes] =
+      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes, identityRes, progressRes] =
         await Promise.all([
           compraRow.cliente_id
             ? supabase
@@ -194,6 +217,13 @@ export function createDependencies(): Dependencies {
             )
             .eq('compra_id', compraRow.id)
             .maybeSingle(),
+          supabase
+            .from('onboarding_progress')
+            .select(
+              'step1_completed_at, step2_completed_at, step3_completed_at, step4_completed_at, step5_completed_at, step6_completed_at, step7_completed_at, step_final_completed_at, traffic_choice, current_step, completed_at'
+            )
+            .eq('compra_id', compraRow.id)
+            .maybeSingle(),
         ])
 
       const cliente = (clienteRes.data as ClienteRow | null) ?? null
@@ -201,6 +231,7 @@ export function createDependencies(): Dependencies {
       const celebridade = (celebridadeRes.data as NomeRow | null) ?? null
       const segmento = (segmentoRes.data as NomeRow | null) ?? null
       const identityRow = (identityRes.data as OnboardingIdentityRow | null) ?? null
+      const progressRow = (progressRes.data as OnboardingProgressRow | null) ?? null
 
       const identity: IdentityPayload | null = identityRow
         ? {
@@ -217,6 +248,40 @@ export function createDependencies(): Dependencies {
           }
         : null
 
+      let progress: ProgressPayload | null = null
+      if (progressRow) {
+        const stepColumns: [string, number][] = [
+          ['step1_completed_at', 1],
+          ['step2_completed_at', 2],
+          ['step3_completed_at', 3],
+          ['step4_completed_at', 4],
+          ['step5_completed_at', 5],
+          ['step6_completed_at', 6],
+          ['step7_completed_at', 7],
+        ]
+        const completedSteps: number[] = []
+        const stepTimestamps: Record<string, string> = {}
+
+        for (const [col, num] of stepColumns) {
+          const ts = progressRow[col as keyof OnboardingProgressRow] as string | null
+          if (ts) {
+            completedSteps.push(num)
+            stepTimestamps[String(num)] = ts
+          }
+        }
+        if (progressRow.step_final_completed_at) {
+          stepTimestamps['final'] = progressRow.step_final_completed_at
+        }
+
+        progress = {
+          completedSteps,
+          currentStep: progressRow.current_step,
+          trafficChoice: progressRow.traffic_choice ?? null,
+          completedAt: progressRow.completed_at ?? null,
+          stepTimestamps,
+        }
+      }
+
       const data: OnboardingDataPayload = {
         compra_id: compraRow.id,
         clientName:
@@ -232,6 +297,7 @@ export function createDependencies(): Dependencies {
         atendente: atendente?.nome?.trim() || 'Equipe Acelerai',
         atendenteGenero: atendente?.genero ?? 'f',
         identity,
+        progress,
       }
 
       return {
