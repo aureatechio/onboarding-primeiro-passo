@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
-import { ETAPA6 } from "../copy"
+import { useCopy } from "../context/CopyContext"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -12,6 +12,7 @@ import StickyFooter from "../components/StickyFooter"
 
 export default function Etapa6() {
   const { userData, goNext } = useOnboarding()
+  const { ETAPA6 } = useCopy()
 
   const [acknowledged, setAcknowledged] = useState(false)
   const [completed, setCompleted] = useState(false)

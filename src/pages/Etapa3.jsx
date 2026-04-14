@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
-import { ETAPA3 } from "../copy";
+import { useCopy } from "../context/CopyContext";
 import { motion } from "framer-motion";
 import PageLayout from "../components/PageLayout";
 import StepHeader from "../components/StepHeader";
@@ -17,6 +17,7 @@ import ProcessingOverlay from "../components/ProcessingOverlay";
 
 export default function Etapa3() {
   const { userData, goNext, totalSteps } = useOnboarding();
+  const { ETAPA3 } = useCopy();
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
-import { ETAPA5 } from "../copy"
+import { useCopy } from "../context/CopyContext"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -41,6 +41,7 @@ async function sendTrafficMaterialWebhook(endpoint, url) {
 
 export default function Etapa5() {
   const { updateUserData } = useOnboarding()
+  const { ETAPA5 } = useCopy()
 
   const [trafficChoice, setTrafficChoice] = useState(null)
   const [completed, setCompleted] = useState(false)

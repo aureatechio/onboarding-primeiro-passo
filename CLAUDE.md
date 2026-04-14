@@ -150,6 +150,13 @@ CREATE POLICY "..." ON tabela FOR SELECT USING (
 
 Available helper functions: `is_admin()`, `is_admin_or_supervisor()`, `is_active_user()`, `get_user_role(uuid)`, `get_user_status(uuid)`
 
+### Copy do Onboarding
+
+- Tabela `onboarding_copy` é singleton (1 row). Sempre UPDATE, nunca INSERT.
+- `copy.js` continua como fallback. Funções template nunca vão para o Supabase.
+- Etapas consomem copy via `useCopy()` hook do `CopyContext.jsx`.
+- Deploy ambas funções com `--no-verify-jwt`.
+
 ### Migrations
 
 **Never edit existing migrations.** Always create new migration files for schema changes.
@@ -207,6 +214,9 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 
 **NanoBanana (config):**
 `get-nanobanana-config`, `update-nanobanana-config`
+
+**Onboarding Copy (CMS):**
+`get-onboarding-copy`, `update-onboarding-copy`
 
 
 ## Code Style

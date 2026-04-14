@@ -4,10 +4,11 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
 import { TYPE } from "../theme/design-tokens";
-import { ETAPA1 } from "../copy";
+import { useCopy } from "../context/CopyContext";
 
 export default function Etapa1Hero() {
   const { userData, goNext } = useOnboarding();
+  const { ETAPA1 } = useCopy();
   const totalSteps = 7;
   const { scrollY } = useScroll();
   const glowY = useTransform(scrollY, [0, 300], [0, -80]);

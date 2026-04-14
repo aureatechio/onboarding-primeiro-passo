@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { COLORS } from "../theme/colors";
 import { useOnboarding } from "../context/OnboardingContext";
-import { ETAPA_FINAL } from "../copy";
+import { useCopy } from "../context/CopyContext";
 import TopBar from "../components/TopBar";
 import TopBarLogo from "../components/TopBarLogo";
 import Icon from "../components/Icon";
@@ -18,6 +18,7 @@ const Lottie =
 
 export default function EtapaFinal() {
   const { userData, totalSteps } = useOnboarding();
+  const { ETAPA_FINAL } = useCopy();
   const [finished, setFinished] = useState(false);
 
   // ════════════════════════════════════════════════

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
-import { ETAPA2 } from "../copy"
+import { useCopy } from "../context/CopyContext"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -19,6 +19,7 @@ const TOTAL_SLIDES = 4
 
 export default function Etapa2() {
   const { userData, goNext } = useOnboarding()
+  const { ETAPA2 } = useCopy()
 
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showQuiz, setShowQuiz] = useState(false)

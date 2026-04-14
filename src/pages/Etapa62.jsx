@@ -2,7 +2,7 @@ import { useRef, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
-import { ETAPA62 } from "../copy"
+import { useCopy } from "../context/CopyContext"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
 import NavButtons from "../components/NavButtons"
@@ -102,6 +102,7 @@ function validateLogoFile(file) {
 
 export default function Etapa62() {
   const { userData, updateUserData, hydrationCompraId } = useOnboarding()
+  const { ETAPA62 } = useCopy()
 
   const alreadyDone = Boolean(userData.identityBonusChoice)
   const [completed, setCompleted] = useState(alreadyDone)

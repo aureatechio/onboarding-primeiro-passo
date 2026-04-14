@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from 'react';
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext';
+import { CopyProvider } from './context/CopyContext';
 import PageTransition from './components/PageTransition';
 import Etapa1Hero from './pages/Etapa1Hero';
 import Etapa2 from './pages/Etapa2';
@@ -210,10 +211,12 @@ export default function App() {
   }
 
   return (
-    <OnboardingProvider>
-      <ErrorBoundary>
-        <OnboardingFlow />
-      </ErrorBoundary>
-    </OnboardingProvider>
+    <CopyProvider>
+      <OnboardingProvider>
+        <ErrorBoundary>
+          <OnboardingFlow />
+        </ErrorBoundary>
+      </OnboardingProvider>
+    </CopyProvider>
   );
 }

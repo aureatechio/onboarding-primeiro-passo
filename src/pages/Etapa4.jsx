@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { COLORS } from "../theme/colors"
 import { useOnboarding } from "../context/OnboardingContext"
-import { ETAPA4 } from "../copy"
+import { useCopy } from "../context/CopyContext"
 import { motion } from "framer-motion"
 import PageLayout from "../components/PageLayout"
 import StepHeader from "../components/StepHeader"
@@ -16,6 +16,7 @@ import ProcessingOverlay from "../components/ProcessingOverlay"
 
 export default function Etapa4() {
   const { userData, goNext } = useOnboarding()
+  const { ETAPA4 } = useCopy()
   const { celebName, praca, segmento } = userData
 
   const [currentSlide, setCurrentSlide] = useState(0)
