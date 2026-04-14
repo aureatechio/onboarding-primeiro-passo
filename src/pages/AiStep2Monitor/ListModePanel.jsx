@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { STATUS_OPTIONS } from './constants'
 import StatusBadge from './components/StatusBadge'
@@ -23,16 +23,65 @@ export default function ListModePanel({
   const [releaseNotes, setReleaseNotes] = useState('')
   const [releaseReason, setReleaseReason] = useState('negotiated_payment_terms')
 
+  const [compraSearch, setCompraSearch] = useState('')
+  const [compraIdSearch, setCompraIdSearch] = useState('')
+  const [showCompraDropdown, setShowCompraDropdown] = useState(false)
+  const compraInputRef = useRef(null)
+  const compraDropdownRef = useRef(null)
+
   const celebrityOptions = uniqueNonEmpty(listItems.map((item) => item.celebrity_name))
   const compraOptions = (availablePurchases || []).map((purchase) => ({
     value: purchase.compra_id,
     label: purchase.eligible
       ? `✅ ${purchase.label}`
       : `🔒 ${purchase.label}`,
+    rawLabel: purchase.label,
     eligible: purchase.eligible,
     eligibilityReason: purchase.eligibility_reason,
     onboardingAccessStatus: purchase.onboarding_access_status,
   }))
+
+  const filteredCompraOptions = useMemo(() => {
+    if (!compraSearch.trim()) return compraOptions
+    const term = compraSearch.toLowerCase()
+    return compraOptions.filter((o) => o.rawLabel.toLowerCase().includes(term))
+  }, [compraSearch, compraOptions])
+
+  const selectedCompraLabel = listCompra
+    ? compraOptions.find((o) => o.value === listCompra)?.label || listCompra
+    : ''
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        compraDropdownRef.current &&
+        !compraDropdownRef.current.contains(e.target) &&
+        compraInputRef.current &&
+        !compraInputRef.current.contains(e.target)
+      ) {
+        setShowCompraDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function selectCompra(value) {
+    updateListFilters({ compra: value, page: 1 })
+    setShowReleaseConfirm(false)
+    setCompraSearch('')
+    setShowCompraDropdown(false)
+  }
+
+  function handleCompraIdGo() {
+    const id = compraIdSearch.trim()
+    if (!id) return
+    updateListFilters({ compra: id, page: 1 })
+    setShowReleaseConfirm(false)
+    setCompraIdSearch('')
+    setCompraSearch('')
+    setShowCompraDropdown(false)
+  }
 
   const selectedPurchase = (availablePurchases || []).find(
     (p) => p.compra_id === listCompra,
@@ -93,91 +142,204 @@ export default function ListModePanel({
           borderRadius: monitorRadius.xl,
           padding: designTokens.space[6],
           marginBottom: designTokens.space[6],
-          display: 'grid',
-          gridTemplateColumns:
-            'minmax(0,2fr) minmax(170px,auto) minmax(180px,1fr) minmax(200px,1fr) 120px',
+          display: 'flex',
+          flexDirection: 'column',
           gap: designTokens.space[4],
-          alignItems: 'center',
         }}
       >
-        <select
-          value={listCompra}
-          onChange={(event) => {
-            updateListFilters({ compra: event.target.value, page: 1 })
-            setShowReleaseConfirm(false)
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)',
+            gap: designTokens.space[4],
+            alignItems: 'start',
           }}
-          style={selectStyles}
         >
-          <option value="">Todas as vendas (contrato assinado)</option>
-          {compraOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={listStatus}
-          onChange={(event) => updateListFilters({ status: event.target.value, page: 1 })}
-          style={selectStyles}
+          {/* Autocomplete de vendas */}
+          <div style={{ position: 'relative' }}>
+            <label style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'block', marginBottom: 4 }}>
+              Buscar venda por nome
+            </label>
+            <input
+              ref={compraInputRef}
+              type="text"
+              value={showCompraDropdown ? compraSearch : selectedCompraLabel}
+              placeholder="Digite o nome do cliente..."
+              onFocus={() => {
+                setShowCompraDropdown(true)
+                setCompraSearch('')
+              }}
+              onChange={(e) => setCompraSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setShowCompraDropdown(false)
+                  compraInputRef.current?.blur()
+                }
+                if (e.key === 'Enter' && filteredCompraOptions.length === 1) {
+                  selectCompra(filteredCompraOptions[0].value)
+                }
+              }}
+              style={{
+                ...selectStyles,
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+              autoComplete="off"
+            />
+            {showCompraDropdown && (
+              <div
+                ref={compraDropdownRef}
+                style={compraDropdownStyles}
+              >
+                <button
+                  type="button"
+                  onClick={() => selectCompra('')}
+                  style={{
+                    ...compraOptionStyles,
+                    fontWeight: !listCompra ? 700 : 400,
+                    background: !listCompra ? monitorTheme.cardMutedBg : 'transparent',
+                  }}
+                >
+                  Todas as vendas (contrato assinado)
+                </button>
+                {filteredCompraOptions.length === 0 ? (
+                  <div style={{ ...TYPE.caption, color: monitorTheme.textMuted, padding: '10px 12px' }}>
+                    Nenhuma venda encontrada
+                  </div>
+                ) : (
+                  filteredCompraOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => selectCompra(option.value)}
+                      style={{
+                        ...compraOptionStyles,
+                        fontWeight: option.value === listCompra ? 700 : 400,
+                        background: option.value === listCompra ? monitorTheme.cardMutedBg : 'transparent',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Busca por compra_id */}
+          <div>
+            <label style={{ ...TYPE.caption, color: monitorTheme.textMuted, display: 'block', marginBottom: 4 }}>
+              Buscar por compra_id
+            </label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={compraIdSearch}
+                placeholder="Cole o UUID da compra..."
+                onChange={(e) => setCompraIdSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCompraIdGo()
+                }}
+                style={{
+                  ...selectStyles,
+                  flex: 1,
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                  fontFamily: designTokens.fontFamily.mono,
+                  fontSize: 12,
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleCompraIdGo}
+                disabled={!compraIdSearch.trim()}
+                style={{
+                  ...actionButtonStyles,
+                  opacity: compraIdSearch.trim() ? 1 : 0.5,
+                  cursor: compraIdSearch.trim() ? 'pointer' : 'not-allowed',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Ir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(170px,auto) minmax(180px,1fr) minmax(200px,1fr) 120px',
+            gap: designTokens.space[4],
+            alignItems: 'center',
+          }}
         >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option.value || 'all'} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={listCelebrity}
-          onChange={(event) => updateListFilters({ celebrity: event.target.value, page: 1 })}
-          style={selectStyles}
-        >
-          <option value="">Todas celebridades</option>
-          {celebrityOptions.map((celebrityName) => (
-            <option key={celebrityName} value={celebrityName}>
-              {celebrityName}
-            </option>
-          ))}
-        </select>
-        {isSelectedBlocked ? (
-          <button
-            type="button"
-            onClick={() => setShowReleaseConfirm(true)}
-            disabled={releasing}
-            style={{
-              ...releaseButtonStyles,
-              opacity: releasing ? 0.65 : 1,
-              cursor: releasing ? 'wait' : 'pointer',
-            }}
+          <select
+            value={listStatus}
+            onChange={(event) => updateListFilters({ status: event.target.value, page: 1 })}
+            style={selectStyles}
           >
-            {releasing ? 'Liberando...' : 'Liberar Onboarding'}
-          </button>
-        ) : (
+            {STATUS_OPTIONS.map((option) => (
+              <option key={option.value || 'all'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={listCelebrity}
+            onChange={(event) => updateListFilters({ celebrity: event.target.value, page: 1 })}
+            style={selectStyles}
+          >
+            <option value="">Todas celebridades</option>
+            {celebrityOptions.map((celebrityName) => (
+              <option key={celebrityName} value={celebrityName}>
+                {celebrityName}
+              </option>
+            ))}
+          </select>
+          {isSelectedBlocked ? (
+            <button
+              type="button"
+              onClick={() => setShowReleaseConfirm(true)}
+              disabled={releasing}
+              style={{
+                ...releaseButtonStyles,
+                opacity: releasing ? 0.65 : 1,
+                cursor: releasing ? 'wait' : 'pointer',
+              }}
+            >
+              {releasing ? 'Liberando...' : 'Liberar Onboarding'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (!canOpenForm) return
+                window.open(buildOnboardingFormUrl(listCompra), '_blank', 'noopener,noreferrer')
+              }}
+              disabled={!canOpenForm}
+              style={{
+                ...highlightActionButtonStyles,
+                opacity: canOpenForm ? 1 : 0.65,
+                cursor: canOpenForm ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Abrir formulario
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
-              if (!canOpenForm) return
-              window.open(buildOnboardingFormUrl(listCompra), '_blank', 'noopener,noreferrer')
+              updateListFilters({ compra: '', status: '', celebrity: '', page: 1 })
+              setShowReleaseConfirm(false)
+              setCompraSearch('')
+              setCompraIdSearch('')
             }}
-            disabled={!canOpenForm}
-            style={{
-              ...highlightActionButtonStyles,
-              opacity: canOpenForm ? 1 : 0.65,
-              cursor: canOpenForm ? 'pointer' : 'not-allowed',
-            }}
+            style={actionButtonStyles}
           >
-            Abrir formulario
+            Limpar
           </button>
-        )}
-        <button
-          type="button"
-          onClick={() => {
-            updateListFilters({ compra: '', status: '', celebrity: '', page: 1 })
-            setShowReleaseConfirm(false)
-          }}
-          style={actionButtonStyles}
-        >
-          Limpar
-        </button>
+        </div>
       </div>
 
       {selectedPurchase && (
@@ -450,6 +612,41 @@ function eligibilityReasonLabel(reason) {
     compra_not_found: 'Compra nao encontrada',
   }
   return map[reason] || reason
+}
+
+const compraDropdownStyles = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  right: 0,
+  marginTop: 4,
+  maxHeight: 280,
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  background: monitorTheme.pageBg,
+  border: `1px solid ${monitorTheme.borderStrong}`,
+  borderRadius: monitorRadius.sm,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+  zIndex: 50,
+  display: 'flex',
+  flexDirection: 'column',
+}
+
+const compraOptionStyles = {
+  display: 'block',
+  width: '100%',
+  minWidth: 0,
+  border: 'none',
+  padding: '8px 12px',
+  fontSize: 13,
+  color: monitorTheme.textPrimary,
+  textAlign: 'left',
+  cursor: 'pointer',
+  textDecoration: 'none',
+  transition: 'background 0.1s',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }
 
 function buildOnboardingFormUrl(compraId) {
