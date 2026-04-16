@@ -5,9 +5,9 @@ import { corsHeaders, handleCors } from '../_shared/cors.ts'
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-type RetryMode = 'single' | 'failed' | 'category'
+type RetryMode = 'single' | 'failed' | 'category' | 'all'
 
-const VALID_MODES: RetryMode[] = ['single', 'failed', 'category']
+const VALID_MODES: RetryMode[] = ['single', 'failed', 'category', 'all']
 const VALID_GROUPS = ['moderna', 'clean', 'retail']
 const REGENERABLE_STATUSES = ['failed', 'completed']
 
@@ -147,6 +147,16 @@ Deno.serve(async (req) => {
       return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar assets da categoria.' }, 500)
     }
     targets = groupAssets || []
+  } else if (mode === 'all') {
+    const { data: allAssets, error: allError } = await supabase
+      .from('ai_campaign_assets')
+      .select('id, status, group_name, format')
+      .eq('job_id', jobId)
+
+    if (allError) {
+      return json({ success: false, code: 'DB_ERROR', message: 'Erro ao buscar todos os assets.' }, 500)
+    }
+    targets = allAssets || []
   } else {
     const { data: failedAssets, error: failedError } = await supabase
       .from('ai_campaign_assets')
@@ -192,6 +202,7 @@ Deno.serve(async (req) => {
       409,
     )
   }
+  // mode='all' skips status validation — resets every asset regardless of current state
 
   const targetIds = targets.map((target) => target.id)
   const { error: prepareError } = await supabase

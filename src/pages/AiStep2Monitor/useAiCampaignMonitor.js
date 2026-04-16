@@ -72,6 +72,7 @@ export function useAiCampaignMonitor() {
   const [retryingAll, setRetryingAll] = useState(false)
   const [retryingCategory, setRetryingCategory] = useState('')
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
+  const [savingEdits, setSavingEdits] = useState(false)
 
   const baseUrl = import.meta.env.VITE_SUPABASE_URL || ''
   const requestIdRef = useRef(0)
@@ -387,6 +388,61 @@ export function useAiCampaignMonitor() {
     [jobId, retryRequest]
   )
 
+  const saveOnboardingEdits = useCallback(
+    async ({ identityChanges, briefingChanges }) => {
+      if (!compraId || !baseUrl) return { ok: false, message: 'compra_id ausente.' }
+      setSavingEdits(true)
+      setActionError('')
+      setActionSuccess('')
+      try {
+        if (identityChanges && Object.keys(identityChanges).length > 0) {
+          const res = await fetch(`${baseUrl}/functions/v1/save-onboarding-identity`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ compra_id: compraId, ...identityChanges }),
+          })
+          const payload = await res.json()
+          if (!res.ok || !payload?.success) {
+            throw new Error(payload?.message || 'Falha ao salvar identidade.')
+          }
+        }
+        if (briefingChanges?.brief_text) {
+          const res = await fetch(`${baseUrl}/functions/v1/save-campaign-briefing`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              compra_id: compraId,
+              mode: 'text',
+              text: briefingChanges.brief_text,
+            }),
+          })
+          const payload = await res.json()
+          if (!res.ok || !payload?.success) {
+            throw new Error(payload?.message || 'Falha ao salvar briefing.')
+          }
+        }
+        setActionSuccess('Dados salvos com sucesso.')
+        await fetchData({ silent: true })
+        return { ok: true }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erro ao salvar.'
+        setActionError(message)
+        return { ok: false, message }
+      } finally {
+        setSavingEdits(false)
+      }
+    },
+    [compraId, baseUrl, fetchData],
+  )
+
+  const rerunAllAssets = useCallback(async () => {
+    if (!jobId) return { ok: false, message: 'job_id ausente.' }
+    setRetryingAll(true)
+    const response = await retryRequest({ job_id: jobId, mode: 'all' })
+    setRetryingAll(false)
+    return response
+  }, [jobId, retryRequest])
+
   return {
     data,
     loading,
@@ -408,6 +464,9 @@ export function useAiCampaignMonitor() {
     listCompra,
     eligiblePurchases: data?.eligible_purchases || [],
     availablePurchases: data?.available_purchases || [],
+    savingEdits,
+    saveOnboardingEdits,
+    rerunAllAssets,
     releaseOnboarding: async (compraId, reasonCode, notes) => {
       if (!baseUrl) {
         setActionError('VITE_SUPABASE_URL nao configurada.')

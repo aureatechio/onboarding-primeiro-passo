@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, RotateCcw } from 'lucide-react'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
@@ -25,7 +26,57 @@ export default function DetailModePanel({
   retryingAssetId,
   retryingAll,
   retryingCategory,
+  onSaveEdits,
+  onRerunAll,
+  savingEdits,
 }) {
+  const [editMode, setEditMode] = useState(false)
+  const [draft, setDraft] = useState({})
+  const [savedOk, setSavedOk] = useState(false)
+
+  const enterEdit = () => {
+    setDraft({
+      choice: identity?.choice || 'add_now',
+      font_choice: identity?.font_choice || '',
+      brand_palette: (identity?.brand_palette || []).join('\n'),
+      campaign_notes: identity?.campaign_notes || '',
+      site_url: identity?.site_url || '',
+      production_path: identity?.production_path || 'standard',
+      brief_text: briefing?.brief_text || '',
+    })
+    setEditMode(true)
+    setSavedOk(false)
+  }
+
+  const cancelEdit = () => {
+    setEditMode(false)
+    setDraft({})
+    setSavedOk(false)
+  }
+
+  const handleSave = async () => {
+    const paletteLines = draft.brand_palette
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter((s) => /^#[0-9a-fA-F]{6}$/.test(s))
+      .slice(0, 8)
+
+    const identityChanges = {
+      choice: draft.choice,
+      ...(draft.font_choice ? { font_choice: draft.font_choice } : {}),
+      ...(paletteLines.length ? { brand_palette: paletteLines } : {}),
+      ...(draft.campaign_notes ? { campaign_notes: draft.campaign_notes } : {}),
+      ...(draft.site_url ? { site_url: draft.site_url } : {}),
+      ...(draft.production_path ? { production_path: draft.production_path } : {}),
+    }
+    const briefingChanges = draft.brief_text ? { brief_text: draft.brief_text } : {}
+
+    const result = await onSaveEdits?.({ identityChanges, briefingChanges })
+    if (result?.ok) {
+      setEditMode(false)
+      setSavedOk(true)
+    }
+  }
   const groupedAssets = ASSET_GROUPS.map((group) => ({
     ...group,
     items: assets.filter((asset) => normalizeGroupName(asset.group_name) === group.key),
@@ -404,18 +455,112 @@ export default function DetailModePanel({
           }}
         >
           <div style={panelStyles}>
-            <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary, marginBottom: 10 }}>
-              Dados do onboarding
-            </h3>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}
+            >
+              <h3 style={{ ...TYPE.h3, color: monitorTheme.textPrimary }}>Dados do onboarding</h3>
+              {!editMode ? (
+                <button type="button" onClick={enterEdit} style={editBtnStyle}>
+                  Editar
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="button" onClick={cancelEdit} style={cancelBtnStyle}>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={savingEdits}
+                    style={saveBtnStyle}
+                  >
+                    {savingEdits ? (
+                      <>
+                        <Loader2 size={13} className="animate-spin" /> Salvando…
+                      </>
+                    ) : (
+                      'Salvar'
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+
             <DataRow label="Cliente" value={onboarding?.client?.name} />
             <DataRow label="Celebridade" value={onboarding?.celebrity?.name} />
             <DataRow label="Status pagamento" value={onboarding?.compra?.checkout_status} />
             <DataRow label="Status contrato" value={onboarding?.compra?.clicksign_status} />
-            <DataRow label="Producao" value={identity?.production_path} />
+
+            {editMode ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '180px minmax(0,1fr)',
+                  gap: 10,
+                  alignItems: 'center',
+                  padding: '8px 0',
+                  borderBottom: `1px solid ${monitorTheme.borderSoft}`,
+                }}
+              >
+                <div style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>Producao</div>
+                <select
+                  value={draft.production_path}
+                  onChange={(e) => setDraft((d) => ({ ...d, production_path: e.target.value }))}
+                  style={selectStyle}
+                >
+                  <option value="standard">standard</option>
+                  <option value="hybrid">hybrid</option>
+                </select>
+              </div>
+            ) : (
+              <DataRow label="Producao" value={identity?.production_path} />
+            )}
+
             <DataRow label="Escolha identidade" value={identity?.choice} />
-            <DataRow label="Fonte" value={identity?.font_choice} />
-            <DataRow label="Paleta" value={(identity?.brand_palette || []).join(', ')} mono />
-            <DataRow label="Notas" value={identity?.campaign_notes} />
+
+            <DataRow
+              label="Fonte"
+              value={editMode ? draft.font_choice : identity?.font_choice}
+              editable={editMode}
+              onChange={(v) => setDraft((d) => ({ ...d, font_choice: v }))}
+            />
+
+            <DataRow
+              label="Paleta"
+              value={
+                editMode ? draft.brand_palette : (identity?.brand_palette || []).join(', ')
+              }
+              editable={editMode}
+              multiline={editMode}
+              mono
+              onChange={(v) => setDraft((d) => ({ ...d, brand_palette: v }))}
+            />
+            {editMode ? (
+              <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, padding: '4px 0 8px 190px' }}>
+                Uma cor por linha ou separadas por vírgula. Ex: #384ffe
+              </p>
+            ) : null}
+
+            <DataRow
+              label="Notas"
+              value={editMode ? draft.campaign_notes : identity?.campaign_notes}
+              editable={editMode}
+              multiline={editMode}
+              onChange={(v) => setDraft((d) => ({ ...d, campaign_notes: v }))}
+            />
+
+            <DataRow
+              label="Site URL"
+              value={editMode ? draft.site_url : identity?.site_url}
+              editable={editMode}
+              onChange={(v) => setDraft((d) => ({ ...d, site_url: v }))}
+            />
+
             <DataRow
               label="Briefing Perplexity"
               value={
@@ -425,8 +570,48 @@ export default function DetailModePanel({
               }
             />
             <DataRow label="Briefing modo" value={briefing?.mode} />
-            <DataRow label="Briefing texto" value={briefing?.brief_text} />
+
+            <DataRow
+              label="Briefing texto"
+              value={editMode ? draft.brief_text : briefing?.brief_text}
+              editable={editMode}
+              multiline={editMode}
+              onChange={(v) => setDraft((d) => ({ ...d, brief_text: v }))}
+            />
+
             <DataRow label="Transcript status" value={briefing?.transcript_status} />
+
+            {!editMode ? (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+                <button
+                  type="button"
+                  onClick={onRerunAll}
+                  disabled={retryingAll}
+                  style={rerunBtnStyle}
+                >
+                  {retryingAll ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" /> Disparando…
+                    </>
+                  ) : (
+                    'Rodar job novamente'
+                  )}
+                </button>
+              </div>
+            ) : null}
+
+            {savedOk ? (
+              <p
+                style={{
+                  ...TYPE.caption,
+                  color: monitorTheme.completedText,
+                  marginTop: 8,
+                  textAlign: 'right',
+                }}
+              >
+                Dados salvos. Clique em &ldquo;Rodar job novamente&rdquo; para reprocessar.
+              </p>
+            ) : null}
           </div>
 
           <div style={panelStyles}>
@@ -577,4 +762,63 @@ const panelStyles = {
   border: `1px solid ${monitorTheme.border}`,
   borderRadius: monitorRadius.xl,
   padding: designTokens.space[6],
+}
+
+const editBtnStyle = {
+  border: `1px solid ${monitorTheme.borderStrong}`,
+  background: monitorTheme.pageBg,
+  color: monitorTheme.textPrimary,
+  borderRadius: monitorRadius.md,
+  padding: '6px 12px',
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 600,
+}
+
+const cancelBtnStyle = {
+  border: `1px solid ${monitorTheme.borderStrong}`,
+  background: monitorTheme.pageBg,
+  color: monitorTheme.textMuted,
+  borderRadius: monitorRadius.md,
+  padding: '6px 12px',
+  cursor: 'pointer',
+  fontSize: 13,
+}
+
+const saveBtnStyle = {
+  border: 'none',
+  background: '#384ffe',
+  color: '#fff',
+  borderRadius: monitorRadius.md,
+  padding: '6px 14px',
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 600,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+}
+
+const rerunBtnStyle = {
+  border: 'none',
+  background: '#384ffe',
+  color: '#fff',
+  borderRadius: monitorRadius.md,
+  padding: '8px 16px',
+  cursor: 'pointer',
+  fontSize: 13,
+  fontWeight: 600,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+}
+
+const selectStyle = {
+  border: `1px solid ${monitorTheme.border}`,
+  background: monitorTheme.cardMutedBg,
+  color: monitorTheme.textPrimary,
+  borderRadius: 6,
+  padding: '4px 8px',
+  fontSize: 13,
+  width: '100%',
 }

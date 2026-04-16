@@ -41,6 +41,9 @@ export default function AiStep2Monitor() {
     retrySingleAsset,
     retryFailedAssets,
     retryCategory,
+    savingEdits,
+    saveOnboardingEdits,
+    rerunAllAssets,
   } = useAiCampaignMonitor()
 
   const [viewerIndex, setViewerIndex] = useState(-1)
@@ -230,6 +233,9 @@ export default function AiStep2Monitor() {
                 retryingAssetId={retryingAssetId}
                 retryingAll={retryingAll}
                 retryingCategory={retryingCategory}
+                savingEdits={savingEdits}
+                onSaveEdits={saveOnboardingEdits}
+                onRerunAll={rerunAllAssets}
               />
             )}
       {!isListMode && currentAsset ? (
