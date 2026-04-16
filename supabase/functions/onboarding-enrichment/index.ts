@@ -46,6 +46,29 @@ function json(body: Record<string, unknown>, status = 200): Response {
   })
 }
 
+const TRACKING_PARAMS = new Set([
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+  'fbclid', 'gclid', 'gclsrc', 'dclid', 'gbraid', 'wbraid',
+  'msclkid', 'ttclid', 'twclid', 'li_fat_id', 'igshid',
+  'mc_cid', 'mc_eid', '_ga', '_gl',
+])
+
+function normalizeUrl(raw: string): string {
+  try {
+    const u = new URL(raw)
+    for (const key of [...u.searchParams.keys()]) {
+      if (TRACKING_PARAMS.has(key)) u.searchParams.delete(key)
+    }
+    // Remove fragment
+    u.hash = ''
+    // Remove trailing slash from pathname (keep root)
+    const path = u.pathname.replace(/\/$/, '') || '/'
+    return `${u.origin}${path === '/' ? '' : path}${u.search}`
+  } catch {
+    return raw
+  }
+}
+
 function guessMimeType(path: string): string {
   if (path.endsWith('.png')) return 'image/png'
   if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg'
@@ -252,14 +275,8 @@ async function executeColorsPhase(ctx: PipelineContext): Promise<ColorResult> {
     }
   }
 
-  // Attempt 4: Fallback
-  attempts.push({
-    method: 'fallback',
-    success: true,
-    duration_ms: 0,
-    result_summary: `usando paleta fallback (${config.color_fallback_palette.length} cores)`,
-  })
-  return { palette: [...config.color_fallback_palette], source: 'fallback', attempts }
+  // Nenhuma estrategia retornou cores — fase falha sem fallback
+  return { palette: [], source: 'none', attempts }
 }
 
 // ---------------------------------------------------------------------------
@@ -711,7 +728,7 @@ async function loadPipelineContext(
     celebrityName,
     segment,
     region,
-    siteUrl: (identity.site_url as string) || null,
+    siteUrl: identity.site_url ? normalizeUrl(identity.site_url as string) : null,
     instagramHandle: (identity.instagram_handle as string) || null,
     logoPath: (identity.logo_path as string) || null,
   }
