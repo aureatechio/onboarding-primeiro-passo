@@ -1,0 +1,1 @@
+Recrute o time: $ARGUMENT e aguarde novas instruções.

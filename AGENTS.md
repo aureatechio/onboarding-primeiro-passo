@@ -69,12 +69,21 @@ primeiro-passo-app/
 ### Onboarding App (React + Vite)
 
 ```bash
-npm install          # Install dependencies
+npm ci               # Install dependencies from lockfile
 npm run dev          # Dev server (port 5173)
 npm run build        # Production build
 npm run lint         # ESLint
 npm run preview      # Preview production build
+npm run gate:prepush # Lockfile + deps + lint + build gate
 ```
+
+### Package Manager Policy (npm-only)
+
+- Official package manager: `npm` (declared in `package.json#packageManager`)
+- Official lockfile: `package-lock.json` (single lockfile policy)
+- Forbidden lockfiles: `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `bun.lock`, `npm-shrinkwrap.json`
+- Before push/deploy, run `npm run gate:prepush`
+- Any dependency change in `package.json` must include the updated `package-lock.json` in the same change
 
 ### Supabase
 

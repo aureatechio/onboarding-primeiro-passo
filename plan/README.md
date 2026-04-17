@@ -2,6 +2,9 @@
 
 ## Indice ativo
 
+- `2026-04-17-fase0-definicao-acesso-dashboard.md` **← NOVO**
+  Execucao da Fase 0 de autenticacao do dashboard: matriz RBAC (`admin`, `supervisor`, `operacao`, `leitura`), ADR de sessao com Supabase Auth (JWT + refresh), catalogo de segregacao `public-only | internal-only | hybrid` por endpoint e plano de migracao por lotes. Status: **GO para Fase 1**.
+
 - `2026-04-08-onboarding-enrichment-master.md` **← PIPELINE NOVO**
   Plano orquestrador do pipeline de enriquecimento automatico pos-onboarding. Cliente envia logo/site/instagram, sistema extrai cores, detecta fonte, gera briefing via Perplexity e dispara campanha IA. 5 blocos sequenciais com dependencias explicitas, criterios de conclusao e rollback.
 

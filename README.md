@@ -46,7 +46,7 @@ A navegação entre etapas é controlada internamente, sem URL routing — o `ve
 ### Pré-requisitos
 
 - Node.js >= 20
-- npm ou pnpm
+- npm >= 10
 
 ### Instalação
 
@@ -56,7 +56,7 @@ git clone <url-do-repo>
 cd onboarding-primeiro-passo
 
 # Instale as dependências
-npm install
+npm ci
 ```
 
 ### Configuração de Ambiente
@@ -151,6 +151,7 @@ npm run dev       # Dev server (porta 5173)
 npm run build     # Build de produção
 npm run preview   # Preview do build
 npm run lint      # Lint com ESLint
+npm run gate:prepush # Gate de segurança pré-push
 ```
 
 ### Fluxo de branches
@@ -166,7 +167,7 @@ refactor(context): simplifica estado global da jornada
 ### Antes de abrir PR
 
 ```bash
-npm run build && npm run lint
+npm run gate:prepush
 ```
 
 ---
@@ -197,7 +198,12 @@ O projeto usa um **projeto Vercel dedicado**: `onboarding-primeiro-passo`.
 - `VITE_SUPABASE_URL`
 - `VITE_ONBOARDING_BASE_URL`
 
-> Se o deploy falhar com `ERR_PNPM_FROZEN_LOCKFILE`, sincronize o `package-lock.json` antes de re-fazer o deploy.
+**Deploy gate obrigatório (npm-only):**
+- Package manager oficial: `npm`
+- Lockfile oficial: `package-lock.json`
+- Antes de push/deploy: `npm run gate:prepush`
+
+> Se houver erro de lockfile no deploy, remova lockfiles não suportados e revalide com `npm ci`.
 
 ---
 

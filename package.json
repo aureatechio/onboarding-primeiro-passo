@@ -3,11 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "npm@10",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gate:lockfiles": "bash scripts/check-lockfiles.sh",
+    "gate:deps": "npm ci",
+    "gate:prepush": "npm run gate:lockfiles && npm run gate:deps && npm run lint && npm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -29,6 +34,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.1.0",
+    "husky": "^9.1.7",
     "vite": "^6.3.5"
   }
 }
