@@ -359,12 +359,11 @@ export const ETAPA4 = {
   },
 
   // ── Quiz ──
-  quizIntro: (celebName) =>
-    `Confirme que voce entendeu as regras de uso da imagem de ${celebName}:`,
+  quizIntro: 'Confirme que voce entendeu as regras de uso da imagem de ${celebName}:',
   quizTitle: 'Confirme o entendimento',
   quizSubtitle: 'Marque todos os itens para concluir',
-  quizQuestions: (celebName, praca, segmento) => [
-    `Entendo que a exclusividade de ${celebName} e valida para minha praca (${praca}) e meu segmento (${segmento}).`,
+  quizQuestions: [
+    'Entendo que a exclusividade de ${celebName} e valida para minha praca (${praca}) e meu segmento (${segmento}).',
     'Sei que toda peca precisa de aprovacao da celebridade e que tenho ate 2 rodadas de ajustes por peca.',
     'Nao vou marcar a celebridade nas redes sociais nem usar sua imagem por WhatsApp ou e-mail marketing.',
     'Ao encerrar o contrato, vou excluir todas as pecas com a imagem da celebridade de todos os canais.',
@@ -374,8 +373,8 @@ export const ETAPA4 = {
 
   // ── Completion ──
   completionTitle: 'Etapa 4 concluida!',
-  completionDescription: (celebName) =>
-    `Agora voce conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento e essencial para uma campanha de sucesso.`,
+  completionDescription:
+    'Agora voce conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento e essencial para uma campanha de sucesso.',
   completionSummary: (celebName, praca, segmento) => [
     { icon: 'clapperboard', label: 'Celebridade', value: celebName },
     { icon: 'mapPin', label: 'Praca', value: praca },

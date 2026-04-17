@@ -299,8 +299,31 @@ function ObjectArrayField({ value, onChange, isDirty }) {
 // ─── NESTED_OBJECT ────────────────────────────────────────────────────────────
 
 function NestedObjectField({ value, onChange, isDirty }) {
-  if (!value || typeof value !== 'object') return null
-  const fields = Object.keys(value).filter((k) => typeof value[k] === 'string')
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const fields = Object.keys(value)
+
+  const renderChild = (field) => {
+    const child = value[field]
+    const setChild = (val) => onChange({ ...value, [field]: val })
+
+    if (typeof child === 'string') {
+      return (child ?? '').length > 80 ? (
+        <TextareaField value={child} onChange={setChild} isDirty={false} />
+      ) : (
+        <StringField value={child} onChange={setChild} isDirty={false} />
+      )
+    }
+
+    if (Array.isArray(child) && child.every((v) => typeof v === 'string')) {
+      return <StringArrayField value={child} onChange={setChild} isDirty={false} />
+    }
+
+    if (child && typeof child === 'object' && !Array.isArray(child)) {
+      return <NestedObjectField value={child} onChange={setChild} isDirty={false} />
+    }
+
+    return null
+  }
 
   return (
     <div
@@ -317,19 +340,7 @@ function NestedObjectField({ value, onChange, isDirty }) {
       {fields.map((field) => (
         <div key={field}>
           <FieldLabel label={field} isDirty={false} />
-          {(value[field] ?? '').length > 80 ? (
-            <TextareaField
-              value={value[field]}
-              onChange={(val) => onChange({ ...value, [field]: val })}
-              isDirty={false}
-            />
-          ) : (
-            <StringField
-              value={value[field]}
-              onChange={(val) => onChange({ ...value, [field]: val })}
-              isDirty={false}
-            />
-          )}
+          {renderChild(field)}
         </div>
       ))}
     </div>

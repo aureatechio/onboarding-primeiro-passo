@@ -69,7 +69,7 @@ export default function Etapa4() {
       <CompletionScreen
         icon="star"
         title={ETAPA4.completionTitle}
-        description={ETAPA4.completionDescription(celebName)}
+        description={ETAPA4.completionDescription.replace('${celebName}', celebName)}
         summaryItems={ETAPA4.completionSummary(celebName, praca, segmento)}
       />
     )
@@ -570,10 +570,12 @@ export default function Etapa4() {
   const renderQuiz = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 20 }}>
-        {ETAPA4.quizIntro(celebName)}
+        {ETAPA4.quizIntro.replace('${celebName}', celebName)}
       </p>
       <QuizConfirmation
-        questions={ETAPA4.quizQuestions(celebName, praca, segmento)}
+        questions={ETAPA4.quizQuestions.map((q) =>
+          q.replace('${celebName}', celebName).replace('${praca}', praca).replace('${segmento}', segmento)
+        )}
         icon="star"
         title={ETAPA4.quizTitle}
         subtitle={ETAPA4.quizSubtitle}
