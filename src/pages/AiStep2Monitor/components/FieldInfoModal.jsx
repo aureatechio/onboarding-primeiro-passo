@@ -15,7 +15,7 @@ const overlayStyle = {
 }
 
 const cardStyle = {
-  background: '#fff',
+  background: monitorTheme.cardElevatedBg,
   borderRadius: monitorRadius.xxl,
   padding: designTokens.space[11],
   maxWidth: 420,
@@ -39,7 +39,7 @@ const closeButtonStyle = {
 const exampleStyle = {
   ...TYPE.caption,
   color: monitorTheme.textSecondary,
-  background: '#f8fafc',
+  background: monitorTheme.surfaceSubtle,
   borderRadius: monitorRadius.md,
   padding: '8px 12px',
   marginBottom: 6,

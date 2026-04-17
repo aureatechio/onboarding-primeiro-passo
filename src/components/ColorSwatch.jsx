@@ -169,7 +169,7 @@ export default function ColorSwatch({
           >
             <input
               type="color"
-              value={value || '#000000'}
+              value={hexInput}
               onChange={handlePickerChange}
               style={{
                 width: '100%',

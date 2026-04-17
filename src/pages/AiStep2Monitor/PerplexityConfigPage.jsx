@@ -45,10 +45,10 @@ const inputStyle = {
   width: '100%',
   padding: '8px 12px',
   borderRadius: monitorRadius.md,
-  border: `1px solid ${monitorTheme.border}`,
-  background: '#fff',
+  border: `1px solid ${monitorTheme.controlBorder}`,
+  background: monitorTheme.controlBg,
   fontSize: 13,
-  color: monitorTheme.textPrimary,
+  color: monitorTheme.controlText,
   outline: 'none',
   boxSizing: 'border-box',
 }
@@ -92,9 +92,9 @@ const primaryButton = {
 
 const outlineButton = {
   ...buttonBase,
-  background: '#fff',
-  color: monitorTheme.textPrimary,
-  border: `1px solid ${monitorTheme.borderStrong}`,
+  background: monitorTheme.buttonSecondaryBg,
+  color: monitorTheme.buttonSecondaryText,
+  border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
 }
 
 const tabBarStyle = {

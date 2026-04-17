@@ -24,6 +24,12 @@ export const monitorTheme = {
   cardMutedBg: '#161B22',
   cardElevatedBg: '#1C2230',
   progressTrack: 'rgba(255,255,255,0.07)',
+  surfaceSubtle: '#0F1724',
+
+  // Form controls
+  controlBg: '#111827',
+  controlBorder: 'rgba(240,246,252,0.24)',
+  controlText: '#E6EDF3',
 
   // Danger
   dangerBg: 'rgba(248,81,73,0.08)',
@@ -45,6 +51,9 @@ export const monitorTheme = {
 
   buttonDarkBg: '#E6EDF3',
   buttonDarkText: '#0D1117',
+  buttonSecondaryBg: '#161B22',
+  buttonSecondaryText: '#E6EDF3',
+  buttonSecondaryBorder: 'rgba(240,246,252,0.24)',
 
   overlayBg: 'rgba(1,4,9,0.94)',
   overlayControlBorder: 'rgba(255,255,255,0.14)',

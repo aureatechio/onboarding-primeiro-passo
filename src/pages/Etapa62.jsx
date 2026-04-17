@@ -12,6 +12,7 @@ import StickyFooter from "../components/StickyFooter"
 import ProcessingOverlay from "../components/ProcessingOverlay"
 import ColorSwatch from "../components/ColorSwatch"
 import { extractColorsFromFile } from "../lib/color-extractor"
+import { stripTrackingParams } from "../lib/url-utils"
 
 async function saveIdentityToBackend(compraId, { choice, logoFile, siteUrl, instagramHandle, brandColors }) {
   const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim()
@@ -532,7 +533,7 @@ export default function Etapa62() {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 14 }}>
                       {brandColors.map((color, i) => (
                         <ColorSwatch
-                          key={`${i}-${color}`}
+                          key={i}
                           value={color}
                           onChange={(newColor) => handleColorChange(i, newColor)}
                           onRemove={() => handleRemoveColor(i)}
@@ -604,7 +605,8 @@ export default function Etapa62() {
                 placeholder={ETAPA62.modoSimplificado.sitePlaceholder}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/^https?:\/\//i, '')
-                  setSiteUrl(raw ? `https://${raw}` : '')
+                  const full = raw ? `https://${raw}` : ''
+                  setSiteUrl(full ? stripTrackingParams(full) : '')
                   setSiteUrlError(null)
                 }}
                 onBlur={() => {

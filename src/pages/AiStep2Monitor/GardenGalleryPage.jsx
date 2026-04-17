@@ -51,8 +51,8 @@ function ToolBadge({ tool }) {
 function FilterBar({ tool, status, onToolChange, onStatusChange }) {
   const selectStyle = {
     padding: '6px 10px', borderRadius: monitorRadius.sm,
-    border: `1px solid ${monitorTheme.border}`, fontSize: 13,
-    background: '#fff', color: monitorTheme.textPrimary,
+    border: `1px solid ${monitorTheme.controlBorder}`, fontSize: 13,
+    background: monitorTheme.controlBg, color: monitorTheme.controlText,
     cursor: 'pointer', outline: 'none',
   }
   return (
@@ -83,7 +83,7 @@ function GalleryCard({ item, onClick }) {
       style={{
         borderRadius: monitorRadius.md,
         border: `1px solid ${monitorTheme.border}`,
-        background: '#fff',
+        background: monitorTheme.cardMutedBg,
         overflow: 'hidden',
         cursor: isCompleted ? 'pointer' : 'default',
         transition: 'box-shadow 0.15s, transform 0.15s',
@@ -197,8 +197,10 @@ function Lightbox({ item, onClose }) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '6px 14px', borderRadius: monitorRadius.sm,
-              background: '#fff', color: monitorTheme.textPrimary,
-              border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              background: monitorTheme.buttonSecondaryBg,
+              color: monitorTheme.buttonSecondaryText,
+              border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}
           >
             <Download size={14} />
@@ -236,7 +238,7 @@ function Pagination({ page, total, limit, onPageChange }) {
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '6px 12px', borderRadius: monitorRadius.sm,
           border: `1px solid ${monitorTheme.border}`,
-          background: page <= 1 ? monitorTheme.cardMutedBg : '#fff',
+          background: page <= 1 ? monitorTheme.cardMutedBg : monitorTheme.buttonSecondaryBg,
           color: page <= 1 ? monitorTheme.textMuted : monitorTheme.textPrimary,
           fontSize: 13, cursor: page <= 1 ? 'default' : 'pointer',
         }}
@@ -254,7 +256,7 @@ function Pagination({ page, total, limit, onPageChange }) {
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '6px 12px', borderRadius: monitorRadius.sm,
           border: `1px solid ${monitorTheme.border}`,
-          background: page >= totalPages ? monitorTheme.cardMutedBg : '#fff',
+          background: page >= totalPages ? monitorTheme.cardMutedBg : monitorTheme.buttonSecondaryBg,
           color: page >= totalPages ? monitorTheme.textMuted : monitorTheme.textPrimary,
           fontSize: 13, cursor: page >= totalPages ? 'default' : 'pointer',
         }}

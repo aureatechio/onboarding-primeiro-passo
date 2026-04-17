@@ -452,7 +452,7 @@ export const ETAPA6 = {
   header: {
     title: 'Sua identidade visual',
     readTime: '2 minutos',
-    stepLabel: 'ETAPA 6.1 DE 8',
+    stepLabel: 'ETAPA 6.1 DE 7',
   },
 
   // ── Card 1 — Intro ──
@@ -505,7 +505,7 @@ export const ETAPA62 = {
   header: {
     title: 'Bonificação de prazo da sua campanha',
     readTime: '2 minutos',
-    stepLabel: 'ETAPA 6.2 DE 8',
+    stepLabel: 'ETAPA 6.2 DE 7',
   },
 
   // ── Bonificação intro ──

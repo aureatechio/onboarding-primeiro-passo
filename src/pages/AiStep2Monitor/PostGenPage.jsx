@@ -246,10 +246,10 @@ export default function PostGenPage() {
     width: '100%',
     padding: '10px 12px',
     borderRadius: monitorRadius.md,
-    border: `1px solid ${monitorTheme.border}`,
+    border: `1px solid ${monitorTheme.controlBorder}`,
     fontSize: 13,
-    color: monitorTheme.textPrimary,
-    background: '#fff',
+    color: monitorTheme.controlText,
+    background: monitorTheme.controlBg,
     boxSizing: 'border-box',
   }
   const halfRow = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }
@@ -365,8 +365,9 @@ export default function PostGenPage() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '8px 14px', borderRadius: monitorRadius.sm,
-                    border: `1px solid ${monitorTheme.border}`, background: '#fff',
-                    fontSize: 12, color: monitorTheme.textSecondary, cursor: 'pointer',
+                    border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
+                    background: monitorTheme.buttonSecondaryBg,
+                    fontSize: 12, color: monitorTheme.buttonSecondaryText, cursor: 'pointer',
                   }}
                   disabled={isLoading}
                 >
@@ -519,8 +520,9 @@ export default function PostGenPage() {
                       style={{
                         display: 'flex', alignItems: 'center', gap: 4,
                         padding: '6px 12px', borderRadius: monitorRadius.sm,
-                        border: `1px solid ${monitorTheme.border}`, background: '#fff',
-                        fontSize: 12, color: monitorTheme.textSecondary, cursor: 'pointer',
+                        border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
+                        background: monitorTheme.buttonSecondaryBg,
+                        fontSize: 12, color: monitorTheme.buttonSecondaryText, cursor: 'pointer',
                       }}
                     >
                       <Download size={13} /> Download
@@ -531,8 +533,9 @@ export default function PostGenPage() {
                       style={{
                         display: 'flex', alignItems: 'center', gap: 4,
                         padding: '6px 12px', borderRadius: monitorRadius.sm,
-                        border: `1px solid ${monitorTheme.border}`, background: '#fff',
-                        fontSize: 12, color: monitorTheme.textSecondary, cursor: 'pointer',
+                        border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
+                        background: monitorTheme.buttonSecondaryBg,
+                        fontSize: 12, color: monitorTheme.buttonSecondaryText, cursor: 'pointer',
                       }}
                     >
                       <RefreshCw size={13} /> Gerar novamente
@@ -547,7 +550,7 @@ export default function PostGenPage() {
                     maxHeight: 500,
                     objectFit: 'contain',
                     borderRadius: monitorRadius.md,
-                    background: '#fff',
+                    background: monitorTheme.cardElevatedBg,
                   }}
                 />
                 {result.duration_ms && (

@@ -47,10 +47,10 @@ const inputStyle = {
   width: '100%',
   padding: '8px 12px',
   borderRadius: monitorRadius.md,
-  border: `1px solid ${monitorTheme.border}`,
-  background: '#fff',
+  border: `1px solid ${monitorTheme.controlBorder}`,
+  background: monitorTheme.controlBg,
   fontSize: 13,
-  color: monitorTheme.textPrimary,
+  color: monitorTheme.controlText,
   outline: 'none',
   boxSizing: 'border-box',
 }
@@ -267,15 +267,15 @@ const TOOLTIPS = {
 const uploadCardStyle = {
   border: `1px dashed ${monitorTheme.borderStrong}`,
   borderRadius: monitorRadius.md,
-  background: '#f8fafc',
+  background: monitorTheme.surfaceSubtle,
   padding: '10px 12px',
 }
 
 const uploadActionStyle = {
   ...buttonBase,
-  background: '#fff',
-  color: monitorTheme.textPrimary,
-  border: `1px solid ${monitorTheme.borderStrong}`,
+  background: monitorTheme.buttonSecondaryBg,
+  color: monitorTheme.buttonSecondaryText,
+  border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
   padding: '6px 12px',
   fontSize: 12,
 }
@@ -301,9 +301,9 @@ const primaryButton = {
 
 const outlineButton = {
   ...buttonBase,
-  background: '#fff',
-  color: monitorTheme.textPrimary,
-  border: `1px solid ${monitorTheme.borderStrong}`,
+  background: monitorTheme.buttonSecondaryBg,
+  color: monitorTheme.buttonSecondaryText,
+  border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
 }
 
 const tabBarStyle = {
