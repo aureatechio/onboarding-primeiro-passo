@@ -1,5 +1,8 @@
-import { TYPE, designTokens } from '../../../theme/design-tokens'
+import { designTokens } from '../../../theme/design-tokens'
 import { monitorTheme } from '../theme'
+
+const MONO = `'JetBrains Mono', 'Fira Mono', monospace`
+const SANS = `'Inter', system-ui, sans-serif`
 
 export default function DataRow({
   label,
@@ -9,45 +12,49 @@ export default function DataRow({
   onChange,
   multiline = false,
 }) {
-  const fontFamily = mono ? designTokens.fontFamily.mono : designTokens.fontFamily.primary
-
-  const inputStyle = {
-    ...TYPE.bodySmall,
-    color: monitorTheme.textPrimary,
-    background: monitorTheme.cardMutedBg,
-    border: `1px solid ${monitorTheme.border}`,
-    borderRadius: 6,
-    padding: '4px 8px',
-    width: '100%',
-    fontFamily,
-    resize: multiline ? 'vertical' : 'none',
-    boxSizing: 'border-box',
-    outline: 'none',
-  }
+  const fontFamily = mono ? MONO : SANS
 
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '180px minmax(0,1fr)',
-        gap: 10,
+        gridTemplateColumns: '160px minmax(0,1fr)',
+        gap: 12,
         alignItems: 'start',
-        padding: '8px 0',
+        padding: '7px 8px',
+        borderRadius: 6,
+        marginLeft: -8,
+        marginRight: -8,
         borderBottom: `1px solid ${monitorTheme.borderSoft}`,
+        transition: 'background 0.12s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(240,246,252,0.04)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'transparent'
       }}
     >
       <div
         style={{
-          ...TYPE.caption,
+          fontSize: 11,
+          fontWeight: 500,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
           color: monitorTheme.textMuted,
-          fontFamily,
+          fontFamily: MONO,
+          paddingTop: 1,
+          userSelect: 'none',
         }}
       >
         {label}
       </div>
+
       <div
         style={{
-          ...TYPE.bodySmall,
+          fontSize: 13,
+          fontWeight: 400,
+          lineHeight: 1.55,
           color: monitorTheme.textPrimary,
           wordBreak: 'break-word',
           fontFamily,
@@ -59,18 +66,50 @@ export default function DataRow({
               value={value || ''}
               onChange={(e) => onChange?.(e.target.value)}
               rows={3}
-              style={inputStyle}
+              style={{
+                fontSize: 13,
+                color: monitorTheme.textPrimary,
+                background: monitorTheme.cardMutedBg,
+                border: `1px solid ${monitorTheme.borderStrong}`,
+                borderRadius: 6,
+                padding: '6px 8px',
+                width: '100%',
+                fontFamily,
+                resize: 'vertical',
+                boxSizing: 'border-box',
+                outline: 'none',
+                lineHeight: 1.55,
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = monitorTheme.brand)}
+              onBlur={(e) => (e.target.style.borderColor = monitorTheme.borderStrong)}
             />
           ) : (
             <input
               type="text"
               value={value || ''}
               onChange={(e) => onChange?.(e.target.value)}
-              style={inputStyle}
+              style={{
+                fontSize: 13,
+                color: monitorTheme.textPrimary,
+                background: monitorTheme.cardMutedBg,
+                border: `1px solid ${monitorTheme.borderStrong}`,
+                borderRadius: 6,
+                padding: '5px 8px',
+                width: '100%',
+                fontFamily,
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 0.15s',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = monitorTheme.brand)}
+              onBlur={(e) => (e.target.style.borderColor = monitorTheme.borderStrong)}
             />
           )
         ) : (
-          value || '-'
+          <span style={{ color: value ? monitorTheme.textPrimary : monitorTheme.textMuted }}>
+            {value || '—'}
+          </span>
         )}
       </div>
     </div>
