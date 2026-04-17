@@ -119,7 +119,7 @@ export default function Etapa1Hero() {
               marginTop: 0,
             }}
           >
-            {ETAPA1.greeting(userData.clientName)}
+            {(ETAPA1.greeting ?? '').replace('${clientName}', userData.clientName ?? '')}
           </motion.p>
 
           {/* Title */}

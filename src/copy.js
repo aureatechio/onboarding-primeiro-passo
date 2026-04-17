@@ -17,7 +17,7 @@
 // ETAPA 1 — Boas-vindas (Hero)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 export const ETAPA1 = {
-  greeting: (clientName) => `Olá, ${clientName}. Bem-vindo.`,
+  greeting: 'Olá, ${clientName}. Bem-vindo.',
   title: 'Primeiro Passo',
   subtitle: 'Falta um passo entre você e a sua campanha com',
   estimatedTime: 'Tempo estimado: 15 minutos',
