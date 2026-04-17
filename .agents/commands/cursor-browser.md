@@ -1,0 +1,1 @@
+Use o cursor-ide-browser para acessar a URL
