@@ -73,10 +73,10 @@ Deno.serve(async (req: Request) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-    // Fetch current singleton
+    // Fetch current singleton (including content to merge)
     const { data: existing, error: fetchError } = await supabase
       .from(CONFIG_TABLE)
-      .select('id, version')
+      .select('id, version, content')
       .limit(1)
       .single()
 
@@ -88,11 +88,14 @@ Deno.serve(async (req: Request) => {
     const newVersion = (existing.version ?? 0) + 1
     const now = new Date().toISOString()
 
+    // Merge: existing content + new diff (new keys override per-etapa, others preserved)
+    const mergedContent = { ...(existing.content ?? {}), ...content }
+
     // Update singleton
     const { error: updateError } = await supabase
       .from(CONFIG_TABLE)
       .update({
-        content,
+        content: mergedContent,
         version: newVersion,
         published_by: published_by.trim(),
         updated_at: now,

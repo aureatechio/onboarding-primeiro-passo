@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback, useLayoutEffect } from 'react'
 import { COLORS } from '../../theme/colors'
 import { PREVIEW_EXAMPLE_VALUES, TEMPLATE_VARIABLES } from './constants'
+
+const VAR_DRAG_MIME = 'application/x-copy-editor-var'
 
 /**
  * Renderiza string template substituindo ${varName} por valores de exemplo.
@@ -22,9 +24,6 @@ function renderValue(value, exampleValues = PREVIEW_EXAMPLE_VALUES) {
   return String(value ?? '')
 }
 
-/**
- * Extrai nomes de parametros de uma funcao.
- */
 function extractFunctionParams(fn) {
   const str = fn.toString()
   const match = str.match(/^\(?\s*([^)=]*?)\s*\)?(?:\s*=>)/)
@@ -35,28 +34,158 @@ function extractFunctionParams(fn) {
     .filter(Boolean)
 }
 
-/**
- * Verifica se o campo tem template variables (string com ${...}).
- */
 function hasTemplateVars(value) {
   return typeof value === 'string' && /\$\{(\w+)\}/.test(value)
 }
 
-/**
- * Detecta quais variaveis de template estao em uso no valor.
- */
 function usedVariables(value) {
   if (typeof value !== 'string') return []
   const matches = value.match(/\$\{(\w+)\}/g) || []
   return [...new Set(matches.map((m) => m.slice(2, -1)))]
 }
 
-/**
- * EditableText — Componente central do Preview-First Copy Editor.
- *
- * Renderiza texto visualmente como aparece no onboarding.
- * Click transforma em input/textarea para edicao inline.
- */
+// ─── Segment helpers (string ↔ DOM) ────────────────────────────────────────
+
+function parseSegments(str) {
+  if (typeof str !== 'string' || !str) return []
+  const segs = []
+  const re = /\$\{(\w+)\}/g
+  let last = 0
+  let m
+  while ((m = re.exec(str)) !== null) {
+    if (m.index > last) segs.push({ type: 'text', value: str.slice(last, m.index) })
+    segs.push({ type: 'var', name: m[1] })
+    last = m.index + m[0].length
+  }
+  if (last < str.length) segs.push({ type: 'text', value: str.slice(last) })
+  return segs
+}
+
+function createChipNode(varName) {
+  const wrap = document.createElement('span')
+  wrap.className = 'var-chip'
+  wrap.setAttribute('contenteditable', 'false')
+  wrap.setAttribute('data-var', varName)
+  wrap.setAttribute('draggable', 'true')
+
+  const label = document.createElement('span')
+  label.className = 'var-chip-label'
+  label.textContent = '${' + varName + '}'
+  wrap.appendChild(label)
+
+  const x = document.createElement('span')
+  x.className = 'var-chip-x'
+  x.setAttribute('data-remove-chip', 'true')
+  x.setAttribute('role', 'button')
+  x.setAttribute('aria-label', 'Remover variável')
+  x.textContent = '×'
+  wrap.appendChild(x)
+
+  return wrap
+}
+
+function populateFromString(root, str) {
+  root.innerHTML = ''
+  const segs = parseSegments(str)
+  for (const seg of segs) {
+    if (seg.type === 'text') {
+      root.appendChild(document.createTextNode(seg.value))
+    } else {
+      root.appendChild(createChipNode(seg.name))
+    }
+  }
+}
+
+function serializeDom(root) {
+  let out = ''
+  for (const node of root.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out += node.nodeValue
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.classList?.contains('var-chip')) {
+        out += '${' + (node.getAttribute('data-var') || '') + '}'
+      } else if (node.tagName === 'BR') {
+        out += '\n'
+      } else {
+        out += serializeDom(node)
+      }
+    }
+  }
+  return out
+}
+
+function getCaretRangeFromPoint(x, y) {
+  if (document.caretRangeFromPoint) {
+    return document.caretRangeFromPoint(x, y)
+  }
+  if (document.caretPositionFromPoint) {
+    const pos = document.caretPositionFromPoint(x, y)
+    if (!pos) return null
+    const range = document.createRange()
+    range.setStart(pos.offsetNode, pos.offset)
+    range.collapse(true)
+    return range
+  }
+  return null
+}
+
+function insertNodeAtRange(range, node) {
+  range.deleteContents()
+  range.insertNode(node)
+  const after = document.createRange()
+  after.setStartAfter(node)
+  after.collapse(true)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(after)
+}
+
+// Caret rect that also works when the range sits between elements (no client rects).
+function getCaretRect(range) {
+  const rects = range.getClientRects()
+  for (const r of rects) {
+    if (r.width + r.height > 0) return r
+  }
+  const container = range.startContainer
+  const offset = range.startOffset
+  if (container.nodeType === Node.ELEMENT_NODE) {
+    const child = container.childNodes[offset]
+    if (child && child.getBoundingClientRect) {
+      const r = child.getBoundingClientRect()
+      return { left: r.left, top: r.top, right: r.left, bottom: r.bottom, width: 0, height: r.height }
+    }
+    const prev = container.childNodes[offset - 1]
+    if (prev && prev.getBoundingClientRect) {
+      const r = prev.getBoundingClientRect()
+      return { left: r.right, top: r.top, right: r.right, bottom: r.bottom, width: 0, height: r.height }
+    }
+    if (container.getBoundingClientRect) {
+      const r = container.getBoundingClientRect()
+      return { left: r.left, top: r.top, right: r.left, bottom: r.bottom, width: 0, height: r.height }
+    }
+  }
+  return null
+}
+
+// Snap a range out of any .var-chip it lands inside, using click X to pick side.
+function normalizeRange(range, rootEl, clientX) {
+  if (!range || !rootEl) return range
+  const container = range.startContainer
+  const el = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement
+  const chip = el?.closest?.('.var-chip')
+  if (!chip || !rootEl.contains(chip)) return range
+  const rect = chip.getBoundingClientRect()
+  const mid = rect.left + rect.width / 2
+  const x = typeof clientX === 'number' ? clientX : (range.getClientRects()[0]?.left ?? mid)
+  const snapped = document.createRange()
+  if (x < mid) snapped.setStartBefore(chip)
+  else snapped.setStartAfter(chip)
+  snapped.collapse(true)
+  return snapped
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────
+
 export default function EditableText({
   value,
   originalValue,
@@ -71,7 +200,9 @@ export default function EditableText({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState('')
-  const inputRef = useRef(null)
+  const editorRef = useRef(null)
+  const savedRangeRef = useRef(null)
+  const indicatorRef = useRef(null)
 
   const isFunction = typeof value === 'function'
   const isTemplate = hasTemplateVars(value)
@@ -89,15 +220,28 @@ export default function EditableText({
     setIsEditing(true)
   }, [isEditable, value])
 
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      if (multiline && inputRef.current.tagName === 'TEXTAREA') {
-        inputRef.current.style.height = 'auto'
-        inputRef.current.style.height = inputRef.current.scrollHeight + 'px'
-      }
-    }
-  }, [isEditing, multiline])
+  const syncFromDom = useCallback(() => {
+    const root = editorRef.current
+    if (!root) return
+    setEditValue(serializeDom(root))
+  }, [])
+
+  // Populate the contentEditable root once when entering edit mode.
+  useLayoutEffect(() => {
+    if (!isEditing) return
+    const root = editorRef.current
+    if (!root) return
+    populateFromString(root, editValue)
+    root.focus()
+    // Place caret at the end.
+    const range = document.createRange()
+    range.selectNodeContents(root)
+    range.collapse(false)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing])
 
   const commit = useCallback(() => {
     setIsEditing(false)
@@ -124,30 +268,165 @@ export default function EditableText({
     [cancel, commit, multiline]
   )
 
-  const insertVariable = useCallback(
-    (varName) => {
-      const input = inputRef.current
-      if (!input) return
-      const start = input.selectionStart
-      const end = input.selectionEnd
-      const before = editValue.slice(0, start)
-      const after = editValue.slice(end)
-      const inserted = `\${${varName}}`
-      setEditValue(before + inserted + after)
-      requestAnimationFrame(() => {
-        input.selectionStart = input.selectionEnd = start + inserted.length
-        input.focus()
-      })
-    },
-    [editValue]
-  )
-
-  const handleTextareaInput = useCallback((e) => {
-    e.target.style.height = 'auto'
-    e.target.style.height = e.target.scrollHeight + 'px'
+  // Save selection while the editor has focus, normalizing out of atomic chips.
+  const handleSelection = useCallback(() => {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    let range = sel.getRangeAt(0)
+    const root = editorRef.current
+    if (!root || !root.contains(range.commonAncestorContainer)) return
+    const normalized = normalizeRange(range, root)
+    if (normalized !== range) {
+      sel.removeAllRanges()
+      sel.addRange(normalized)
+      range = normalized
+    }
+    savedRangeRef.current = range.cloneRange()
   }, [])
 
-  // ─── Edit Mode ──────────────────────────────────────────────────────────────
+  const insertVariableAtCaret = useCallback(
+    (varName) => {
+      const root = editorRef.current
+      if (!root) return
+      let range = savedRangeRef.current
+      if (!range || !root.contains(range.commonAncestorContainer)) {
+        range = document.createRange()
+        range.selectNodeContents(root)
+        range.collapse(false)
+      }
+      range = normalizeRange(range, root)
+      const chip = createChipNode(varName)
+      insertNodeAtRange(range, chip)
+      savedRangeRef.current = window.getSelection().getRangeAt(0).cloneRange()
+      syncFromDom()
+      root.focus()
+    },
+    [syncFromDom]
+  )
+
+  const hideIndicator = useCallback(() => {
+    if (indicatorRef.current) indicatorRef.current.style.display = 'none'
+  }, [])
+
+  const showIndicatorAt = useCallback((range) => {
+    const bar = indicatorRef.current
+    const root = editorRef.current
+    if (!bar || !root) return
+    const wrapper = bar.parentElement
+    if (!wrapper) return
+    const rect = getCaretRect(range)
+    if (!rect) return
+    const wrapperRect = wrapper.getBoundingClientRect()
+    const height = rect.height || parseFloat(getComputedStyle(root).lineHeight) || 18
+    bar.style.display = 'block'
+    bar.style.left = rect.left - wrapperRect.left - 1 + 'px'
+    bar.style.top = rect.top - wrapperRect.top + 'px'
+    bar.style.height = height + 'px'
+  }, [])
+
+  const handleDrop = useCallback(
+    (e) => {
+      hideIndicator()
+      const varName = e.dataTransfer.getData(VAR_DRAG_MIME)
+      if (!varName) return
+      e.preventDefault()
+      const root = editorRef.current
+      if (!root) return
+      let range = getCaretRangeFromPoint(e.clientX, e.clientY)
+      if (!range) return
+      range = normalizeRange(range, root, e.clientX)
+      // If the drag source is an existing chip in this editor, remove it first.
+      const sel = window.getSelection()
+      const draggedChip = root.querySelector(`.var-chip[data-dragging="true"]`)
+      if (draggedChip) {
+        draggedChip.remove()
+      }
+      const chip = createChipNode(varName)
+      insertNodeAtRange(range, chip)
+      savedRangeRef.current = sel.getRangeAt(0).cloneRange()
+      syncFromDom()
+      root.focus()
+    },
+    [hideIndicator, syncFromDom]
+  )
+
+  const handleDragOver = useCallback(
+    (e) => {
+      if (!e.dataTransfer.types.includes(VAR_DRAG_MIME)) return
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'copy'
+      const root = editorRef.current
+      if (!root) return
+      let range = getCaretRangeFromPoint(e.clientX, e.clientY)
+      if (!range) {
+        hideIndicator()
+        return
+      }
+      range = normalizeRange(range, root, e.clientX)
+      showIndicatorAt(range)
+    },
+    [hideIndicator, showIndicatorAt]
+  )
+
+  const handleDragLeave = useCallback(
+    (e) => {
+      const next = e.relatedTarget
+      const wrapper = indicatorRef.current?.parentElement
+      if (wrapper && next && wrapper.contains(next)) return
+      hideIndicator()
+    },
+    [hideIndicator]
+  )
+
+  // Click within the editor: handle chip X-button removal.
+  const handleEditorMouseDown = useCallback(
+    (e) => {
+      const target = e.target
+      if (target?.getAttribute && target.getAttribute('data-remove-chip') === 'true') {
+        e.preventDefault()
+        const chip = target.closest('.var-chip')
+        if (chip) {
+          chip.remove()
+          syncFromDom()
+          editorRef.current?.focus()
+        }
+      }
+    },
+    [syncFromDom]
+  )
+
+  // Dragging an existing chip: mark it so drop handler can remove original (move).
+  const handleEditorDragStart = useCallback((e) => {
+    const chip = e.target?.closest?.('.var-chip')
+    if (!chip || !editorRef.current?.contains(chip)) return
+    const varName = chip.getAttribute('data-var')
+    if (!varName) return
+    chip.setAttribute('data-dragging', 'true')
+    e.dataTransfer.setData(VAR_DRAG_MIME, varName)
+    e.dataTransfer.setData('text/plain', `\${${varName}}`)
+    e.dataTransfer.effectAllowed = 'move'
+  }, [])
+
+  const handleEditorDragEnd = useCallback(
+    (e) => {
+      hideIndicator()
+      const chip = e.target?.closest?.('.var-chip')
+      if (chip) chip.removeAttribute('data-dragging')
+    },
+    [hideIndicator]
+  )
+
+  // Prevent blur when user clicks pills / X buttons.
+  const handleBlur = useCallback(
+    (e) => {
+      const next = e.relatedTarget
+      if (next && next.closest?.('[data-editor-keep-focus="true"]')) return
+      commit()
+    },
+    [commit]
+  )
+
+  // ─── Edit Mode ────────────────────────────────────────────────────────
   if (isEditing) {
     const editTypography = {
       fontFamily: style.fontFamily || "'Inter', sans-serif",
@@ -165,9 +444,10 @@ export default function EditableText({
       margin: style.margin || 0,
     }
 
-    const inputStyle = {
+    const editorStyle = {
       width: '100%',
       maxWidth: '100%',
+      minHeight: multiline ? 60 : undefined,
       background: `${COLORS.card}`,
       border: `1.5px solid ${COLORS.accent}80`,
       borderRadius: 6,
@@ -176,79 +456,93 @@ export default function EditableText({
       ...editTypography,
       outline: 'none',
       boxShadow: `0 0 0 3px ${COLORS.accent}20`,
-      resize: 'none',
       display: 'block',
       margin: 0,
       boxSizing: 'border-box',
+      whiteSpace: multiline ? 'pre-wrap' : 'nowrap',
+      overflowX: multiline ? 'hidden' : 'auto',
+      wordBreak: multiline ? 'break-word' : 'normal',
+      cursor: 'text',
     }
 
     const varsInUse = usedVariables(editValue)
-    const showVarPills = isTemplate || varsInUse.length > 0
 
     return (
       <div data-path={dataPath} style={editContainerStyle}>
-        {multiline ? (
-          <textarea
-            ref={inputRef}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={commit}
-            onKeyDown={handleKeyDown}
-            onInput={handleTextareaInput}
-            style={{ ...inputStyle, minHeight: 60 }}
-            rows={2}
-          />
-        ) : (
-          <input
-            ref={inputRef}
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={commit}
-            onKeyDown={handleKeyDown}
-            style={inputStyle}
-          />
-        )}
-        {showVarPills && (
+        <div style={{ position: 'relative' }} onDragLeave={handleDragLeave}>
           <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 4,
-              marginTop: 4,
-              marginBottom: 4,
-            }}
-          >
-            {Object.entries(TEMPLATE_VARIABLES).map(([key, { label }]) => (
-              <button
+            ref={editorRef}
+            className="var-rich-editor"
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-multiline={multiline}
+            onInput={syncFromDom}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleSelection}
+            onMouseUp={handleSelection}
+            onMouseDown={handleEditorMouseDown}
+            onDragStart={handleEditorDragStart}
+            onDragEnd={handleEditorDragEnd}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            spellCheck={false}
+            style={editorStyle}
+          />
+          <div ref={indicatorRef} className="var-drop-indicator" aria-hidden="true" />
+        </div>
+        <div
+          data-editor-keep-focus="true"
+          tabIndex={-1}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 4,
+            marginTop: 6,
+            marginBottom: 4,
+          }}
+          onMouseDown={(e) => {
+            // Prevent blur stealing focus from the editor when clicking pills.
+            if (e.target !== e.currentTarget) e.preventDefault()
+          }}
+        >
+          {Object.entries(TEMPLATE_VARIABLES).map(([key, { label }]) => {
+            const active = varsInUse.includes(key)
+            return (
+              <span
                 key={key}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault()
-                  insertVariable(key)
+                className="var-chip-source"
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData(VAR_DRAG_MIME, key)
+                  e.dataTransfer.setData('text/plain', `\${${key}}`)
+                  e.dataTransfer.effectAllowed = 'copy'
                 }}
+                onClick={() => insertVariableAtCaret(key)}
+                title="Arraste para dentro do texto ou clique para inserir no cursor"
                 style={{
                   fontSize: 10,
                   fontFamily: "'JetBrains Mono', monospace",
                   fontWeight: 600,
-                  background: varsInUse.includes(key) ? `${COLORS.accent}20` : `${COLORS.border}`,
-                  color: varsInUse.includes(key) ? COLORS.accent : COLORS.textMuted,
-                  border: `1px solid ${varsInUse.includes(key) ? COLORS.accent + '40' : 'transparent'}`,
+                  background: active ? `${COLORS.accent}20` : `${COLORS.border}`,
+                  color: active ? COLORS.accent : COLORS.textMuted,
+                  border: `1px solid ${active ? COLORS.accent + '40' : 'transparent'}`,
                   borderRadius: 4,
                   padding: '2px 6px',
-                  cursor: 'pointer',
+                  userSelect: 'none',
                 }}
               >
                 {'${' + label + '}'}
-              </button>
-            ))}
-          </div>
-        )}
+              </span>
+            )
+          })}
+        </div>
       </div>
     )
   }
 
-  // ─── View Mode ────────────────────────────────────────────────────────────
+  // ─── View Mode ────────────────────────────────────────────────────────
   const rendered = renderValue(value, exampleValues)
 
   const viewStyle = {

@@ -77,6 +77,80 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Copy Editor — variable chips inside editable texts */
+.var-chip {
+  display: inline-block;
+  vertical-align: baseline;
+  background: rgba(200, 255, 0, 0.15);
+  color: var(--color-accent);
+  border: 1px solid rgba(200, 255, 0, 0.35);
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 0 2px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: grab;
+  user-select: none;
+  position: relative;
+  white-space: nowrap;
+}
+.var-chip:active {
+  cursor: grabbing;
+}
+.var-chip-x {
+  display: none;
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 14px;
+  height: 14px;
+  background: var(--color-red);
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--font-primary);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+.var-chip:hover .var-chip-x {
+  display: block;
+}
+.var-chip-label {
+  pointer-events: none;
+}
+.var-chip-source {
+  cursor: grab;
+}
+.var-chip-source:active {
+  cursor: grabbing;
+}
+.var-drop-indicator {
+  display: none;
+  position: absolute;
+  width: 2px;
+  background: var(--color-accent);
+  pointer-events: none;
+  border-radius: 1px;
+  box-shadow: 0 0 6px rgba(200, 255, 0, 0.6);
+  animation: var-drop-blink 0.9s step-start infinite;
+  z-index: 5;
+}
+@keyframes var-drop-blink {
+  0%, 55% { opacity: 1; }
+  55.01%, 100% { opacity: 0.25; }
+}
+.var-rich-editor[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-dim);
+  pointer-events: none;
+}
+
 /* Safe areas para iPhone notch/Dynamic Island */
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
