@@ -1,4 +1,5 @@
-import { RotateCcw, Download, Search, GitCompare, Upload } from 'lucide-react'
+import { useRef } from 'react'
+import { RotateCcw, Download, Search, GitCompare, Upload, FileUp } from 'lucide-react'
 import { COLORS } from '../../theme/colors'
 import { monitorTheme, monitorRadius } from '../AiStep2Monitor/theme'
 
@@ -50,12 +51,47 @@ export default function EditorToolbar({
   dirtyCount,
   onReset,
   onExport,
+  onImport,
   onSearch,
   onToggleDiff,
   diffActive,
   onPublish,
   publishStatus,
 }) {
+  const fileInputRef = useRef(null)
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const parsed = JSON.parse(text)
+      const result = onImport?.(parsed)
+
+      if (!result?.success) {
+        const reason =
+          result?.reason === 'no-valid-keys'
+            ? 'Nenhuma etapa válida encontrada (ETAPA1, ETAPA2, ...).'
+            : result?.reason === 'invalid-json'
+              ? 'JSON inválido.'
+              : 'Falha ao importar.'
+        window.alert(reason)
+      } else {
+        window.alert(`Importado: ${result.imported.join(', ')}. Revise e clique em Publicar.`)
+      }
+    } catch (err) {
+      window.alert(`Erro ao ler arquivo: ${err.message}`)
+    } finally {
+      // Reset so selecting the same file again re-triggers
+      e.target.value = ''
+    }
+  }
+
   return (
     <div
       style={{
@@ -118,6 +154,18 @@ export default function EditorToolbar({
           icon={Download}
           label="Exportar"
           onClick={onExport}
+        />
+        <ToolbarButton
+          icon={FileUp}
+          label="Importar"
+          onClick={handleImportClick}
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
         />
         <ToolbarButton
           icon={Upload}

@@ -21,6 +21,7 @@ export default function PreviewEditorLayout({
   onUpdateField,
   onResetSection,
   onExportJSON,
+  onImportJSON,
   PreviewComponent,
   onPublish,
   publishStatus,
@@ -84,6 +85,7 @@ export default function PreviewEditorLayout({
         dirtyCount={dirtyEtapas.size}
         onReset={() => onResetSection(activeEtapaId)}
         onExport={onExportJSON}
+        onImport={onImportJSON}
         onSearch={() => setSearchOpen(true)}
         onToggleDiff={() => setDiffActive((p) => !p)}
         diffActive={diffActive}

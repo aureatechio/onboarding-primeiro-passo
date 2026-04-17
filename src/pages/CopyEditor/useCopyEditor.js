@@ -153,6 +153,63 @@ export function useCopyEditor() {
     })
   }, [originalSections])
 
+  // ── Import JSON ─────────────────────────────────────────────────────────
+  // Merge imported content over current sections. Preserves functions
+  // (strings matching the function placeholder are ignored). Marks every
+  // imported etapa as dirty so the Publicar button is enabled.
+  const importFromJSON = useCallback((jsonContent) => {
+    if (!jsonContent || typeof jsonContent !== 'object' || Array.isArray(jsonContent)) {
+      return { success: false, reason: 'invalid-json' }
+    }
+
+    const FUNCTION_PLACEHOLDER = '[function — edite diretamente no copy.js]'
+
+    const mergeImport = (current, imported) => {
+      if (imported === FUNCTION_PLACEHOLDER) return current
+      if (typeof current === 'function') return current
+      if (Array.isArray(imported)) return imported
+      if (
+        imported &&
+        typeof imported === 'object' &&
+        current &&
+        typeof current === 'object' &&
+        !Array.isArray(current)
+      ) {
+        const merged = { ...current }
+        for (const key of Object.keys(imported)) {
+          merged[key] = mergeImport(current[key], imported[key])
+        }
+        return merged
+      }
+      return imported
+    }
+
+    const newSections = { ...sections }
+    const importedKeys = []
+
+    for (const { id, exportKey } of ETAPAS_META) {
+      if (jsonContent[exportKey]) {
+        newSections[id] = mergeImport(sections[id], jsonContent[exportKey])
+        importedKeys.push(exportKey)
+      }
+    }
+
+    if (importedKeys.length === 0) {
+      return { success: false, reason: 'no-valid-keys' }
+    }
+
+    setSections(newSections)
+    setDirtyEtapas((prev) => {
+      const next = new Set(prev)
+      for (const { id, exportKey } of ETAPAS_META) {
+        if (importedKeys.includes(exportKey)) next.add(id)
+      }
+      return next
+    })
+
+    return { success: true, imported: importedKeys }
+  }, [sections])
+
   // ── Export JSON ─────────────────────────────────────────────────────────
   const exportAsJSON = useCallback(() => {
     const exportable = {}
@@ -258,6 +315,7 @@ export function useCopyEditor() {
     updateField,
     resetSection,
     exportAsJSON,
+    importFromJSON,
     getOriginalValue,
     // Supabase integration
     publishToSupabase,

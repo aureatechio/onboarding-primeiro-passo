@@ -18,6 +18,7 @@ export default function CopyEditor() {
     updateField,
     resetSection,
     exportAsJSON,
+    importFromJSON,
     publishToSupabase,
     publishStatus,
     publishError,
@@ -44,6 +45,7 @@ export default function CopyEditor() {
         onUpdateField={updateField}
         onResetSection={resetSection}
         onExportJSON={exportAsJSON}
+        onImportJSON={importFromJSON}
         PreviewComponent={PreviewComponent}
         onPublish={() => setPublishDialogOpen(true)}
         publishStatus={publishStatus}

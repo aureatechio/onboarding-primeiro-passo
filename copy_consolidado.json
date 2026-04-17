@@ -1,0 +1,601 @@
+{
+  "ETAPA1": {
+    "greeting": "[function — edite diretamente no copy.js]",
+    "title": "Primeiro Passo",
+    "subtitle": "Falta um passo entre você e a sua campanha com",
+    "estimatedTime": "Tempo estimado: 15 minutos",
+    "ctaButton": "COMEÇAR AGORA",
+    "microCopy": "Ao completar, a equipe de produção será ativada",
+    "stepLabel": "ETAPA 1 DE 7",
+    "valueProps": [
+      "Entender como funciona a sua campanha",
+      "Conhecer os prazos e combinados",
+      "Saber as regras de uso da celebridade",
+      "Liberar a produção das suas peças"
+    ]
+  },
+  "ETAPA2": {
+    "header": {
+      "title": "Como funciona sua campanha",
+      "readTime": "3 minutos"
+    },
+    "pacoteResumo": "2 vídeos (de 30 segundos) e 4 peças estáticas.",
+    "slideTitles": [
+      "Entenda o que você contratou",
+      "Como a celebridade aparece na sua campanha",
+      "Seu pacote de campanha",
+      "Seu resultado depende de nós dois"
+    ],
+    "slide1": {
+      "body": "A Aceleraí não é uma agência de publicidade tradicional. Nós produzimos os criativos com a celebridade, mas a divulgação, o planejamento e o tráfego pago ficam por sua conta (ou da sua agência/equipe de marketing).",
+      "cardLabel": "PENSE ASSIM",
+      "aceleraiLabel": "ACELERAÍ",
+      "aceleraiDesc": "Entrega a munição",
+      "voceLabel": "VOCÊ",
+      "voceDesc": "Aponta e dispara"
+    },
+    "slide2": {
+      "body": "[function — edite diretamente no copy.js]",
+      "steps": [
+        {
+          "num": "1",
+          "title": "Gravação",
+          "desc": "A celebridade grava sessões de vídeo e foto em estúdio profissional"
+        },
+        {
+          "num": "2",
+          "title": "Seu briefing",
+          "desc": "Você envia as informações da sua empresa, produto e público-alvo"
+        },
+        {
+          "num": "3",
+          "title": "Produção",
+          "desc": "Nossa equipe combina as gravações com seu briefing para criar as peças"
+        },
+        {
+          "num": "4",
+          "title": "Sua campanha",
+          "desc": "Você recebe os materiais prontos para rodar sua campanha"
+        }
+      ],
+      "footer": "Assim, você tem acesso a materiais com uma celebridade por uma fração do custo de uma contratação direta."
+    },
+    "slide3": {
+      "body": "No seu contrato, você tem direito a:",
+      "footer": "Todos os materiais são produzidos pela nossa equipe de produção profissional, garantindo qualidade e consistência."
+    },
+    "slide4": {
+      "body": "O sucesso da sua campanha é uma parceria entre a Aceleraí e a sua empresa. Cada lado tem um papel fundamental.",
+      "nossaParte": {
+        "label": "Da nossa parte",
+        "items": [
+          "Produção dos criativos com a celebridade",
+          "Edição e finalização profissional",
+          "Entrega dentro do prazo combinado",
+          "Suporte durante toda a campanha"
+        ]
+      },
+      "suaParte": {
+        "label": "Da sua parte",
+        "items": [
+          "Enviar o briefing completo da empresa",
+          "Rodar a divulgação e o tráfego pago",
+          "Manter comunicação ativa com nosso time"
+        ]
+      },
+      "closingTip": "Quanto mais rápido a gente se comunicar, melhor vai ser o resultado."
+    },
+    "quizQuestions": [
+      "Entendi que a Aceleraí produz os criativos com a celebridade e que a divulgação e o tráfego são de minha responsabilidade.",
+      "Entendi que os criativos são produzidos a partir de gravações pré-realizadas pela celebridade, combinadas com o briefing da minha empresa.",
+      "Entendi o que vou receber no meu pacote de campanha."
+    ],
+    "quizTitle": "Confirme o entendimento",
+    "quizSubtitle": "Marque todos para avançar",
+    "quizConfirmMessage": "Tudo confirmado. Você pode avançar.",
+    "completionTitle": "Etapa 2 concluída!",
+    "completionDescription": "Agora você sabe exatamente como funciona a sua campanha. No próximo passo, vamos alinhar os prazos e combinados.",
+    "navNextDefault": "Próximo",
+    "navNextLast": "Ir para confirmação",
+    "navConfirm": "Confirmar e avançar",
+    "processingMessages": [
+      "Salvando respostas...",
+      "Concluído!"
+    ]
+  },
+  "ETAPA3": {
+    "header": {
+      "title": "Prazos e combinados",
+      "readTime": "4 minutos",
+      "alert": "Ao concluir esta etapa, os 15 dias de preparação começam a contar"
+    },
+    "slideTags": [
+      "SLIDE 3.1",
+      "SLIDE 3.2",
+      "SLIDE 3.3",
+      "SLIDE 3.4",
+      "SLIDE 3.5"
+    ],
+    "slideTitles": [
+      "A linha do tempo da sua campanha",
+      "Prazos reais de cada fase",
+      "Preparação: 15 dias pra tudo acontecer",
+      "O tempo é seu aliado (se você for rápido)",
+      "Onde a gente se fala"
+    ],
+    "timeline": [
+      {
+        "label": "Assinatura do contrato",
+        "status": "done"
+      },
+      {
+        "tag": "AGORA",
+        "label": "Primeiro Passo",
+        "status": "current"
+      },
+      {
+        "tag": "EM BREVE",
+        "label": "Briefing",
+        "status": "next"
+      },
+      {
+        "label": "Roteiros",
+        "status": "future"
+      },
+      {
+        "label": "Produção das peças",
+        "status": "future"
+      },
+      {
+        "label": "Aprovação do cliente",
+        "status": "future"
+      },
+      {
+        "label": "Aprovação com a Celebridade",
+        "status": "future"
+      },
+      {
+        "label": "Entrega final",
+        "status": "future"
+      },
+      {
+        "label": "Uso da campanha",
+        "status": "future"
+      }
+    ],
+    "prazosProducao": {
+      "cardTitle": "Prazos de cada etapa",
+      "items": [
+        {
+          "label": "Roteiro pronto",
+          "prazo": "Até 1 dia útil após envio do briefing",
+          "icon": "fileText"
+        },
+        {
+          "label": "Ajuste de roteiro",
+          "prazo": "Até 1 dia útil por rodada (ilimitados nessa fase)",
+          "icon": "penLine"
+        },
+        {
+          "label": "Após aprovação do roteiro",
+          "prazo": "Não é mais possível alterar",
+          "icon": "lock",
+          "alert": true
+        },
+        {
+          "label": "Campanha pronta",
+          "prazo": "Até 3 dias úteis após roteiro aprovado",
+          "icon": "clapperboard"
+        },
+        {
+          "label": "Ajuste de peças",
+          "prazo": "Até 1 dia útil por rodada (2 levas contratuais)",
+          "icon": "refreshCw"
+        },
+        {
+          "label": "Aprovação da celebridade",
+          "prazo": "Até 3 dias úteis",
+          "icon": "star"
+        },
+        {
+          "label": "Após aprovação da celebridade",
+          "prazo": "Não é mais possível alterar",
+          "icon": "lock",
+          "alert": true
+        },
+        {
+          "label": "Troca de oferta",
+          "prazo": "Até 1 dia útil",
+          "icon": "shuffle"
+        }
+      ],
+      "alertTip": "Os prazos acima são dias úteis e contam a partir da ação anterior. Sua agilidade nas respostas acelera todo o processo."
+    },
+    "suaParte": {
+      "label": "A sua parte",
+      "items": [
+        "Responder ao briefing criativo",
+        "Enviar materiais solicitados (logo, textos, referências)",
+        "Aprovar ou solicitar ajustes nas peças",
+        "Cumprir os prazos de cada fase"
+      ]
+    },
+    "nossaParte": {
+      "label": "A parte da Aceleraí",
+      "items": [
+        "Criar o roteiro e direção criativa",
+        "Produzir as peças com a celebridade",
+        "Entregar dentro do prazo combinado"
+      ]
+    },
+    "warningText": "O período de direito de uso de imagem da celebridade contratada começa a partir do décimo sexto dia.",
+    "clienteAgil": {
+      "label": "CLIENTE ÁGIL",
+      "desc": "Responde rápido, envia materiais no prazo, aprova sem demora. Resultado: campanha entregue dentro do previsto."
+    },
+    "clienteDemorou": {
+      "label": "CLIENTE QUE DEMOROU",
+      "desc": "Demora pra responder, atrasa envio de materiais, pede muitas alterações fora do escopo. Resultado: prazo do contrato corre, e o tempo de uso da campanha diminui."
+    },
+    "agilidadeTip": "Sua agilidade é o que garante o melhor resultado. O tempo é seu aliado — use-o bem.",
+    "whatsapp": {
+      "title": "WhatsApp",
+      "subtitle": "Canal principal de comunicação",
+      "desc": "Todas as atualizações, solicitações de materiais e aprovações serão enviadas por WhatsApp. Mantenha as notificações ativas e responda o mais rápido possível."
+    },
+    "plataforma": {
+      "title": "Plataforma Aceleraí",
+      "subtitle": "Acompanhamento e entregas",
+      "desc": "Pela plataforma você acompanha o status da campanha, faz upload de materiais e visualiza as entregas finais."
+    },
+    "canaisTip": "Mantenha os dois canais ativos. Demora na resposta impacta diretamente o prazo da sua campanha.",
+    "quizSubtitle": "Ao confirmar, a preparação de 15 dias inicia",
+    "quizQuestions": [
+      "Entendi que o prazo do contrato conta a partir da assinatura e que minha agilidade impacta diretamente o resultado.",
+      "Sei que terei 15 dias de preparação e que preciso responder rapidamente a todas as solicitações.",
+      "Compreendo que atrasos da minha parte podem reduzir o tempo de uso da campanha."
+    ],
+    "quizConfirmMessage": "Tudo certo! Você pode ativar a preparação.",
+    "navConfirmQuiz": "Confirmar e ativar preparação",
+    "navNextDefault": "Próximo",
+    "navNextLast": "Revisar e confirmar",
+    "processingMessages": [
+      "Ativando preparação...",
+      "Notificando seu(a) atendente...",
+      "Registrando prazos...",
+      "Tudo pronto!"
+    ],
+    "activation": {
+      "title": "Preparação ativada!",
+      "description": "[function — edite diretamente no copy.js]",
+      "badge": "15 DIAS DE PREPARAÇÃO",
+      "cardLabel": "O QUE ACONTECE AGORA",
+      "items": [
+        {
+          "icon": "mail",
+          "title": "Entraremos em contato",
+          "desc": "Nossa equipe vai te procurar nos canais combinados."
+        },
+        {
+          "icon": "zap",
+          "title": "Responda rápido",
+          "desc": "Quanto mais rápido você responder, mais rápido sua campanha sai."
+        },
+        {
+          "icon": "clapperboard",
+          "title": "A produção começa",
+          "desc": "Assim que tudo estiver alinhado, iniciamos as peças."
+        }
+      ],
+      "nextStepText": "Na próxima etapa, você conhecerá as regras de uso da imagem da celebridade.",
+      "ctaButton": "Continuar para Etapa 4",
+      "stepLabel": "[function — edite diretamente no copy.js]"
+    }
+  },
+  "ETAPA4": {
+    "header": {
+      "readTime": "4 minutos"
+    },
+    "slideHeaders": [
+      {
+        "tag": "SLIDE 4.1",
+        "title": "Onde e como voce pode usar sua celebridade",
+        "readTime": "4 minutos"
+      },
+      {
+        "tag": "SLIDE 4.3",
+        "title": "Como funciona a aprovacao das pecas"
+      },
+      {
+        "tag": "SLIDE 4.4",
+        "title": "Franquias, filiais e outras midias"
+      },
+      {
+        "tag": "SLIDE 4.5",
+        "title": "Prazo de uso e o que acontece no fim do contrato"
+      },
+      {
+        "tag": "SLIDE 4.6",
+        "title": "Quiz — Regras de uso da celebridade"
+      }
+    ],
+    "slide1": {
+      "body": "[function — edite diretamente no copy.js]",
+      "contractLabel": "SEU CONTRATO",
+      "exclusivityTitle": "Exclusividade geografica e de segmento",
+      "exclusivityBody": "[function — edite diretamente no copy.js]",
+      "exampleTitle": "Exemplo pratico do seu contrato",
+      "exampleBody": "[function — edite diretamente no copy.js]"
+    },
+    "slide2": {
+      "body": "Toda peca que usa a imagem da celebridade precisa passar por um fluxo de aprovacao. Entenda cada etapa:",
+      "flowLabel": "FLUXO DE APROVACAO",
+      "steps": [
+        {
+          "icon": "clapperboard",
+          "label": "Producao cria a peca",
+          "desc": "Nossa equipe desenvolve o material criativo."
+        },
+        {
+          "icon": "eye",
+          "label": "Voce revisa e aprova",
+          "desc": "Voce analisa e pede ajustes se necessario."
+        },
+        {
+          "icon": "star",
+          "label": "Celebridade aprova",
+          "desc": "A celebridade valida o uso da sua imagem."
+        },
+        {
+          "icon": "circleCheck",
+          "label": "Entrega liberada",
+          "desc": "Peca aprovada e liberada para veiculacao."
+        }
+      ],
+      "ajustesTitle": "2 rodadas de ajustes por peca",
+      "ajustesBody": "Cada peca tem direito a ate 2 rodadas de ajustes inclusos no contrato. Ajustes adicionais podem gerar custos extras.",
+      "celebAjustesTitle": "Celebridade pode pedir ajustes",
+      "celebAjustesBody": "A celebridade tem o direito contratual de solicitar alteracoes na peca antes de aprovar. O prazo de aprovacao pela celebridade e de ate 3 dias uteis.",
+      "regraOuroTitle": "Regra de ouro",
+      "regraOuroBody": "Nenhuma peca pode ser veiculada sem a aprovacao final da celebridade. Veicular sem aprovacao pode gerar penalidades contratuais."
+    },
+    "slide3": {
+      "body": "Se voce tem mais de uma unidade ou usa diferentes canais, veja o que pode e o que nao pode:",
+      "franquias": {
+        "title": "Franquias e filiais",
+        "allowed": "Unidades na mesma regiao da praca contratada podem usar as pecas normalmente.",
+        "forbidden": "Unidades em outras regioes precisam de contrato proprio para usar a celebridade."
+      },
+      "canaisDigitais": {
+        "title": "Canais digitais",
+        "allowed": "Instagram, Facebook, Tiktok, Youtube, Linkedin, Google, Site e Tráfego Pago - Uso liberado com peças aprovadas;",
+        "forbidden": "WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade nesses canais."
+      },
+      "regrasPublicacao": {
+        "title": "Regras de publicação",
+        "noTag": "Não é permitido marcar a Celebridade nas publicações em redes sociais.",
+        "canaisOficiais": "Só é permitida a veiculação da celebridade nos canais oficiais da marca.\n\nColaboradores podem republicar o conteúdo mas não podem publicar em suas redes sociais pessoais."
+      },
+      "tvRadioOutdoor": {
+        "title": "TV, Radio e Outdoor",
+        "warning": "Consulte a equipe antes de veicular nesses meios. Cada formato pode ter regras especificas.",
+        "tags": [
+          "TV aberta",
+          "TV fechada",
+          "Radio",
+          "Outdoor",
+          "Busdoor",
+          "Painel LED"
+        ]
+      }
+    },
+    "slide4": {
+      "body": "Seu contrato tem prazo definido. Saiba o que acontece na renovacao e no encerramento:",
+      "renovacao": {
+        "title": "Renovacao do contrato",
+        "steps": [
+          "A equipe entra em contato antes do vencimento para negociar a renovacao.",
+          "Voce pode manter a mesma celebridade ou trocar por outra disponivel para sua praca e segmento."
+        ]
+      },
+      "naoDisponivel": {
+        "title": "Celebridade nao disponivel",
+        "opcaoA": {
+          "title": "Opcao A — Trocar de celebridade",
+          "desc": "Voce pode escolher outra celebridade disponivel sem custo adicional de troca."
+        },
+        "opcaoB": {
+          "title": "Opcao B — Creditos",
+          "desc": "Se preferir, voce pode converter o valor restante em creditos para uso futuro."
+        }
+      },
+      "encerramento": {
+        "title": "Fim do contrato — obrigacoes",
+        "items": [
+          "Todas as pecas com a imagem da celebridade devem ser excluidas.",
+          "Remover de redes sociais, site, trafego pago e qualquer midia ativa.",
+          "O uso apos o vencimento configura violacao contratual."
+        ]
+      },
+      "multa": {
+        "title": "Multa de ate 10x",
+        "desc": "O uso indevido da imagem apos o fim do contrato pode gerar multa de ate 10 vezes o valor contratual."
+      }
+    },
+    "quizIntro": "[function — edite diretamente no copy.js]",
+    "quizTitle": "Confirme o entendimento",
+    "quizSubtitle": "Marque todos os itens para concluir",
+    "quizQuestions": "[function — edite diretamente no copy.js]",
+    "quizConfirmMessage": "Tudo certo! Voce pode concluir esta etapa.",
+    "completionTitle": "Etapa 4 concluida!",
+    "completionDescription": "[function — edite diretamente no copy.js]",
+    "completionSummary": "[function — edite diretamente no copy.js]",
+    "navNextSlide": "Proximo",
+    "navGoToQuiz": "Ir para o quiz",
+    "navConfirmAll": "Confirme todos os itens",
+    "navConcluir": "Concluir etapa",
+    "processingMessages": [
+      "Salvando respostas...",
+      "Concluído!"
+    ]
+  },
+  "ETAPA5": {
+    "header": {
+      "title": "Sua presença digital",
+      "readTime": "2 minutos"
+    },
+    "palco": {
+      "title": "Seus criativos precisam de um palco",
+      "body": "De nada adianta ter vídeos incríveis com uma celebridade se seus canais digitais não estão preparados para receber essa audiência. Suas redes sociais, site e landing pages precisam estar prontos para converter."
+    },
+    "penseAssim": {
+      "label": "PENSE ASSIM",
+      "celebLabel": "A CELEBRIDADE",
+      "celebDesc": "Atrai os olhares",
+      "canaisLabel": "SEUS CANAIS",
+      "canaisDesc": "Convertem em resultado",
+      "warningTip": "Imagine investir em uma vitrine incrível... e manter a loja trancada. Seus canais digitais são a porta de entrada."
+    },
+    "trafego": {
+      "title": "Como acelerar seus resultados",
+      "body": "Empresas que investem em tráfego pago junto com criativos de celebridade têm até 21x mais visibilidade do que quem apenas posta organicamente.",
+      "question": "Quer aprender mais sobre tráfego?",
+      "optionYes": "Sim, quero receber as 10 superdicas de tráfego pago",
+      "optionYesBadge": "PDF GRATUITO",
+      "optionNo": "Agora não, quero seguir para a próxima etapa"
+    },
+    "navNext": "Concluir e avançar",
+    "navNextSubmitting": "Enviando...",
+    "completionTitle": "Etapa 5 concluída!",
+    "completionYes": "Excelente escolha! Você vai receber o PDF com as 10 superdicas de tráfego pago diretamente no seu WhatsApp. Enquanto isso, vamos seguir para a próxima etapa.",
+    "completionNo": "Sem problemas! Você pode solicitar o material sobre tráfego a qualquer momento com seu atendente. Vamos seguir para a próxima etapa.",
+    "completionBadge": "PDF SUPERDICAS SOLICITADO"
+  },
+  "ETAPA6": {
+    "header": {
+      "title": "Sua identidade visual",
+      "readTime": "2 minutos",
+      "stepLabel": "ETAPA 6.1 DE 7"
+    },
+    "intro": {
+      "title": "Suas peças ficam muito melhores com a sua cara",
+      "body": "Para que os criativos da sua campanha fiquem alinhados com a identidade da sua marca, precisamos de algumas referências visuais. Quanto mais material você enviar, mais personalizado e profissional será o resultado."
+    },
+    "diferenca": {
+      "label": "A DIFERENÇA NA PRÁTICA",
+      "comReferencias": {
+        "label": "COM REFERÊNCIAS",
+        "desc": "Peça alinhada com a identidade da sua marca, cores corretas, fontes consistentes e resultado profissional."
+      },
+      "semReferencias": {
+        "label": "SEM REFERÊNCIAS",
+        "desc": "Produção genérica, sem personalidade da marca, cores e fontes aproximadas e resultado que não representa sua empresa."
+      }
+    },
+    "itensTitle": "Separe esses itens",
+    "items": [
+      {
+        "icon": "palette",
+        "title": "Logo em alta resolução",
+        "desc": "PNG com fundo transparente, de preferência"
+      },
+      {
+        "icon": "palette",
+        "title": "Cores principais da marca",
+        "desc": "Códigos hex (ex: #FF0000) ou referência visual"
+      },
+      {
+        "icon": "type",
+        "title": "Fontes da comunicação",
+        "desc": "Nome das fontes usadas nos materiais da marca"
+      },
+      {
+        "icon": "camera",
+        "title": "Referências visuais",
+        "desc": "Exemplos de peças, posts ou anúncios que você gosta"
+      }
+    ],
+    "reassuringTip": "Não tem nada disso organizado? Sem problema! Seu atendente vai te ajudar a reunir tudo. O importante é começar.",
+    "acknowledgement": "Entendi que preciso separar os materiais de identidade visual da minha marca para enviar ao atendente.",
+    "navConfirm": "Confirmar e avançar",
+    "completionTitle": "Etapa 6.1 concluída!",
+    "completionDescription": "[function — edite diretamente no copy.js]"
+  },
+  "ETAPA62": {
+    "header": {
+      "title": "Bonificação de prazo da sua campanha",
+      "readTime": "2 minutos",
+      "stepLabel": "ETAPA 6.2 DE 7"
+    },
+    "bonificacaoTitle": "GANHE UMA BONIFICAÇÃO DE PRAZO DE VEICULAÇÃO DA SUA CAMPANHA",
+    "bonificacaoBody": "O QUE VC PRECISA CONCLUIR? Adicione os arquivos nos campos abaixo e agilize o atendimento.",
+    "startKitInfo": "O QUE VOCÊ VAI RECEBER? Em até 24h, você receberá o START KIT com 4 peças estáticas com conteúdo da sua campanha gerado por IA.",
+    "comoFunciona": {
+      "title": "Como funciona",
+      "body": "Dentro do prazo de 15 dias após a assinatura do seu contrato, você recebe, ao final dos três meses de contrato, os dias que você conseguiu antecipar de prazo.",
+      "exemploA": "Exemplo A): Preenchendo ainda hoje (DIA DO PRIMEIRO PASSO) você ganha + 15 dias de bonificação.",
+      "exemploB": "Exemplo B): Preenchendo 5 dias corridos a partir da data do contrato, você ganha + 10 dias de bonificação."
+    },
+    "logoLabel": "Logo da sua marca",
+    "logoPlaceholder": "Selecionar logo",
+    "logoHint": "PNG, JPG, PDF, WebP, SVG, HEIC ou HEIF (max. 5 MB)",
+    "logoChangeButton": "Trocar arquivo",
+    "colorPaletteLabel": "Cores da sua marca",
+    "colorPaletteHint": "Extraídas automaticamente do logo. Edite ou adicione novas.",
+    "colorPaletteAddButton": "Adicionar cor",
+    "colorPaletteExtracting": "Extraindo cores...",
+    "colorPaletteMax": "Máximo de 8 cores atingido.",
+    "modoSimplificado": {
+      "siteLabel": "Site da sua empresa",
+      "sitePlaceholder": "www.seusite.com.br",
+      "siteError": "URL inválida. Verifique o endereço digitado.",
+      "instagramLabel": "Perfil do Instagram",
+      "instagramPrefix": "https://www.instagram.com/",
+      "instagramPlaceholder": "seuperfil",
+      "instagramError": "Handle inválido. Use apenas letras, números, pontos e underscores (ex: minha_marca)."
+    },
+    "navConfirm": "Confirmar e enviar",
+    "navConfirmPending": "Quero a bonificação",
+    "navContinueLater": "Prefiro fazer depois",
+    "navSaving": "Salvando...",
+    "processingMessages": [
+      "Enviando identidade visual...",
+      "Salvando logo e cores...",
+      "Quase pronto..."
+    ],
+    "completionDone": {
+      "title": "Etapa 6.2 concluída!",
+      "description": "Perfeito. Sua etapa de bonificação foi preenchida e isso agiliza o atendimento para envio do seu Start Kit.",
+      "badge": "BONIFICAÇÃO ATIVA"
+    },
+    "completionPending": {
+      "title": "Etapa 6.2 marcada como pendente",
+      "description": "Você decidiu continuar depois. O prazo do contrato segue correndo e você pode completar os itens de identidade visual na sequência com seu atendente.",
+      "badge": "PENDENTE"
+    }
+  },
+  "ETAPA_FINAL": {
+    "resumo": {
+      "title": "Tudo pronto. Sua campanha vai começar.",
+      "subtitle": "Você completou todas as etapas. Aqui está o resumo.",
+      "cardLabel": "RESUMO DA SUA CAMPANHA",
+      "pacoteValue": "2 vídeos + 4 estáticas",
+      "preparacaoValue": "15 dias (ativados)"
+    },
+    "proximosPassosLabel": "PRÓXIMOS PASSOS",
+    "nextSteps": "[function — edite diretamente no copy.js]",
+    "atendenteLabel": "[function — edite diretamente no copy.js]",
+    "atendenteContactTime": "[function — edite diretamente no copy.js]",
+    "ctaButton": "Concluir Primeiro Passo",
+    "ctaMicro": "Ao concluir, seu perfil completo é gerado automaticamente.",
+    "parabens": {
+      "badge": "CONCLUÍDO",
+      "title": "Parabéns!",
+      "body": "Você está entre os poucos empresários do Brasil que contam com uma celebridade na sua comunicação.",
+      "cta": "Agora é hora de fazer esse investimento virar resultado.",
+      "stepLabel": "PRIMEIRO PASSO CONCLUIDO",
+      "atendenteContact": "[function — edite diretamente no copy.js]",
+      "closing": "A gente está junto com você. Boa campanha!"
+    }
+  }
+}

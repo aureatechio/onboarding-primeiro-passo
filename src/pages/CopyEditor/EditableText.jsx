@@ -149,31 +149,44 @@ export default function EditableText({
 
   // ─── Edit Mode ──────────────────────────────────────────────────────────────
   if (isEditing) {
-    const inputStyle = {
-      ...style,
+    const editTypography = {
+      fontFamily: style.fontFamily || "'Inter', sans-serif",
+      fontSize: style.fontSize || 14,
+      fontWeight: style.fontWeight || 400,
+      lineHeight: style.lineHeight || 1.6,
+      letterSpacing: style.letterSpacing || 'normal',
+      textAlign: style.textAlign || 'left',
+    }
+
+    const editContainerStyle = {
       width: '100%',
+      maxWidth: '100%',
+      alignSelf: 'stretch',
+      margin: style.margin || 0,
+    }
+
+    const inputStyle = {
+      width: '100%',
+      maxWidth: '100%',
       background: `${COLORS.card}`,
       border: `1.5px solid ${COLORS.accent}80`,
       borderRadius: 6,
       padding: '6px 8px',
       color: COLORS.text,
-      fontFamily: style.fontFamily || "'Inter', sans-serif",
-      fontSize: style.fontSize || 14,
-      fontWeight: style.fontWeight || 400,
-      lineHeight: style.lineHeight || 1.6,
+      ...editTypography,
       outline: 'none',
       boxShadow: `0 0 0 3px ${COLORS.accent}20`,
       resize: 'none',
       display: 'block',
-      margin: style.margin || 0,
-      letterSpacing: style.letterSpacing || 'normal',
+      margin: 0,
+      boxSizing: 'border-box',
     }
 
     const varsInUse = usedVariables(editValue)
     const showVarPills = isTemplate || varsInUse.length > 0
 
     return (
-      <div data-path={dataPath}>
+      <div data-path={dataPath} style={editContainerStyle}>
         {multiline ? (
           <textarea
             ref={inputRef}
