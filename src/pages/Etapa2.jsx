@@ -151,7 +151,7 @@ export default function Etapa2() {
     // ── Slide 2.2 ──
     <div key="slide-2">
       <p style={{ color: COLORS.textMuted, fontSize: 14, lineHeight: 1.7, margin: "0 0 16px 0" }}>
-        {ETAPA2.slide2.body(celebName)}
+        {ETAPA2.slide2.body}
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>

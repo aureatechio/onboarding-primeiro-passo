@@ -62,8 +62,7 @@ export const ETAPA2 = {
 
   // ── Slide 2.2 ──
   slide2: {
-    body: (celebName) =>
-      `A celebridade já realizou sessões de filmagem onde registramos diversos textos. A partir dessas gravações, combinamos com o briefing da sua empresa para criar os criativos da sua campanha.`,
+    body: 'A celebridade já realizou sessões de filmagem onde registramos diversos textos. A partir dessas gravações, combinamos com o briefing da sua empresa para criar os criativos da sua campanha.',
     steps: [
       { num: '1', title: 'Gravação', desc: 'A celebridade grava sessões de vídeo e foto em estúdio profissional' },
       { num: '2', title: 'Seu briefing', desc: 'Você envia as informações da sua empresa, produto e público-alvo' },
@@ -241,8 +240,7 @@ export const ETAPA3 = {
   // ── Activation Screen ──
   activation: {
     title: 'Preparação ativada!',
-    description: (celebName) =>
-      `A partir de agora, os 15 dias de preparação da sua campanha com ${celebName} começaram a contar. Fique atento aos prazos e responda rápido.`,
+    description: 'A partir de agora, os 15 dias de preparação da sua campanha com ${celebName} começaram a contar. Fique atento aos prazos e responda rápido.',
     badge: '15 DIAS DE PREPARAÇÃO',
     cardLabel: 'O QUE ACONTECE AGORA',
     items: [
@@ -274,15 +272,12 @@ export const ETAPA4 = {
 
   // ── Slide 4.1 — Exclusividade ──
   slide1: {
-    body: (celebName) =>
-      `A imagem de ${celebName} e um ativo valioso. Seu contrato garante exclusividade dentro de regras bem definidas de praca e segmento. Veja exatamente o que esta no seu contrato:`,
+    body: 'A imagem de ${celebName} e um ativo valioso. Seu contrato garante exclusividade dentro de regras bem definidas de praca e segmento. Veja exatamente o que esta no seu contrato:',
     contractLabel: 'SEU CONTRATO',
     exclusivityTitle: 'Exclusividade geografica e de segmento',
-    exclusivityBody: (celebName) =>
-      `Dentro da sua praca e segmento, nenhum concorrente pode usar ${celebName}. Essa exclusividade e garantida pelo contrato e protege o investimento da sua campanha.`,
+    exclusivityBody: 'Dentro da sua praca e segmento, nenhum concorrente pode usar ${celebName}. Essa exclusividade e garantida pelo contrato e protege o investimento da sua campanha.',
     exampleTitle: 'Exemplo pratico do seu contrato',
-    exampleBody: (celebName, praca, segmento) =>
-      `Voce contratou ${celebName} para a praca ${praca} no segmento ${segmento}. Isso significa que somente voce pode veicular pecas com essa celebridade nessa regiao e nesse ramo de atuacao.`,
+    exampleBody: 'Voce contratou ${celebName} para a praca ${praca} no segmento ${segmento}. Isso significa que somente voce pode veicular pecas com essa celebridade nessa regiao e nesse ramo de atuacao.',
   },
 
   // ── Slide 4.3 — Aprovação ──
@@ -606,8 +601,7 @@ export const ETAPA_FINAL = {
 
   // ── Card atendente ──
   atendenteLabel: (genero = 'f') => genero === 'm' ? 'SEU ATENDENTE' : 'SUA ATENDENTE',
-  atendenteContactTime: (atendente) =>
-    `Entrará em contato em até 1 dia útil`,
+  atendenteContactTime: 'Entrará em contato em até 1 dia útil',
 
   // ── Botão final ──
   ctaButton: 'Concluir Primeiro Passo',
@@ -620,8 +614,7 @@ export const ETAPA_FINAL = {
     body: 'Você está entre os poucos empresários do Brasil que contam com uma celebridade na sua comunicação.',
     cta: 'Agora é hora de fazer esse investimento virar resultado.',
     stepLabel: 'PRIMEIRO PASSO CONCLUIDO',
-    atendenteContact: (atendente) =>
-      `Vai entrar em contato em até 1 dia útil pra iniciar a produção da sua campanha.`,
+    atendenteContact: 'Vai entrar em contato em até 1 dia útil pra iniciar a produção da sua campanha.',
     closing: 'A gente está junto com você. Boa campanha!',
   },
 }

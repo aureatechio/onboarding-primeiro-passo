@@ -109,7 +109,7 @@ export default function Etapa4() {
   const renderSlide41 = () => (
     <div>
       <p style={{ ...bodyText, marginBottom: 16 }}>
-        {ETAPA4.slide1.body(celebName)}
+        {ETAPA4.slide1.body.replace('${celebName}', celebName)}
       </p>
 
       {/* Contract card */}
@@ -161,7 +161,7 @@ export default function Etapa4() {
           </p>
         </div>
         <p style={bodyText}>
-          {ETAPA4.slide1.exclusivityBody(celebName)}
+          {ETAPA4.slide1.exclusivityBody.replace('${celebName}', celebName)}
         </p>
       </div>
 
@@ -174,7 +174,7 @@ export default function Etapa4() {
           </p>
         </div>
         <p style={bodyText}>
-          {ETAPA4.slide1.exampleBody(celebName, praca, segmento)}
+          {ETAPA4.slide1.exampleBody.replace('${celebName}', celebName).replace('${praca}', praca).replace('${segmento}', segmento)}
         </p>
       </div>
     </div>

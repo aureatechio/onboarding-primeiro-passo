@@ -134,7 +134,7 @@ export default function Etapa3() {
               margin: "0 0 20px 0",
             }}
           >
-            {ETAPA3.activation.description(userData.celebName)}
+            {ETAPA3.activation.description.replace('${celebName}', userData.celebName)}
           </motion.p>
 
           {/* Badge */}

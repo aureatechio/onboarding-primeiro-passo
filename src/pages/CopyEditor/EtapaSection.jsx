@@ -33,7 +33,7 @@ const ETAPA_SCHEMAS = {
     { path: ['slide1', 'aceleraiDesc'],    label: 'slide1.aceleraiDesc',   type: FT.STRING },
     { path: ['slide1', 'voceLabel'],       label: 'slide1.voceLabel',      type: FT.STRING },
     { path: ['slide1', 'voceDesc'],        label: 'slide1.voceDesc',       type: FT.STRING },
-    { path: ['slide2', 'body'],            label: 'slide2.body',           type: FT.TEMPLATE, variables: ['celebName'] },
+    { path: ['slide2', 'body'],            label: 'slide2.body',           type: FT.TEXTAREA },
     { path: ['slide2', 'steps'],           label: 'slide2.steps',          type: FT.OBJECT_ARRAY },
     { path: ['slide2', 'footer'],          label: 'slide2.footer',         type: FT.TEXTAREA },
     { path: ['slide3', 'body'],            label: 'slide3.body',           type: FT.TEXTAREA },

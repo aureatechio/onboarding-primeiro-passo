@@ -113,7 +113,7 @@ export default function EtapaFinal() {
               {userData.atendente}
             </p>
             <p style={{ color: COLORS.textMuted, fontSize: 14, lineHeight: 1.5, margin: 0 }}>
-              {ETAPA_FINAL.parabens.atendenteContact(userData.atendente)}
+              {ETAPA_FINAL.parabens.atendenteContact}
             </p>
           </div>
 
@@ -234,7 +234,7 @@ export default function EtapaFinal() {
             <p style={{ color: COLORS.textDim, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", margin: "0 0 4px 0" }}>{ETAPA_FINAL.atendenteLabel(userData.atendenteGenero)}</p>
             <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 800, margin: "0 0 4px 0" }}>{userData.atendente}</p>
             <p style={{ color: COLORS.textMuted, fontSize: 12, margin: 0 }}>
-              {ETAPA_FINAL.atendenteContactTime(userData.atendente)}
+              {ETAPA_FINAL.atendenteContactTime}
             </p>
           </div>
         </div>
