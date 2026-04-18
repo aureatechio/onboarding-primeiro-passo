@@ -3,7 +3,6 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 import { requireServiceRole } from '../_shared/service-role-auth.ts'
 import { generateImage } from '../_shared/ai-campaign/image-generator.ts'
-import { PROMPT_VERSION } from '../_shared/ai-campaign/prompt-builder.ts'
 import { log } from '../_shared/ai-campaign/logger.ts'
 
 function json(body: Record<string, unknown>, status = 200): Response {
@@ -29,6 +28,7 @@ interface WorkerBody {
   max_image_download_bytes?: number
   aspect_ratio?: string
   prompt: string
+  prompt_version: string
   temperature?: number
   top_p?: number
   top_k?: number
@@ -70,6 +70,7 @@ Deno.serve(async (req) => {
     max_image_download_bytes,
     aspect_ratio,
     prompt,
+    prompt_version,
     temperature,
     top_p,
     top_k,
@@ -77,7 +78,7 @@ Deno.serve(async (req) => {
     system_instruction_text,
   } = body
 
-  if (!job_id || !asset_id || !compra_id || !group_name || !format || !celebrity_png_url || !prompt) {
+  if (!job_id || !asset_id || !compra_id || !group_name || !format || !celebrity_png_url || !prompt || !prompt_version) {
     return json({ success: false, code: 'MISSING_FIELDS', message: 'Campos obrigatorios faltando.' }, 400)
   }
 
@@ -145,7 +146,7 @@ Deno.serve(async (req) => {
         .update({
           status: 'completed',
           image_url: storagePath,
-          prompt_version: PROMPT_VERSION,
+          prompt_version,
         })
         .eq('id', asset_id)
 

@@ -18,6 +18,15 @@ export default function PvCompletionBlock({
   originalBadge,
   badgePath,
   badgeColor,
+  cardLabel,
+  originalCardLabel,
+  cardLabelPath,
+  nextStepText,
+  originalNextStepText,
+  nextStepTextPath,
+  ctaButton,
+  originalCtaButton,
+  ctaButtonPath,
   etapaId,
   onUpdate,
   children,
@@ -116,7 +125,75 @@ export default function PvCompletionBlock({
         </div>
       )}
 
+      {cardLabel && (
+        <EditableText
+          value={cardLabel}
+          originalValue={originalCardLabel}
+          path={cardLabelPath}
+          etapaId={etapaId}
+          onUpdate={onUpdate}
+          as="p"
+          style={{
+            color: COLORS.textDim,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            margin: '20px 0 12px',
+          }}
+        />
+      )}
+
       {children}
+
+      {nextStepText && (
+        <EditableText
+          value={nextStepText}
+          originalValue={originalNextStepText}
+          path={nextStepTextPath}
+          etapaId={etapaId}
+          onUpdate={onUpdate}
+          as="p"
+          multiline
+          style={{
+            color: COLORS.textMuted,
+            fontSize: 13,
+            lineHeight: 1.6,
+            margin: '20px 0 16px',
+            textAlign: 'center',
+          }}
+        />
+      )}
+
+      {ctaButton && (
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: badgeColor || COLORS.accent,
+            color: '#fff',
+            borderRadius: 100,
+            padding: '10px 22px',
+            marginTop: 8,
+          }}
+        >
+          <EditableText
+            value={ctaButton}
+            originalValue={originalCtaButton}
+            path={ctaButtonPath}
+            etapaId={etapaId}
+            onUpdate={onUpdate}
+            as="span"
+            style={{
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }

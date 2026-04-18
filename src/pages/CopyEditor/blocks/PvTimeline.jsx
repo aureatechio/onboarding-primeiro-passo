@@ -94,7 +94,17 @@ export default function PvTimeline({
                 }}
               />
               {item.tag && (
-                <span
+                <EditableText
+                  value={item.tag}
+                  originalValue={originalItems[i]?.tag}
+                  path={[...basePath, i, 'tag']}
+                  etapaId={etapaId}
+                  onUpdate={(path, value) => {
+                    const newItems = [...items]
+                    newItems[i] = { ...newItems[i], tag: value }
+                    onUpdate(basePath, newItems)
+                  }}
+                  as="span"
                   style={{
                     display: 'inline-block',
                     fontSize: 9,
@@ -107,9 +117,7 @@ export default function PvTimeline({
                     marginTop: 4,
                     letterSpacing: '0.05em',
                   }}
-                >
-                  {item.tag}
-                </span>
+                />
               )}
             </div>
           </div>

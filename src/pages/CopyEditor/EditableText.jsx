@@ -203,6 +203,7 @@ export default function EditableText({
   const editorRef = useRef(null)
   const savedRangeRef = useRef(null)
   const indicatorRef = useRef(null)
+  const pillInteractionRef = useRef(false)
 
   const isFunction = typeof value === 'function'
   const isTemplate = hasTemplateVars(value)
@@ -308,7 +309,48 @@ export default function EditableText({
     if (indicatorRef.current) indicatorRef.current.style.display = 'none'
   }, [])
 
-  const showIndicatorAt = useCallback((range) => {
+  const showIndicatorAtPoint = useCallback(
+    (x, y) => {
+      const root = editorRef.current
+      if (!root) return false
+      const rect = root.getBoundingClientRect()
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (indicatorRef.current) indicatorRef.current.style.display = 'none'
+        return false
+      }
+      let range = getCaretRangeFromPoint(x, y)
+      if (!range) {
+        if (indicatorRef.current) indicatorRef.current.style.display = 'none'
+        return false
+      }
+      range = normalizeRange(range, root, x)
+      showIndicatorAtRange(range)
+      return true
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  const performDropAtPoint = useCallback(
+    (x, y, varName) => {
+      const root = editorRef.current
+      if (!root) return false
+      const rect = root.getBoundingClientRect()
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return false
+      let range = getCaretRangeFromPoint(x, y)
+      if (!range) return false
+      range = normalizeRange(range, root, x)
+      const chip = createChipNode(varName)
+      insertNodeAtRange(range, chip)
+      savedRangeRef.current = window.getSelection().getRangeAt(0).cloneRange()
+      syncFromDom()
+      root.focus()
+      return true
+    },
+    [syncFromDom]
+  )
+
+  const showIndicatorAtRange = useCallback((range) => {
     const bar = indicatorRef.current
     const root = editorRef.current
     if (!bar || !root) return
@@ -363,9 +405,9 @@ export default function EditableText({
         return
       }
       range = normalizeRange(range, root, e.clientX)
-      showIndicatorAt(range)
+      showIndicatorAtRange(range)
     },
-    [hideIndicator, showIndicatorAt]
+    [hideIndicator, showIndicatorAtRange]
   )
 
   const handleDragLeave = useCallback(
@@ -416,11 +458,111 @@ export default function EditableText({
     [hideIndicator]
   )
 
-  // Prevent blur when user clicks pills / X buttons.
+  // ─── Custom pointer-drag for pills (external → editor) ───────────────
+  // Gives a live "hanging" chip that follows the mouse and tilts with motion.
+  const startPillPointerDrag = useCallback(
+    (varName, startEvent, pillEl) => {
+      const pointerId = startEvent.pointerId
+      const startX = startEvent.clientX
+      const startY = startEvent.clientY
+      pillInteractionRef.current = true
+
+      let didDrag = false
+      let ghost = null
+      let raf = 0
+      let currentAngle = 0
+      let targetAngle = 0
+      let lastX = startX
+      let x = startX
+      let y = startY
+
+      const render = () => {
+        // Gravity pulls target angle back to 0; current angle lerps to target.
+        targetAngle *= 0.82
+        currentAngle += (targetAngle - currentAngle) * 0.22
+        if (ghost) {
+          ghost.style.transform = `translate(${x - 24}px, ${y - 8}px) rotate(${currentAngle}deg)`
+        }
+        raf = requestAnimationFrame(render)
+      }
+
+      const beginDrag = () => {
+        didDrag = true
+        ghost = pillEl.cloneNode(true)
+        ghost.classList.add('var-chip-drag-live')
+        ghost.style.transform = `translate(${x - 24}px, ${y - 8}px) rotate(0deg)`
+        document.body.appendChild(ghost)
+        pillEl.setAttribute('data-dragging', 'true')
+        raf = requestAnimationFrame(render)
+      }
+
+      const onMove = (e) => {
+        if (!didDrag) {
+          const moved = Math.hypot(e.clientX - startX, e.clientY - startY)
+          if (moved < 4) return
+          beginDrag()
+        }
+        const dx = e.clientX - lastX
+        // Clamp swing angle target based on horizontal velocity.
+        const add = Math.max(-28, Math.min(28, dx * 2.5))
+        targetAngle = Math.max(-30, Math.min(30, targetAngle + add))
+        lastX = e.clientX
+        x = e.clientX
+        y = e.clientY
+        showIndicatorAtPoint(e.clientX, e.clientY)
+      }
+
+      const cleanup = () => {
+        cancelAnimationFrame(raf)
+        pillEl.removeEventListener('pointermove', onMove)
+        pillEl.removeEventListener('pointerup', onUp)
+        pillEl.removeEventListener('pointercancel', onCancel)
+        try {
+          pillEl.releasePointerCapture(pointerId)
+        } catch {
+          /* noop */
+        }
+        pillEl.removeAttribute('data-dragging')
+        if (ghost) ghost.remove()
+        hideIndicator()
+        window.setTimeout(() => {
+          pillInteractionRef.current = false
+        }, 50)
+      }
+
+      const onUp = (e) => {
+        if (!didDrag) {
+          // Treat as a click: insert at saved caret.
+          insertVariableAtCaret(varName)
+          editorRef.current?.focus()
+        } else {
+          performDropAtPoint(e.clientX, e.clientY, varName)
+        }
+        cleanup()
+      }
+
+      const onCancel = () => {
+        cleanup()
+      }
+
+      try {
+        pillEl.setPointerCapture(pointerId)
+      } catch {
+        /* noop */
+      }
+      pillEl.addEventListener('pointermove', onMove)
+      pillEl.addEventListener('pointerup', onUp)
+      pillEl.addEventListener('pointercancel', onCancel)
+    },
+    [hideIndicator, insertVariableAtCaret, performDropAtPoint, showIndicatorAtPoint]
+  )
+
+  // Prevent blur when user clicks pills / X buttons / initiates a drag from a pill.
   const handleBlur = useCallback(
     (e) => {
       const next = e.relatedTarget
       if (next && next.closest?.('[data-editor-keep-focus="true"]')) return
+      if (pillInteractionRef.current) return
       commit()
     },
     [commit]
@@ -502,9 +644,8 @@ export default function EditableText({
             marginTop: 6,
             marginBottom: 4,
           }}
-          onMouseDown={(e) => {
-            // Prevent blur stealing focus from the editor when clicking pills.
-            if (e.target !== e.currentTarget) e.preventDefault()
+          onMouseDown={() => {
+            pillInteractionRef.current = true
           }}
         >
           {Object.entries(TEMPLATE_VARIABLES).map(([key, { label }]) => {
@@ -513,13 +654,12 @@ export default function EditableText({
               <span
                 key={key}
                 className="var-chip-source"
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.setData(VAR_DRAG_MIME, key)
-                  e.dataTransfer.setData('text/plain', `\${${key}}`)
-                  e.dataTransfer.effectAllowed = 'copy'
+                draggable={false}
+                onPointerDown={(e) => {
+                  if (e.button !== 0) return
+                  e.preventDefault()
+                  startPillPointerDrag(key, e, e.currentTarget)
                 }}
-                onClick={() => insertVariableAtCaret(key)}
                 title="Arraste para dentro do texto ou clique para inserir no cursor"
                 style={{
                   fontSize: 10,

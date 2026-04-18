@@ -126,9 +126,44 @@ button {
 }
 .var-chip-source {
   cursor: grab;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  will-change: transform;
 }
 .var-chip-source:active {
   cursor: grabbing;
+}
+.var-chip-source[data-dragging="true"] {
+  opacity: 0.35;
+}
+.var-chip-drag-live {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.75;
+  transform-origin: top center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(200, 255, 0, 0.2);
+  color: var(--color-accent);
+  border: 1px solid rgba(200, 255, 0, 0.5);
+  border-radius: 4px;
+  padding: 2px 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(200, 255, 0, 0.2);
+  will-change: transform;
+}
+/* A short "pin" at the top of the live ghost so the hanging metaphor reads. */
+.var-chip-drag-live::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  width: 1px;
+  height: 10px;
+  background: rgba(200, 255, 0, 0.45);
+  transform: translateX(-50%);
 }
 .var-drop-indicator {
   display: none;

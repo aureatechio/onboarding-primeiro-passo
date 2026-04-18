@@ -12,6 +12,9 @@ export default function PvInfoCard({
   title,
   originalTitle,
   titlePath,
+  subtitle,
+  originalSubtitle,
+  subtitlePath,
   body,
   originalBody,
   bodyPath,
@@ -45,23 +48,42 @@ export default function PvInfoCard({
               radius={12}
             />
           )}
-          {title && (
-            <EditableText
-              value={title}
-              originalValue={originalTitle}
-              path={titlePath}
-              etapaId={etapaId}
-              onUpdate={onUpdate}
-              as="p"
-              style={{
-                color: COLORS.text,
-                fontSize: 17,
-                fontWeight: 800,
-                lineHeight: 1.3,
-                margin: 0,
-              }}
-            />
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+            {title && (
+              <EditableText
+                value={title}
+                originalValue={originalTitle}
+                path={titlePath}
+                etapaId={etapaId}
+                onUpdate={onUpdate}
+                as="p"
+                style={{
+                  color: COLORS.text,
+                  fontSize: 17,
+                  fontWeight: 800,
+                  lineHeight: 1.3,
+                  margin: 0,
+                }}
+              />
+            )}
+            {subtitle && (
+              <EditableText
+                value={subtitle}
+                originalValue={originalSubtitle}
+                path={subtitlePath}
+                etapaId={etapaId}
+                onUpdate={onUpdate}
+                as="p"
+                style={{
+                  color: COLORS.textDim,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  lineHeight: 1.3,
+                  margin: 0,
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
 

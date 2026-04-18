@@ -90,6 +90,7 @@ export default function Etapa3Preview({ data, originalData, etapaId, onUpdate })
       <PvInfoCard
         icon="messageCircle" iconColor={COLORS.whatsapp}
         title={d.whatsapp?.title} originalTitle={o.whatsapp?.title} titlePath={['whatsapp', 'title']}
+        subtitle={d.whatsapp?.subtitle} originalSubtitle={o.whatsapp?.subtitle} subtitlePath={['whatsapp', 'subtitle']}
         body={d.whatsapp?.desc} originalBody={o.whatsapp?.desc} bodyPath={['whatsapp', 'desc']}
         etapaId={etapaId} onUpdate={onUpdate}
         borderColor={`${COLORS.whatsapp}25`}
@@ -97,6 +98,7 @@ export default function Etapa3Preview({ data, originalData, etapaId, onUpdate })
       <PvInfoCard
         icon="monitor" iconColor={COLORS.red}
         title={d.plataforma?.title} originalTitle={o.plataforma?.title} titlePath={['plataforma', 'title']}
+        subtitle={d.plataforma?.subtitle} originalSubtitle={o.plataforma?.subtitle} subtitlePath={['plataforma', 'subtitle']}
         body={d.plataforma?.desc} originalBody={o.plataforma?.desc} bodyPath={['plataforma', 'desc']}
         etapaId={etapaId} onUpdate={onUpdate}
       />
@@ -109,7 +111,7 @@ export default function Etapa3Preview({ data, originalData, etapaId, onUpdate })
       {/* ── Quiz ── */}
       <PvSlideDivider tag="QUIZ" />
       <PvQuizBlock
-        title="Confirme o entendimento"
+        title={d.quizTitle} originalTitle={o.quizTitle} titlePath={['quizTitle']}
         subtitle={d.quizSubtitle} originalSubtitle={o.quizSubtitle} subtitlePath={['quizSubtitle']}
         questions={d.quizQuestions || []} originalQuestions={o.quizQuestions || []} questionsPath={['quizQuestions']}
         confirmMessage={d.quizConfirmMessage} originalConfirmMessage={o.quizConfirmMessage} confirmMessagePath={['quizConfirmMessage']}
@@ -123,6 +125,9 @@ export default function Etapa3Preview({ data, originalData, etapaId, onUpdate })
         description={d.activation?.description} originalDescription={o.activation?.description} descriptionPath={['activation', 'description']}
         badge={d.activation?.badge} originalBadge={o.activation?.badge} badgePath={['activation', 'badge']}
         badgeColor={COLORS.warning}
+        cardLabel={d.activation?.cardLabel} originalCardLabel={o.activation?.cardLabel} cardLabelPath={['activation', 'cardLabel']}
+        nextStepText={d.activation?.nextStepText} originalNextStepText={o.activation?.nextStepText} nextStepTextPath={['activation', 'nextStepText']}
+        ctaButton={d.activation?.ctaButton} originalCtaButton={o.activation?.ctaButton} ctaButtonPath={['activation', 'ctaButton']}
         etapaId={etapaId} onUpdate={onUpdate}
       >
         <PvNumberedSteps

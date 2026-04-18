@@ -6,12 +6,9 @@ import { checkAiCampaignEligibility } from '../_shared/ai-campaign/eligibility.t
 import {
   buildPrompt,
   computeInputHashAsync,
-  PROMPT_VERSION,
-  GLOBAL_RULES_VERSION,
   GROUPS,
   FORMATS,
   type PromptInput,
-  type PromptOverrides,
   type GroupName,
   type FormatName,
   type BriefingContext,
@@ -26,57 +23,6 @@ import {
   REFERENCE_BUCKET,
 } from '../_shared/nanobanana/config.ts'
 
-const GLOBAL_RULES = `# GLOBAL ART DIRECTION & ADVERTISING STANDARD (NANO BANANA)
-**Role:** SENIOR ADVERTISING ART DIRECTOR.
-**Goal:** Deliver high-end, market-ready COMMERCIAL ADS. Professionalism over literal instruction.
-
----
-
-## RULE #1: THE SACRED FACE (CELEBRITY PROTECTION)
-If a PNG/Photo of a person is provided, it is a **PHOTOGRAPH**, not a prompt.
-- **ZERO MODIFICATION:** Never alter pixels, expressions, skin, or features.
-- **LOCKED ASSETS:** Pose and clothing must remain IDENTICAL to the source.
-- **COLLAGE TECHNIQUE:** Treat the person as a "cut and paste" element.
-- **ALLOWED:** Proportional resizing, repositioning, and global lighting match.
-
----
-
-## FORMAT & HIERARCHY (NON-NEGOTIABLE)
-1. **Respect Aspect Ratio:** Check prompt for 4:5, 9:16, 1:1, or 16:9. Never swap them.
-2. **Visual Order:** Headline > Subheadline > Body > CTA. The message must dominate.
-3. **Negative Space:** Avoid clutter. If a request creates mess, simplify with "Design Judgment."
-
----
-
-## VISUAL STYLE & REFERENCE POLICY
-- **Style Imitation:** When a reference is provided, mimic its **technique** (vector, 3D, glow, collage) exactly.
-- **The "Monochromatic" Color Rule:** - NEVER use colors from the reference image.
-    - Use ONLY the Client's Primary Brand Color + its luminance variations (tints/shades).
-    - Gradients must be [Brand Color] to [Darker/Lighter Brand Color].
-    - White/Black allowed only for contrast/legibility.
-
----
-
-## COPYWRITING & TYPOGRAPHY (PT-BR ONLY)
-- **Language:** 100% Brazilian Portuguese. Fix grammar/spelling automatically.
-- **Legibility First:** Never place text over "noisy" backgrounds. Use gradients, blurs, or overlays to protect readability.
-- **Typography Standard:**
-    - Max 2 font families.
-    - Use **Weight & Contrast** instead of just size to create hierarchy.
-    - Short lines, strong breaks. No "paragraphs".
-    - CTA must be instantly scannable (e.g., "Saiba Mais", "Compre Agora").
-
----
-
-## FINAL ADVERTISING GATE
-Before output, verify:
-1. Does it look like a **paid agency ad**?
-2. Is the message clear in **<2 seconds**?
-3. Is the celebrity's face **100% untouched**?
-4. Is the text in **Portuguese** and readable?
-
-**You are the Director. If an instruction makes the ad "ugly" or "amateur", adapt it to maintain premium quality.**`
-
 const URL_EXPIRY_SECONDS = parseInt(Deno.env.get('AI_CAMPAIGN_URL_EXPIRY_SECONDS') ?? '604800', 10)
 
 const FORMAT_TO_ASPECT_RATIO: Record<string, string> = {
@@ -84,15 +30,6 @@ const FORMAT_TO_ASPECT_RATIO: Record<string, string> = {
   '4:5': '4:5',
   '16:9': '16:9',
   '9:16': '9:16',
-}
-
-const FALLBACK_DIRECTION: Record<GroupName, string> = {
-  moderna:
-    'CREATIVE DIRECTION — MODERNA (Dark & Bold).',
-  clean:
-    'CREATIVE DIRECTION — CLEAN (Light & Editorial).',
-  retail:
-    'CREATIVE DIRECTION — RETAIL (Hard Sell & Impact).',
 }
 
 interface ResolvedGroupDirection {
@@ -236,15 +173,12 @@ function buildReferenceSignature(config?: NanoBananaDbConfig | null): string {
 }
 
 function resolveDirectionPromptText(group: GroupName, config: NanoBananaDbConfig): string {
-  const cleanText = (
-    group === 'moderna'
-      ? config.direction_moderna
-      : group === 'clean'
-        ? config.direction_clean
-        : config.direction_retail
-  )?.trim()
-
-  return cleanText || FALLBACK_DIRECTION[group]
+  const raw = group === 'moderna'
+    ? config.direction_moderna
+    : group === 'clean'
+      ? config.direction_clean
+      : config.direction_retail
+  return (raw ?? '').trim()
 }
 
 function json(body: Record<string, unknown>, status = 200): Response {
@@ -420,15 +354,64 @@ Deno.serve(async (req) => {
     }
   }
 
-  // --- 5c. Load NanoBanana config from DB (fallback to hardcoded) ---
+  // --- 5c. Load NanoBanana config from DB (single source of truth, no fallback) ---
   const nbConfig = await loadNanoBananaConfig(supabase)
-  const effectiveGlobalRules = nbConfig?.global_rules ?? GLOBAL_RULES
-  const effectivePromptVersion = nbConfig?.prompt_version ?? PROMPT_VERSION
-  const effectiveGlobalRulesVersion = nbConfig?.global_rules_version ?? GLOBAL_RULES_VERSION
+  if (!nbConfig) {
+    log.error({ compraId: compra_id, stage: 'ingestion' }, 'NanoBanana config not found in DB')
+    return json({
+      success: false,
+      code: 'NANOBANANA_CONFIG_MISSING',
+      message: 'Configuração NanoBanana não encontrada. Popule a tabela nanobanana_config.',
+    }, 500)
+  }
 
-  // --- 6. Build prompt input and compute hash ---
+  const requiredStringFields: Array<keyof NanoBananaDbConfig> = [
+    'global_rules',
+    'global_rules_version',
+    'prompt_version',
+    'direction_moderna',
+    'direction_clean',
+    'direction_retail',
+    'format_1_1',
+    'format_4_5',
+    'format_16_9',
+    'format_9_16',
+  ]
+  const missingFields = requiredStringFields.filter((k) => {
+    const v = nbConfig[k]
+    return typeof v !== 'string' || v.trim().length === 0
+  })
+  if (missingFields.length > 0) {
+    log.error({ compraId: compra_id, stage: 'ingestion' }, 'NanoBanana config incomplete', { missing: missingFields })
+    return json({
+      success: false,
+      code: 'NANOBANANA_CONFIG_INCOMPLETE',
+      message: `Campos obrigatórios vazios em nanobanana_config: ${missingFields.join(', ')}`,
+    }, 500)
+  }
+
+  const effectiveGlobalRules = nbConfig.global_rules
+  const effectivePromptVersion = nbConfig.prompt_version
+  const effectiveGlobalRulesVersion = nbConfig.global_rules_version
+
+  // --- 6. Pre-resolve per-group direction text and reference image URLs ---
+  const resolvedDirections = await resolveGroupDirections(supabase, nbConfig, URL_EXPIRY_SECONDS)
+
+  const groupDirections: Record<GroupName, string> = {
+    moderna: resolvedDirections.moderna.text,
+    clean: resolvedDirections.clean.text,
+    retail: resolvedDirections.retail.text,
+  }
+  const formatInstructions: Record<FormatName, string> = {
+    '1:1': nbConfig.format_1_1,
+    '4:5': nbConfig.format_4_5,
+    '16:9': nbConfig.format_16_9,
+    '9:16': nbConfig.format_9_16,
+  }
+
+  // --- 7. Build prompt input and compute hash ---
   const promptInput: PromptInput = {
-    globalRules: nbConfig?.use_system_instruction ? '' : effectiveGlobalRules,
+    globalRules: nbConfig.use_system_instruction ? '' : effectiveGlobalRules,
     clientName,
     celebName,
     brandPalette: identity.brand_palette,
@@ -436,13 +419,16 @@ Deno.serve(async (req) => {
     campaignNotes: identity.campaign_notes || '',
     briefing: briefingContext,
     insightsPecas,
+    groupDirections,
+    formatInstructions,
   }
 
-  const inputHash = await computeInputHashAsync(
-    promptInput,
+  const inputHash = await computeInputHashAsync(promptInput, {
     campaignImageUrl,
-    buildReferenceSignature(nbConfig),
-  )
+    referenceSignature: buildReferenceSignature(nbConfig),
+    promptVersion: effectivePromptVersion,
+    globalRulesVersion: effectiveGlobalRulesVersion,
+  })
 
   // --- 7. Idempotency check ---
   // When forceJobId is provided (from retry flow), look up by ID directly to avoid
@@ -490,14 +476,11 @@ Deno.serve(async (req) => {
           .update({ status: 'processing', updated_at: new Date().toISOString() })
           .eq('id', existingJob.id)
 
-        const resumeResolvedDirections = nbConfig
-          ? await resolveGroupDirections(supabase, nbConfig, URL_EXPIRY_SECONDS)
-          : null
-
         const backgroundWork = dispatchWorkers(
           supabaseUrl, serviceRoleKey, supabase,
           existingJob.id, compra_id, promptInput, pendingAssets,
-          celebrityPngUrl, clientLogoUrl, campaignImageUrl, nbConfig, resumeResolvedDirections,
+          celebrityPngUrl, clientLogoUrl, campaignImageUrl, nbConfig, resolvedDirections,
+          effectivePromptVersion,
         )
 
         // @ts-ignore — EdgeRuntime.waitUntil
@@ -585,20 +568,15 @@ Deno.serve(async (req) => {
   log.info({ jobId, compraId: compra_id, stage: 'ingestion' }, 'Job created, dispatching workers', {
     promptVersion: effectivePromptVersion,
     globalRulesVersion: effectiveGlobalRulesVersion,
-    configSource: nbConfig ? 'database' : 'hardcoded',
     totalAssets: insertedAssets.length,
   })
 
-  // --- 10. Pre-resolve per-group direction text and reference image URLs ---
-  const resolvedDirections = nbConfig
-    ? await resolveGroupDirections(supabase, nbConfig, URL_EXPIRY_SECONDS)
-    : null
-
-  // --- 11. Return immediately, dispatch workers in background ---
+  // --- 10. Return immediately, dispatch workers in background ---
   const backgroundWork = dispatchWorkers(
     supabaseUrl, serviceRoleKey, supabase,
     jobId, compra_id, promptInput, insertedAssets,
     celebrityPngUrl, clientLogoUrl, campaignImageUrl, nbConfig, resolvedDirections,
+    effectivePromptVersion,
   )
 
   // @ts-ignore — EdgeRuntime.waitUntil available in Supabase Edge Functions
@@ -630,36 +608,15 @@ async function dispatchWorkers(
   assets: { id: string; group_name: string; format: string }[],
   celebrityPngUrl: string,
   clientLogoUrl: string,
-  campaignImageUrl?: string,
-  nbConfig?: NanoBananaDbConfig | null,
-  resolvedDirections?: Record<GroupName, ResolvedGroupDirection> | null,
+  campaignImageUrl: string | undefined,
+  nbConfig: NanoBananaDbConfig,
+  resolvedDirections: Record<GroupName, ResolvedGroupDirection>,
+  promptVersion: string,
 ): Promise<void> {
   const workerUrl = `${supabaseUrl}/functions/v1/generate-ai-campaign-image`
-  const dbBatchSize = nbConfig?.worker_batch_size
+  const dbBatchSize = nbConfig.worker_batch_size
   const workerBatchSize = Number.parseInt(Deno.env.get('AI_CAMPAIGN_WORKER_BATCH_SIZE') ?? String(dbBatchSize ?? 4), 10)
   const batchSize = Number.isNaN(workerBatchSize) || workerBatchSize < 1 ? 4 : workerBatchSize
-
-  const promptOverrides: PromptOverrides | undefined = nbConfig
-    ? {
-      groupDirections: resolvedDirections
-        ? {
-          moderna: resolvedDirections.moderna.text,
-          clean: resolvedDirections.clean.text,
-          retail: resolvedDirections.retail.text,
-        }
-        : {
-          moderna: resolveDirectionPromptText('moderna', nbConfig),
-          clean: resolveDirectionPromptText('clean', nbConfig),
-          retail: resolveDirectionPromptText('retail', nbConfig),
-        },
-      formatInstructions: {
-        '1:1': nbConfig.format_1_1,
-        '4:5': nbConfig.format_4_5,
-        '16:9': nbConfig.format_16_9,
-        '9:16': nbConfig.format_9_16,
-      },
-    }
-    : undefined
 
   let successCalls = 0
   let failedCalls = 0
@@ -673,7 +630,6 @@ async function dispatchWorkers(
           promptInput,
           asset.group_name as GroupName,
           asset.format as FormatName,
-          promptOverrides,
           variationIndex,
         )
 
@@ -693,18 +649,19 @@ async function dispatchWorkers(
               celebrity_png_url: celebrityPngUrl,
               client_logo_url: clientLogoUrl,
               campaign_image_url: campaignImageUrl,
-              reference_image_url: resolvedDirections?.[asset.group_name as GroupName]?.referenceImageUrl,
+              reference_image_url: resolvedDirections[asset.group_name as GroupName]?.referenceImageUrl,
               aspect_ratio: FORMAT_TO_ASPECT_RATIO[asset.format],
               prompt,
-              gemini_model_name: nbConfig?.gemini_model_name,
-              gemini_api_base_url: nbConfig?.gemini_api_base_url,
-              max_retries: nbConfig?.max_retries,
-              max_image_download_bytes: nbConfig?.max_image_download_bytes,
-              temperature: nbConfig?.temperature,
-              top_p: nbConfig?.top_p,
-              top_k: nbConfig?.top_k,
-              safety_settings: nbConfig ? resolveSafetyPreset(nbConfig.safety_preset) : undefined,
-              system_instruction_text: nbConfig?.use_system_instruction
+              prompt_version: promptVersion,
+              gemini_model_name: nbConfig.gemini_model_name,
+              gemini_api_base_url: nbConfig.gemini_api_base_url,
+              max_retries: nbConfig.max_retries,
+              max_image_download_bytes: nbConfig.max_image_download_bytes,
+              temperature: nbConfig.temperature,
+              top_p: nbConfig.top_p,
+              top_k: nbConfig.top_k,
+              safety_settings: resolveSafetyPreset(nbConfig.safety_preset),
+              system_instruction_text: nbConfig.use_system_instruction
                 ? nbConfig.global_rules
                 : undefined,
             }),

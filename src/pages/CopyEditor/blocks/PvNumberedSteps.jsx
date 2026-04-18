@@ -164,6 +164,28 @@ export default function PvNumberedSteps({
                 }}
               />
             )}
+            {hasOwn(item, 'prazo') && (
+              <EditableText
+                value={item.prazo}
+                originalValue={originalItems[i]?.prazo}
+                path={[...basePath, i, 'prazo']}
+                etapaId={etapaId}
+                onUpdate={(path, value) => {
+                  const newItems = [...items]
+                  newItems[i] = { ...newItems[i], prazo: value }
+                  onUpdate(basePath, newItems)
+                }}
+                as="p"
+                multiline
+                style={{
+                  color: COLORS.textDim,
+                  fontSize: 11,
+                  lineHeight: 1.5,
+                  margin: '2px 0 0 0',
+                  fontStyle: 'italic',
+                }}
+              />
+            )}
           </div>
 
           <button

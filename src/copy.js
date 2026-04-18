@@ -218,6 +218,7 @@ export const ETAPA3 = {
   canaisTip: 'Mantenha os dois canais ativos. Demora na resposta impacta diretamente o prazo da sua campanha.',
 
   // ── Quiz ──
+  quizTitle: 'Confirme o entendimento',
   quizSubtitle: 'Ao confirmar, a preparação de 15 dias inicia',
   quizQuestions: [
     'Entendi que o prazo do contrato conta a partir da assinatura e que minha agilidade impacta diretamente o resultado.',
