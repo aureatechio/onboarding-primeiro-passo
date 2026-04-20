@@ -47,7 +47,9 @@
       "Bash(git -C /Users/mac/Documents/Projetos/onboarding-primeiro-passo commit -m ':*)",
       "Bash(git -C /Users/mac/Documents/Projetos/onboarding-primeiro-passo push)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(deno --version)",
+      "Bash(deno install *)"
     ]
   },
   "enableAllProjectMcpServers": true,
