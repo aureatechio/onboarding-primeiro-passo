@@ -11,6 +11,9 @@ export default function PvStepHeader({
   originalData,
   etapaId,
   basePath = [],
+  titlePath,
+  readTimePath,
+  alertPath,
   onUpdate,
   stepLabel,
   stepNum,
@@ -23,6 +26,10 @@ export default function PvStepHeader({
   const origTitle = originalData?.title
   const origReadTime = originalData?.readTime
   const origAlert = originalData?.alert
+
+  const resolvedTitlePath = titlePath || [...basePath, 'title']
+  const resolvedReadTimePath = readTimePath || [...basePath, 'readTime']
+  const resolvedAlertPath = alertPath || [...basePath, 'alert']
 
   const labelText = stepLabel || (stepNum ? `ETAPA ${stepNum} DE ${totalSteps}` : null)
 
@@ -83,7 +90,7 @@ export default function PvStepHeader({
         <EditableText
           value={title}
           originalValue={origTitle}
-          path={[...basePath, 'title']}
+          path={resolvedTitlePath}
           etapaId={etapaId}
           onUpdate={onUpdate}
           as="h1"
@@ -101,7 +108,7 @@ export default function PvStepHeader({
         <EditableText
           value={readTime}
           originalValue={origReadTime}
-          path={[...basePath, 'readTime']}
+          path={resolvedReadTimePath}
           etapaId={etapaId}
           onUpdate={onUpdate}
           as="p"
@@ -125,7 +132,7 @@ export default function PvStepHeader({
           <EditableText
             value={alert}
             originalValue={origAlert}
-            path={[...basePath, 'alert']}
+            path={resolvedAlertPath}
             etapaId={etapaId}
             onUpdate={onUpdate}
             as="span"

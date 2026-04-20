@@ -9,6 +9,9 @@ export default function PvAlertBox({
   text,
   originalText,
   path,
+  title,
+  originalTitle,
+  titlePath,
   etapaId,
   onUpdate,
   variant = 'warning',
@@ -33,22 +36,41 @@ export default function PvAlertBox({
       }}
     >
       <Icon name={icon} size={14} color={color} />
-      <EditableText
-        value={text}
-        originalValue={originalText}
-        path={path}
-        etapaId={etapaId}
-        onUpdate={onUpdate}
-        as="p"
-        multiline
-        style={{
-          color: color,
-          fontSize: 12,
-          fontWeight: 600,
-          lineHeight: 1.5,
-          margin: 0,
-        }}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+        {title && (
+          <EditableText
+            value={title}
+            originalValue={originalTitle}
+            path={titlePath}
+            etapaId={etapaId}
+            onUpdate={onUpdate}
+            as="p"
+            style={{
+              color: color,
+              fontSize: 13,
+              fontWeight: 800,
+              lineHeight: 1.4,
+              margin: 0,
+            }}
+          />
+        )}
+        <EditableText
+          value={text}
+          originalValue={originalText}
+          path={path}
+          etapaId={etapaId}
+          onUpdate={onUpdate}
+          as="p"
+          multiline
+          style={{
+            color: color,
+            fontSize: 12,
+            fontWeight: 600,
+            lineHeight: 1.5,
+            margin: 0,
+          }}
+        />
+      </div>
     </div>
   )
 }

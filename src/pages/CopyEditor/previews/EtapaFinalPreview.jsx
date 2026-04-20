@@ -29,9 +29,19 @@ export default function EtapaFinalPreview({ data, originalData, etapaId, onUpdat
     { icon: 'star', label: 'Celebridade', value: PREVIEW_EXAMPLE_VALUES.celebName },
     { icon: 'mapPin', label: 'Praça', value: PREVIEW_EXAMPLE_VALUES.praca },
     { icon: 'tag', label: 'Segmento', value: PREVIEW_EXAMPLE_VALUES.segmento },
-    { icon: 'clapperboard', label: 'Pacote', value: d.resumo?.pacoteValue || '' },
+    {
+      icon: 'clapperboard', label: 'Pacote',
+      value: d.resumo?.pacoteValue || '',
+      originalValue: o.resumo?.pacoteValue,
+      valuePath: ['resumo', 'pacoteValue'],
+    },
     { icon: 'calendarDays', label: 'Vigência', value: '12 meses' },
-    { icon: 'clock', label: 'Preparação', value: d.resumo?.preparacaoValue || '' },
+    {
+      icon: 'clock', label: 'Preparação',
+      value: d.resumo?.preparacaoValue || '',
+      originalValue: o.resumo?.preparacaoValue,
+      valuePath: ['resumo', 'preparacaoValue'],
+    },
   ]
 
   return (

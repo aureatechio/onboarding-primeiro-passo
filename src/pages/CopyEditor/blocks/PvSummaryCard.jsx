@@ -61,9 +61,21 @@ export default function PvSummaryCard({
               {row.label}
             </span>
           </div>
-          <span style={{ color: row.color || COLORS.text, fontSize: 13, fontWeight: 600 }}>
-            {row.value}
-          </span>
+          {row.valuePath ? (
+            <EditableText
+              value={row.value}
+              originalValue={row.originalValue}
+              path={row.valuePath}
+              etapaId={etapaId}
+              onUpdate={onUpdate}
+              as="span"
+              style={{ color: row.color || COLORS.text, fontSize: 13, fontWeight: 600 }}
+            />
+          ) : (
+            <span style={{ color: row.color || COLORS.text, fontSize: 13, fontWeight: 600 }}>
+              {row.value}
+            </span>
+          )}
         </div>
       ))}
     </div>

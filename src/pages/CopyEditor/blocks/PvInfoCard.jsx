@@ -18,6 +18,9 @@ export default function PvInfoCard({
   body,
   originalBody,
   bodyPath,
+  body2,
+  originalBody2,
+  body2Path,
   etapaId,
   onUpdate,
   borderColor,
@@ -101,6 +104,27 @@ export default function PvInfoCard({
             fontSize: 14,
             lineHeight: 1.6,
             margin: 0,
+          }}
+        />
+      )}
+
+      {body2 && (
+        <EditableText
+          value={body2}
+          originalValue={originalBody2}
+          path={body2Path}
+          etapaId={etapaId}
+          onUpdate={onUpdate}
+          as="p"
+          multiline
+          style={{
+            color: COLORS.textMuted,
+            fontSize: 14,
+            lineHeight: 1.6,
+            margin: 0,
+            marginTop: 12,
+            paddingTop: 12,
+            borderTop: `1px solid ${COLORS.border}`,
           }}
         />
       )}
