@@ -2,6 +2,9 @@
 
 ## Indice ativo
 
+- `2026-04-19-fase1-fundacao-auth-frontend-dashboard.md` **← NOVO**
+  Plano de implementacao da Fase 1 (fundacao de auth no frontend): dependencia `@supabase/supabase-js`, `AuthContext`, tela `/login`, guard central para `/ai-step2/*` e `/copy-editor`, logout no painel interno e checklist de validacao para manter onboarding publico sem regressao.
+
 - `2026-04-17-fase0-definicao-acesso-dashboard.md` **← NOVO**
   Execucao da Fase 0 de autenticacao do dashboard: matriz RBAC (`admin`, `supervisor`, `operacao`, `leitura`), ADR de sessao com Supabase Auth (JWT + refresh), catalogo de segregacao `public-only | internal-only | hybrid` por endpoint e plano de migracao por lotes. Status: **GO para Fase 1**.
 
