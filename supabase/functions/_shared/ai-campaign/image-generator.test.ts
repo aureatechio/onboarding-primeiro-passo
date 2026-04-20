@@ -104,3 +104,29 @@ Deno.test('job status logic: 8/12 = partial', () => {
 Deno.test('job status logic: 0/12 = failed', () => {
   assertEquals(resolveJobStatus(0, 12), 'failed')
 })
+
+// --- SVG detection logic tests ---
+
+function isSvgInput(contentType: string, url: string): boolean {
+  return contentType === 'image/svg+xml' || url.toLowerCase().endsWith('.svg')
+}
+
+Deno.test('SVG detection: image/svg+xml content-type', () => {
+  assertEquals(isSvgInput('image/svg+xml', 'https://example.com/logo'), true)
+})
+
+Deno.test('SVG detection: .svg extension fallback', () => {
+  assertEquals(isSvgInput('application/octet-stream', 'https://example.com/logo.svg'), true)
+})
+
+Deno.test('SVG detection: PNG is not SVG', () => {
+  assertEquals(isSvgInput('image/png', 'https://example.com/logo.png'), false)
+})
+
+Deno.test('SVG detection: uppercase .SVG extension', () => {
+  assertEquals(isSvgInput('application/octet-stream', 'https://example.com/LOGO.SVG'), true)
+})
+
+Deno.test('SVG detection: JPEG is not SVG', () => {
+  assertEquals(isSvgInput('image/jpeg', 'https://example.com/photo.jpg'), false)
+})

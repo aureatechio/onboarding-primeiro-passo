@@ -1,4 +1,23 @@
 import { log } from './logger.ts'
+import { initWasm, Resvg } from 'npm:@resvg/resvg-wasm'
+
+let _resvgReady = false
+async function ensureResvgReady(): Promise<void> {
+  if (_resvgReady) return
+  const wasmUrl = import.meta.resolve('npm:@resvg/resvg-wasm/index_bg.wasm')
+  await initWasm(fetch(wasmUrl))
+  _resvgReady = true
+}
+
+async function convertSvgToPng(svgBytes: Uint8Array): Promise<Uint8Array> {
+  await ensureResvgReady()
+  const svgString = new TextDecoder().decode(svgBytes)
+  const resvg = new Resvg(svgString, {
+    fitTo: { mode: 'width', value: 512 },
+  })
+  const rendered = resvg.render()
+  return rendered.asPng() as Uint8Array
+}
 
 export interface GenerateImageResult {
   success: boolean
@@ -160,22 +179,39 @@ async function prepareImageInputs(
     try {
       const response = await fetch(url)
       if (!response.ok) continue
-      const contentType =
-        response.headers.get('content-type') || 'image/png'
+      const rawContentType = (response.headers.get('content-type') || 'image/png').split(';')[0].trim()
       const buffer = await response.arrayBuffer()
       if (buffer.byteLength > maxBytes) {
         log.warn({ stage: 'generation' }, `Image too large (${buffer.byteLength} bytes), skipping: ${url}`)
         continue
       }
-      const bytes = new Uint8Array(buffer)
+
+      let bytes: Uint8Array = new Uint8Array(buffer)
+      let mimeType = rawContentType
+
+      const isSvg = rawContentType === 'image/svg+xml' || url.toLowerCase().endsWith('.svg')
+      if (isSvg) {
+        try {
+          bytes = await convertSvgToPng(bytes)
+          mimeType = 'image/png'
+          log.info({ stage: 'generation' }, `SVG logo converted to PNG: ${url}`)
+        } catch (svgErr) {
+          log.warn(
+            { stage: 'generation' },
+            `SVG conversion failed, skipping: ${url}`,
+            { error: svgErr instanceof Error ? svgErr.message : String(svgErr) },
+          )
+          continue
+        }
+      }
+
       let binary = ''
       for (let i = 0; i < bytes.length; i++) {
         binary += String.fromCharCode(bytes[i])
       }
-      const base64 = btoa(binary)
       inputs.push({
-        mimeType: contentType.split(';')[0].trim(),
-        base64Data: base64,
+        mimeType,
+        base64Data: btoa(binary),
       })
     } catch {
       log.warn({ stage: 'generation' }, `Failed to fetch image: ${url}`)
