@@ -53,10 +53,10 @@ primeiro-passo-app/
 ├── .context/modules/
 │   ├── onboarding/              # Onboarding context engineering
 │   ├── aurea-garden/            # Aurea Garden context engineering
-├── .cursor/
-│   ├── rules/                    # Always-apply Cursor rules (MDC)
-│   ├── skills/                   # Cursor skills (SKILL.md per skill)
-│   └── commands/                 # Cursor slash commands
+├── .claude/
+│   ├── commands/                 # Claude Code slash commands
+│   └── skills/                   # Claude Code skills (SKILL.md per skill)
+│       └── _rules/               # Project rules (migrated from legacy Cursor .mdc)
 ├── plan/                         # Feature plans (YYYY-MM-DD-slug.md)
 ├── tasks/                        # Operational tasks (TASK-YYYY-MM-DD-NNN-slug.md)
 ├── scripts/                      # Utilities
@@ -252,7 +252,7 @@ When working on Aurea Garden code (image generation, gallery, NanoBanana config)
 2. `.context/modules/aurea-garden/README.md` — architecture, data flow, database schema
 3. `.context/modules/aurea-garden/BUSINESS-RULES.md` — 15 critical business rules extracted from code
 4. `supabase/functions/<function>/functionSpec.md` — spec of the target function
-5. `.cursor/skills/aurea-garden/SKILL.md` — specialist playbook
+5. `.claude/skills/aurea-garden/SKILL.md` — specialist playbook
 
 All Garden Edge Functions are **public** (deploy with `--no-verify-jwt`).
 
@@ -293,7 +293,7 @@ Feature plans go in `plan/` with naming `YYYY-MM-DD-slug.md`. Update `plan/READM
 
 Operational tasks (bugs, requests, fixes) go in `tasks/` with naming `TASK-YYYY-MM-DD-NNN-slug.md`. Archived tasks go in `tasks/arquivo/`. Use skill `task-enricher` to enrich tasks with context before execution.
 
-## Cursor Skills Available
+## Claude Code Skills Available
 
 | Skill                 | Trigger                                                              |
 | --------------------- | -------------------------------------------------------------------- |
