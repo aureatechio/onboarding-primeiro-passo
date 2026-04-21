@@ -1,1 +1,0 @@
-Considere o uso do MCP do Supabase se/quando necessário.

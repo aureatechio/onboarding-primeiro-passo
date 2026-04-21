@@ -1,1 +1,0 @@
-Compreenda o erro e me responda no chat sem alterar nem tentar corrigir ainda.
