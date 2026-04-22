@@ -58,7 +58,16 @@
       "Bash(git mv *)",
       "mcp__679204a2-261e-4438-810f-43d31d049430__list_teams",
       "mcp__679204a2-261e-4438-810f-43d31d049430__save_project",
-      "mcp__679204a2-261e-4438-810f-43d31d049430__save_issue"
+      "mcp__679204a2-261e-4438-810f-43d31d049430__save_issue",
+      "Bash(node *)",
+      "Bash(python3 -c \" import json, sys data = json.load\\(sys.stdin\\) text = data[0]['text'] logs = json.loads\\(text\\)['result']['result'] paths = {} for log in logs: msg = log.get\\('event_message', ''\\) try: parsed = json.loads\\(msg\\) path = parsed.get\\('path', ''\\) status = parsed.get\\('status', ''\\) error_code = parsed.get\\('error_code', ''\\) key = f'{path} [{status}] {error_code}' paths[key] = paths.get\\(key, 0\\) + 1 except: pass for k, v in sorted\\(paths.items\\(\\), key=lambda x: -x[1]\\): print\\(f'{v:4d}x {k}'\\) \")",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__list_projects",
+      "Bash(python3 -c ' *)",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__list_issues",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__list_issue_statuses",
+      "Bash(vercel ls *)",
+      "Bash(vercel project *)",
+      "Bash(vercel teams *)"
     ]
   },
   "enableAllProjectMcpServers": true,
