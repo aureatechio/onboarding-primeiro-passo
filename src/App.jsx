@@ -1,6 +1,7 @@
-import { Component, useEffect, useState } from 'react';
+import { Component, useEffect, useRef, useState } from 'react';
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext';
 import { CopyProvider } from './context/CopyContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import PageTransition from './components/PageTransition';
 import Etapa1Hero from './pages/Etapa1Hero';
 import Etapa2 from './pages/Etapa2';
@@ -17,6 +18,34 @@ import PostTurboPage from './pages/AiStep2Monitor/PostTurboPage';
 import PostGenPage from './pages/AiStep2Monitor/PostGenPage';
 import GardenGalleryPage from './pages/AiStep2Monitor/GardenGalleryPage';
 import CopyEditor from './pages/CopyEditor';
+import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+const PROTECTED_PREFIXES = ['/ai-step2/', '/copy-editor'];
+
+function isProtectedPath(pathname) {
+  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+function AuthSplash() {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#080C14',
+        color: '#E6EDF3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: "'Inter', system-ui, sans-serif",
+        fontSize: 13,
+      }}
+    >
+      Carregando sessao...
+    </div>
+  );
+}
 
 // Error boundary pra pegar crashes silenciosos
 class ErrorBoundary extends Component {
@@ -129,11 +158,13 @@ function OnboardingFlow() {
   );
 }
 
-export default function App() {
+function AppRoutes() {
   const [currentLocation, setCurrentLocation] = useState(() => ({
     pathname: window.location.pathname || '/',
     search: window.location.search || '',
   }))
+  const { isAuthenticated, isAuthLoading } = useAuth()
+  const redirectedRef = useRef(null)
 
   useEffect(() => {
     const syncLocation = () => {
@@ -141,6 +172,7 @@ export default function App() {
         pathname: window.location.pathname || '/',
         search: window.location.search || '',
       })
+      redirectedRef.current = null
     }
 
     window.addEventListener('popstate', syncLocation)
@@ -153,6 +185,45 @@ export default function App() {
   }, [])
 
   const pathname = currentLocation.pathname
+  const search = currentLocation.search
+
+  if (pathname === '/' && !search) {
+    const target = '/ai-step2/monitor'
+    if (redirectedRef.current !== target) {
+      redirectedRef.current = target
+      window.history.replaceState({}, '', target)
+      window.dispatchEvent(new Event('aurea:location-change'))
+    }
+    return null
+  }
+
+  if (pathname.startsWith('/login')) {
+    return <Login />
+  }
+
+  if (pathname.startsWith('/forgot-password')) {
+    return <ForgotPassword />
+  }
+
+  if (pathname.startsWith('/reset-password')) {
+    return <ResetPassword />
+  }
+
+  if (isProtectedPath(pathname)) {
+    if (isAuthLoading) {
+      return <AuthSplash />
+    }
+    if (!isAuthenticated) {
+      const fullPath = `${pathname}${search}`
+      const target = `/login?next=${encodeURIComponent(fullPath)}`
+      if (redirectedRef.current !== target) {
+        redirectedRef.current = target
+        window.history.replaceState({}, '', target)
+        window.dispatchEvent(new Event('aurea:location-change'))
+      }
+      return null
+    }
+  }
 
   if (pathname.startsWith('/ai-step2/post-turbo')) {
     return (
@@ -218,5 +289,13 @@ export default function App() {
         </ErrorBoundary>
       </OnboardingProvider>
     </CopyProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
