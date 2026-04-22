@@ -55,7 +55,10 @@
       "Bash(mkdir -p .claude/skills/_rules)",
       "Bash(cp .cursor/rules/aurea-garden.mdc .claude/skills/_rules/aurea-garden.md)",
       "Bash(cp .cursor/rules/deploy-gate.mdc .claude/skills/_rules/deploy-gate.md)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__list_teams",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__save_project",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__save_issue"
     ]
   },
   "enableAllProjectMcpServers": true,
