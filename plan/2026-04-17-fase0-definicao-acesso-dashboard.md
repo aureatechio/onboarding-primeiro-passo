@@ -12,9 +12,9 @@ Origem: plano de execucao da Fase 0 (autenticacao dashboard)
 1. `.context/modules/onboarding/DOC-READING-ORDER.md`
 2. `.context/modules/onboarding/README.md`
 3. `.context/modules/onboarding/BUSINESS-RULES.md`
-4. `.context/modules/aurea-garden/DOC-READING-ORDER.md`
-5. `.context/modules/aurea-garden/README.md`
-6. `.context/modules/aurea-garden/BUSINESS-RULES.md`
+4. `.context/modules/aurea-studio/DOC-READING-ORDER.md`
+5. `.context/modules/aurea-studio/README.md`
+6. `.context/modules/aurea-studio/BUSINESS-RULES.md`
 7. `ai-step2/CONTRACT.md`
 8. `docs/mapeamento-formulario-onboarding.md`
 

@@ -7,11 +7,11 @@ description: "Especialista em Aurea Garden (Post Gen e Post Turbo) — geracao d
 
 ## Fontes Obrigatorias
 
-1. `.context/modules/aurea-garden/DOC-READING-ORDER.md` — **LER PRIMEIRO**: roteamento por tipo de tarefa
-2. `.context/modules/aurea-garden/README.md` — arquitetura, data flow, database schema
-3. `.context/modules/aurea-garden/BUSINESS-RULES.md` — 15 regras criticas extraidas do codigo
+1. `.context/modules/aurea-studio/DOC-READING-ORDER.md` — **LER PRIMEIRO**: roteamento por tipo de tarefa
+2. `.context/modules/aurea-studio/README.md` — arquitetura, data flow, database schema
+3. `.context/modules/aurea-studio/BUSINESS-RULES.md` — 15 regras criticas extraidas do codigo
 4. `supabase/functions/<funcao-alvo>/functionSpec.md` — contrato da funcao
-5. `.context/modules/aurea-garden/OPERACAO-AUREA-GARDEN.md` — runbook (troubleshooting, SQL, deploy)
+5. `.context/modules/aurea-studio/OPERACAO-AUREA-GARDEN.md` — runbook (troubleshooting, SQL, deploy)
 
 ## Tabela de Operacoes
 

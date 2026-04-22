@@ -116,7 +116,7 @@ Gera imagens e campanhas de marketing pós-onboarding. Docs em `ai-step2/`.
 
 ### 5. Aurea Garden (Post Gen + Post Turbo)
 
-**Todas públicas** (`--no-verify-jwt`). Ver `.context/modules/aurea-garden/`.
+**Todas públicas** (`--no-verify-jwt`). Ver `.context/modules/aurea-studio/`.
 
 | Função | Propósito |
 |---|---|

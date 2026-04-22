@@ -8,7 +8,7 @@ globs:
   - "supabase/functions/get-garden-*/**"
   - "supabase/functions/_shared/garden/**"
   - "src/pages/AiStep2Monitor/**"
-  - ".context/modules/aurea-garden/**"
+  - ".context/modules/aurea-studio/**"
 ---
 
 # Aurea Garden: Post Gen & Post Turbo (Geracao de Criativos IA)
@@ -16,11 +16,11 @@ globs:
 ## Gate obrigatorio ANTES de agir
 
 1. **Identificar tipo de tarefa** e consultar ordem de leitura:
-   - Ler `.context/modules/aurea-garden/DOC-READING-ORDER.md` — identifica quais docs sao obrigatorios para o tipo de tarefa
-   - Ler `.context/modules/aurea-garden/BUSINESS-RULES.md` — regras de negocio criticas
+   - Ler `.context/modules/aurea-studio/DOC-READING-ORDER.md` — identifica quais docs sao obrigatorios para o tipo de tarefa
+   - Ler `.context/modules/aurea-studio/BUSINESS-RULES.md` — regras de negocio criticas
 
 2. **Ler docs na ordem indicada pelo DOC-READING-ORDER:**
-   - SEMPRE: `.context/modules/aurea-garden/README.md`
+   - SEMPRE: `.context/modules/aurea-studio/README.md`
    - Condicional: docs especificos do tipo de tarefa (ver DOC-READING-ORDER)
    - functionSpec da funcao alvo: `supabase/functions/<funcao>/functionSpec.md`
 

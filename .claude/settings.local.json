@@ -54,7 +54,8 @@
       "Bash(cp -r .cursor/skills/aurea-garden .cursor/skills/nova-tarefa .cursor/skills/sdd-spec-creator .cursor/skills/task-enricher .cursor/skills/deploy-gate .claude/skills/)",
       "Bash(mkdir -p .claude/skills/_rules)",
       "Bash(cp .cursor/rules/aurea-garden.mdc .claude/skills/_rules/aurea-garden.md)",
-      "Bash(cp .cursor/rules/deploy-gate.mdc .claude/skills/_rules/deploy-gate.md)"
+      "Bash(cp .cursor/rules/deploy-gate.mdc .claude/skills/_rules/deploy-gate.md)",
+      "Bash(git mv *)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -28,9 +28,9 @@ Antes de implementar qualquer tarefa, ler na ordem:
 1. `.context/modules/onboarding/DOC-READING-ORDER.md`
 2. `.context/modules/onboarding/README.md`
 3. `.context/modules/onboarding/BUSINESS-RULES.md`
-4. `.context/modules/aurea-garden/DOC-READING-ORDER.md`
-5. `.context/modules/aurea-garden/README.md`
-6. `.context/modules/aurea-garden/BUSINESS-RULES.md`
+4. `.context/modules/aurea-studio/DOC-READING-ORDER.md`
+5. `.context/modules/aurea-studio/README.md`
+6. `.context/modules/aurea-studio/BUSINESS-RULES.md`
 7. `ai-step2/CONTRACT.md`
 8. `docs/mapeamento-formulario-onboarding.md`
 
@@ -108,7 +108,7 @@ Status da execucao (2026-04-17):
   - Tipo: arquitetura
   - Referencias:
     - `.context/modules/onboarding/BUSINESS-RULES.md`
-    - `.context/modules/aurea-garden/BUSINESS-RULES.md`
+    - `.context/modules/aurea-studio/BUSINESS-RULES.md`
     - `docs/mapeamento-formulario-onboarding.md`
   - Entregavel: lista de endpoints que permanecem publicos e endpoints internos protegidos.
 
