@@ -78,3 +78,20 @@ O fluxo manual com audio em `save-campaign-briefing` grava WebM no browser. O ca
 ## 17. Briefing no prompt de imagem
 
 `create-ai-campaign-job` le `onboarding_briefings` com `status = 'done'` e passa `briefing` / `insightsPecas` estruturados para `buildPrompt`. Mudanca no briefing altera `input_hash` e pode criar novo job de campanha.
+
+## 18. brand_display_name tem precedencia sobre clientes.nome
+
+`onboarding_identity.brand_display_name`, quando preenchido, e usado como nome da marca nos jobs IA em vez de `clientes.nome`. Afeta:
+
+- `create-ai-campaign-job` → `clientName` passado para `buildPrompt` (NanoBanana)
+- `onboarding-enrichment` → `companyName` passado para `generate-campaign-briefing` (Perplexity)
+
+O campo e editavel no painel Monitor (aba `onboarding-data`) via edge `admin-update-onboarding-identity`. Se vazio, o fallback permanece: `clientes.nome || clientes.nome_fantasia`.
+
+## 19. Historico de logos: 1 ativo por compra
+
+`onboarding_logo_history` mantem todos os logos enviados por compra. Unique partial index garante exatamente 1 linha com `is_active = true` por `compra_id`. Ao deletar, o logo ativo e protegido (edge retorna 409 `ACTIVE_LOGO_PROTECTED`) — trocar ativo primeiro. `onboarding_identity.logo_path` sempre reflete o logo ativo atual.
+
+## 20. Edits admin usam JWT
+
+As 4 edges `admin-update-onboarding-identity`, `admin-upload-logo`, `admin-set-active-logo`, `admin-delete-logo-from-history` sao **protegidas** (verify_jwt habilitado). Frontend passa `Authorization: Bearer <access_token>` via helper `src/lib/admin-edge.js`, que tenta `refreshSession()` automaticamente em 401. `get-ai-campaign-monitor` e `save-onboarding-identity` permanecem publicas.

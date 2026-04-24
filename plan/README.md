@@ -4,6 +4,9 @@ Convenção: arquivos nomeados `YYYY-MM-DD-slug.md`. Planos concluídos ou subst
 
 ## Índice ativo
 
+- `2026-04-23-onboarding-overview-editavel.md`
+  ONB-23: aba `onboarding-data` editavel, historico de logos com 1 ativo por compra, 4 edges admin com JWT, precedencia de `brand_display_name` sobre `clientes.nome` nos jobs IA (NanoBanana + Perplexity).
+
 - `2026-04-19-fase1-fundacao-auth-frontend-dashboard.md`
   Implementação da Fase 1 da autenticação do dashboard interno: dependência `@supabase/supabase-js`, `AuthContext`, tela `/login`, guard central para `/ai-step2/*` e `/copy-editor`, logout no painel e checklist de validação preservando o onboarding público.
 
