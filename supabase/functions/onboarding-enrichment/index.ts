@@ -691,6 +691,16 @@ async function loadPipelineContext(
     }
   }
 
+  // brand_display_name (onboarding_identity) takes precedence over clientes.nome
+  const { data: identityName } = await supabase
+    .from('onboarding_identity')
+    .select('brand_display_name')
+    .eq('compra_id', compraId)
+    .maybeSingle()
+  if (identityName?.brand_display_name && identityName.brand_display_name.trim().length > 0) {
+    companyName = identityName.brand_display_name.trim()
+  }
+
   const celebridadeId = eligibilityCompra.celebridade as string | null
   if (celebridadeId) {
     const { data: celeb } = await supabase

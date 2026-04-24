@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
   // --- 2. Load identity from onboarding_identity ---
   const { data: identity, error: identityError } = await supabase
     .from('onboarding_identity')
-    .select('logo_path, brand_palette, font_choice, campaign_notes, campaign_images_paths')
+    .select('logo_path, brand_palette, font_choice, campaign_notes, campaign_images_paths, brand_display_name')
     .eq('compra_id', compra_id)
     .maybeSingle()
 
@@ -304,6 +304,10 @@ Deno.serve(async (req) => {
     if (cliente) {
       clientName = cliente.nome || cliente.nome_fantasia || 'Cliente'
     }
+  }
+  // brand_display_name (onboarding_identity) takes precedence over clientes.nome
+  if (identity.brand_display_name && identity.brand_display_name.trim().length > 0) {
+    clientName = identity.brand_display_name.trim()
   }
 
   if (!celebrityPngUrl) {
