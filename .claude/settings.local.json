@@ -67,7 +67,12 @@
       "mcp__679204a2-261e-4438-810f-43d31d049430__list_issue_statuses",
       "Bash(vercel ls *)",
       "Bash(vercel project *)",
-      "Bash(vercel teams *)"
+      "Bash(vercel teams *)",
+      "Bash(awk -F: '$2>0 {print $1\": \"$2}')",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__list_issue_labels",
+      "mcp__679204a2-261e-4438-810f-43d31d049430__get_issue",
+      "Bash(git checkout *)",
+      "Bash(awk *)"
     ]
   },
   "enableAllProjectMcpServers": true,
