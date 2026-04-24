@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Download, X, ChevronLeft, ChevronRight, Zap, Sparkles, ImageOff } from 'lucide-react'
+import { Download, X, ChevronLeft, ChevronRight, Sparkles, ImageOff } from 'lucide-react'
 import MonitorLayout from './MonitorLayout'
 import { monitorTheme, monitorRadius, monitorSpacing } from './theme'
 import { TYPE } from '../../theme/design-tokens'
@@ -9,7 +9,6 @@ const PAGE_SIZE = 20
 
 const TOOL_OPTIONS = [
   { value: 'all', label: 'Todos' },
-  { value: 'post-turbo', label: 'Post Turbo' },
   { value: 'post-gen', label: 'Post Gen' },
 ]
 
@@ -20,7 +19,6 @@ const STATUS_OPTIONS = [
 ]
 
 const TOOL_BADGE = {
-  'post-turbo': { label: 'Post Turbo', icon: Zap, bg: '#EFF6FF', color: '#1D4ED8' },
   'post-gen': { label: 'Post Gen', icon: Sparkles, bg: '#F5F3FF', color: '#6D28D9' },
 }
 
@@ -378,7 +376,7 @@ export default function GardenGalleryPage() {
         }}>
           <ImageOff size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
           <p style={{ ...TYPE.body, margin: 0 }}>Nenhuma imagem encontrada.</p>
-          <p style={{ ...TYPE.bodySmall, margin: '4px 0 0' }}>Gere imagens no Post Turbo ou Post Gen.</p>
+          <p style={{ ...TYPE.bodySmall, margin: '4px 0 0' }}>Gere imagens no Post Gen.</p>
         </div>
       ) : (
         <>

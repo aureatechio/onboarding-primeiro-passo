@@ -37,7 +37,7 @@ Painel de monitoramento do AI Campaign Pipeline:
 
 - `index.jsx`, `MonitorLayout.jsx`
 - `ListModePanel.jsx`, `DetailModePanel.jsx`
-- Sub-páginas: `GardenGalleryPage`, `PostGenPage`, `PostTurboPage`, `NanoBananaConfigPage`, `PerplexityConfigPage`
+- Sub-páginas: `GardenGalleryPage`, `PostGenPage`, `NanoBananaConfigPage`, `PerplexityConfigPage`
 - Hooks: `useAiCampaignMonitor`, `useGardenOptions`
 - Componentes locais: `StatusBadge`, `TabBar`, `DataRow`, `ImageViewer`, `ProgressBar`, `FieldInfoModal`
 
