@@ -154,19 +154,11 @@ export function useOnboardingEdit({ compraId, jobId, onMutated } = {}) {
     setRegenerating(true)
     setLastError(null)
     try {
-      const baseUrl = import.meta.env.VITE_SUPABASE_URL
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-      const res = await fetch(`${baseUrl}/functions/v1/retry-ai-campaign-assets`, {
+      const payload = await adminFetch('retry-ai-campaign-assets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: anonKey,
-          Authorization: `Bearer ${anonKey}`,
-        },
-        body: JSON.stringify({ job_id: jobId, mode: 'all' }),
+        body: { job_id: jobId, mode: 'all' },
       })
-      const payload = await res.json().catch(() => null)
-      if (!res.ok || !payload?.success) {
+      if (!payload?.success) {
         throw new Error(payload?.message || 'Falha ao regenerar jobs.')
       }
       await invalidate()

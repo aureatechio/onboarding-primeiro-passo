@@ -10,8 +10,12 @@ import { useAiCampaignMonitor } from './useAiCampaignMonitor'
 import { formatDate } from './utils'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
+import { useAuth } from '../../context/AuthContext'
 
 export default function AiStep2Monitor() {
+  const { isAdmin, isOperator } = useAuth()
+  const canOperate = isAdmin || isOperator
+  const canAdminMutate = isAdmin
   const {
     data,
     loading,
@@ -210,9 +214,10 @@ export default function AiStep2Monitor() {
                 listCelebrity={listCelebrity}
                 listCompra={listCompra}
                 availablePurchases={availablePurchases}
-                releaseOnboarding={releaseOnboarding}
+                releaseOnboarding={canAdminMutate ? releaseOnboarding : null}
                 openJobDetail={openJobDetail}
                 updateListFilters={updateListFilters}
+                canMutate={canAdminMutate}
               />
             ) : (
               <DetailModePanel
@@ -227,9 +232,9 @@ export default function AiStep2Monitor() {
                 activeGalleryCategory={activeGalleryCategory}
                 onGalleryCategoryChange={setActiveGalleryCategory}
                 onOpenViewer={openViewerByAsset}
-                onRetrySingleAsset={retrySingleAsset}
-                onRetryFailedAssets={retryFailedAssets}
-                onRetryCategory={retryCategory}
+                onRetrySingleAsset={canOperate ? retrySingleAsset : null}
+                onRetryFailedAssets={canOperate ? retryFailedAssets : null}
+                onRetryCategory={canOperate ? retryCategory : null}
                 retryingAssetId={retryingAssetId}
                 retryingAll={retryingAll}
                 retryingCategory={retryingCategory}
@@ -239,6 +244,8 @@ export default function AiStep2Monitor() {
                 compraId={compraId}
                 jobId={jobId}
                 reload={reload}
+                canMutate={canAdminMutate}
+                canOperate={canOperate}
               />
             )}
       {!isListMode && currentAsset ? (

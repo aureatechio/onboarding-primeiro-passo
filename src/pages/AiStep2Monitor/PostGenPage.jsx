@@ -5,6 +5,7 @@ import { monitorTheme, monitorRadius } from './theme'
 import { ASPECT_RATIOS } from './constants'
 import useGardenOptions from './useGardenOptions'
 import { extractColorsFromImage } from '../../lib/color-extractor'
+import { adminFetch } from '../../lib/admin-edge'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
 const FORMATS = Object.keys(ASPECT_RATIOS)
@@ -198,11 +199,11 @@ export default function PostGenPage() {
       const palette = allColors.filter((c) => c !== '__temp__')
       if (palette.length > 0) formData.append('palette', JSON.stringify(palette))
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/post-gen-generate`, {
+      const json = await adminFetch('post-gen-generate', {
         method: 'POST',
         body: formData,
+        isMultipart: true,
       })
-      const json = await res.json()
 
       if (!json.success) {
         setError(json.message || 'Erro ao submeter.')
@@ -212,8 +213,8 @@ export default function PostGenPage() {
 
       setPhase('polling')
       startPolling(json.data.job_id)
-    } catch {
-      setError('Erro de conexao. Tente novamente.')
+    } catch (err) {
+      setError(err?.message || 'Erro de conexao. Tente novamente.')
       setPhase('failed')
     }
   }

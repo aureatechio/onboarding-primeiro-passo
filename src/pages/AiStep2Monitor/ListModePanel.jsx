@@ -17,6 +17,7 @@ export default function ListModePanel({
   releaseOnboarding,
   openJobDetail,
   updateListFilters,
+  canMutate = false,
 }) {
   const [releasing, setReleasing] = useState(false)
   const [showReleaseConfirm, setShowReleaseConfirm] = useState(false)
@@ -297,7 +298,7 @@ export default function ListModePanel({
               </option>
             ))}
           </select>
-          {isSelectedBlocked ? (
+          {canMutate && isSelectedBlocked ? (
             <button
               type="button"
               onClick={() => setShowReleaseConfirm(true)}
@@ -382,7 +383,7 @@ export default function ListModePanel({
         </div>
       )}
 
-      {showReleaseConfirm && isSelectedBlocked && (
+      {canMutate && showReleaseConfirm && isSelectedBlocked && (
         <div
           style={{
             border: `1px solid ${monitorTheme.borderStrong}`,

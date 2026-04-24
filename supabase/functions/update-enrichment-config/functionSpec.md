@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Atualiza campos da configuracao do pipeline de enriquecimento. Tabela singleton `enrichment_config`. Protegida via `x-admin-password`.
+Atualiza campos da configuracao do pipeline de enriquecimento. Tabela singleton `enrichment_config`. Protegida via JWT + RBAC admin.
 
 ---
 
@@ -10,8 +10,8 @@ Atualiza campos da configuracao do pipeline de enriquecimento. Tabela singleton 
 
 ### Autenticacao
 
-- Header `x-admin-password` (mesmo padrao de `update-nanobanana-config`)
-- Deploy: `--no-verify-jwt`
+- Header `Authorization: Bearer <access_token>` com role `admin`
+- Deploy protegido: nao usar `--no-verify-jwt`
 
 ### Requisicao
 
@@ -50,7 +50,7 @@ Todos os campos sao opcionais. Apenas os campos presentes no body serao atualiza
 ## Validacoes
 
 1. Metodo != POST → 405 `METHOD_NOT_ALLOWED`
-2. `x-admin-password` ausente ou invalida → 401 `UNAUTHORIZED`
+2. JWT ausente/invalido → 401 `UNAUTHORIZED`; role sem admin → 403 `FORBIDDEN`
 3. JSON invalido → 400 `INVALID_JSON`
 4. Nenhum campo valido no body → 400 `NO_VALID_FIELDS`
 5. Campo com valor invalido → 400 `VALIDATION_ERROR`
@@ -59,7 +59,7 @@ Todos os campos sao opcionais. Apenas os campos presentes no body serao atualiza
 
 ## Comportamento
 
-1. Validar admin password via `requireAdminPassword()`
+1. Validar JWT + role admin via `requireRole()`
 2. Parsear body JSON
 3. Validar cada campo presente (tipos, ranges)
 4. Buscar registro existente (singleton)
@@ -87,5 +87,5 @@ Todos os campos sao opcionais. Apenas os campos presentes no body serao atualiza
 ## Deploy
 
 ```bash
-supabase functions deploy update-enrichment-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
+supabase functions deploy update-enrichment-config --project-ref awqtzoefutnfmnbomujt
 ```

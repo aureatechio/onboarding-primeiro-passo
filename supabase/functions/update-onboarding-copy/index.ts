@@ -2,15 +2,15 @@
  * Edge Function: update-onboarding-copy
  *
  * Publishes updated onboarding copy to the singleton table and creates
- * a version history record. Protected by x-admin-password header.
+ * a version history record. Protected by JWT + RBAC admin.
  *
- * Deploy with: --no-verify-jwt (frontend has no JWT auth)
+ * Deploy protected, without --no-verify-jwt.
  */
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { handleCors, corsHeaders } from '../_shared/cors.ts'
-import { requireAdminPassword } from '../_shared/admin-auth.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
 
 const CONFIG_TABLE = 'onboarding_copy'
 const VERSIONS_TABLE = 'onboarding_copy_versions'
@@ -42,13 +42,14 @@ Deno.serve(async (req: Request) => {
   }
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  const authCheck = requireAdminPassword(req)
-  if (!authCheck.authorized) return authCheck.response
+  const authResult = await requireRole(req, ['admin'])
+  if (isRbacError(authResult)) return authResult.error
 
   try {
     // ── Parse body ──────────────────────────────────────────────────────────
     const body = await req.json()
-    const { content, changed_etapas, published_by, notes } = body
+    const { content, changed_etapas, notes } = body
+    const published_by = authResult.user.email || authResult.user.id
 
     // ── Validate ────────────────────────────────────────────────────────────
     if (!content || typeof content !== 'object' || Array.isArray(content)) {

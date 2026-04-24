@@ -1,7 +1,7 @@
 /**
  * Edge Function: update-nanobanana-config
  * Atualiza configurações do NanoBanana (todos os campos editáveis).
- * Protegida via x-admin-password.
+ * Protegida via JWT + RBAC admin.
  */
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -15,12 +15,12 @@ import {
   VALID_SAFETY_PRESETS,
   CONFIG_TABLE,
 } from "../_shared/nanobanana/config.ts";
-import { requireAdminPassword } from "../_shared/admin-auth.ts";
+import { isRbacError, requireRole } from "../_shared/rbac.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-admin-password",
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "PATCH, OPTIONS",
 };
 
@@ -174,8 +174,8 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Método não permitido", code: "METHOD_NOT_ALLOWED" }, 405);
     }
 
-    const authCheck = requireAdminPassword(req);
-    if (!authCheck.authorized) return authCheck.response;
+    const authResult = await requireRole(req, ["admin"]);
+    if (isRbacError(authResult)) return authResult.error;
 
     const parsedPayload = await parsePayload(req);
     if (parsedPayload instanceof Response) {
@@ -455,15 +455,15 @@ Deno.serve(async (req: Request) => {
         direction_clean_image_path: updated?.direction_clean_image_path ?? null,
         direction_retail_image_path: updated?.direction_retail_image_path ?? null,
         direction_moderna_image_url: await createSignedUrlForConfig(
-          supabase,
+          supabase as any,
           updated?.direction_moderna_image_path,
         ),
         direction_clean_image_url: await createSignedUrlForConfig(
-          supabase,
+          supabase as any,
           updated?.direction_clean_image_path,
         ),
         direction_retail_image_url: await createSignedUrlForConfig(
-          supabase,
+          supabase as any,
           updated?.direction_retail_image_path,
         ),
         format_1_1: updated?.format_1_1,

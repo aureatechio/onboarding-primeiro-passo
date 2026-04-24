@@ -6,7 +6,7 @@ Liberar, bloquear ou revogar o acesso ao onboarding para uma compra, com rastrea
 
 ## Autenticacao
 
-Guard admin via header `x-admin-password` (`requireAdminPassword`).
+Guard admin via JWT + RBAC (`requireRole(req, ["admin"])`).
 
 ## Metodo
 
@@ -64,5 +64,5 @@ Guard admin via header `x-admin-password` (`requireAdminPassword`).
 ## Deploy
 
 ```bash
-supabase functions deploy set-onboarding-access --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
+supabase functions deploy set-onboarding-access --project-ref awqtzoefutnfmnbomujt
 ```

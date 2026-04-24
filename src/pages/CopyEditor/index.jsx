@@ -26,8 +26,8 @@ export default function CopyEditor() {
 
   const PreviewComponent = getPreviewComponent(activeEtapaId)
 
-  const handlePublish = async (password, notes) => {
-    const result = await publishToSupabase(password, notes)
+  const handlePublish = async (_password, notes) => {
+    const result = await publishToSupabase('', notes)
     if (result.success) {
       setTimeout(() => setPublishDialogOpen(false), 1500)
     }

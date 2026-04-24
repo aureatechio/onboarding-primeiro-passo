@@ -2,7 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 import { CONFIG_TABLE, resetConfigCache } from '../_shared/enrichment/config.ts'
-import { requireAdminPassword } from '../_shared/admin-auth.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/
 
@@ -38,8 +38,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authCheck = requireAdminPassword(req)
-    if (!authCheck.authorized) return authCheck.response
+    const authResult = await requireRole(req, ['admin'])
+    if (isRbacError(authResult)) return authResult.error
 
     let body: Record<string, unknown>
     try {

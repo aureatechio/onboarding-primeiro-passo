@@ -4,7 +4,7 @@
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
-import { isAuthError, requireAuth } from '../_shared/auth.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
 import {
   getFileExtension,
   validateLogoFile,
@@ -33,8 +33,8 @@ Deno.serve(async (req) => {
     return json({ success: false, code: 'METHOD_NOT_ALLOWED', message: 'Use POST.' }, 405)
   }
 
-  const authResult = await requireAuth(req)
-  if (isAuthError(authResult)) return authResult.error
+  const authResult = await requireRole(req, ['admin'])
+  if (isRbacError(authResult)) return authResult.error
   const { user, serviceClient } = authResult
 
   const contentType = req.headers.get('content-type') || ''

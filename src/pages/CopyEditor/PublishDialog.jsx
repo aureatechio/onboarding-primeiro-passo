@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Upload, X, Lock, FileText } from 'lucide-react'
+import { Upload, X, FileText } from 'lucide-react'
 import { COLORS } from '../../theme/colors'
 import { monitorTheme, monitorRadius } from '../AiStep2Monitor/theme'
 
 /**
  * PublishDialog — Modal for publishing copy changes to Supabase.
- * Collects admin password and optional notes.
+ * Collects optional notes; admin permission comes from the logged-in JWT.
  */
 export default function PublishDialog({
   isOpen,
@@ -15,7 +15,6 @@ export default function PublishDialog({
   publishStatus,
   publishError,
 }) {
-  const [password, setPassword] = useState('')
   const [notes, setNotes] = useState('')
 
   if (!isOpen) return null
@@ -26,8 +25,8 @@ export default function PublishDialog({
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!password.trim() || isPublishing) return
-    onPublish(password.trim(), notes.trim())
+    if (isPublishing) return
+    onPublish('', notes.trim())
   }
 
   return (
@@ -129,43 +128,6 @@ export default function PublishDialog({
             </div>
           )}
 
-          {/* Password */}
-          <div style={{ marginBottom: 14 }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                fontWeight: 600,
-                color: monitorTheme.textSecondary,
-                marginBottom: 6,
-              }}
-            >
-              <Lock size={12} />
-              Senha admin
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite a senha admin"
-              required
-              disabled={isPublishing}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 8,
-                border: `1px solid ${monitorTheme.border}`,
-                fontSize: 14,
-                outline: 'none',
-                background: monitorTheme.pageBg,
-                color: monitorTheme.textPrimary,
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
           {/* Notes */}
           <div style={{ marginBottom: 16 }}>
             <label
@@ -259,18 +221,18 @@ export default function PublishDialog({
             {!isSuccess && (
               <button
                 type="submit"
-                disabled={!password.trim() || isPublishing}
+                disabled={isPublishing}
                 style={{
                   padding: '8px 20px',
                   borderRadius: 8,
                   border: 'none',
-                  background: !password.trim() || isPublishing
+                  background: isPublishing
                     ? monitorTheme.border
                     : COLORS.red,
                   color: '#fff',
                   fontSize: 13,
                   fontWeight: 700,
-                  cursor: !password.trim() || isPublishing ? 'not-allowed' : 'pointer',
+                  cursor: isPublishing ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,

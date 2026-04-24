@@ -1,5 +1,4 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 import {
   validateImageFile,
@@ -16,6 +15,11 @@ import {
   loadNanoBananaConfig,
   buildImageOverrides,
 } from '../_shared/nanobanana/config.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
+
+declare const EdgeRuntime:
+  | { waitUntil?: (promise: Promise<unknown>) => void }
+  | undefined
 
 const URL_EXPIRY_SECONDS = 7 * 24 * 60 * 60
 
@@ -82,6 +86,9 @@ Deno.serve(async (req) => {
   const requestId = crypto.randomUUID()
 
   try {
+    const authResult = await requireRole(req, ['admin', 'operator'])
+    if (isRbacError(authResult)) return authResult.error
+
     const contentType = req.headers.get('content-type') || ''
     let fields: Record<string, string> = {}
     let logoFile: File | null = null
@@ -131,8 +138,7 @@ Deno.serve(async (req) => {
     })
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    const supabase = createClient(supabaseUrl, serviceRoleKey)
+    const supabase = authResult.serviceClient
 
     const jobId = crypto.randomUUID()
     let logoPath: string | null = null
@@ -186,7 +192,7 @@ Deno.serve(async (req) => {
     // Background: gerar imagem
     const bgPromise = (async () => {
       try {
-        const config = await loadNanoBananaConfig(supabase)
+        const config = await loadNanoBananaConfig(supabase as any)
 
         // Se tem logo, obter signed URL
         let logoSignedUrl: string | undefined

@@ -2,13 +2,13 @@
 
 ## Proposito
 
-Atualiza configuracoes do Perplexity/Sonar de forma granular. Funcao permite editar model, endpoints, parametros de geracao, prompts, versoes e chave de API. Validacoes rígidas garantem que campos editaveis mantenhem consistencia. API key no corpo e mascarada na resposta. Protegida por `requireAdminPassword` (header `x-admin-password`).
+Atualiza configuracoes do Perplexity/Sonar de forma granular. Funcao permite editar model, endpoints, parametros de geracao, prompts, versoes e chave de API. Validacoes rígidas garantem que campos editaveis mantenhem consistencia. API key no corpo e mascarada na resposta. Protegida por JWT + RBAC admin.
 
 ## Metodo / Acesso
 
 - **HTTP Method**: PATCH
-- **Autenticacao**: Publica (--no-verify-jwt) + Guard `requireAdminPassword` via header `x-admin-password`
-- **Deploy**: `supabase functions deploy update-perplexity-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt`
+- **Autenticacao**: JWT obrigatorio + Guard `requireRole(req, ["admin"])`
+- **Deploy**: `supabase functions deploy update-perplexity-config --project-ref awqtzoefutnfmnbomujt`
 
 ## Input
 
@@ -100,7 +100,8 @@ Ou com atualizacoes de prompt:
 
 | Codigo | HTTP | Descricao |
 |--------|------|-----------|
-| `UNAUTHORIZED` | 401 | Header `x-admin-password` ausente ou invalido |
+| `UNAUTHORIZED` | 401 | JWT ausente ou invalido |
+| `FORBIDDEN` | 403 | Role diferente de `admin` |
 | `INVALID_JSON` | 400 | JSON no body e invalido |
 | `VALIDATION_ERROR` | 400 | Campo falhou validacao (vazio quando nao permite, tipo errado, intervalo invalido, enum invalido, etc) |
 | `NO_VALID_FIELDS` | 400 | Nenhum campo valido foi fornecido para atualizar |
@@ -112,7 +113,7 @@ Ou com atualizacoes de prompt:
 
 1. **CORS Check**: Responder OPTIONS com headers CORS
 2. **Method Validation**: Se nao PATCH, retornar 405
-3. **Auth Guard**: Validar `x-admin-password` via `requireAdminPassword()`; se invalido, retornar 401 UNAUTHORIZED
+3. **Auth Guard**: Validar JWT e role admin via `requireRole()`; se invalido, retornar 401/403
 4. **Parse JSON**: Tentar fazer parse do body JSON; se invalido, retornar 400 INVALID_JSON
 4. **Validate Each Field**:
    - `model`: Se defined, nao-vazio
@@ -148,7 +149,7 @@ Ou com atualizacoes de prompt:
 
 ### Modulos _shared
 
-- `_shared/admin-auth.ts` — `requireAdminPassword`
+- `_shared/rbac.ts` — `requireRole`
 - `jsr:@supabase/supabase-js@2` — `createClient`
 
 ### Tabelas
@@ -159,9 +160,9 @@ Ou com atualizacoes de prompt:
 
 ### Deployment
 
-- Funcao publica: usar `--no-verify-jwt`
-- **Seguranca**: Protegida por `requireAdminPassword` (header `x-admin-password`, env var `ADMIN_PASSWORD`)
-- CORS habilitado para todas as origens com header `x-admin-password` permitido
+- Funcao protegida: nao usar `--no-verify-jwt`
+- **Seguranca**: Protegida por JWT + RBAC admin.
+- CORS habilitado para headers de autenticacao Supabase.
 
 ### Validacoes Criticas
 

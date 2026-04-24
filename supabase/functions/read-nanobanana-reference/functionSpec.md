@@ -7,8 +7,8 @@ Recebe uma imagem de referência e uma categoria, envia para a Gemini Vision API
 ## Inputs
 
 ### Auth
-- **Protegida** via `x-admin-password` header. Deploy com `--no-verify-jwt` (auth é aplicada no código).
-- Guard: `requireAdminPassword` de `_shared/admin-auth.ts`
+- **Protegida** via JWT + RBAC admin.
+- Guard: `requireRole(req, ["admin"])` de `_shared/rbac.ts`
 
 ### Env Vars
 | Variável | Obrigatória | Descrição |
@@ -16,7 +16,7 @@ Recebe uma imagem de referência e uma categoria, envia para a Gemini Vision API
 | `GEMINI_API_KEY` | Sim | Chave da API Gemini |
 | `GEMINI_MODEL_NAME` | Não | Modelo a usar (default: `gemini-1.5-flash`) |
 | `GEMINI_API_BASE_URL` | Não | Base URL da API (default: `https://generativelanguage.googleapis.com/v1beta`) |
-| `ADMIN_PASSWORD` | Não | Senha admin (default: `megazord`) |
+| JWT do usuario admin | Sim | Header `Authorization: Bearer <access_token>` |
 | `NANOBANANA_MAX_REFERENCE_UPLOAD_BYTES` | Não | Limite de upload (default: 10 MB) |
 
 ### Request
@@ -32,7 +32,7 @@ Recebe uma imagem de referência e uma categoria, envia para a Gemini Vision API
 ## Validations
 
 1. Método ≠ POST → 405 `METHOD_NOT_ALLOWED`
-2. `x-admin-password` ausente ou incorreto → 401 `UNAUTHORIZED`
+2. JWT ausente/invalido → 401 `UNAUTHORIZED`; role sem admin → 403 `FORBIDDEN`
 3. Content-Type ≠ multipart/form-data → 400 `INVALID_CONTENT_TYPE`
 3. `category` ausente ou inválida → 400 `INVALID_CATEGORY`
 4. `image` ausente ou tamanho 0 → 400 `MISSING_IMAGE`
@@ -101,7 +101,8 @@ CREATIVE DIRECTION — <CATEGORIA> (<Estilo>)
 
 | HTTP | Code | Descrição |
 |------|------|-----------|
-| 401 | `UNAUTHORIZED` | `x-admin-password` inválido ou ausente |
+| 401 | `UNAUTHORIZED` | JWT inválido ou ausente |
+| 403 | `FORBIDDEN` | Role diferente de `admin` |
 | 400 | `INVALID_CONTENT_TYPE` | Content-Type ≠ multipart/form-data |
 | 400 | `INVALID_CATEGORY` | Categoria fora de `moderna\|clean\|retail` |
 | 400 | `MISSING_IMAGE` | Arquivo de imagem ausente ou vazio |

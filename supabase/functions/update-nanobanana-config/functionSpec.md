@@ -7,15 +7,15 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 ## Inputs
 
 ### Auth
-- **Protegida** via `x-admin-password` header. Deploy com `--no-verify-jwt` (auth é aplicada no código).
-- Guard: `requireAdminPassword` de `_shared/admin-auth.ts`
+- **Protegida** via JWT + RBAC admin.
+- Guard: `requireRole(req, ["admin"])` de `_shared/rbac.ts`
 
 ### Env Vars
 | Variável | Obrigatória | Descrição |
 |----------|-------------|-----------|
 | `SUPABASE_URL` | Sim | URL do projeto Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Sim | Service role key |
-| `ADMIN_PASSWORD` | Não | Senha admin (default: `megazord`) |
+| JWT do usuario admin | Sim | Header `Authorization: Bearer <access_token>` |
 | `NANOBANANA_MAX_REFERENCE_UPLOAD_BYTES` | Não | Limite de upload (default: 10 MB) |
 
 ### Request
@@ -85,7 +85,7 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 ## Validations
 
 1. Método ≠ PATCH → 405
-2. `x-admin-password` ausente ou incorreto → 401 `UNAUTHORIZED`
+2. JWT ausente/invalido → 401 `UNAUTHORIZED`; role sem admin → 403 `FORBIDDEN`
 3. Content-Type inválido → 400 `INVALID_MULTIPART` ou `INVALID_JSON`
 3. Campo string vazio (quando enviado) → 400 `VALIDATION_ERROR`
 4. `gemini_api_base_url` sem `https://` → 400 `VALIDATION_ERROR`
@@ -168,7 +168,8 @@ Atualiza a configuração singleton do NanoBanana. Suporta atualização parcial
 
 | HTTP | Code | Descrição |
 |------|------|-----------|
-| 401 | `UNAUTHORIZED` | `x-admin-password` inválido ou ausente |
+| 401 | `UNAUTHORIZED` | JWT inválido ou ausente |
+| 403 | `FORBIDDEN` | Role diferente de `admin` |
 | 400 | `VALIDATION_ERROR` | Campo inválido (string vazio, range fora, mode inválido, mime inválido, imagem grande, direção obrigatória vazia) |
 | 400 | `INVALID_MULTIPART` | multipart/form-data mal-formado |
 | 400 | `INVALID_JSON` | JSON mal-formado |

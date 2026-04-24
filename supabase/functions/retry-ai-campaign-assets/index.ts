@@ -1,6 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return json({ success: false, code: 'METHOD_NOT_ALLOWED', message: 'Use POST.' }, 405)
   }
+
+  const authResult = await requireRole(req, ['admin', 'operator'])
+  if (isRbacError(authResult)) return authResult.error
 
   let body: RetryBody
   try {
@@ -65,10 +68,10 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  const supabase = authResult.serviceClient
   if (!supabaseUrl || !serviceRoleKey) {
     return json({ success: false, code: 'CONFIG_ERROR', message: 'Supabase env vars not configured.' }, 500)
   }
-  const supabase = createClient(supabaseUrl, serviceRoleKey)
 
   const { data: job, error: jobError } = await supabase
     .from('ai_campaign_jobs')

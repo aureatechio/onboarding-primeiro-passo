@@ -1,17 +1,17 @@
 /**
  * Edge Function: update-perplexity-config
  * Atualiza configurações do Perplexity/Sonar (todos os campos editáveis).
- * Protegida por x-admin-password (requireAdminPassword).
+ * Protegida por JWT + RBAC admin.
  */
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { requireAdminPassword } from "../_shared/admin-auth.ts";
+import { isRbacError, requireRole } from "../_shared/rbac.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-admin-password",
+    "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "PATCH, OPTIONS",
 };
 
@@ -78,8 +78,8 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Método não permitido", code: "METHOD_NOT_ALLOWED" }, 405);
     }
 
-    const authCheck = requireAdminPassword(req);
-    if (!authCheck.authorized) return authCheck.response;
+    const authResult = await requireRole(req, ["admin"]);
+    if (isRbacError(authResult)) return authResult.error;
 
     let body: UpdateBody;
     try {

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import * as copyModule from '../../copy'
 import { deepMergeCopy } from '../../lib/deep-merge'
+import { adminFetch } from '../../lib/admin-edge'
 import { ETAPAS_META, UI } from './constants'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -231,7 +232,7 @@ export function useCopyEditor() {
   }, [sections])
 
   // ── Publish to Supabase ─────────────────────────────────────────────────
-  const publishToSupabase = useCallback(async (adminPassword, notes = '') => {
+  const publishToSupabase = useCallback(async (_adminPassword, notes = '') => {
     setPublishStatus('publishing')
     setPublishError(null)
 
@@ -253,31 +254,17 @@ export function useCopyEditor() {
         return { success: false, reason: 'no-changes' }
       }
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      if (!supabaseUrl) {
-        setPublishStatus('error')
-        setPublishError('VITE_SUPABASE_URL não configurada')
-        return { success: false, reason: 'no-url' }
-      }
-
-      const res = await fetch(`${supabaseUrl}/functions/v1/update-onboarding-copy`, {
+      const data = await adminFetch('update-onboarding-copy', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
-        },
-        body: JSON.stringify({
+        body: {
           content,
           changed_etapas: changedEtapas,
-          published_by: 'copy-editor',
           notes: notes.trim() || null,
-        }),
+        },
       })
 
-      const data = await res.json()
-
-      if (!res.ok || !data.success) {
-        const errMsg = data.error || data.message || `HTTP ${res.status}`
+      if (!data.success) {
+        const errMsg = data.error || data.message || 'Erro ao publicar copy'
         setPublishStatus('error')
         setPublishError(errMsg)
         return { success: false, reason: errMsg }

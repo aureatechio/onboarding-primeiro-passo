@@ -17,6 +17,7 @@ import {
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
+import { adminFetch } from '../../lib/admin-edge'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 
@@ -523,16 +524,11 @@ export default function PerplexityConfigPage() {
       changed.api_key = apiKeyInput.trim()
     }
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/update-perplexity-config`, {
+      const data = await adminFetch('update-perplexity-config', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-password': 'megazord',
-        },
-        body: JSON.stringify(changed),
+        body: changed,
       })
-      const data = await res.json()
-      if (!res.ok) {
+      if (!data?.config) {
         setError(data.error || 'Erro ao salvar')
         setSaving(false)
         return

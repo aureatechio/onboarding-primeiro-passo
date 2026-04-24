@@ -18,9 +18,9 @@ import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
 import FieldInfoModal from './components/FieldInfoModal'
+import { adminFetch } from '../../lib/admin-edge'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'megazord'
 
 const cardStyle = {
   border: `1px solid ${monitorTheme.border}`,
@@ -526,11 +526,8 @@ export default function NanoBananaConfigPage() {
     }
     try {
       const hasFileChanges = Object.keys(referenceFiles).length > 0 || Object.keys(removeReferenceImage).length > 0
-      let body = JSON.stringify(changed)
-      const headers = {
-        'Content-Type': 'application/json',
-        'x-admin-password': ADMIN_PASSWORD,
-      }
+      let body = changed
+      let isMultipart = false
 
       if (hasFileChanges) {
         const formData = new FormData()
@@ -544,16 +541,15 @@ export default function NanoBananaConfigPage() {
           if (removeReferenceImage[category]) formData.append(`direction_${category}_remove_image`, 'true')
         }
         body = formData
-        delete headers['Content-Type']
+        isMultipart = true
       }
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/update-nanobanana-config`, {
+      const data = await adminFetch('update-nanobanana-config', {
         method: 'PATCH',
-        headers,
         body,
+        isMultipart,
       })
-      const data = await res.json()
-      if (!res.ok) {
+      if (!data?.config) {
         setError(data.error || 'Erro ao salvar')
         setSaving(false)
         return
@@ -620,13 +616,12 @@ export default function NanoBananaConfigPage() {
       formData.append('category', category)
       formData.append('image', file)
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/read-nanobanana-reference`, {
+      const data = await adminFetch('read-nanobanana-reference', {
         method: 'POST',
-        headers: { 'x-admin-password': ADMIN_PASSWORD },
         body: formData,
+        isMultipart: true,
       })
-      const data = await res.json()
-      if (!res.ok) {
+      if (!data?.success) {
         setError(data.error || 'Erro ao ler imagem')
       } else {
         const text = typeof data.direction_text === 'string' ? data.direction_text.trim() : ''

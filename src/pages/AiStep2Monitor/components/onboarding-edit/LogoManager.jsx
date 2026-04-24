@@ -30,6 +30,7 @@ export default function LogoManager({
   uploading = false,
   busyLogoId = '',
   error = null,
+  readOnly = false,
 }) {
   const fileRef = useRef(null)
   const [previewUrl, setPreviewUrl] = useState(null)
@@ -119,11 +120,11 @@ export default function LogoManager({
             style={{ display: 'none' }}
           />
 
-          {!previewUrl ? (
+          {!readOnly && !previewUrl ? (
             <button type="button" onClick={pick} style={primaryBtn}>
               {activeLogoUrl ? 'Trocar logo' : 'Enviar logo'}
             </button>
-          ) : (
+          ) : !readOnly ? (
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button type="button" onClick={confirmUpload} disabled={uploading} style={primaryBtn}>
                 {uploading ? 'Enviando…' : 'Confirmar upload'}
@@ -132,14 +133,16 @@ export default function LogoManager({
                 Cancelar
               </button>
             </div>
-          )}
+          ) : null}
 
           {error && (
             <div style={{ marginTop: 8, fontSize: 11, color: DESTRUCTIVE }}>{error}</div>
           )}
-          <div style={{ marginTop: 8, fontSize: 11, color: monitorTheme.textMuted }}>
-            Maximo 5 MB. Formatos: PNG, JPG, WebP, SVG, PDF, HEIC/HEIF.
-          </div>
+          {!readOnly && (
+            <div style={{ marginTop: 8, fontSize: 11, color: monitorTheme.textMuted }}>
+              Maximo 5 MB. Formatos: PNG, JPG, WebP, SVG, PDF, HEIC/HEIF.
+            </div>
+          )}
         </div>
       </div>
 
@@ -148,12 +151,13 @@ export default function LogoManager({
         onSetActive={onSetActive}
         onDelete={onDelete}
         busyLogoId={busyLogoId}
+        readOnly={readOnly}
       />
     </div>
   )
 }
 
-function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId }) {
+function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId, readOnly = false }) {
   if (!entries || entries.length === 0) {
     return (
       <div style={{ fontSize: 12, color: monitorTheme.textMuted, fontFamily: SANS }}>
@@ -256,7 +260,8 @@ function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId }) {
               <div style={{ fontSize: 10, color: monitorTheme.textMuted }}>
                 {formatDate(entry.uploaded_at)} · {formatBytes(entry.size_bytes)}
               </div>
-              <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
+              {!readOnly && (
+                <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
                 {!entry.is_active && (
                   <button
                     type="button"
@@ -296,7 +301,8 @@ function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId }) {
                 >
                   ✕
                 </button>
-              </div>
+                </div>
+              )}
             </div>
           )
         })}

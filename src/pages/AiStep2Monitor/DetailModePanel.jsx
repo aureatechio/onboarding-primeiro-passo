@@ -34,6 +34,8 @@ export default function DetailModePanel({
   compraId,
   jobId,
   reload,
+  canMutate = false,
+  canOperate = canMutate,
 }) {
   const groupedAssets = ASSET_GROUPS.map((group) => ({
     ...group,
@@ -80,15 +82,17 @@ export default function DetailModePanel({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onRetryFailedAssets}
-                disabled={retryingAll}
-                style={retryAllBtnStyle(retryingAll)}
-              >
-                {retryingAll ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
-                Reprocessar todas com erro
-              </button>
+              {canOperate ? (
+                <button
+                  type="button"
+                  onClick={onRetryFailedAssets}
+                  disabled={retryingAll}
+                  style={retryAllBtnStyle(retryingAll)}
+                >
+                  {retryingAll ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
+                  Reprocessar todas com erro
+                </button>
+              ) : null}
             </div>
           ) : null}
 
@@ -196,7 +200,7 @@ export default function DetailModePanel({
                 <h3 style={{ fontSize: 14, fontWeight: 600, color: monitorTheme.textPrimary, margin: 0 }}>
                   {currentGroup?.label || 'Categoria'}
                 </h3>
-                {currentGroup && currentGroup.items.length > 0 ? (
+                {canOperate && currentGroup && currentGroup.items.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => onRetryCategory(currentGroup.key)}
@@ -259,6 +263,7 @@ export default function DetailModePanel({
                         retryingCategory={retryingCategory}
                         onOpenViewer={onOpenViewer}
                         onRetrySingleAsset={onRetrySingleAsset}
+                        canMutate={canOperate}
                       />
                     )
                   })}
@@ -278,6 +283,7 @@ export default function DetailModePanel({
           identity={identity}
           briefing={briefing}
           reload={reload}
+          readOnly={!canMutate}
         />
       ) : null}
 
@@ -408,6 +414,7 @@ function AssetCard({
   retryingCategory,
   onOpenViewer,
   onRetrySingleAsset,
+  canMutate = false,
 }) {
   return (
     <div
@@ -539,7 +546,7 @@ function AssetCard({
             {asset.status || 'unknown'}
           </p>
         </div>
-        {isFailed ? (
+        {canMutate && isFailed ? (
           <button
             type="button"
             onClick={() => onRetrySingleAsset(asset.id)}
@@ -549,7 +556,7 @@ function AssetCard({
           >
             {isRetryingThis ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
           </button>
-        ) : asset.status === 'completed' ? (
+        ) : canMutate && asset.status === 'completed' ? (
           <button
             type="button"
             onClick={() => onRetrySingleAsset(asset.id)}
@@ -654,4 +661,3 @@ const iconBtnStyle = ({ danger, disabled }) => ({
   flexShrink: 0,
   transition: 'opacity 0.15s',
 })
-

@@ -63,6 +63,7 @@ export default function OnboardingDataTab({
   identity,
   briefing,
   reload,
+  readOnly = false,
 }) {
   const {
     savingField,
@@ -90,6 +91,7 @@ export default function OnboardingDataTab({
   }
 
   const handleFieldSave = (field) => async (value, options) => {
+    if (readOnly) return { ok: false, message: 'Somente admins podem editar dados do onboarding.' }
     const res = await saveIdentityField(field, value, options)
     if (res.ok) {
       setFieldErrors((prev) => ({ ...prev, [field]: null }))
@@ -101,24 +103,28 @@ export default function OnboardingDataTab({
   }
 
   const handlePaletteSave = async (colors) => {
+    if (readOnly) return { ok: false, message: 'Somente admins podem editar dados do onboarding.' }
     const res = await saveIdentityField('brand_palette', colors)
     if (res.ok) markBanner(true)
     return res
   }
 
   const handleLogoUpload = async (file) => {
+    if (readOnly) return { ok: false, message: 'Somente admins podem editar logos.' }
     const res = await uploadLogo(file)
     if (res.ok) markBanner(true)
     return res
   }
 
   const handleSetActive = async (id) => {
+    if (readOnly) return { ok: false, message: 'Somente admins podem editar logos.' }
     const res = await setActiveLogo(id)
     if (res.ok) markBanner(true)
     return res
   }
 
   const handleDelete = async (id) => {
+    if (readOnly) return { ok: false, message: 'Somente admins podem editar logos.' }
     if (!window.confirm('Deletar este logo do historico? Esta acao nao pode ser desfeita.')) {
       return { ok: false, message: 'cancelado' }
     }
@@ -127,6 +133,7 @@ export default function OnboardingDataTab({
   }
 
   const handleRegenerate = async () => {
+    if (readOnly) return
     const res = await regenerateJobs()
     if (res.ok) markBanner(false)
   }
@@ -138,11 +145,27 @@ export default function OnboardingDataTab({
   return (
     <div>
       <ChangeBanner
-        active={bannerActive}
+        active={bannerActive && !readOnly}
         onRegenerate={handleRegenerate}
         onDismiss={() => markBanner(false)}
         regenerating={regenerating}
       />
+
+      {readOnly && (
+        <div
+          style={{
+            padding: '10px 14px',
+            background: monitorTheme.neutralBadgeBg,
+            border: `1px solid ${monitorTheme.border}`,
+            borderRadius: 10,
+            color: monitorTheme.textSecondary,
+            fontSize: 12,
+            marginBottom: 16,
+          }}
+        >
+          Somente admins podem editar estes dados.
+        </div>
+      )}
 
       {lastError && lastError.field === 'regenerate' && (
         <div
@@ -173,6 +196,9 @@ export default function OnboardingDataTab({
             title="Marca"
             description="Nome exibido em prompts e criativos. Tem precedencia sobre o nome do cliente."
           >
+            {readOnly ? (
+              <FieldRow label="Nome da marca" value={identity?.brand_display_name || onboarding?.client?.name} />
+            ) : (
             <EditableField
               label="Nome da marca"
               value={identity?.brand_display_name || ''}
@@ -183,6 +209,7 @@ export default function OnboardingDataTab({
               maxLength={120}
               help="Se vazio, usa o nome do cliente."
             />
+            )}
           </OnboardingDataCard>
 
           <OnboardingDataCard
@@ -211,6 +238,9 @@ export default function OnboardingDataTab({
               badge={<ReadOnlyBadge reason="Escolha feita no onboarding." />}
             />
             <div style={{ marginTop: 14 }}>
+              {readOnly ? (
+                <FieldRow label="Fonte" value={identity?.font_choice} />
+              ) : (
               <EditableField
                 label="Fonte"
                 value={identity?.font_choice || ''}
@@ -220,6 +250,7 @@ export default function OnboardingDataTab({
                 error={fieldErrors.font_choice}
                 maxLength={80}
               />
+              )}
             </div>
             <div style={{ marginTop: 8 }}>
               <label
@@ -235,12 +266,16 @@ export default function OnboardingDataTab({
               >
                 Paleta da marca
               </label>
+              {readOnly ? (
+                <FieldRow label="Cores" value={(identity?.brand_palette || []).join(', ')} />
+              ) : (
               <PaletteEditor
                 value={identity?.brand_palette || []}
                 onSave={handlePaletteSave}
                 saving={savingField === 'brand_palette'}
                 error={fieldErrors.brand_palette}
               />
+              )}
             </div>
           </OnboardingDataCard>
 
@@ -248,19 +283,29 @@ export default function OnboardingDataTab({
             title="Presenca Digital"
             description="Site e Instagram alimentam o briefing. Marque re-enriquecer para disparar onboarding-enrichment."
           >
-            <SiteInstagramEditor
-              siteUrl={identity?.site_url || ''}
-              instagramHandle={identity?.instagram_handle || ''}
-              onSave={async (field, value, options) => handleFieldSave(field)(value, options)}
-              saving={savingField === 'site_url' || savingField === 'instagram_handle'}
-              fieldErrors={fieldErrors}
-            />
+            {readOnly ? (
+              <>
+                <FieldRow label="Site" value={identity?.site_url} />
+                <FieldRow label="Instagram" value={identity?.instagram_handle} />
+              </>
+            ) : (
+              <SiteInstagramEditor
+                siteUrl={identity?.site_url || ''}
+                instagramHandle={identity?.instagram_handle || ''}
+                onSave={async (field, value, options) => handleFieldSave(field)(value, options)}
+                saving={savingField === 'site_url' || savingField === 'instagram_handle'}
+                fieldErrors={fieldErrors}
+              />
+            )}
           </OnboardingDataCard>
 
           <OnboardingDataCard
             title="Briefing"
             description="Notas internas e texto do briefing de campanha."
           >
+            {readOnly ? (
+              <FieldRow label="Notas da campanha" value={identity?.campaign_notes} />
+            ) : (
             <EditableField
               label="Notas da campanha"
               value={identity?.campaign_notes || ''}
@@ -272,6 +317,7 @@ export default function OnboardingDataTab({
               rows={4}
               maxLength={2000}
             />
+            )}
             <FieldRow
               label="Modo"
               value={briefing?.mode}
@@ -304,6 +350,7 @@ export default function OnboardingDataTab({
               uploading={uploadingLogo}
               busyLogoId={busyLogoId}
               error={lastError?.field?.startsWith('logo_') ? lastError.message : null}
+              readOnly={readOnly}
             />
           </OnboardingDataCard>
 

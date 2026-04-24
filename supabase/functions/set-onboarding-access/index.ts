@@ -1,7 +1,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
-import { requireAdminPassword } from '../_shared/admin-auth.ts'
+import { isRbacError, requireRole } from '../_shared/rbac.ts'
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -37,10 +37,8 @@ Deno.serve(async (req) => {
     return json({ success: false, code: 'METHOD_NOT_ALLOWED', message: 'Use POST.' }, 405)
   }
 
-  const authCheck = requireAdminPassword(req)
-  if (!authCheck.authorized) {
-    return (authCheck as { authorized: false; response: Response }).response
-  }
+  const authResult = await requireRole(req, ['admin'])
+  if (isRbacError(authResult)) return authResult.error
 
   let body: Record<string, unknown>
   try {
@@ -54,7 +52,7 @@ Deno.serve(async (req) => {
   const reasonCode = String(body.reason_code ?? '').trim()
   const notes = body.notes ? String(body.notes).trim().slice(0, 1000) : null
   const allowedUntil = body.allowed_until ? String(body.allowed_until).trim() : null
-  const actorId = body.actor_id ? String(body.actor_id).trim() : 'admin'
+  const actorId = authResult.user.id
 
   if (!compraId || !UUID_RE.test(compraId)) {
     return json({ success: false, code: 'INVALID_COMPRA_ID', message: 'compra_id ausente ou invalido.' }, 400)

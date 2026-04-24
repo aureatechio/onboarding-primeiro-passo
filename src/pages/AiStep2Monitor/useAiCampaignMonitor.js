@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { adminFetch } from '../../lib/admin-edge'
 
 function toPage(value, fallback) {
   return Math.max(parseInt(value || String(fallback), 10) || fallback, 1)
@@ -322,16 +323,12 @@ export function useAiCampaignMonitor() {
         setActionError('')
         setActionSuccess('')
 
-        const response = await fetch(`${baseUrl}/functions/v1/retry-ai-campaign-assets`, {
+        const result = await adminFetch('retry-ai-campaign-assets', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
+          body: payload,
         })
 
-        const result = await response.json()
-        if (!response.ok || !result?.success) {
+        if (!result?.success) {
           throw new Error(result?.message || 'Falha ao reprocessar.')
         }
 
@@ -475,23 +472,16 @@ export function useAiCampaignMonitor() {
       try {
         setActionError('')
         setActionSuccess('')
-        const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'megazord'
-        const response = await fetch(`${baseUrl}/functions/v1/set-onboarding-access`, {
+        const result = await adminFetch('set-onboarding-access', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-password': adminPassword,
-          },
-          body: JSON.stringify({
+          body: {
             compra_id: compraId,
             action: 'allow',
             reason_code: reasonCode || 'manual_exception',
             notes: notes || '',
-            actor_id: 'monitor-admin',
-          }),
+          },
         })
-        const result = await response.json()
-        if (!response.ok || !result?.success) {
+        if (!result?.success) {
           throw new Error(result?.message || 'Falha ao liberar onboarding.')
         }
         setActionSuccess(result?.message || 'Onboarding liberado com sucesso.')

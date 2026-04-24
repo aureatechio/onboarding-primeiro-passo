@@ -8,7 +8,7 @@ Gerar criativos publicitarios (prompt-to-image) a partir de um brief estruturado
 
 - **Method:** POST
 - **Content-Type:** `multipart/form-data` (com logo) ou `application/json` (sem logo)
-- **Auth:** Publica (deploy com `--no-verify-jwt`)
+- **Auth:** JWT obrigatorio com role `admin` ou `operator`
 
 ## Inputs
 
@@ -129,5 +129,5 @@ Erros de geracao (background) nao retornam HTTP — ficam no job:
 ## Deploy
 
 ```bash
-supabase functions deploy post-gen-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
+supabase functions deploy post-gen-generate --project-ref awqtzoefutnfmnbomujt
 ```
