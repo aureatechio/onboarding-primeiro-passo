@@ -551,7 +551,7 @@ Deno.serve(async (req) => {
     supabase
       .from('onboarding_identity')
       .select(
-        'id, choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, created_at, updated_at'
+        'id, choice, logo_path, brand_palette, font_choice, campaign_images_paths, campaign_notes, production_path, brand_display_name, instagram_handle, site_url, created_at, updated_at'
       )
       .eq('compra_id', compraId)
       .maybeSingle(),
@@ -600,7 +600,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  const [logoUrl, briefingAudioUrl, campaignImageUrls] = await Promise.all([
+  const [logoUrl, briefingAudioUrl, campaignImageUrls, logoHistoryRes] = await Promise.all([
     createSignedUrlIfPath(supabase, 'onboarding-identity', identity?.logo_path, signedUrlExpirySec),
     createSignedUrlIfPath(supabase, 'onboarding-briefings', briefing?.audio_path, signedUrlExpirySec),
     Promise.all(
@@ -608,7 +608,32 @@ Deno.serve(async (req) => {
         createSignedUrlIfPath(supabase, 'onboarding-identity', path, signedUrlExpirySec)
       )
     ),
+    supabase
+      .from('onboarding_logo_history')
+      .select('id, logo_path, original_filename, mime_type, size_bytes, uploaded_at, uploaded_by_user_id, is_active')
+      .eq('compra_id', compraId)
+      .order('uploaded_at', { ascending: false }),
   ])
+
+  const logoHistoryRows = (logoHistoryRes.data || []) as Array<Record<string, unknown>>
+  const logoHistory = await Promise.all(
+    logoHistoryRows.map(async (row) => ({
+      id: row.id,
+      logo_path: row.logo_path,
+      logo_url: await createSignedUrlIfPath(
+        supabase,
+        'onboarding-identity',
+        String(row.logo_path || ''),
+        signedUrlExpirySec,
+      ),
+      original_filename: row.original_filename,
+      mime_type: row.mime_type,
+      size_bytes: row.size_bytes,
+      uploaded_at: row.uploaded_at,
+      uploaded_by_user_id: row.uploaded_by_user_id,
+      is_active: row.is_active,
+    }))
+  )
 
   let assets: Array<Record<string, unknown>> = []
   let errors: Array<Record<string, unknown>> = []
@@ -832,6 +857,9 @@ Deno.serve(async (req) => {
           font_choice: identity.font_choice,
           campaign_notes: identity.campaign_notes,
           production_path: identity.production_path,
+          brand_display_name: identity.brand_display_name ?? null,
+          instagram_handle: identity.instagram_handle ?? null,
+          site_url: identity.site_url ?? null,
           created_at: identity.created_at,
           updated_at: identity.updated_at,
           uploads: {
@@ -840,6 +868,7 @@ Deno.serve(async (req) => {
             campaign_images_paths: identity.campaign_images_paths || [],
             campaign_images_urls: campaignImageUrls.filter(Boolean),
           },
+          logo_history: logoHistory,
         }
         : null,
       briefing: briefing
