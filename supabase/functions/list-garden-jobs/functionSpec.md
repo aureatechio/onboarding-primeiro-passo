@@ -13,7 +13,7 @@ Listar jobs da Aurea Garden com filtros por ferramenta e status, paginacao e reg
 
 | Param | Default | Valid Values |
 |-------|---------|-------------|
-| `tool` | `all` | `all`, `post-turbo`, `post-gen` |
+| `tool` | `all` | `all`, `post-gen` |
 | `status` | `completed` | `all`, `pending`, `processing`, `completed`, `failed` |
 | `page` | `1` | Inteiro >= 1 |
 | `limit` | `20` | Inteiro 1-50 |

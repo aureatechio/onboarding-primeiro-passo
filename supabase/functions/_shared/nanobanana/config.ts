@@ -7,7 +7,6 @@
  * Consumers:
  *   - create-ai-campaign-job
  *   - post-gen-generate
- *   - post-turbo-generate
  *   - get-nanobanana-config
  *   - update-nanobanana-config
  *   - read-nanobanana-reference

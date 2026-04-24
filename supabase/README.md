@@ -114,14 +114,13 @@ Gera imagens e campanhas de marketing pós-onboarding. Docs em `ai-step2/`.
 | `get-perplexity-config` | protegido | Lê singleton. |
 | `update-perplexity-config` | protegido (admin) | Atualiza prompts, modelo, temperatura. |
 
-### 5. Aurea Garden (Post Gen + Post Turbo)
+### 5. Aurea Garden (Post Gen)
 
 **Todas públicas** (`--no-verify-jwt`). Ver `.context/modules/aurea-studio/`.
 
 | Função | Propósito |
 |---|---|
 | `post-gen-generate` | Gera 1 criativo (Post Gen). |
-| `post-turbo-generate` | Gera lote de criativos (Post Turbo). |
 | `list-garden-jobs` | Lista jobs da galeria. |
 | `get-garden-job` | Detalhe de 1 job. |
 | `get-garden-options` | Opções (estilos, categorias) para o UI. |

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Retornar dados de referencia (celebridades, segmentos, subsegmentos, negocios) para popular os formularios do Post Gen e Post Turbo.
+Retornar dados de referencia (celebridades, segmentos, subsegmentos, negocios) para popular o formulario do Post Gen.
 
 ## HTTP
 

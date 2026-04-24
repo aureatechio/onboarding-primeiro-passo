@@ -6,7 +6,7 @@ import { errorJson, successJson, BUCKET_NAME } from '../_shared/garden/validate.
 const URL_EXPIRY_SECONDS = 7 * 24 * 60 * 60 // 7 dias
 const MAX_LIMIT = 50
 const DEFAULT_LIMIT = 20
-const VALID_TOOLS = ['post-turbo', 'post-gen']
+const VALID_TOOLS = ['post-gen']
 const VALID_STATUSES = ['pending', 'processing', 'completed', 'failed']
 
 Deno.serve(async (req) => {
