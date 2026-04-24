@@ -236,6 +236,9 @@ export default function AiStep2Monitor() {
                 savingEdits={savingEdits}
                 onSaveEdits={saveOnboardingEdits}
                 onRerunAll={rerunAllAssets}
+                compraId={compraId}
+                jobId={jobId}
+                reload={reload}
               />
             )}
       {!isListMode && currentAsset ? (
