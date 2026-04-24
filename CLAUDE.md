@@ -190,6 +190,14 @@ The `handle_new_user` trigger MUST create BOTH:
 
 Without `user_roles`, the `is_agent()` function fails silently and users see blank screens.
 
+### User Management
+
+- Roles oficiais do dashboard: `admin`, `operator`, `viewer`.
+- `profiles.status = disabled` deve ser sincronizado com ban no Supabase Auth.
+- Helpers RLS: `is_admin()`, `is_admin_or_operator()`, `is_active_user()`, `get_user_role(uuid)`.
+- Nunca rebaixar/desativar/excluir o unico admin; admins tambem nao podem excluir a propria conta.
+- Edge Functions de user management usam JWT + `_shared/rbac.ts` e sao protegidas (sem `--no-verify-jwt`).
+
 ## Edge Functions Registry
 
 > **Deploy:** Always include `--project-ref awqtzoefutnfmnbomujt`. Confirm public vs protected before deploying.
@@ -214,6 +222,9 @@ Without `user_roles`, the `is_agent()` function fails silently and users see bla
 
 **NanoBanana (config):**
 `get-nanobanana-config`, `update-nanobanana-config`
+
+**User Management:**
+`list-users`, `invite-user`, `update-user-role`, `set-user-status`, `delete-user`
 
 **Onboarding Copy (CMS):**
 `get-onboarding-copy`, `update-onboarding-copy`

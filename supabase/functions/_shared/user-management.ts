@@ -1,0 +1,81 @@
+import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2'
+import { type AppRole, assertValidRole } from './rbac.ts'
+
+export const VALID_STATUSES = ['active', 'disabled'] as const
+export type UserStatus = (typeof VALID_STATUSES)[number]
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function json(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers':
+        'authorization, x-client-info, apikey, content-type, x-forwarded-for, x-correlation-id',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+export function parseUuid(value: unknown): string | null {
+  const normalized = String(value ?? '').trim()
+  return UUID_RE.test(normalized) ? normalized : null
+}
+
+export function parseRole(value: unknown): AppRole | null {
+  return assertValidRole(String(value ?? '').trim())
+}
+
+export function parseStatus(value: unknown): UserStatus | null {
+  const normalized = String(value ?? '').trim()
+  return VALID_STATUSES.includes(normalized as UserStatus) ? (normalized as UserStatus) : null
+}
+
+export function parseEmail(value: unknown): string | null {
+  const normalized = String(value ?? '').trim().toLowerCase()
+  return EMAIL_RE.test(normalized) && normalized.length <= 254 ? normalized : null
+}
+
+export function parseFullName(value: unknown): string | null {
+  const normalized = String(value ?? '').trim().replace(/\s+/g, ' ')
+  if (!normalized) return null
+  return normalized.slice(0, 160)
+}
+
+export async function countAdmins(serviceClient: SupabaseClient): Promise<number> {
+  const { count, error } = await serviceClient
+    .from('user_roles')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('role', 'admin')
+
+  if (error) throw error
+  return count ?? 0
+}
+
+export async function isOnlyAdmin(
+  serviceClient: SupabaseClient,
+  userId: string,
+): Promise<boolean> {
+  const { data, error } = await serviceClient
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) throw error
+  if (data?.role !== 'admin') return false
+  return (await countAdmins(serviceClient)) <= 1
+}
+
+export function inviteRedirectTo(req: Request): string | undefined {
+  const configured = Deno.env.get('DASHBOARD_URL') || Deno.env.get('SITE_URL')
+  if (configured) return `${configured.replace(/\/$/, '')}/reset-password?type=invite`
+
+  const origin = req.headers.get('origin')
+  if (!origin) return undefined
+  return `${origin.replace(/\/$/, '')}/reset-password?type=invite`
+}

@@ -4,6 +4,9 @@ Convenção: arquivos nomeados `YYYY-MM-DD-slug.md`. Planos concluídos ou subst
 
 ## Índice ativo
 
+- `2026-04-24-user-management.md`
+  Gestão de usuários e RBAC no dashboard: schema `profiles/user_roles`, roles `admin/operator/viewer`, Edge Functions protegidas, guards e UI `/users` + `/profile`.
+
 - `2026-04-23-onboarding-overview-editavel.md`
   ONB-23: aba `onboarding-data` editavel, historico de logos com 1 ativo por compra, 4 edges admin com JWT, precedencia de `brand_display_name` sobre `clientes.nome` nos jobs IA (NanoBanana + Perplexity).
 
