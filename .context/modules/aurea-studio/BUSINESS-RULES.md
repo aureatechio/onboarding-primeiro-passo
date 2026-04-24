@@ -25,7 +25,7 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **MIME → Extensao:** `jpeg/jpg` → `.jpg`, `webp` → `.webp`, fallback → `.png` (funcao `mimeToExt()`).
 
-**Fonte:** `_shared/garden/validate.ts` (MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES), `PostGenPage.jsx`, `PostTurboPage.jsx`
+**Fonte:** `_shared/garden/validate.ts` (MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES), `PostGenPage.jsx`
 
 ## 3. Post Gen — Direction Default e Prompt Building
 
@@ -43,14 +43,6 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **Fonte:** `post-gen-generate/index.ts` → `buildPostGenPrompt()`
 
-## 4. Post Turbo — Directions Selecionaveis e Auto-Fill
-
-**Regra:** Post Turbo oferece 3 directions: `moderna`, `clean`, `retail`. Ao selecionar uma direction, o campo prompt e auto-preenchido com o texto da direction correspondente do `nanobanana_config`.
-
-**Resolucao:** `direction_${direction}` como chave na tabela `nanobanana_config`.
-
-**Fonte:** `post-turbo-generate/index.ts`, `PostTurboPage.jsx` → `handleDirectionChange()`
-
 ## 5. Config-Driven Prompts (NanoBanana Config)
 
 **Regra:** Todas as instructions de direction e formato vem de `nanobanana_config` (tabela). NAO sao hardcoded.
@@ -65,24 +57,18 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **Fallback:** Se config nao carrega (`null`), directions ficam vazias e format usa texto simples (`FORMAT: 1:1`).
 
-**Fonte:** `post-gen-generate/index.ts`, `post-turbo-generate/index.ts` → `loadNanoBananaConfig()`
+**Fonte:** `post-gen-generate/index.ts` → `loadNanoBananaConfig()` (via `_shared/nanobanana/config.ts`)
 
-## 6. Post Turbo — Mapeamento de Slots de Imagem
+## 6. Post Gen — Mapeamento de Slots de Imagem
 
 **Regra:** A funcao `generateImage()` espera 5 parametros posicionais de imagem: `(prompt, celebrityPngUrl, clientLogoUrl, campaignImageUrl?, categoryReferenceImageUrl?)`.
-
-**Mapeamento Post Turbo:**
-- `celebritySlot` = URL da celebridade (da tabela `celebridades.fotoPrincipal`) OU imagem base (signed URL)
-- `logoSlot` = logo uploadado (signed URL) OU imagem base (signed URL)
-- `campaignSlot` = imagem de produto (signed URL), se fornecida
-- `referenceSlot` = SEMPRE a imagem base (signed URL) — serve como referencia visual principal
 
 **Mapeamento Post Gen:**
 - `celebritySlot` = logo signed URL OU `https://placehold.co/1x1.png` (placeholder)
 - `logoSlot` = logo signed URL OU `https://placehold.co/1x1.png` (placeholder)
 - Demais slots: `undefined`
 
-**Fonte:** `post-turbo-generate/index.ts` (linhas 295-299), `post-gen-generate/index.ts` (linhas 230-236)
+**Fonte:** `post-gen-generate/index.ts` (linhas 230-236)
 
 ## 7. Paleta de Cores — Extracao e Limite
 
@@ -92,7 +78,7 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **Placeholder `__temp__`:** Enquanto o color picker esta aberto, uma entrada temporaria `'__temp__'` e adicionada ao array e filtrada antes do submit.
 
-**Fonte:** `PostGenPage.jsx`, `PostTurboPage.jsx`, `lib/color-extractor.js`
+**Fonte:** `PostGenPage.jsx`, `lib/color-extractor.js`
 
 ## 8. Error Codes Padronizados
 
@@ -110,7 +96,7 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **Truncation:** `error_message` no job e truncada em 500 caracteres (`errMsg.substring(0, 500)`).
 
-**Fonte:** `_shared/garden/validate.ts` (tipo ErrorCode), `post-gen-generate/index.ts`, `post-turbo-generate/index.ts`
+**Fonte:** `_shared/garden/validate.ts` (tipo ErrorCode), `post-gen-generate/index.ts`
 
 ## 9. Cascading Dropdowns (Post Gen)
 
@@ -120,15 +106,11 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 
 **Fonte:** `PostGenPage.jsx` → `handleSegmentChange()`, `handleSubsegmentChange()`, `getSegmentName()`, etc.
 
-## 10. Celebridade — Resolucao de Imagem (Post Turbo)
+## 10. Celebridade — Resolucao de Imagem
 
-**Regra:** Quando uma celebridade e selecionada no Post Turbo, o backend busca `fotoPrincipal` na tabela `celebridades` (filtro: `nome = celebrityName AND ativo = true`). Se encontrada, a URL e usada no slot de celebridade do `generateImage()`.
+**Regra:** Post Gen NAO busca imagem de celebridade — a celebridade vai apenas como texto no brief.
 
-**Se nao encontrada:** Usa a imagem base (source) como fallback para o slot de celebridade.
-
-**Post Gen:** NAO busca imagem de celebridade — celebridade vai apenas como texto no brief.
-
-**Fonte:** `post-turbo-generate/index.ts` (linhas 254-265)
+> **Historico:** Post Turbo (descontinuado em 2026-04-24) buscava `fotoPrincipal` na tabela `celebridades`.
 
 ## 11. Signed URLs — Validades Distintas
 
@@ -159,27 +141,26 @@ Consulte este arquivo antes de qualquer implementacao ou correcao no modulo Aure
 - Default tool filter: `all`
 - Ordem: `created_at DESC`
 
-**Validacao:** `tool` aceita `all`, `post-turbo`, `post-gen`. `status` aceita `all`, `pending`, `processing`, `completed`, `failed`.
+**Validacao:** `tool` aceita `all`, `post-gen`. `status` aceita `all`, `pending`, `processing`, `completed`, `failed`. Registros historicos com `tool='post-turbo'` ainda aparecem quando `tool=all`.
 
 **Fonte:** `list-garden-jobs/index.ts`
 
-## 14. Post Turbo — Content-Type Obrigatorio
+## 14. Post Gen — Content-Type
 
-**Regra:** Post Turbo EXIGE `multipart/form-data`. Se receber outro content-type, retorna 400 imediatamente.
+**Regra:** Post Gen aceita tanto `multipart/form-data` (com logo) quanto `application/json` (sem logo).
 
-**Post Gen:** Aceita tanto `multipart/form-data` (com logo) quanto `application/json` (sem logo).
-
-**Fonte:** `post-turbo-generate/index.ts` (linha 109), `post-gen-generate/index.ts` (linhas 115-130)
+**Fonte:** `post-gen-generate/index.ts` (linhas 115-130)
 
 ## 15. Storage Path Convention
 
 **Regra:** Assets sao organizados por tool e jobId:
 - Post Gen: `gen/{jobId}/logo.{ext}`, `gen/{jobId}/output.png`
-- Post Turbo: `turbo/{jobId}/source.{ext}`, `turbo/{jobId}/logo.{ext}`, `turbo/{jobId}/product.{ext}`, `turbo/{jobId}/output.png`
+
+> Prefixo `turbo/*` existe apenas para registros historicos do Post Turbo (tool descontinuada em 2026-04-24).
 
 **Bucket:** `aurea-garden-assets` (privado, sem acesso publico).
 
-**Fonte:** `post-gen-generate/index.ts`, `post-turbo-generate/index.ts`, `_shared/garden/validate.ts` (BUCKET_NAME)
+**Fonte:** `post-gen-generate/index.ts`, `_shared/garden/validate.ts` (BUCKET_NAME)
 
 ## 16. Regeneracao de Assets Completed
 

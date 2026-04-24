@@ -428,7 +428,7 @@ Tipos, constantes e loader do NanoBanana estao centralizados em `_shared/nanoban
 - `CategoryKey`, `DirectionMode` — type aliases
 - `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE`, `REFERENCE_BUCKET` — constantes
 
-Consumidores: `create-ai-campaign-job`, `post-gen-generate`, `post-turbo-generate`, `get-nanobanana-config`, `update-nanobanana-config`, `read-nanobanana-reference`.
+Consumidores: `create-ai-campaign-job`, `post-gen-generate`, `get-nanobanana-config`, `update-nanobanana-config`, `read-nanobanana-reference`.
 
 ### Autenticacao
 

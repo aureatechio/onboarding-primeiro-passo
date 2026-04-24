@@ -1,13 +1,14 @@
-# Module: Aurea Garden (Post Gen + Post Turbo)
+# Module: Aurea Garden (Post Gen)
 
 ## Overview
 
-O modulo Aurea Garden e o sistema de geracao de criativos publicitarios da AUREA, integrado ao dashboard AI-Step2 Monitor. Oferece duas ferramentas complementares:
+O modulo Aurea Garden e o sistema de geracao de criativos publicitarios da AUREA, integrado ao dashboard AI-Step2 Monitor. Oferece a ferramenta:
 
 - **Post Gen** (prompt-to-image): gera criativos do zero a partir de brief estruturado (celebridade, segmento, estilo, paleta, prompt)
-- **Post Turbo** (image-to-image): recebe uma imagem base e a turbina com direcao criativa, branding e elementos adicionais
 
-Ambas usam o modelo **NanoBanana** (Gemini) via `generateImage()` compartilhado, processam em background com `EdgeRuntime.waitUntil()`, e persistem jobs na tabela `garden_jobs`.
+Usa o modelo **NanoBanana** (Gemini) via `generateImage()` compartilhado, processa em background com `EdgeRuntime.waitUntil()`, e persiste jobs na tabela `garden_jobs`.
+
+> **Nota historica:** Post Turbo (image-to-image) foi descontinuado em 2026-04-24. Jobs antigos com `tool='post-turbo'` permanecem na tabela `garden_jobs` apenas como historico.
 
 Documentos operacionais do modulo:
 - Regras de negocio criticas: `.context/modules/aurea-garden/BUSINESS-RULES.md`
@@ -22,7 +23,6 @@ Documentos operacionais do modulo:
 | Path | Description |
 |------|-------------|
 | `supabase/functions/post-gen-generate/` | Geracao prompt-to-image (multipart form → NanoBanana → bucket). |
-| `supabase/functions/post-turbo-generate/` | Enhancement image-to-image (imagem base + direcao criativa → NanoBanana). |
 | `supabase/functions/list-garden-jobs/` | Listagem paginada de jobs com filtros por tool e status. |
 | `supabase/functions/get-garden-options/` | Dados de referencia: celebridades, segmentos, subsegmentos, negocios. |
 | `supabase/functions/get-garden-job/` | Polling de status de um job individual. |
@@ -31,7 +31,6 @@ Documentos operacionais do modulo:
 | `supabase/functions/get-nanobanana-config/` | Leitura da config NanoBanana (modelo, directions, formats). |
 | `supabase/functions/update-nanobanana-config/` | Atualizacao da config NanoBanana. |
 | `src/pages/AiStep2Monitor/PostGenPage.jsx` | UI do Post Gen (formulario + polling + resultado). |
-| `src/pages/AiStep2Monitor/PostTurboPage.jsx` | UI do Post Turbo (drag-drop + direcao criativa + polling). |
 | `src/pages/AiStep2Monitor/GardenGalleryPage.jsx` | Galeria unificada com filtros, paginacao e lightbox. |
 | `src/pages/AiStep2Monitor/MonitorLayout.jsx` | Layout sidebar do painel AI-Step2 (navegacao Garden). |
 | `src/pages/AiStep2Monitor/useGardenOptions.js` | Hook compartilhado para carregar opcoes (celebridades, segmentos). |
@@ -43,7 +42,7 @@ Documentos operacionais do modulo:
 
 | Service | Purpose |
 |---------|---------|
-| Google Gemini API (NanoBanana) | Geracao de imagem (prompt-to-image e image-to-image). |
+| Google Gemini API (NanoBanana) | Geracao de imagem (prompt-to-image). |
 | Supabase Storage (`aurea-garden-assets`) | Upload de assets (logo, source, product) e armazenamento de outputs. |
 | Supabase DB (`garden_jobs`, `nanobanana_config`) | Persistencia de jobs e configuracao do modelo. |
 | Supabase DB (`celebridades`, `segmentos`, `subsegmento`, `negocio`) | Dados de referencia para formularios. |
@@ -51,36 +50,31 @@ Documentos operacionais do modulo:
 ## Data Flow
 
 ```
-Frontend (PostGenPage / PostTurboPage)
+Frontend (PostGenPage)
   │
   ├── 1. Carrega opcoes via GET get-garden-options
-  ├── 2. (Post Turbo) Carrega directions via GET get-nanobanana-config
   │
-  ├── 3. Usuario preenche formulario + upload de arquivos
+  ├── 2. Usuario preenche formulario + upload de arquivos
   │     ├── Validacao client-side (tipo, tamanho, campos obrigatorios)
   │     └── Extracao de cores do logo (extractColorsFromImage)
   │
-  ├── 4. POST multipart/form-data → post-gen-generate / post-turbo-generate
+  ├── 3. POST multipart/form-data → post-gen-generate
   │     │
-  │     ├── 4a. Validacao server-side (formato, imagem, prompt)
-  │     ├── 4b. Upload de assets para aurea-garden-assets bucket
-  │     │       ├── gen/{jobId}/logo.{ext}     (Post Gen)
-  │     │       ├── turbo/{jobId}/source.{ext}  (Post Turbo)
-  │     │       ├── turbo/{jobId}/logo.{ext}    (Post Turbo, se logo)
-  │     │       └── turbo/{jobId}/product.{ext} (Post Turbo, se produto)
-  │     ├── 4c. INSERT garden_jobs (status: processing)
-  │     ├── 4d. Response 202 { job_id, status: processing }
+  │     ├── 3a. Validacao server-side (formato, imagem, prompt)
+  │     ├── 3b. Upload de assets para aurea-garden-assets bucket
+  │     │       └── gen/{jobId}/logo.{ext}     (Post Gen)
+  │     ├── 3c. INSERT garden_jobs (status: processing)
+  │     ├── 3d. Response 202 { job_id, status: processing }
   │     │
-  │     └── 4e. [Background] EdgeRuntime.waitUntil:
+  │     └── 3e. [Background] EdgeRuntime.waitUntil:
   │           ├── Load nanobanana_config
-  │           ├── Build prompt estruturado (buildPostGenPrompt / buildPostTurboPrompt)
-  │           ├── (Post Turbo) Resolve celebrity image URL da tabela celebridades
+  │           ├── Build prompt estruturado (buildPostGenPrompt)
   │           ├── Generate signed URLs para assets uploadados
   │           ├── Call generateImage(prompt, celebritySlot, logoSlot, campaignSlot, referenceSlot)
-  │           ├── Upload output para gen/{jobId}/output.png ou turbo/{jobId}/output.png
+  │           ├── Upload output para gen/{jobId}/output.png
   │           └── UPDATE garden_jobs (status: completed/failed)
   │
-  └── 5. Polling a cada 3s via GET get-garden-job?job_id=...
+  └── 4. Polling a cada 3s via GET get-garden-job?job_id=...
         ├── completed → exibe imagem + download
         └── failed → exibe erro
 
@@ -94,7 +88,6 @@ Gallery (GardenGalleryPage)
 | Component | Path | Responsibility |
 |-----------|------|----------------|
 | Post Gen Generator | `supabase/functions/post-gen-generate/index.ts` | Geracao prompt-to-image com brief estruturado. |
-| Post Turbo Generator | `supabase/functions/post-turbo-generate/index.ts` | Enhancement image-to-image com direcao criativa. |
 | Garden Validator | `supabase/functions/_shared/garden/validate.ts` | Validacao de formato, imagem (15MB, tipos), prompt (5000 chars). |
 | Image Generator | `supabase/functions/_shared/ai-campaign/image-generator.ts` | Interface com Gemini: download de refs, chamada API, retry. |
 | NanoBanana Config | tabela `nanobanana_config` | Config do modelo: nome, base URL, retries, directions, format instructions. |
@@ -121,13 +114,13 @@ Configuracoes adicionais vem de `nanobanana_config` (DB, nao env vars):
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | uuid PK | ID do job. |
-| `tool` | text | `'post-gen'` ou `'post-turbo'`. |
+| `tool` | text | `'post-gen'` (tool ativa). Registros historicos podem ter `'post-turbo'`. |
 | `status` | text | `'pending'`, `'processing'`, `'completed'`, `'failed'`. |
-| `input_prompt` | text | Prompt do usuario (Post Gen) ou direction name (Post Turbo sem prompt). |
+| `input_prompt` | text | Prompt do usuario. |
 | `input_format` | text | Formato: `'1:1'`, `'4:5'`, `'16:9'`, `'9:16'`. |
 | `input_model` | text | Sempre `'nanobanana'`. |
 | `input_metadata` | jsonb | Dados especificos por tool (celebrity, segment, palette, etc.). |
-| `source_image_path` | text | Path no bucket (logo para Post Gen, source para Post Turbo). |
+| `source_image_path` | text | Path no bucket (logo para Post Gen). |
 | `output_image_path` | text | Path do output gerado no bucket. |
 | `output_image_url` | text | Signed URL do output (7 dias de validade). |
 | `duration_ms` | int | Duracao do processamento em ms. |
@@ -141,10 +134,8 @@ Configuracoes adicionais vem de `nanobanana_config` (DB, nao env vars):
 |--------------|------|---------|
 | `gen/{jobId}/logo.{ext}` | Post Gen | Logo do cliente. |
 | `gen/{jobId}/output.png` | Post Gen | Imagem gerada. |
-| `turbo/{jobId}/source.{ext}` | Post Turbo | Imagem base. |
-| `turbo/{jobId}/logo.{ext}` | Post Turbo | Logo (opcional). |
-| `turbo/{jobId}/product.{ext}` | Post Turbo | Imagem de produto (opcional). |
-| `turbo/{jobId}/output.png` | Post Turbo | Imagem gerada. |
+
+> Prefixo `turbo/*` e usado apenas por registros historicos do Post Turbo (tool descontinuada em 2026-04-24).
 
 ## Error Handling
 
@@ -164,7 +155,7 @@ Codigos de erro padronizados (tipo `ErrorCode` em `validate.ts`):
 - **Polling pattern**: Frontend faz polling a cada 3s via `get-garden-job`. Sem WebSocket.
 - **Signed URLs**: Output URLs tem validade de 7 dias. A galeria regenera URLs ao listar.
 - **Signed URLs temporarias**: Assets de input (para o Gemini) usam signed URLs de 600s (10 min).
-- **Multipart form-data**: Ambos os geradores aceitam multipart. Post Turbo EXIGE multipart.
+- **Multipart form-data**: O gerador Post Gen aceita multipart.
 - **Paleta como JSON**: Campo `palette` e enviado como string JSON parseable (`JSON.parse(paletteRaw)`).
 - **Prompt max 5000 chars**, imagem max 15 MB, tipos aceitos: PNG, JPEG, WebP.
 - **Config-driven**: Directions criativas e format instructions vem de `nanobanana_config`, nao hardcoded.

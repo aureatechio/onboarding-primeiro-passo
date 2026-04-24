@@ -1,5 +1,7 @@
 # Plano: Melhoria do Modulo NanoBanana — SDD, Shared Code, Seguranca e Testes
 
+> **Nota:** referencias a `post-turbo-generate` / `PostTurboPage` neste plano sao historicas — funcionalidade **Post Turbo descontinuada em 2026-04-24**. Manter apenas para registro historico.
+
 **Data:** 2026-04-06
 **Status:** Pendente
 **Motivacao:** O modulo NanoBanana e funcional e bem integrado ao pipeline de geracao de criativos, mas diverge significativamente do padrao de qualidade estabelecido pelo modulo OMIE. Nao possui functionSpecs (SDD), tem codigo duplicado em 3 edge functions, endpoints criticos sem autenticacao e zero testes automatizados. Essas lacunas aumentam risco de regressao, dificultam manutencao por agentes de IA e criam vulnerabilidade de seguranca.

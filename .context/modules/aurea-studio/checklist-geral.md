@@ -19,22 +19,9 @@
 - [ ] Rate limiting
 - [ ] Timeout de polling no frontend
 
-## B. Post Turbo (image-to-image)
+## B. Post Turbo (image-to-image) — DESCONTINUADA 2026-04-24
 
-- [x] Edge Function `post-turbo-generate` com processamento async — `supabase/functions/post-turbo-generate/index.ts`
-- [x] Validacao de imagem obrigatoria + direction + formato — `post-turbo-generate/index.ts`
-- [x] Upload de source, logo, product para bucket — `post-turbo-generate/index.ts`
-- [x] Build de prompt com direction text do config — `buildPostTurboPrompt()`
-- [x] Resolucao de celebridade (fotoPrincipal da tabela) — `post-turbo-generate/index.ts`
-- [x] Mapeamento de slots de imagem para `generateImage()` — `post-turbo-generate/index.ts`
-- [x] Persistencia em `garden_jobs` — `post-turbo-generate/index.ts`
-- [x] Frontend com drag-drop e auto-fill de prompt — `PostTurboPage.jsx`
-- [x] Carregamento de directions da config on mount — `PostTurboPage.jsx`
-- [x] Upload de imagem de produto opcional — `PostTurboPage.jsx`
-- [x] Polling + resultado + download — `PostTurboPage.jsx`
-- [ ] functionSpec.md para `post-turbo-generate`
-- [ ] Autenticacao
-- [ ] Rate limiting
+Funcionalidade removida do codigo e documentacao. Jobs historicos com `tool='post-turbo'` permanecem em `garden_jobs` apenas como registro.
 
 ## C. Galeria
 
@@ -42,7 +29,7 @@
 - [x] Regeneracao de signed URLs para jobs completados — `list-garden-jobs/index.ts`
 - [x] Frontend com grid, filtros (tool + status), paginacao — `GardenGalleryPage.jsx`
 - [x] Lightbox com download — `GardenGalleryPage.jsx`
-- [x] Tool badges visuais (Post Turbo azul, Post Gen roxo) — `GardenGalleryPage.jsx`
+- [x] Tool badges visuais (Post Gen roxo) — `GardenGalleryPage.jsx`
 - [ ] functionSpec.md para `list-garden-jobs`
 - [ ] Busca por texto no prompt
 
@@ -55,11 +42,11 @@
 - [x] Hook `useGardenOptions` para opcoes de referencia — `useGardenOptions.js`
 - [x] Constantes centralizadas — `constants.js`
 - [x] Navegacao sidebar no MonitorLayout — `MonitorLayout.jsx`
-- [x] Rotas configuradas no App.jsx — `/ai-step2/post-turbo`, `/ai-step2/post-gen`, `/ai-step2/gallery`
+- [x] Rotas configuradas no App.jsx — `/ai-step2/post-gen`, `/ai-step2/gallery`
 
 ## E. Observabilidade
 
-- [x] Logs estruturados com prefixo `[post-gen.*]` e `[post-turbo.*]` — Edge Functions
+- [x] Logs estruturados com prefixo `[post-gen.*]` — Edge Functions
 - [x] `request_id` em todos os logs e no `garden_jobs` — Edge Functions
 - [x] `duration_ms` registrado em jobs completados e falhados — Edge Functions
 - [ ] Alertas para taxa de falha elevada

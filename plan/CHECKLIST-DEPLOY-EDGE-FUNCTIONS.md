@@ -28,12 +28,11 @@
 | `update-nanobanana-config` | Pública | `requireAdminPassword` (`x-admin-password`) | `supabase functions deploy update-nanobanana-config --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `read-nanobanana-reference` | Pública | `requireAdminPassword` (`x-admin-password`) | `supabase functions deploy read-nanobanana-reference --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 
-## Aurea Garden (Post Gen + Post Turbo)
+## Aurea Garden (Post Gen)
 
 | Função | JWT | Guard | Comando de deploy |
 |--------|-----|-------|-------------------|
 | `post-gen-generate` | Pública | Nenhum | `supabase functions deploy post-gen-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
-| `post-turbo-generate` | Pública | Nenhum | `supabase functions deploy post-turbo-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `list-garden-jobs` | Pública | Nenhum | `supabase functions deploy list-garden-jobs --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `get-garden-options` | Pública | Nenhum | `supabase functions deploy get-garden-options --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |
 | `get-garden-job` | Pública | Nenhum | `supabase functions deploy get-garden-job --project-ref awqtzoefutnfmnbomujt --no-verify-jwt` |

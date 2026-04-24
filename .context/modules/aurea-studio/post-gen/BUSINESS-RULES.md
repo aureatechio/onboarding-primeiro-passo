@@ -26,11 +26,9 @@ A ordem importa: o Gemini prioriza instrucoes no inicio do prompt. O MANDATORY n
 
 No Post Gen, a celebridade entra no prompt apenas como TEXTO no bloco CREATIVE BRIEF (`Celebrity: {nome}`). NAO ha busca de `fotoPrincipal` na tabela `celebridades`.
 
-Isso contrasta com Post Turbo, que resolve a imagem real da celebridade.
-
 **Implicacao para Sacred Face Rule:** Como nao ha imagem de referencia, o Gemini gera a celebridade do zero — a regra Sacred Face nao se aplica diretamente ao Post Gen.
 
-**Fonte:** `post-gen-generate/index.ts` (compare com `post-turbo-generate/index.ts`)
+**Fonte:** `post-gen-generate/index.ts`
 
 ## 4. Aceita JSON (unico no Garden)
 

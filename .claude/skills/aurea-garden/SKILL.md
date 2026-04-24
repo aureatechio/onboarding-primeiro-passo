@@ -1,9 +1,9 @@
 ---
 name: aurea-garden
-description: "Especialista em Aurea Garden (Post Gen e Post Turbo) — geracao de criativos publicitarios com IA. Cobre prompt engineering, processamento de imagem, UX de formulario, galeria, config NanoBanana e integracao Gemini. Use quando o usuario mencionar Post Gen, Post Turbo, geracao de imagem IA, criativos, Garden, galeria de imagens, ou config NanoBanana."
+description: "Especialista em Aurea Garden (Post Gen) — geracao de criativos publicitarios com IA. Cobre prompt engineering, processamento de imagem, UX de formulario, galeria, config NanoBanana e integracao Gemini. Use quando o usuario mencionar Post Gen, geracao de imagem IA, criativos, Garden, galeria de imagens, ou config NanoBanana."
 ---
 
-# Aurea Garden: Post Gen & Post Turbo — Skill Especialista
+# Aurea Garden: Post Gen — Skill Especialista
 
 ## Fontes Obrigatorias
 
@@ -18,17 +18,16 @@ description: "Especialista em Aurea Garden (Post Gen e Post Turbo) — geracao d
 | Operacao | Edge Function | Frontend | Docs |
 |----------|--------------|----------|------|
 | Gerar imagem do zero | `post-gen-generate` | `PostGenPage.jsx` | functionSpec, BUSINESS-RULES regras 3,5,6 |
-| Turbinar imagem existente | `post-turbo-generate` | `PostTurboPage.jsx` | functionSpec, BUSINESS-RULES regras 4,6,10,14 |
 | Listar/filtrar jobs | `list-garden-jobs` | `GardenGalleryPage.jsx` | functionSpec, BUSINESS-RULES regra 13 |
 | Opcoes de formulario | `get-garden-options` | `useGardenOptions.js` | functionSpec |
-| Polling de job | `get-garden-job` | PostGenPage/PostTurboPage | — |
+| Polling de job | `get-garden-job` | PostGenPage | — |
 | Config do modelo | `get/update-nanobanana-config` | NanoBananaConfig page | BUSINESS-RULES regra 5 |
 
 ## Quando Usar
 
-- Usuario menciona Post Gen, Post Turbo, geracao de imagem, criativo IA
+- Usuario menciona Post Gen, geracao de imagem, criativo IA
 - Trabalho em `src/pages/AiStep2Monitor/`
-- Trabalho em `supabase/functions/post-gen-*` ou `post-turbo-*` ou `list-garden-*` ou `get-garden-*`
+- Trabalho em `supabase/functions/post-gen-*` ou `list-garden-*` ou `get-garden-*`
 - Trabalho em `supabase/functions/_shared/garden/`
 - Mencao a NanoBanana, Gemini image generation, direction criativa
 - Mencao a galeria de imagens, lightbox, filtros de galeria
@@ -45,11 +44,11 @@ description: "Especialista em Aurea Garden (Post Gen e Post Turbo) — geracao d
 
 - [ ] Ler documentacao conforme DOC-READING-ORDER
 - [ ] Verificar se mudanca afeta validacao compartilhada (`_shared/garden/validate.ts`)
-- [ ] Verificar se mudanca afeta prompt building (`buildPostGenPrompt` ou `buildPostTurboPrompt`)
+- [ ] Verificar se mudanca afeta prompt building (`buildPostGenPrompt`)
 - [ ] Verificar se mudanca afeta schema de `garden_jobs` (nova migration se necessario)
 - [ ] Verificar se mudanca afeta `nanobanana_config` (config-driven)
 - [ ] Testar cenarios: submit valido, submit invalido, job completado, job falhado
-- [ ] Verificar logs com prefixos corretos (`[post-gen.*]`, `[post-turbo.*]`)
+- [ ] Verificar logs com prefixos corretos (`[post-gen.*]`)
 - [ ] Atualizar functionSpec se contrato mudou
 - [ ] Atualizar BUSINESS-RULES se nova regra critica descoberta
 - [ ] Atualizar checklist-geral.md se item novo implementado
@@ -71,19 +70,6 @@ state: "SP"                (opcional)
 briefing: "Foco em..."     (opcional)
 logo: [File]               (opcional)
 palette: '["#384ffe","#ff0058"]'  (opcional, JSON string)
-```
-
-### Payload Post Turbo (FormData — obrigatorio multipart)
-
-```
-image: [File]              (obrigatorio)
-direction: "moderna"       (obrigatorio: moderna|clean|retail)
-format: "4:5"              (obrigatorio)
-prompt: "Texto da direction..."  (opcional, pre-preenchido)
-celebrity_name: "Ana Maria"     (opcional)
-logo: [File]                    (opcional)
-product_image: [File]           (opcional)
-palette: '["#384ffe"]'          (opcional, JSON string)
 ```
 
 ### Response Padrao (202)
@@ -134,7 +120,6 @@ palette: '["#384ffe"]'          (opcional, JSON string)
 
 ```bash
 supabase functions deploy post-gen-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
-supabase functions deploy post-turbo-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
 supabase functions deploy list-garden-jobs --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
 supabase functions deploy get-garden-options --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
 supabase functions deploy get-garden-job --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
@@ -143,6 +128,6 @@ supabase functions deploy get-garden-job --project-ref awqtzoefutnfmnbomujt --no
 ## Observabilidade
 
 - NUNCA logar API keys ou tokens
-- Prefixos de log: `[post-gen.*]` e `[post-turbo.*]`
+- Prefixos de log: `[post-gen.*]`
 - Campos essenciais: `request_id`, `job_id`, `duration_ms`, `error`
 - Metricas de saude: consultar SQL no runbook (OPERACAO-AUREA-GARDEN.md)

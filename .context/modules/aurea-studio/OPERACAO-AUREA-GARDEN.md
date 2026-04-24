@@ -64,14 +64,13 @@ GROUP BY tool;
 
 No Supabase Dashboard → Edge Functions → Logs, filtrar por:
 - **Post Gen:** prefixo `[post-gen.*]`
-- **Post Turbo:** prefixo `[post-turbo.*]`
 
 Log tags importantes:
-- `[post-gen.request]` / `[post-turbo.request]` — dados da request (formato, celebrity, tamanho)
-- `[post-gen.generation-failed]` / `[post-turbo.generation-failed]` — Gemini falhou
+- `[post-gen.request]` — dados da request (formato, celebrity, tamanho)
+- `[post-gen.generation-failed]` — Gemini falhou
 - `[post-gen.output-upload-error]` — falha ao salvar output no bucket
-- `[post-gen.complete]` / `[post-turbo.complete]` — sucesso com duration_ms
-- `[post-gen.error]` / `[post-turbo.error]` — excecao generica
+- `[post-gen.complete]` — sucesso com duration_ms
+- `[post-gen.error]` — excecao generica
 
 ### 3. Verificar config NanoBanana
 
@@ -157,9 +156,6 @@ Todas as funcoes Garden sao **publicas** (sem JWT):
 ```bash
 # Post Gen
 supabase functions deploy post-gen-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
-
-# Post Turbo
-supabase functions deploy post-turbo-generate --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
 
 # Listagem
 supabase functions deploy list-garden-jobs --project-ref awqtzoefutnfmnbomujt --no-verify-jwt

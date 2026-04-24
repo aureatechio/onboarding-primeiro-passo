@@ -2,6 +2,8 @@
 
 > Documentacao independente de projeto. Descreve a funcionalidade "Post Gen" (text-to-image com briefing estruturado via IA) de forma que um agente de IA consiga replica-la em qualquer stack.
 
+> **Nota historica (2026-04-24):** Post Turbo (image-to-image) foi descontinuado. Comparacoes "Post Gen vs Post Turbo" ao longo deste documento sao mantidas apenas como contexto de design — nao ha mais implementacao ativa do Post Turbo no repositorio.
+
 ---
 
 ## 1. Visao Geral

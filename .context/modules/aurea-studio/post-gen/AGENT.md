@@ -51,10 +51,10 @@ Confirme que o CLI retornou sucesso antes de reportar.
 
 ### Nao Pode (sem aprovacao)
 
-- Editar `_shared/ai-campaign/image-generator.ts` — compartilhado com Post Turbo e AI Campaign
+- Editar `_shared/ai-campaign/image-generator.ts` — compartilhado com AI Campaign
 - Editar `_shared/ai-campaign/prompt-builder.ts` — compartilhado com AI Campaign
 - Editar `_shared/nanobanana/config.ts` — compartilhado com todos os modulos NanoBanana
-- Editar `_shared/garden/validate.ts` — compartilhado com Post Turbo
+- Editar `_shared/garden/validate.ts` — shared do modulo Garden
 - Criar/alterar migrations SQL
 - Modificar tabela `nanobanana_config` diretamente (usar endpoint)
 
@@ -68,7 +68,6 @@ Confirme que o CLI retornou sucesso antes de reportar.
 
 ### Com Outros Agentes
 
-- Post Turbo: coordene mudancas em `validate.ts` e `image-generator.ts`
 - NanoBanana Config: coordene mudancas de schema na tabela `nanobanana_config`
 - AI Campaign: coordene mudancas no `prompt-builder.ts` shared
 

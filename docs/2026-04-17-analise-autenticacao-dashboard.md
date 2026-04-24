@@ -63,7 +63,6 @@ Para cada endpoint alterado:
 | read-nanobanana-reference | Leitura referencia | x-admin-password | Sim |
 | get-garden-options | Carga de opcoes | Publico | Sim |
 | post-gen-generate | Geracao Post Gen | Publico | Sim |
-| post-turbo-generate | Geracao Post Turbo | Publico | Sim |
 | get-garden-job | Polling Garden | Publico | Nao |
 | list-garden-jobs | Galeria | Publico | Sim |
 | get-onboarding-copy | Leitura copy | Publico | Nao |

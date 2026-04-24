@@ -23,14 +23,13 @@ O módulo gerencia três eixos de criação visual (categorias de direção cria
 | Edge Function | `read-nanobanana-reference/index.ts` | Leitura de imagem via Gemini Vision → texto |
 | Pipeline | `create-ai-campaign-job/index.ts` | Consome config NanoBanana para enriquecer prompts |
 | Pipeline | `post-gen-generate/index.ts` | Geração individual de post — usa config NanoBanana |
-| Pipeline | `post-turbo-generate/index.ts` | Geração turbo de post — usa config NanoBanana |
 | Frontend | `NanoBananaConfigPage.jsx` | UI completa de configuração (4 abas) |
 | Frontend | `MonitorLayout.jsx` | Navegação lateral com item NanoBanana IA |
 | Frontend | `App.jsx` | Registro da rota `/ai-step2/nanobanana-config` |
 | Documentação | `ai-step2/CONTRACT.md` (seção 9.1) | Contrato de dados e validação |
 | Documentação | `ai-step2/PRD.md` (RF-14, RF-15) | Requisitos funcionais |
 
-**Total: 11 arquivos** (3 edge functions dedicadas, 3 funções consumidoras no pipeline, 3 frontend, 2 docs)
+**Total: 10 arquivos** (3 edge functions dedicadas, 2 funções consumidoras no pipeline, 3 frontend, 2 docs)
 
 ---
 
@@ -66,7 +65,6 @@ O módulo gerencia três eixos de criação visual (categorias de direção cria
 ┌─────────────────────────────────────────────┐
 │  create-ai-campaign-job                      │
 │  post-gen-generate                           │
-│  post-turbo-generate                         │
 │                                              │
 │  Leem nanobanana_config para:                │
 │  - global_rules → instruções do sistema      │
@@ -120,9 +118,9 @@ O fluxo de contexto segue este caminho:
 4. Chama `resolveDirectionPromptText()` — extrai o texto limpo da direção criativa, usado para compor o prompt final.
 5. Os prompts são passados para workers `generate-ai-campaign-image` que chamam a Gemini API com o contexto completo.
 
-### 5.2. PostGen e PostTurbo
+### 5.2. PostGen
 
-Ambos `post-gen-generate` e `post-turbo-generate` têm sua própria cópia da interface `NanoBananaDbConfig` e da função `loadNanoBananaConfig()`. O prompt é construído assim:
+O `post-gen-generate` carrega a config NanoBanana via shared module `_shared/nanobanana/config.ts`. O prompt é construído assim:
 
 ```
 [Direção criativa do grupo] +
@@ -196,7 +194,7 @@ O frontend implementa dirty-checking com `JSON.stringify(form) !== JSON.stringif
 - **Todas as 3 edge functions NanoBanana são públicas** (sem autenticação). Isso é intencional conforme o código, mas significa que qualquer pessoa pode alterar a configuração de geração de criativos. Recomendação: adicionar `requireAuth` pelo menos no `update-nanobanana-config` e `read-nanobanana-reference`.
 
 ### Duplicação de código
-- A interface `NanoBananaDbConfig` e a função `loadNanoBananaConfig()` estão **duplicadas em 3 arquivos** (`create-ai-campaign-job`, `post-gen-generate`, `post-turbo-generate`). Não existe um shared module em `_shared/` para NanoBanana. Recomendação: extrair para `_shared/nanobanana/config.ts`.
+- Historicamente a interface `NanoBananaDbConfig` e a função `loadNanoBananaConfig()` estavam duplicadas nas funções do pipeline. Hoje o código vive em `_shared/nanobanana/config.ts` e é importado pelos consumidores.
 
 ### SDD
 - Criar `functionSpec.md` para as 3 edge functions NanoBanana, seguindo o padrão dos módulos OMIE, formalizando payloads, validações e cenários de erro.

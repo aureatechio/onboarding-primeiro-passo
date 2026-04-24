@@ -1,9 +1,8 @@
 ---
-description: Obrigar consulta de documentacao e uso de skills em temas Aurea Garden (Post Gen, Post Turbo, Galeria)
+description: Obrigar consulta de documentacao e uso de skills em temas Aurea Garden (Post Gen, Galeria)
 alwaysApply: false
 globs:
   - "supabase/functions/post-gen-*/**"
-  - "supabase/functions/post-turbo-*/**"
   - "supabase/functions/list-garden-*/**"
   - "supabase/functions/get-garden-*/**"
   - "supabase/functions/_shared/garden/**"
@@ -11,7 +10,7 @@ globs:
   - ".context/modules/aurea-studio/**"
 ---
 
-# Aurea Garden: Post Gen & Post Turbo (Geracao de Criativos IA)
+# Aurea Garden: Post Gen (Geracao de Criativos IA)
 
 ## Gate obrigatorio ANTES de agir
 
@@ -35,13 +34,13 @@ globs:
 
 ## Funcoes Edge Aurea Garden
 
-**Geracao:** `post-gen-generate`, `post-turbo-generate`
+**Geracao:** `post-gen-generate`
 **Consulta:** `list-garden-jobs`, `get-garden-options`, `get-garden-job`
 **Config:** `get-nanobanana-config`, `update-nanobanana-config`
 
 ## Frontend
 
-**Pages:** `PostGenPage.jsx`, `PostTurboPage.jsx`, `GardenGalleryPage.jsx`
+**Pages:** `PostGenPage.jsx`, `GardenGalleryPage.jsx`
 **Layout:** `MonitorLayout.jsx` (sidebar Garden section)
 **Shared:** `useGardenOptions.js`, `constants.js`, `theme.js`
 **Util:** `lib/color-extractor.js`

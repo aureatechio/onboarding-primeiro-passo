@@ -24,7 +24,6 @@ Criar a base de autenticacao no frontend para rotas internas (`/ai-step2/*` e `/
 - `/ai-step2/perplexity-config`
 - `/ai-step2/nanobanana-config`
 - `/ai-step2/post-gen`
-- `/ai-step2/post-turbo`
 - `/ai-step2/gallery`
 - `/copy-editor`
 4. Roles definidos no contrato (`admin`, `supervisor`, `operacao`, `leitura`) mas ainda sem enforcement fino de permissao no frontend nesta fase.

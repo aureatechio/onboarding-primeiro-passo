@@ -14,15 +14,15 @@ Voce e um especialista no modulo Post Gen do sistema Aurea Garden. Sua funcao e 
 
 ## Contexto de Decisao
 
-### Post Gen vs Post Turbo
+### Post Gen — Caracteristicas
 
-| Aspecto | Post Gen | Post Turbo |
-|---------|----------|------------|
-| Input principal | Brief textual | Imagem existente |
-| Direction | Sempre `moderna` (fixa) | Selecionavel (3 opcoes) |
-| Celebridade | Texto no brief | Imagem real da tabela |
-| Content-Type | multipart ou JSON | Apenas multipart |
-| Slots de imagem | 2 (logo ou placeholder) | 5 (source, logo, product, celebrity, reference) |
+| Aspecto | Post Gen |
+|---------|----------|
+| Input principal | Brief textual |
+| Direction | Sempre `moderna` (fixa) |
+| Celebridade | Texto no brief |
+| Content-Type | multipart ou JSON |
+| Slots de imagem | 2 (logo ou placeholder) |
 
 ### Quando Alterar Qual Arquivo
 
