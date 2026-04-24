@@ -7,16 +7,54 @@ export function AuthProvider({ children }) {
   const envError = !hasAuthEnv()
   const [session, setSession] = useState(null)
   const [isAuthLoading, setIsAuthLoading] = useState(!envError)
+  const [profile, setProfile] = useState(null)
+  const [role, setRole] = useState(null)
   const refreshInFlight = useRef(false)
+
+  const loadUserAccess = useCallback(async (nextSession) => {
+    if (!authClient || !nextSession?.user?.id) {
+      setProfile(null)
+      setRole(null)
+      return { profile: null, role: null }
+    }
+
+    const userId = nextSession.user.id
+    const [{ data: profileData, error: profileError }, { data: roleData, error: roleError }] =
+      await Promise.all([
+        authClient
+          .from('profiles')
+          .select('id, email, full_name, avatar_url, status, created_at, updated_at')
+          .eq('id', userId)
+          .maybeSingle(),
+        authClient.from('user_roles').select('role, assigned_at').eq('user_id', userId).maybeSingle(),
+      ])
+
+    if (profileError) throw profileError
+    if (roleError) throw roleError
+
+    const nextProfile = profileData ?? {
+      id: userId,
+      email: nextSession.user.email ?? null,
+      full_name: nextSession.user.user_metadata?.full_name ?? '',
+      status: 'active',
+    }
+    const nextRole = roleData?.role ?? 'viewer'
+
+    setProfile(nextProfile)
+    setRole(nextRole)
+    return { profile: nextProfile, role: nextRole }
+  }, [])
 
   useEffect(() => {
     if (envError || !authClient) return
 
     let cancelled = false
 
-    authClient.auth.getSession().then(({ data }) => {
+    authClient.auth.getSession().then(async ({ data }) => {
       if (cancelled) return
-      setSession(data?.session ?? null)
+      const nextSession = data?.session ?? null
+      setSession(nextSession)
+      await loadUserAccess(nextSession)
       setIsAuthLoading(false)
     }).catch((err) => {
       console.warn('[AuthProvider] getSession failed:', err?.message)
@@ -25,22 +63,37 @@ export function AuthProvider({ children }) {
 
     const { data: sub } = authClient.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession ?? null)
-      setIsAuthLoading(false)
+      loadUserAccess(nextSession)
+        .catch((err) => {
+          console.warn('[AuthProvider] load access failed:', err?.message)
+          setProfile(null)
+          setRole(null)
+        })
+        .finally(() => setIsAuthLoading(false))
     })
 
     return () => {
       cancelled = true
       sub?.subscription?.unsubscribe?.()
     }
-  }, [envError])
+  }, [envError, loadUserAccess])
 
   const signInWithPassword = useCallback(async ({ email, password }) => {
     if (!authClient) throw new Error('Autenticacao nao configurada')
     const { data, error } = await authClient.auth.signInWithPassword({ email, password })
     if (error) throw error
-    setSession(data?.session ?? null)
+    const nextSession = data?.session ?? null
+    const access = await loadUserAccess(nextSession)
+    if (access.profile?.status === 'disabled') {
+      await authClient.auth.signOut()
+      setSession(null)
+      setProfile(null)
+      setRole(null)
+      throw new Error('Usuario desativado. Fale com um administrador.')
+    }
+    setSession(nextSession)
     return data
-  }, [])
+  }, [loadUserAccess])
 
   const signOut = useCallback(async () => {
     if (!authClient) {
@@ -51,6 +104,8 @@ export function AuthProvider({ children }) {
       await authClient.auth.signOut()
     } finally {
       setSession(null)
+      setProfile(null)
+      setRole(null)
     }
   }, [])
 
@@ -62,28 +117,65 @@ export function AuthProvider({ children }) {
       const { data, error } = await authClient.auth.refreshSession()
       if (error) throw error
       setSession(data?.session ?? null)
+      await loadUserAccess(data?.session ?? null)
       return data?.session ?? null
     } catch (err) {
       console.warn('[AuthProvider] refreshSession failed, signing out:', err?.message)
       setSession(null)
+      setProfile(null)
+      setRole(null)
       return null
     } finally {
       refreshInFlight.current = false
     }
-  }, [session])
+  }, [session, loadUserAccess])
+
+  const refreshProfile = useCallback(async () => {
+    return loadUserAccess(session)
+  }, [loadUserAccess, session])
+
+  const hasRole = useCallback((allowedRoles) => {
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]
+    return Boolean(role && roles.includes(role))
+  }, [role])
+
+  const isAdmin = role === 'admin'
+  const isOperator = role === 'operator'
+  const isViewer = role === 'viewer'
 
   const value = useMemo(
     () => ({
       session,
       user: session?.user ?? null,
+      profile,
+      role,
+      isAdmin,
+      isOperator,
+      isViewer,
       isAuthLoading,
       isAuthenticated: Boolean(session),
       envError,
+      hasRole,
       signInWithPassword,
       signOut,
       refreshSession,
+      refreshProfile,
     }),
-    [session, isAuthLoading, envError, signInWithPassword, signOut, refreshSession]
+    [
+      session,
+      profile,
+      role,
+      isAdmin,
+      isOperator,
+      isViewer,
+      isAuthLoading,
+      envError,
+      hasRole,
+      signInWithPassword,
+      signOut,
+      refreshSession,
+      refreshProfile,
+    ]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

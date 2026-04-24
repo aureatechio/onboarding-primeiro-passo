@@ -20,8 +20,11 @@ import CopyEditor from './pages/CopyEditor';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import RequireRole from './components/RequireRole';
+import UsersList from './pages/Users/UsersList';
+import Profile from './pages/Profile';
 
-const PROTECTED_PREFIXES = ['/ai-step2/', '/copy-editor'];
+const PROTECTED_PREFIXES = ['/ai-step2/', '/copy-editor', '/users', '/profile'];
 
 function isProtectedPath(pathname) {
   return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -226,9 +229,11 @@ function AppRoutes() {
 
   if (pathname.startsWith('/ai-step2/post-gen')) {
     return (
-      <ErrorBoundary>
-        <PostGenPage />
-      </ErrorBoundary>
+      <RequireRole roles={['admin', 'operator']}>
+        <ErrorBoundary>
+          <PostGenPage />
+        </ErrorBoundary>
+      </RequireRole>
     );
   }
 
@@ -242,17 +247,21 @@ function AppRoutes() {
 
   if (pathname.startsWith('/ai-step2/perplexity-config')) {
     return (
-      <ErrorBoundary>
-        <PerplexityConfigPage />
-      </ErrorBoundary>
+      <RequireRole roles={['admin']}>
+        <ErrorBoundary>
+          <PerplexityConfigPage />
+        </ErrorBoundary>
+      </RequireRole>
     );
   }
 
   if (pathname.startsWith('/ai-step2/nanobanana-config')) {
     return (
-      <ErrorBoundary>
-        <NanoBananaConfigPage />
-      </ErrorBoundary>
+      <RequireRole roles={['admin']}>
+        <ErrorBoundary>
+          <NanoBananaConfigPage />
+        </ErrorBoundary>
+      </RequireRole>
     );
   }
 
@@ -266,9 +275,31 @@ function AppRoutes() {
 
   if (pathname.startsWith('/copy-editor')) {
     return (
-      <ErrorBoundary>
-        <CopyEditor />
-      </ErrorBoundary>
+      <RequireRole roles={['admin']}>
+        <ErrorBoundary>
+          <CopyEditor />
+        </ErrorBoundary>
+      </RequireRole>
+    );
+  }
+
+  if (pathname.startsWith('/users')) {
+    return (
+      <RequireRole roles={['admin']}>
+        <ErrorBoundary>
+          <UsersList />
+        </ErrorBoundary>
+      </RequireRole>
+    );
+  }
+
+  if (pathname.startsWith('/profile')) {
+    return (
+      <RequireRole roles={['admin', 'operator', 'viewer']}>
+        <ErrorBoundary>
+          <Profile />
+        </ErrorBoundary>
+      </RequireRole>
     );
   }
 

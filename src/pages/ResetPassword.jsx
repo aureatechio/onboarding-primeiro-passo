@@ -21,11 +21,14 @@ function extractTokensFromHash() {
   const type = params.get('type')
   const errorDescription = params.get('error_description') || params.get('error')
   if (errorDescription) return { errorDescription }
-  if (!accessToken || !refreshToken || type !== 'recovery') return null
-  return { accessToken, refreshToken }
+  if (!accessToken || !refreshToken || !['recovery', 'invite'].includes(type)) return null
+  return { accessToken, refreshToken, type }
 }
 
 export default function ResetPassword() {
+  const params = new URLSearchParams(window.location.search)
+  const requestedType = params.get('type')
+  const isInvite = requestedType === 'invite'
   const envError = !hasAuthEnv()
   const [status, setStatus] = useState(envError ? 'invalid' : 'loading')
   const [errorMessage, setErrorMessage] = useState(null)
@@ -55,7 +58,7 @@ export default function ResetPassword() {
       .setSession({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken })
       .then(({ error }) => {
         if (error) throw error
-        window.history.replaceState({}, '', '/reset-password')
+        window.history.replaceState({}, '', isInvite ? '/reset-password?type=invite' : '/reset-password')
         setStatus('ready')
       })
       .catch((err) => {
@@ -117,9 +120,11 @@ export default function ResetPassword() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <TopBarLogo height={22} maxWidth={140} />
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Nova senha</h1>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+            {isInvite ? 'Defina sua senha' : 'Nova senha'}
+          </h1>
           <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
-            Defina uma nova senha para sua conta.
+            {isInvite ? 'Crie sua senha para acessar o dashboard.' : 'Defina uma nova senha para sua conta.'}
           </p>
         </div>
 

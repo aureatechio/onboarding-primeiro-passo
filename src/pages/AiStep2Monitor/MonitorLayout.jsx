@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Brain, Palette, BarChart3, Sparkles, Image, FileText, LogOut } from 'lucide-react'
+import { Brain, Palette, BarChart3, Sparkles, Image, FileText, LogOut, UserCircle, Users } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
@@ -17,6 +17,14 @@ const GARDEN_NAV = [
   { id: 'gallery', label: 'Galeria', icon: Image, path: '/ai-step2/gallery', newTab: true },
 ]
 
+const USERS_NAV = [
+  { id: 'users', label: 'Usuarios', icon: Users, path: '/users' },
+]
+
+const ACCOUNT_NAV = [
+  { id: 'profile', label: 'Meu Perfil', icon: UserCircle, path: '/profile' },
+]
+
 function getActiveId() {
   const pathname = window.location.pathname || '/'
   if (pathname.includes('perplexity-config')) return 'perplexity'
@@ -24,6 +32,8 @@ function getActiveId() {
   if (pathname.includes('post-gen')) return 'post-gen'
   if (pathname.includes('gallery')) return 'gallery'
   if (pathname.startsWith('/copy-editor')) return 'copy-editor'
+  if (pathname.startsWith('/users')) return 'users'
+  if (pathname.startsWith('/profile')) return 'profile'
   return 'monitor'
 }
 
@@ -207,6 +217,9 @@ function SidebarFooter() {
 
 export default function MonitorLayout({ children }) {
   const activeId = getActiveId()
+  const { isAdmin, isViewer } = useAuth()
+  const mainNav = isAdmin ? MAIN_NAV : MAIN_NAV.filter((item) => item.id === 'monitor')
+  const gardenNav = isViewer ? GARDEN_NAV.filter((item) => item.id === 'gallery') : GARDEN_NAV
 
   return (
     <div style={{ minHeight: '100vh', background: monitorTheme.layoutBg, color: monitorTheme.textPrimary }}>
@@ -231,7 +244,7 @@ export default function MonitorLayout({ children }) {
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {MAIN_NAV.map((item) => (
+            {mainNav.map((item) => (
               <NavButton key={item.id} item={item} isActive={item.id === activeId} />
             ))}
           </div>
@@ -246,7 +259,30 @@ export default function MonitorLayout({ children }) {
             }}>
               Aurea Garden
             </p>
-            {GARDEN_NAV.map((item) => (
+            {gardenNav.map((item) => (
+              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
+            ))}
+          </div>
+
+          {isAdmin && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{
+                ...TYPE.caption,
+                color: monitorTheme.sidebarTextMuted,
+                padding: '4px 12px 2px',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}>
+                Acesso
+              </p>
+              {USERS_NAV.map((item) => (
+                <NavButton key={item.id} item={item} isActive={item.id === activeId} />
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {ACCOUNT_NAV.map((item) => (
               <NavButton key={item.id} item={item} isActive={item.id === activeId} />
             ))}
           </div>
