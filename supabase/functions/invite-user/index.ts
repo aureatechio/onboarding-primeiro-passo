@@ -55,7 +55,9 @@ Deno.serve(async (req) => {
     .from('profiles')
     .upsert({
       id: invitedUser.id,
+      user_id: invitedUser.id,
       email,
+      name: fullName,
       full_name: fullName,
       status: 'active',
       updated_at: now,
