@@ -56,7 +56,7 @@ Consultar `CONTEXT-MAP.md` e usar este mapeamento:
 |----------------|--------|
 | OMIE, ordem de servico, OS, ERP, cliente OMIE, vendedor | `omie` |
 | onboarding, primeiro passo, cadastro inicial, etapa, fluxo | `onboarding` |
-| campanha AI, perplexity, garden, nanobanana, post-gen, briefing, imagem AI | `ai-campaign` |
+| campanha AI, perplexity, nanobanana, briefing, imagem AI | `ai-campaign` |
 | deploy, edge function, supabase function, infra | `shared` |
 | config admin, logs, auditoria | `admin` |
 

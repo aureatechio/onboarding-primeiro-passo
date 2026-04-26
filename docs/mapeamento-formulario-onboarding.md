@@ -412,7 +412,6 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | `CompletionScreen` | Etapas 2, 4, 5, 6, 6.2 | Tela de transição "Etapa X concluída!" |
 | `ProcessingOverlay` | Etapas 2, 3, 4, 6.2 | Overlay com mensagens sequenciais durante salvamento |
 | `CampaignBriefing` | Legado / ferramentas internas | Componente de briefing (texto + áudio + site); não usado no fluxo principal pós-remoção da Etapa 7 |
-| `ColorSwatch` | AiStep2Monitor (PostGen) | Color picker com badge e botão remover |
 | `InfoCard` | Etapa 5 | Card com ícone, título e conteúdo |
 | `BulletList` | Etapas 2, 3 | Lista com bullets coloridos |
 | `Icon` | Todas | Wrapper de ícones Lucide |

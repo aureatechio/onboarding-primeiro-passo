@@ -61,10 +61,6 @@ Para cada endpoint alterado:
 | get-nanobanana-config | Leitura config | Publico | Sim |
 | update-nanobanana-config | Escrita config | x-admin-password | Sim |
 | read-nanobanana-reference | Leitura referencia | x-admin-password | Sim |
-| get-garden-options | Carga de opcoes | Publico | Sim |
-| post-gen-generate | Geracao Post Gen | Publico | Sim |
-| get-garden-job | Polling Garden | Publico | Nao |
-| list-garden-jobs | Galeria | Publico | Sim |
 | get-onboarding-copy | Leitura copy | Publico | Nao |
 | update-onboarding-copy | Publicacao copy | x-admin-password | Nao |
 | get-onboarding-data | Hidratar onboarding | Publico | Nao |
@@ -220,7 +216,6 @@ Trocar guard de senha compartilhada por autenticacao/autorizacao por usuario e p
   - Referencias:
     - `supabase/functions/get-ai-campaign-monitor/`
     - `supabase/functions/retry-ai-campaign-assets/`
-    - `supabase/functions/get-garden-job/`
     - `supabase/functions/get-onboarding-copy/`
     - `supabase/functions/update-onboarding-copy/`
   - Entregavel: `functionSpec.md` com auth por usuario/papel.
@@ -387,7 +382,6 @@ Total:
 ### 7.1 Specs para criar (alta prioridade)
 - [ ] `supabase/functions/get-ai-campaign-monitor/functionSpec.md`
 - [ ] `supabase/functions/retry-ai-campaign-assets/functionSpec.md`
-- [ ] `supabase/functions/get-garden-job/functionSpec.md`
 - [ ] `supabase/functions/get-onboarding-copy/functionSpec.md`
 - [ ] `supabase/functions/update-onboarding-copy/functionSpec.md`
 

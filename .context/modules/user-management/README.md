@@ -18,4 +18,3 @@ Modulo de gestao de usuarios do dashboard interno.
 - `/users`: admin.
 - `/profile`: admin, operator, viewer.
 - Configuracoes: admin.
-- `Post Gen`: admin/operator.

@@ -51,12 +51,12 @@ Leia `$ARGUMENTS` e siga o fluxo correspondente:
 
 1. **Resolva o team**: use o `teamId` fixo (`4884303a-489c-4b70-80a9-2d71c056f1c5`) do team Onboarding. Se preferir confirmar, chame `list_teams` (query: "Onboarding") — necessário para `list_projects`, `list_issue_labels`, `list_issues`, `save_project` e `save_issue`.
 
-2. **Liste projetos do team** com `list_projects` (team: "Onboarding") para ver o que já existe. Projetos típicos deste repositório: Onboarding (fluxo do cliente), AI Campaign Pipeline, Aurea Garden (Post Gen), NanoBanana, Enrichment, Dashboard/Monitor, Infra.
+2. **Liste projetos do team** com `list_projects` (team: "Onboarding") para ver o que já existe. Projetos típicos deste repositório: Onboarding (fluxo do cliente), AI Campaign Pipeline, NanoBanana, Enrichment, Dashboard/Monitor, Infra.
 
 3. **Busque duplicatas**: chame `list_issues` (team: "Onboarding", query: palavras-chave do caso). Se encontrar issue similar, avise antes de prosseguir.
 
 4. **Analise o caso** e identifique:
-   - Domínio/área (onboarding, ai-campaign, aurea-garden, nanobanana, enrichment, perplexity, monitor/dashboard, edge functions, infra, etc.)
+   - Domínio/área (onboarding, ai-campaign, nanobanana, enrichment, perplexity, monitor/dashboard, edge functions, infra, etc.)
    - Objetivo da exploração/tarefa
    - Possíveis entregáveis
 
@@ -94,10 +94,10 @@ Leia `$ARGUMENTS` e siga o fluxo correspondente:
   - **Edge Functions:** classificar como pública (`--no-verify-jwt`) ou protegida (JWT via `_shared/auth.ts` ou `x-admin-password` via `_shared/admin-auth.ts`) antes de deploy; sempre passar `--project-ref awqtzoefutnfmnbomujt`.
   - **RLS:** evitar queries em tabelas RLS-protegidas dentro de policies (usar `is_admin()`, `is_admin_or_supervisor()`, etc).
   - **Trigger `handle_new_user`:** deve popular `profiles` E `user_roles`.
-  - **Conventional commits:** `feat(onboarding):`, `feat(ai-campaign):`, `feat(garden):`, `fix(monitor):`, etc.
+  - **Conventional commits:** `feat(onboarding):`, `feat(ai-campaign):`, `fix(monitor):`, etc.
   - **Design tokens:** primary `#384ffe` (Acelerai Blue), destructive `#ff0058`, font Inter.
   - **Plans vs Tasks:** features maiores em `plan/YYYY-MM-DD-slug.md`; tarefas operacionais em `tasks/TASK-YYYY-MM-DD-NNN-slug.md`.
-  - **SDD:** funções Aurea Garden e NanoBanana possuem `functionSpec.md` — referenciar/atualizar quando aplicável.
+  - **SDD:** funções NanoBanana possuem `functionSpec.md` — referenciar/atualizar quando aplicável.
 - Referencie caminhos do repo em vez de colar blocos grandes de código.
 - Para tarefas que também vivem localmente em `tasks/`, inclua o caminho do arquivo nas Referências da issue.
 

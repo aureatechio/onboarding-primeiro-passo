@@ -123,8 +123,8 @@
     <rect x="432" y="28" width="392" height="168" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
     <text x="446" y="50" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#5b21b6">retry-ai-campaign-assets</text>
     <text x="446" y="68" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6d28d9">Retry por asset, categoria ou todos falhos - re-enfileira worker</text>
-    <text x="446" y="92" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">Separado do fluxo Aurea Garden (Post Gen / Post Turbo):</text>
-    <text x="446" y="108" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">aqueles usam post-gen-generate / post-turbo-generate sob demanda.</text>
+    <text x="446" y="92" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">Fluxo dedicado ao AI Campaign Pipeline.</text>
+    <text x="446" y="108" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">Reprocessamento ocorre via retry-ai-campaign-assets.</text>
   </g>
 
   <g transform="translate(40, 1300)">

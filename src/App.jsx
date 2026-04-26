@@ -14,8 +14,6 @@ import EtapaFinal from './pages/EtapaFinal';
 import AiStep2Monitor from './pages/AiStep2Monitor';
 import PerplexityConfigPage from './pages/AiStep2Monitor/PerplexityConfigPage';
 import NanoBananaConfigPage from './pages/AiStep2Monitor/NanoBananaConfigPage';
-import PostGenPage from './pages/AiStep2Monitor/PostGenPage';
-import GardenGalleryPage from './pages/AiStep2Monitor/GardenGalleryPage';
 import CopyEditor from './pages/CopyEditor';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
@@ -225,24 +223,6 @@ function AppRoutes() {
       }
       return null
     }
-  }
-
-  if (pathname.startsWith('/ai-step2/post-gen')) {
-    return (
-      <RequireRole roles={['admin', 'operator']}>
-        <ErrorBoundary>
-          <PostGenPage />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
-  if (pathname.startsWith('/ai-step2/gallery')) {
-    return (
-      <ErrorBoundary>
-        <GardenGalleryPage />
-      </ErrorBoundary>
-    );
   }
 
   if (pathname.startsWith('/ai-step2/perplexity-config')) {

@@ -72,7 +72,7 @@ supabase functions deploy onboarding-enrichment --project-ref awqtzoefutnfmnbomu
 
 ## Checklist QA manual
 
-- [ ] Editar `brand_display_name` e confirmar que PostGen/Briefing usam o novo nome.
+- [ ] Editar `brand_display_name` e confirmar que Briefing/NanoBanana usam o novo nome.
 - [ ] Upload de logo (happy path, >5MB bloqueado, mime invalido bloqueado).
 - [ ] Trocar ativo; tentar deletar o ativo → 409.
 - [ ] Deletar logo inativo → sucesso.

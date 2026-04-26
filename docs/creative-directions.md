@@ -1,6 +1,6 @@
 # Direções Criativas — NanoBanana
 
-Prompts de direção criativa usados no pipeline de geração de imagens IA (Post Gen).
+Prompts de direção criativa usados no pipeline de geração de imagens IA.
 
 Fonte: `supabase/functions/_shared/ai-campaign/prompt-builder.ts` (`GROUP_DIRECTIONS`)
 

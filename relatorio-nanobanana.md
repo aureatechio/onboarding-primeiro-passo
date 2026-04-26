@@ -22,14 +22,13 @@ O módulo gerencia três eixos de criação visual (categorias de direção cria
 | Edge Function | `update-nanobanana-config/index.ts` | Atualização (PATCH) com upload de imagens |
 | Edge Function | `read-nanobanana-reference/index.ts` | Leitura de imagem via Gemini Vision → texto |
 | Pipeline | `create-ai-campaign-job/index.ts` | Consome config NanoBanana para enriquecer prompts |
-| Pipeline | `post-gen-generate/index.ts` | Geração individual de post — usa config NanoBanana |
 | Frontend | `NanoBananaConfigPage.jsx` | UI completa de configuração (4 abas) |
 | Frontend | `MonitorLayout.jsx` | Navegação lateral com item NanoBanana IA |
 | Frontend | `App.jsx` | Registro da rota `/ai-step2/nanobanana-config` |
 | Documentação | `ai-step2/CONTRACT.md` (seção 9.1) | Contrato de dados e validação |
 | Documentação | `ai-step2/PRD.md` (RF-14, RF-15) | Requisitos funcionais |
 
-**Total: 10 arquivos** (3 edge functions dedicadas, 2 funções consumidoras no pipeline, 3 frontend, 2 docs)
+**Total: 9 arquivos** (3 edge functions dedicadas, 1 função consumidora no pipeline, 3 frontend, 2 docs)
 
 ---
 
@@ -64,7 +63,6 @@ O módulo gerencia três eixos de criação visual (categorias de direção cria
        ▼
 ┌─────────────────────────────────────────────┐
 │  create-ai-campaign-job                      │
-│  post-gen-generate                           │
 │                                              │
 │  Leem nanobanana_config para:                │
 │  - global_rules → instruções do sistema      │
@@ -118,20 +116,7 @@ O fluxo de contexto segue este caminho:
 4. Chama `resolveDirectionPromptText()` — extrai o texto limpo da direção criativa, usado para compor o prompt final.
 5. Os prompts são passados para workers `generate-ai-campaign-image` que chamam a Gemini API com o contexto completo.
 
-### 5.2. PostGen
-
-O `post-gen-generate` carrega a config NanoBanana via shared module `_shared/nanobanana/config.ts`. O prompt é construído assim:
-
-```
-[Direção criativa do grupo] +
-[Global Rules] +
-[Instruções de formato (format_1_1, etc.)] +
-[Paleta de cores do cliente] +
-[Nome da celebridade] +
-[Prompt do usuário (se houver)]
-```
-
-### 5.3. Leitura assistida por IA (read-nanobanana-reference)
+### 5.2. Leitura assistida por IA (read-nanobanana-reference)
 
 A function `read-nanobanana-reference` é um mini-pipeline isolado:
 - Recebe imagem + categoria via multipart

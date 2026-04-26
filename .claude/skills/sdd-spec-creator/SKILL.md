@@ -32,8 +32,8 @@ Determinar QUAL componente sera especificado:
 |------|---------------|---------|
 | Edge Function | `supabase/functions/<nome>/functionSpec.md` | `omie-orchestrator/functionSpec.md` |
 | Modulo _shared/ | `supabase/functions/_shared/<modulo>/spec.md` | `_shared/perplexity/spec.md` |
-| Componente React | `src/components/<nome>/spec.md` | `src/components/GardenGallery/spec.md` |
-| Pagina React | `src/pages/<nome>/spec.md` | `src/pages/PostGenPage/spec.md` |
+| Componente React | `src/components/<nome>/spec.md` | `src/components/CampaignBriefing/spec.md` |
+| Pagina React | `src/pages/<nome>/spec.md` | `src/pages/NanoBananaConfigPage/spec.md` |
 | Lib utilitaria | `src/lib/<nome>/spec.md` | `src/lib/color-extractor/spec.md` |
 
 ### Step 2: Coletar contexto
@@ -244,13 +244,13 @@ Apos gerar a spec de um componente existente, validar:
 
 **Documentar existente:**
 ```
-"Documenta a funcao post-gen-generate como spec"
+"Documenta a funcao get-nanobanana-config como spec"
 "Cria functionSpec pra omie-create-os"
 ```
 
 **Componente React:**
 ```
-"Cria spec do componente GardenGallery"
+"Cria spec do componente CampaignBriefing"
 ```
 
 **Modulo shared:**

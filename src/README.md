@@ -1,6 +1,6 @@
 # `src/` — Onboarding SPA (React 19 + Vite)
 
-SPA do onboarding **Primeiro Passo**, servido em `https://onboarding-primeiro-passo.vercel.app`. **105 arquivos**, ~15k linhas de JSX/JS. Sem TypeScript (exceto 1 arquivo de teste).
+SPA do onboarding **Primeiro Passo**, servido em `https://onboarding-primeiro-passo.vercel.app`. Sem TypeScript (exceto 1 arquivo de teste).
 
 ## Estrutura
 
@@ -32,13 +32,13 @@ Etapa1Hero → Etapa2 → Etapa3 → Etapa4 → Etapa5 → Etapa6 | Etapa62 → 
 
 Dois mini-apps embutidos no mesmo bundle:
 
-### 1. `pages/AiStep2Monitor/` (15 arquivos)
+### 1. `pages/AiStep2Monitor/`
 Painel de monitoramento do AI Campaign Pipeline:
 
 - `index.jsx`, `MonitorLayout.jsx`
 - `ListModePanel.jsx`, `DetailModePanel.jsx`
-- Sub-páginas: `GardenGalleryPage`, `PostGenPage`, `NanoBananaConfigPage`, `PerplexityConfigPage`
-- Hooks: `useAiCampaignMonitor`, `useGardenOptions`
+- Sub-páginas: `NanoBananaConfigPage`, `PerplexityConfigPage`
+- Hooks: `useAiCampaignMonitor`, `useOnboardingEdit`
 - Componentes locais: `StatusBadge`, `TabBar`, `DataRow`, `ImageViewer`, `ProgressBar`, `FieldInfoModal`
 
 ### 2. `pages/CopyEditor/` (24 arquivos)

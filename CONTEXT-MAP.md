@@ -22,13 +22,6 @@ Indice rapido para agentes de IA. Para cada dominio, leia os arquivos na ordem l
 4. `supabase/functions/<funcao>/functionSpec.md` — spec da funcao especifica
 5. `.cursor/skills/omie-integracao/SKILL.md` — payload/API/transformacao
 
-## Aurea Studio (Post Gen — Geracao de Criativos IA)
-1. `.context/modules/aurea-studio/DOC-READING-ORDER.md` — **LER PRIMEIRO**: roteamento condicional por tipo de tarefa
-2. `.context/modules/aurea-studio/README.md` — arquitetura, data flow, database schema
-3. `.context/modules/aurea-studio/BUSINESS-RULES.md` — regras de negocio criticas (15 regras extraidas do codigo)
-4. `supabase/functions/<funcao>/functionSpec.md` — spec da funcao especifica
-5. `.cursor/skills/aurea-garden/SKILL.md` — playbook: prompt engineering, UX, galeria, config
-
 ## Tarefas Operacionais
 1. `tasks/README.md` — convencoes, lifecycle, indice
 2. `tasks/TASK-TEMPLATE.md` — template para novas tarefas

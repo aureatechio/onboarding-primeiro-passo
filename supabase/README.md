@@ -1,6 +1,6 @@
 # Supabase — Primeiro Passo
 
-Backend do app **Primeiro Passo (Onboarding Acelerai)**. Concentra schema do banco (migrations Postgres) e Edge Functions (Deno) que sustentam o fluxo de onboarding, o pipeline de enriquecimento, a geração de campanhas de IA (AI Step 2 / Aurea Garden) e os CMSs internos (copy, Perplexity, NanoBanana).
+Backend do app **Primeiro Passo (Onboarding Acelerai)**. Concentra schema do banco (migrations Postgres) e Edge Functions (Deno) que sustentam o fluxo de onboarding, o pipeline de enriquecimento, a geração de campanhas de IA (AI Step 2) e os CMSs internos (copy, Perplexity, NanoBanana).
 
 > **Project ref:** `awqtzoefutnfmnbomujt` — obrigatório em **todos** os comandos de deploy.
 
@@ -11,7 +11,7 @@ Backend do app **Primeiro Passo (Onboarding Acelerai)**. Concentra schema do ban
 ```
 supabase/
 ├── migrations/          # Schema Postgres (9 migrations, imutáveis)
-└── functions/           # 30 Edge Functions (Deno) + _shared/
+└── functions/           # Edge Functions (Deno) + _shared/
     └── _shared/         # Bibliotecas compartilhadas entre functions
 ```
 
@@ -53,7 +53,7 @@ Políticas **nunca** devem consultar diretamente tabelas protegidas (gera `42P17
 
 ## `functions/` — Edge Functions (Deno)
 
-São **30 funções** organizadas em 6 domínios. Toda função segue o padrão:
+As funções são organizadas por domínio. Toda função segue o padrão:
 
 ```ts
 import { handleCors, jsonResponse } from '../_shared/cors.ts'
@@ -114,18 +114,7 @@ Gera imagens e campanhas de marketing pós-onboarding. Docs em `ai-step2/`.
 | `get-perplexity-config` | protegido | Lê singleton. |
 | `update-perplexity-config` | protegido (admin) | Atualiza prompts, modelo, temperatura. |
 
-### 5. Aurea Garden (Post Gen)
-
-**Todas públicas** (`--no-verify-jwt`). Ver `.context/modules/aurea-studio/`.
-
-| Função | Propósito |
-|---|---|
-| `post-gen-generate` | Gera 1 criativo (Post Gen). |
-| `list-garden-jobs` | Lista jobs da galeria. |
-| `get-garden-job` | Detalhe de 1 job. |
-| `get-garden-options` | Opções (estilos, categorias) para o UI. |
-
-### 6. NanoBanana (direção criativa de IA)
+### 5. NanoBanana (direção criativa de IA)
 
 Config de 3 categorias: `moderna`, `clean`, `retail`. Todas com `--no-verify-jwt`; `update` e `read` são protegidas por `x-admin-password` em código (ver `_shared/admin-auth.ts`).
 
@@ -135,7 +124,7 @@ Config de 3 categorias: `moderna`, `clean`, `retail`. Todas com `--no-verify-jwt
 | `update-nanobanana-config` | `x-admin-password` |
 | `read-nanobanana-reference` | `x-admin-password` |
 
-### 7. Onboarding Copy (CMS)
+### 6. Onboarding Copy (CMS)
 
 | Função | JWT | Propósito |
 |---|---|---|
@@ -161,7 +150,6 @@ Bibliotecas reutilizadas por múltiplas Edge Functions.
 | `perplexity/` | `client.ts`, `prompt.ts`, `normalize.ts`, `suggest.ts`, `discover.ts` (todos com `*.test.ts`). |
 | `ai-campaign/` | `eligibility.ts`, `image-generator.ts`, `prompt-builder.ts`, `logger.ts` (com testes). |
 | `enrichment/` | `config.ts`, `config-types.ts`, `gemini-client.ts`, `color-extractor.ts`, `css-scraper.ts`, `font-detector.ts` (com testes + `__tests__/`). |
-| `garden/` | `validate.ts` — validação de jobs Aurea Garden. |
 | `nanobanana/` | `config.ts` — **single source of truth**: `NanoBananaDbConfig`, `loadNanoBananaConfig`, `CategoryKey`, `DirectionMode`, `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE`, `REFERENCE_BUCKET`. |
 
 \* Arquivos referenciados pelo CLAUDE.md; podem residir em outros shared helpers dependendo da convenção.
@@ -182,7 +170,7 @@ supabase functions serve
 # Função protegida (JWT Supabase)
 supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt
 
-# Função pública (sem JWT — onboarding, Aurea Garden, NanoBanana)
+# Função pública (sem JWT — onboarding, NanoBanana)
 supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
 ```
 
@@ -209,7 +197,7 @@ deno test supabase/functions/_shared/   --allow-env --allow-net --allow-read
 ## Convenções
 
 - **SDD:** funções com `functionSpec.md` têm contrato formal — leia antes de editar.
-- **Public vs Protected:** onboarding, Aurea Garden e NanoBanana são **públicas**. Perplexity, enrichment-writes e AI Campaign admin são **protegidas**.
+- **Public vs Protected:** onboarding e NanoBanana são **públicas**. Perplexity, enrichment-writes e AI Campaign admin são **protegidas**.
 - **Singletons:** `enrichment_config`, `nanobanana_config`, `perplexity_config`, `onboarding_copy` têm exatamente 1 linha — **sempre UPDATE**, nunca INSERT.
 - **Migrations:** imutáveis após merge. Novas mudanças → nova migration.
 - **RLS:** use sempre helpers `SECURITY DEFINER`. Nunca subquery direto em tabela protegida dentro de policy.

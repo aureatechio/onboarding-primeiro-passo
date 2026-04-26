@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Brain, Palette, BarChart3, Sparkles, Image, FileText, LogOut, UserCircle, Users } from 'lucide-react'
+import { Brain, Palette, BarChart3, FileText, LogOut, UserCircle, Users } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
@@ -10,11 +10,6 @@ const MAIN_NAV = [
   { id: 'perplexity', label: 'Perplexity IA', icon: Brain, path: '/ai-step2/perplexity-config' },
   { id: 'nanobanana', label: 'NanoBanana IA', icon: Palette, path: '/ai-step2/nanobanana-config' },
   { id: 'copy-editor', label: 'Copy Editor', icon: FileText, path: '/copy-editor' },
-]
-
-const GARDEN_NAV = [
-  { id: 'post-gen', label: 'Post Gen', icon: Sparkles, path: '/ai-step2/post-gen', newTab: true },
-  { id: 'gallery', label: 'Galeria', icon: Image, path: '/ai-step2/gallery', newTab: true },
 ]
 
 const USERS_NAV = [
@@ -29,8 +24,6 @@ function getActiveId() {
   const pathname = window.location.pathname || '/'
   if (pathname.includes('perplexity-config')) return 'perplexity'
   if (pathname.includes('nanobanana-config')) return 'nanobanana'
-  if (pathname.includes('post-gen')) return 'post-gen'
-  if (pathname.includes('gallery')) return 'gallery'
   if (pathname.startsWith('/copy-editor')) return 'copy-editor'
   if (pathname.startsWith('/users')) return 'users'
   if (pathname.startsWith('/profile')) return 'profile'
@@ -217,9 +210,8 @@ function SidebarFooter() {
 
 export default function MonitorLayout({ children }) {
   const activeId = getActiveId()
-  const { isAdmin, isViewer } = useAuth()
+  const { isAdmin } = useAuth()
   const mainNav = isAdmin ? MAIN_NAV : MAIN_NAV.filter((item) => item.id === 'monitor')
-  const gardenNav = isViewer ? GARDEN_NAV.filter((item) => item.id === 'gallery') : GARDEN_NAV
 
   return (
     <div style={{ minHeight: '100vh', background: monitorTheme.layoutBg, color: monitorTheme.textPrimary }}>
@@ -245,21 +237,6 @@ export default function MonitorLayout({ children }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {mainNav.map((item) => (
-              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <p style={{
-              ...TYPE.caption,
-              color: monitorTheme.sidebarTextMuted,
-              padding: '4px 12px 2px',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-            }}>
-              Aurea Garden
-            </p>
-            {gardenNav.map((item) => (
               <NavButton key={item.id} item={item} isActive={item.id === activeId} />
             ))}
           </div>

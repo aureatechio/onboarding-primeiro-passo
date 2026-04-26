@@ -25,8 +25,6 @@ Origem: plano de execucao da Fase 0 (autenticacao dashboard)
 | `/ai-step2/monitor` | `src/pages/AiStep2Monitor/index.jsx` | listar jobs, abrir detalhe, retry assets, editar identidade/briefing, liberar onboarding |
 | `/ai-step2/perplexity-config` | `src/pages/AiStep2Monitor/PerplexityConfigPage.jsx` | ler config, testar prompt, descobrir fontes, sugerir seed, salvar config |
 | `/ai-step2/nanobanana-config` | `src/pages/AiStep2Monitor/NanoBananaConfigPage.jsx` | ler config, ler imagem referencia, salvar config |
-| `/ai-step2/post-gen` | `src/pages/AiStep2Monitor/PostGenPage.jsx` | gerar criativo, polling de job, download |
-| `/ai-step2/gallery` | `src/pages/AiStep2Monitor/GardenGalleryPage.jsx` | listar jobs, filtrar, abrir lightbox, download |
 | `/copy-editor` | `src/pages/CopyEditor/index.jsx` | ler copy publicada, editar copy, publicar nova versao |
 
 ### Endpoints consumidos pelo dashboard e sensibilidade
@@ -46,10 +44,6 @@ Origem: plano de execucao da Fase 0 (autenticacao dashboard)
 | `get-nanobanana-config` | media |
 | `update-nanobanana-config` | alta |
 | `read-nanobanana-reference` | alta |
-| `get-garden-options` | baixa |
-| `post-gen-generate` | media |
-| `get-garden-job` | media |
-| `list-garden-jobs` | media |
 | `get-onboarding-copy` | baixa |
 | `update-onboarding-copy` | alta |
 | `get-onboarding-data` | alta |
@@ -97,11 +91,6 @@ export type ActionPolicy = {
 | `/ai-step2/nanobanana-config` | Ler config | `get-nanobanana-config` | `leitura` | media | leitura para operacao |
 | `/ai-step2/nanobanana-config` | Ler imagem de referencia via IA | `read-nanobanana-reference` | `supervisor` | alta | acao sensivel de direcao criativa |
 | `/ai-step2/nanobanana-config` | Salvar config do gerador | `update-nanobanana-config` | `admin` | alta | altera regras globais de geracao |
-| `/ai-step2/post-gen` | Carregar opcoes | `get-garden-options` | `operacao` | baixa | lookup operacional |
-| `/ai-step2/post-gen` | Disparar geracao | `post-gen-generate` | `operacao` | media | cria job e usa provider |
-| `/ai-step2/post-gen` | Polling de job | `get-garden-job` | `operacao` | media | monitoramento de job em execucao |
-| `/ai-step2/gallery` | Listar jobs | `list-garden-jobs` | `leitura` | media | consulta de historico operacional |
-| `/ai-step2/gallery` | Download de resultado | `list-garden-jobs` (signed URL) | `leitura` | media | acesso a output de campanha |
 | `/copy-editor` | Ler copy publicada | `get-onboarding-copy` | `leitura` | baixa | conteudo publico do onboarding |
 | `/copy-editor` | Publicar nova versao de copy | `update-onboarding-copy` | `supervisor` | alta | altera copy de producao |
 | `/ai-step2/perplexity-config` | Prefill de compra para testes | `get-onboarding-data` (interno) | `operacao` | alta | leitura de dados de compra/onboarding |
@@ -140,10 +129,6 @@ export type EndpointClass = 'public-only' | 'internal-only' | 'hybrid'
 | `get-nanobanana-config` | `internal-only` | exigir sessao + RBAC leitura |
 | `update-nanobanana-config` | `internal-only` | exigir sessao + RBAC admin |
 | `read-nanobanana-reference` | `internal-only` | exigir sessao + RBAC supervisor |
-| `get-garden-options` | `internal-only` | exigir sessao + RBAC operacao |
-| `post-gen-generate` | `internal-only` | exigir sessao + RBAC operacao |
-| `get-garden-job` | `internal-only` | exigir sessao + RBAC operacao |
-| `list-garden-jobs` | `internal-only` | exigir sessao + RBAC leitura |
 | `get-onboarding-copy` | `public-only` | manter publico (copy publicada e fallback) |
 | `update-onboarding-copy` | `internal-only` | migrar de `x-admin-password` para RBAC |
 | `get-onboarding-data` | `hybrid` | manter publico para onboarding e criar variante interna detalhada |
@@ -154,7 +139,6 @@ export type EndpointClass = 'public-only' | 'internal-only' | 'hybrid'
 |---|---|---|
 | Lote 1 | Fechar superficie critica do monitor | `get-ai-campaign-monitor`, `retry-ai-campaign-assets`, `set-onboarding-access`, `update-onboarding-copy` |
 | Lote 2 | Hardening de configuracoes IA | `get/update-perplexity-config`, `get/update-nanobanana-config`, `read-nanobanana-reference` |
-| Lote 3 | Isolar operacao Garden | `get-garden-options`, `post-gen-generate`, `get-garden-job`, `list-garden-jobs` |
 | Lote 4 | Separar endpoints hibridos | `save-onboarding-identity`, `get-onboarding-data` (publico x interno) |
 | Lote 5 | Ajustes finais de legados | `save-campaign-briefing` + remocao total de `x-admin-password` do frontend |
 
