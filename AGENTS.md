@@ -1,319 +1,232 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file provides guidance to Codex when working with code in this repository.
 
 ## Repository Structure
 
-`primeiro-passo-app` is a **standalone React + Vite SPA** (onboarding flow) backed by Supabase Edge Functions and an AI campaign pipeline:
+`primeiro-passo-app` is a standalone React + Vite SPA for onboarding, backed by Supabase Edge Functions and internal admin tooling.
 
-```
+```text
 primeiro-passo-app/
-├── src/                          # React + Vite SPA (onboarding)
-│   ├── pages/                    # Etapa1Hero → EtapaFinal + AiStep2Monitor
-│   ├── components/               # Shared UI components
-│   ├── context/                  # OnboardingContext (state across steps)
-│   ├── lib/                      # Utilities (color-extractor, ai-step2-validation)
-│   ├── theme/                    # Design tokens, colors, global CSS
-│   └── copy.js                   # Content copy for onboarding steps
+├── src/                    # React SPA (onboarding + internal dashboards)
 ├── supabase/
-│   ├── migrations/               # Schema migrations (never edit existing ones)
-│   └── functions/                # 26 Edge Functions (Deno) + _shared/
-│       └── _shared/              # Shared Deno utilities
-│           ├── cors.ts           # CORS + jsonResponse
-│           ├── auth.ts           # JWT auth helpers
-│           ├── activity-logger.ts
-│           ├── audit-logger.ts
-│           ├── service-role-auth.ts
-│           ├── operational-events*.ts
-│           ├── email/            # Resend provider
-│           ├── perplexity/       # Perplexity AI integration
-│           │   ├── client.ts     # Shared provider client, errors, config loader
-│           │   ├── prompt.ts     # Briefing prompt builder
-│           │   ├── normalize.ts  # Response normalization + JSON extraction
-│           │   ├── suggest.ts    # Briefing seed suggestion
-│           │   └── discover.ts   # Company digital profile discovery
-│           ├── ai-campaign/      # AI campaign eligibility, image-generator, etc.
-│           ├── nanobanana/       # NanoBanana config types, loader, constants
-│           │   └── config.ts     # NanoBananaDbConfig, loadNanoBananaConfig, CategoryKey, DirectionMode
-│           ├── enrichment/      # Onboarding enrichment pipeline shared modules
-│           │   ├── config.ts         # EnrichmentConfig loader (re-exports config-types.ts)
-│           │   ├── config-types.ts   # EnrichmentConfig interface, constants, resolvePromptTemplate
-│           │   ├── gemini-client.ts  # callGeminiText with retry + bytesToBase64
-│           │   ├── color-extractor.ts # extractColorsFromImage, extractColorsViaGemini, extractColorsFromCss
-│           │   ├── css-scraper.ts    # fetchAndParseCss, extractFontsFromCss
-│           │   └── font-detector.ts  # detectAndValidateFont (waterfall: CSS → Gemini → fallback)
-│           └── admin-auth.ts     # Admin password guard (x-admin-password header)
-├── ai-step2/                     # AI Campaign Pipeline docs
-│   ├── PRD.md                    # Product requirements
-│   ├── BACKLOG.md                # Feature backlog
-│   └── CONTRACT.md               # Pipeline contract
-├── docs/                            # Reference documentation
-│   └── mapeamento-formulario-onboarding.md  # Canonical form-to-DB mapping
-├── .context/modules/
-│   ├── onboarding/              # Onboarding context engineering
-├── .cursor/
-│   ├── rules/                    # Always-apply Cursor rules (MDC)
-│   ├── skills/                   # Cursor skills (SKILL.md per skill)
-│   └── commands/                 # Cursor slash commands
-├── plan/                         # Feature plans (YYYY-MM-DD-slug.md)
-├── tasks/                        # Operational tasks (TASK-YYYY-MM-DD-NNN-slug.md)
-├── scripts/                      # Utilities
-├── package.json                  # name: "primeiro-passo-app"
-└── .env.example
+│   ├── migrations/         # Postgres schema migrations (immutable)
+│   └── functions/          # Edge Functions (Deno) + _shared/
+├── ai-step2/               # AI campaign pipeline docs
+├── docs/                   # Product and technical reference docs
+│   └── context/            # Canonical module context docs
+├── .claude/                # Local agent commands and skills kept in-repo
+├── plan/                   # Feature plans
+├── tasks/                  # Operational tasks
+├── scripts/                # Repo utilities
+├── package.json
+├── package-lock.json
+├── deno.json
+└── deno.lock
 ```
 
 ## Common Commands
 
-### Onboarding App (React + Vite)
+### Onboarding App
 
 ```bash
-npm ci               # Install dependencies from lockfile
-npm run dev          # Dev server (port 5173)
-npm run build        # Production build
-npm run lint         # ESLint
-npm run preview      # Preview production build
-npm run gate:prepush # Lockfile + deps + lint + build gate
+npm ci
+npm run dev
+npm run build
+npm run lint
+npm run preview
+npm run gate:prepush
 ```
 
-### Package Manager Policy (npm-only)
+### Package Manager Policy
 
-- Official package manager: `npm` (declared in `package.json#packageManager`)
-- Official lockfile: `package-lock.json` (single lockfile policy)
-- Forbidden lockfiles: `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `bun.lock`, `npm-shrinkwrap.json`
+- Official package manager: `npm`
+- Official lockfile: `package-lock.json`
 - Before push/deploy, run `npm run gate:prepush`
-- Any dependency change in `package.json` must include the updated `package-lock.json` in the same change
+- Any dependency change in `package.json` must include the updated `package-lock.json`
+- Do not add `pnpm-lock.yaml`, `yarn.lock`, `bun.lock*`, or `npm-shrinkwrap.json`
 
 ### Supabase
 
 ```bash
-supabase functions serve                                              # Dev local Edge Functions
-supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt  # Deploy (ALWAYS include --project-ref)
-supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt --no-verify-jwt  # Deploy public function
-supabase db reset                                                      # Reset + apply migrations
+supabase functions serve
+supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt
+supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt --no-verify-jwt
+supabase db reset
 ```
 
-**Supabase project ref:** `awqtzoefutnfmnbomujt` — required on every deploy command.
+Project ref: `awqtzoefutnfmnbomujt`
 
-**Mandatory deploy protocol:**
+Deploy protocol:
 
-1. **Before deploy:** classify the function as public or protected. If uncertain, ask before proceeding.
-2. **Public functions** require `--no-verify-jwt`; **protected functions** must NOT use it.
-3. **After deploy:** confirm CLI returned success (`Deployed Functions on project`).
+1. Classify the function as public or protected before deploying.
+2. Public functions require `--no-verify-jwt`.
+3. Protected functions must not use `--no-verify-jwt`.
+4. Confirm CLI success output: `Deployed Functions on project`.
 
-### Deno Tests (Edge Functions)
+### Deno Tests
 
 ```bash
 deno test supabase/functions/<function>/ --allow-env --allow-net --allow-read
 deno test supabase/functions/_shared/ --allow-env --allow-net --allow-read
 ```
 
-## Onboarding App
+## Frontend App
 
-React 19 + Vite SPA (Vercel project: **onboarding-primeiro-passo**).
+React 19 + Vite SPA deployed on Vercel at `https://onboarding-primeiro-passo.vercel.app`.
 
-**Flow:** Etapa1Hero → Etapa2 → Etapa3 → Etapa4 → Etapa5 → Etapa6 / Etapa62 → EtapaFinal → TudoPronto
+Public onboarding flow:
 
-- When the client saves identity with `site_url` or `instagram_handle`, `save-onboarding-identity` triggers the **enrichment pipeline** (`onboarding-enrichment`): extracts colors/font, generates briefing via Perplexity, and creates AI campaign job. Config in singleton table `enrichment_config`.
-- State is managed by `OnboardingContext` in `src/context/`
-- `AiStep2Monitor` page — AI campaign monitoring panel (sub-pages: Garden, PostGen, NanoBanana config)
-- No TypeScript — project uses JSX/JS
-- Design tokens in `src/theme/design-tokens.js`; brand: primary `#384ffe` (Acelerai Blue), destructive `#ff0058`; font: Inter (Google Fonts CDN)
+`Etapa1Hero -> Etapa2 -> Etapa3 -> Etapa4 -> Etapa5 -> Etapa6 / Etapa62 -> EtapaFinal -> TudoPronto`
 
-**Vercel Deploy:**
+Internal authenticated routes live in the same bundle:
 
-- Root Directory: `.` (repo root)
-- Canonical URL: `https://onboarding-primeiro-passo.vercel.app`
-- Required env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- `/ai-step2/*` — AI campaign monitor and config screens
+- `/copy-editor` — onboarding copy CMS
+- `/users` and `/profile` — user management and profile
+- `/login`, `/forgot-password`, `/reset-password` — auth entrypoints
 
-## AI Campaign Pipeline
+Important frontend facts:
 
-Documented in `ai-step2/`. The pipeline generates personalized AI marketing campaigns after onboarding completion.
-
-**Edge Functions (AI Campaign):**
-- `create-ai-campaign-job` — trigger campaign generation
-- `get-ai-campaign-status` / `get-ai-campaign-monitor` — polling
-- `generate-campaign-briefing` / `save-campaign-briefing` / `suggest-briefing-seed` / `test-perplexity-briefing`
-- `generate-ai-campaign-image` / `retry-ai-campaign-assets`
-- `discover-company-sources` / `read-nanobanana-reference`
-- `get-perplexity-config` / `update-perplexity-config`
-- `get-nanobanana-config` / `update-nanobanana-config`
+- No TypeScript in the main app code; JSX/JS is the default
+- `src/copy.js` is the static fallback copy source
+- `src/context/CopyContext.jsx` merges Supabase copy overrides over `copy.js`
+- `src/context/AuthContext.jsx` powers internal dashboard auth
+- `App.jsx` uses manual route handling, not `react-router`
+- Design tokens live in `src/theme/design-tokens.js`
 
 ## Supabase Critical Rules
 
-### RLS (Row Level Security) — Avoid Infinite Recursion
-
-**NEVER** query RLS-protected tables inside policy definitions. This causes `42P17: infinite recursion detected`.
-
-```sql
--- CORRECT: Use SECURITY DEFINER helper functions
-CREATE POLICY "..." ON tabela FOR SELECT USING (public.is_admin_or_supervisor());
-
--- WRONG: Direct subquery on protected table
-CREATE POLICY "..." ON tabela FOR SELECT USING (
-  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-);
-```
-
-Available helper functions: `is_admin()`, `is_admin_or_supervisor()`, `is_active_user()`, `get_user_role(uuid)`, `get_user_status(uuid)`
-
-### Copy do Onboarding
-
-- Tabela `onboarding_copy` é singleton (1 row). Sempre UPDATE, nunca INSERT.
-- `copy.js` continua como fallback. Funções template nunca vão para o Supabase.
-- Etapas consomem copy via `useCopy()` hook do `CopyContext.jsx`.
-- Deploy ambas funções com `--no-verify-jwt`.
-
 ### Migrations
 
-**Never edit existing migrations.** Always create new migration files for schema changes.
+Never edit an existing migration. Always create a new migration file.
 
-### Edge Functions Authentication
+### RLS
 
-The default `verify_jwt: true` validates JWT before code runs, causing "401 with empty logs". For functions called by frontend:
+Never query RLS-protected tables directly inside policy definitions. Use `SECURITY DEFINER` helpers such as:
 
-```typescript
-// CORRECT: Use shared auth module
-import { handleCors, jsonResponse } from "../_shared/cors.ts";
-import { requireAuth, isAuthError } from "../_shared/auth.ts";
-
-Deno.serve(async (req) => {
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
-
-  const authResult = await requireAuth(req);
-  if (isAuthError(authResult)) return authResult.error;
-  const { user, serviceClient } = authResult;
-  // ...
-});
-```
+- `is_admin()`
+- `is_admin_or_operator()`
+- `is_active_user()`
+- `get_user_role(uuid)`
+- `get_user_status(uuid)`
 
 ### User Signup Trigger
 
-The `handle_new_user` trigger MUST create BOTH:
+The `handle_new_user` trigger must create both:
 
-1. Record in `profiles` (user data)
-2. Record in `user_roles` (for RLS)
+1. A row in `profiles`
+2. A row in `user_roles`
 
-Without `user_roles`, the `is_agent()` function fails silently and users see blank screens.
+Without `user_roles`, RBAC-based access breaks.
 
 ### User Management
 
-- Roles oficiais do dashboard: `admin`, `operator`, `viewer`.
-- `profiles.status = disabled` deve ser sincronizado com ban no Supabase Auth.
-- Helpers RLS: `is_admin()`, `is_admin_or_operator()`, `is_active_user()`, `get_user_role(uuid)`.
-- Nunca rebaixar/desativar/excluir o unico admin; admins tambem nao podem excluir a propria conta.
-- Edge Functions de user management usam JWT + `_shared/rbac.ts` e sao protegidas (sem `--no-verify-jwt`).
+- Official roles: `admin`, `operator`, `viewer`
+- `viewer` is the default role for new users
+- `profiles.status = disabled` must stay aligned with Supabase Auth ban state
+- Do not demote, disable, or delete the only remaining admin
+- Admins must not delete their own account
 
-## Edge Functions Registry
+## Edge Function Groups
 
-> **Deploy:** Always include `--project-ref awqtzoefutnfmnbomujt`. Confirm public vs protected before deploying.
+### Public onboarding functions
 
-**Onboarding:**
-`get-onboarding-data`, `save-onboarding-identity`
+- `get-onboarding-data`
+- `save-onboarding-identity`
+- `save-onboarding-progress`
 
-**Enrichment (pipeline automatico):**
-`onboarding-enrichment`, `get-enrichment-status`, `get-enrichment-config`, `update-enrichment-config`
+The onboarding form has no JWT login. Public access relies on non-guessable purchase UUIDs.
 
-**AI Campaign Pipeline:**
-`create-ai-campaign-job`, `get-ai-campaign-status`, `get-ai-campaign-monitor`, `save-campaign-briefing`, `generate-ai-campaign-image`, `retry-ai-campaign-assets`, `read-nanobanana-reference`
+### Protected onboarding admin function
 
-**Perplexity (geracao):**
-`generate-campaign-briefing`, `test-perplexity-briefing`, `suggest-briefing-seed`, `discover-company-sources`
+- `set-onboarding-access`
 
-**Perplexity (config):**
-`get-perplexity-config`, `update-perplexity-config`
+This function is JWT-protected via RBAC and must not be deployed with `--no-verify-jwt`.
 
-**NanoBanana (config):**
-`get-nanobanana-config`, `update-nanobanana-config`
+### Enrichment pipeline
 
-**User Management:**
-`list-users`, `invite-user`, `update-user-role`, `set-user-status`, `delete-user`
+- `onboarding-enrichment` — public
+- `get-enrichment-status` — public
+- `get-enrichment-config` — public
+- `update-enrichment-config` — protected
 
-**Onboarding Copy (CMS):**
-`get-onboarding-copy`, `update-onboarding-copy`
+`save-onboarding-identity` triggers enrichment when `site_url` or `instagram_handle` is saved.
 
+### AI campaign pipeline
 
-## Code Style
+- `create-ai-campaign-job` — public
+- `get-ai-campaign-status` — public
+- `get-ai-campaign-monitor` — protected
+- `generate-ai-campaign-image` — protected
+- `retry-ai-campaign-assets` — protected
+- `generate-campaign-briefing` — protected
+- `save-campaign-briefing` — protected
+- `suggest-briefing-seed` — protected
+- `test-perplexity-briefing` — protected
+- `discover-company-sources` — protected
+- `get-perplexity-config` — protected
+- `update-perplexity-config` — protected
 
-- **ESLint** + **Prettier**: no semicolons, single quotes, 2 spaces, trailing comma es5, **printWidth 100**, arrowParens always, endOfLine LF
-- **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:` — use scopes: `feat(onboarding):`, `feat(ai-campaign):`
-- Unused vars prefixed with `_` are allowed (`@typescript-eslint/no-unused-vars` ignores `^_`)
-- **Acelerai brand:** primary `#384ffe` (Acelerai Blue), destructive `#ff0058` (RED CRM). Font: Inter (Google Fonts CDN)
+### NanoBanana
 
-### TypeScript (Edge Functions — Deno)
+Singleton config for creative direction categories `moderna`, `clean`, and `retail`.
 
-- Target: `ES2022`, Deno standard library
-- Edge Functions use Deno imports with URL specifiers or import maps
-- Logger is `silent` in test environment automatically
+- `get-nanobanana-config` — public, deploy with `--no-verify-jwt`
+- `update-nanobanana-config` — protected in code by `x-admin-password`, deploy with `--no-verify-jwt`
+- `read-nanobanana-reference` — protected in code by `x-admin-password`, deploy with `--no-verify-jwt`
 
-## Onboarding Context (Formulario "Primeiro Passo")
+Source of truth: `supabase/functions/_shared/nanobanana/config.ts`
 
-When working on onboarding code (form steps, identity, briefing, post-onboarding pipeline), consult:
+### Onboarding Copy CMS
 
-1. `.context/modules/onboarding/DOC-READING-ORDER.md` — identifies which docs to read for each task type
-2. `.context/modules/onboarding/README.md` — module overview, flow, tables, edge functions
-3. `.context/modules/onboarding/BUSINESS-RULES.md` — 15 critical business rules
-4. `docs/mapeamento-formulario-onboarding.md` — **canonical reference**: all form fields, step-by-step mapping, database columns, storage, validations
-5. `supabase/functions/<function>/index.ts` — implementation of the target function
+- `get-onboarding-copy` — public
+- `update-onboarding-copy` — protected via JWT + RBAC admin
 
-**Key constraint:** The form has no JWT authentication. All onboarding Edge Functions are public (`--no-verify-jwt`). Security relies on UUID non-guessability.
+Rules:
 
-## NanoBanana Context (Creative Direction Config)
+- `onboarding_copy` is a singleton table
+- Always `UPDATE`, never `INSERT`
+- `copy.js` remains the fallback
+- Template functions stay in code, not in Supabase content
 
-NanoBanana is the configuration module for AI creative direction (3 categories: moderna, clean, retail). When working on NanoBanana code, consult:
+## Canonical Docs To Read
 
-1. `supabase/functions/<function>/functionSpec.md` — SDD specs for get/update/read functions
-2. `_shared/nanobanana/config.ts` — Single source of truth for types, constants, and singleton loader
-3. `_shared/admin-auth.ts` — Shared admin password guard used by update/read endpoints
+When working on onboarding code, use these current docs:
 
-**Key architecture:**
+1. `docs/context/onboarding/DOC-READING-ORDER.md`
+2. `docs/context/onboarding/README.md`
+3. `docs/context/onboarding/BUSINESS-RULES.md`
+4. `docs/mapeamento-formulario-onboarding.md`
+5. `supabase/functions/<function>/index.ts`
 
-- **Singleton table:** `nanobanana_config` (exactly 1 row) — all config fields
-- **Storage bucket:** `nanobanana-references` — reference images per category
-- **Shared module:** `_shared/nanobanana/config.ts` — `NanoBananaDbConfig`, `loadNanoBananaConfig()`, `CategoryKey`, `DirectionMode`, `VALID_CATEGORIES`, `VALID_DIRECTION_MODES`, `CONFIG_TABLE`, `REFERENCE_BUCKET`
-- **Auth:** `update-nanobanana-config` and `read-nanobanana-reference` are protected via `x-admin-password` header (`_shared/admin-auth.ts`). `get-nanobanana-config` is public (read-only).
+When working on user management:
 
-**JWT classification for deploy:**
+1. `docs/context/user-management/README.md`
+2. `docs/context/user-management/BUSINESS-RULES.md`
+3. `supabase/functions/_shared/rbac.ts`
+4. `supabase/functions/<function>/functionSpec.md`
 
-| Function | JWT | Auth |
-|----------|-----|------|
-| `get-nanobanana-config` | `--no-verify-jwt` | Public (read-only) |
-| `update-nanobanana-config` | `--no-verify-jwt` | `x-admin-password` in code |
-| `read-nanobanana-reference` | `--no-verify-jwt` | `x-admin-password` in code |
+When working on NanoBanana:
 
-All 3 functions deploy with `--no-verify-jwt` because the frontend has no JWT/login system. Write endpoints enforce `x-admin-password` header at the application level.
+1. `supabase/functions/<function>/functionSpec.md`
+2. `supabase/functions/_shared/nanobanana/config.ts`
+3. `supabase/functions/_shared/admin-auth.ts`
 
-## SDD Convention (functionSpec.md)
+## Repo Conventions
 
-Some Edge Functions use Spec Driven Development: a `functionSpec.md` file alongside `index.ts` defines the function's contract. Check for existing specs before modifying Aurea Garden or NanoBanana functions.
+- Some Edge Functions use SDD via `functionSpec.md`; read it before changing the function
+- `enrichment_config`, `nanobanana_config`, `perplexity_config`, and `onboarding_copy` are singleton tables
+- `src/` is the SPA, `supabase/functions/` is backend logic, `supabase/migrations/` is schema history
+- Update `docs/mapeamento-formulario-onboarding.md` when form fields change
+- Update `plan/README.md` when adding a new feature plan
+- Tasks live in `tasks/` as `TASK-YYYY-MM-DD-NNN-slug.md`
 
-## Plan Convention
+## Agent Resources In Repo
 
-Feature plans go in `plan/` with naming `YYYY-MM-DD-slug.md`. Update `plan/README.md` when adding a new plan. Historical/completed plans go in `plan/historico/`.
+This repository keeps agent-oriented resources in `.claude/`:
 
-## Task Convention
+- `.claude/commands/` — reusable command prompts
+- `.claude/skills/` — local skills and playbooks
 
-Operational tasks (bugs, requests, fixes) go in `tasks/` with naming `TASK-YYYY-MM-DD-NNN-slug.md`. Archived tasks go in `tasks/arquivo/`. Use skill `task-enricher` to enrich tasks with context before execution.
-
-## Cursor Skills Available
-
-| Skill                 | Trigger                                                              |
-| --------------------- | -------------------------------------------------------------------- |
-| `nova-tarefa`         | /nova-tarefa + relato → cria e enriquece tarefa operacional completa |
-| `task-enricher`       | Enriquecer tarefa operacional existente, preparar para execução      |
-| `sdd-spec-creator`   | Criar/documentar functionSpec.md (SDD) para qualquer componente      |
-
-## AI Agent Workflow
-
-### When to Edit What
-
-- `src/` — React SPA (onboarding flow). No TypeScript; use JSX.
-- `supabase/functions/` — Edge Functions (Deno). Deploy via Supabase CLI.
-- `supabase/migrations/` — Database schema. Never edit existing migrations; create new ones.
-- `ai-step2/` — AI campaign pipeline docs and contracts.
-- `AGENTS.md` — Update when adding new cross-repo patterns and critical operational rules.
-- `plan/` — Feature plans (`YYYY-MM-DD-slug.md`). Keep `plan/README.md` in sync.
-- `tasks/` — Operational tasks (`TASK-YYYY-MM-DD-NNN-slug.md`). Enrich with skill `task-enricher`.
-- `docs/` — Reference documentation (form mapping, etc.). Update `mapeamento-formulario-onboarding.md` when adding/removing form fields.
-- `.context/modules/onboarding/` — Onboarding module documentation and business rules.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+They are useful as repo documentation assets, but the current source of truth for product behavior remains the code and the `docs/` directory.
