@@ -66,10 +66,10 @@ CMS interno da tabela singleton `onboarding_copy`:
 
 ## `theme/`
 
-- `design-tokens.js` — tokens canônicos (cores, espaçamento, tipografia)
-- `colors.js` — paleta derivada
+- `design-tokens.js` — escala compartilhada (radius, espaçamento, tipografia) e tokens legados ainda usados pelo onboarding
+- `colors.js` — paleta derivada dos tokens legados
 - `global.css` — reset + variáveis CSS
-- Brand: primary `#384ffe` (Acelerai Blue), destructive `#ff0058`. Font: Inter (Google Fonts CDN).
+- Design spec oficial: `../docs/design-spec.md`. Novas UIs devem seguir o tema escuro do dashboard (`AiStep2Monitor/theme.js`), com magenta/vermelho Acelerai `#E8356D` como acento principal. Font: Inter (Google Fonts CDN).
 
 ## Observações arquiteturais
 

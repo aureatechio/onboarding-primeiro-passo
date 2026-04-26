@@ -137,8 +137,8 @@ onboarding-primeiro-passo/
 
 - Transições de página com **Framer Motion**
 - Animações Lottie em momentos-chave
-- Design mobile-first, inspirado em padrões Duolingo
-- Cor primária Acelerai Blue `#384ffe`
+- Design mobile-first alinhado ao dashboard operacional Acelerai
+- Design spec oficial em [`docs/design-spec.md`](./docs/design-spec.md), com magenta/vermelho Acelerai `#E8356D` como acento principal
 
 ---
 
@@ -213,9 +213,9 @@ O projeto usa um **projeto Vercel dedicado**: `onboarding-primeiro-passo`.
 |---|---|
 | [`RESUMO-EXECUTIVO-PRIMEIRO-PASSO.md`](./RESUMO-EXECUTIVO-PRIMEIRO-PASSO.md) | Visão de produto completa, regras de negócio e indicadores |
 | [`onboarding.md`](./onboarding.md) | Prompt padrão para geração de briefing via API Sonar (Perplexity) |
-| [`refactor-spec.md`](./refactor-spec.md) | Especificação técnica de refatoração |
-| [`ux-mobile-spec.md`](./ux-mobile-spec.md) | Especificação de UX mobile |
-| [`duolingo-patterns.md`](./duolingo-patterns.md) | Referência de padrões de UX/UI |
+| [`docs/design-spec.md`](./docs/design-spec.md) | Design spec oficial: tokens, cores, padrões de componentes e regras visuais |
+| [`refactor-spec.md`](./refactor-spec.md) | Spec histórica de refatoração visual; usar apenas como referência secundária |
+| [`ux-mobile-spec.md`](./ux-mobile-spec.md) | Spec histórica de UX mobile; usar apenas como referência secundária |
 | [`plan/`](./plan/) | Planos de feature ativos |
 | [`tasks/`](./tasks/) | Tarefas operacionais (bugs, pedidos, correções) |
 
