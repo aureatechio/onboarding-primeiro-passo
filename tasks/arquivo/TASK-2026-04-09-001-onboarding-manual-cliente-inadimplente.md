@@ -62,5 +62,3 @@ Para prosseguir, definir qual caminho seguir:
 2. **Disparar o enrichment manualmente** — ignorando a checagem de `checkout_status`, mantendo o banco fiel à realidade financeira.
 3. **Aguardar pagamento** — cobrar o cliente e só gerar o onboarding após confirmação do boleto.
 4. **Flexibilizar a regra do enrichment** — permitir que `vendaaprovada = true` seja suficiente para disparar o pipeline (mudança de código).
-
----

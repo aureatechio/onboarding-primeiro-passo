@@ -37,24 +37,28 @@ TASK-{YYYY-MM-DD}-{NNN}-{slug}.md
 
 ---
 
-## Índice de Tarefas Ativas
+## Tarefas na Raiz
+
+Tarefas mantidas diretamente em `tasks/` porque ainda documentam entregas ou escopos relevantes do app atual.
 
 | ID | Título | Módulo | Scale | Status | Prioridade |
 |----|--------|--------|-------|--------|------------|
 | [TASK-2026-04-06-001](./TASK-2026-04-06-001-conectar-copy-js-aos-componentes.md) | Conectar copy.js aos componentes de onboarding | onboarding | MEDIUM | concluida | media |
-| [TASK-2026-04-06-002](./TASK-2026-04-06-002-tela-gerenciamento-copy-dashboard.md) | Criar tela de gerenciamento de copy no dashboard | dashboard | LARGE | enriquecida | media |
+| [TASK-2026-04-06-002](./TASK-2026-04-06-002-tela-gerenciamento-copy-dashboard.md) | Criar tela de gerenciamento de copy no dashboard | dashboard | LARGE | concluida | media |
 
 ---
 
 ## Tarefas Arquivadas
 
-Tasks movidas para `tasks/arquivo/` por referenciarem apps que não existem neste repo standalone.
+Itens movidos para `tasks/arquivo/` quando ficaram fora do escopo do repo atual, foram superados por decisões mais recentes ou viraram registro histórico.
 
 | ID | Título | Motivo do arquivamento |
 |----|--------|------------------------|
-| TASK-2026-04-02-002 | Tipo de venda nas características da OS | Referenciava integração OMIE (removida deste repo) |
-| TASK-2026-04-02-003 | Forma de pagamento boleto parcelado no dashboard | 100% sobre apps/dashboard (monorepo principal) |
-| TASK-2026-04-02-004 | Badge de versão no checkout overview | 100% sobre apps/dashboard (monorepo principal) |
+| [TASK-2026-04-02-004](./arquivo/TASK-2026-04-02-004-badge-checkout-version-overview.md) | Badge de versão do checkout (v1/v2) na tabela Overview | Referia `apps/dashboard`, estrutura do monorepo que não existe neste repo standalone |
+| [TASK-2026-04-09-001](./arquivo/TASK-2026-04-09-001-onboarding-manual-cliente-inadimplente.md) | Gerar onboarding manualmente para cliente com pagamento pendente | Envelheceu após a introdução de `onboarding_access` e da function `set-onboarding-access` |
+| [TASK-2026-04-17-001](./arquivo/TASK-2026-04-17-001-copy-editor-diagnostico-persistencia.md) | Copy Editor: Diagnóstico de Persistência no Banco | Diagnóstico histórico; parte do conteúdo já foi resolvida e não representa task ativa |
+
+Outras tasks antigas do monorepo principal podem ter sido removidas do repo durante a extração e limpeza.
 
 ---
 
