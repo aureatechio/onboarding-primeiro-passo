@@ -125,7 +125,7 @@ async function main() {
 
   const config = getConfig()
 
-  const [progressRows, identityRows, logoHistoryRows, enrichmentRows, briefingRows] =
+  const [progressRows, identityRows, acceptanceRows, submissionRows, logoHistoryRows, enrichmentRows, briefingRows] =
     await Promise.all([
       restSelect(
         config,
@@ -141,8 +141,22 @@ async function main() {
       ),
       restSelect(
         config,
+        'onboarding_acceptances',
+        'compra_id,step_key,item_key,item_text,item_hash,accepted,accepted_at,copy_source,metadata',
+        compraId,
+        'order=accepted_at.asc'
+      ).catch((error) => [{ _error: error.message }]),
+      restSelect(
+        config,
+        'onboarding_identity_submissions',
+        'compra_id,choice,site_url,instagram_handle,campaign_notes,brand_palette,production_path,logo_path,logo_original_filename,logo_mime_type,logo_size_bytes,submitted_at,source',
+        compraId,
+        'order=submitted_at.desc'
+      ).catch((error) => [{ _error: error.message }]),
+      restSelect(
+        config,
         'onboarding_logo_history',
-        'compra_id,logo_path,original_filename,mime_type,size_bytes,uploaded_at,is_active',
+        'compra_id,logo_path,original_filename,mime_type,size_bytes,uploaded_at,is_active,source',
         compraId,
         'order=uploaded_at.desc'
       ).catch((error) => [{ _error: error.message }]),
@@ -187,7 +201,18 @@ async function main() {
     }
     console.log(`current_step: ${formatValue(progress.current_step)}`)
     console.log(`traffic_choice: ${formatValue(progress.traffic_choice)}`)
-    console.log('Observacao: o sistema salva timestamps das etapas; nao salva cada checkbox individualmente.')
+  }
+
+  printSection('Aceites auditaveis')
+  if (acceptanceRows[0]?._error) {
+    console.log(`Nao foi possivel ler onboarding_acceptances: ${acceptanceRows[0]._error}`)
+  } else if (!acceptanceRows.length) {
+    console.log('Nenhum aceite em onboarding_acceptances.')
+  } else {
+    for (const row of acceptanceRows) {
+      console.log(`${row.accepted ? 'OK' : 'NAO'} ${row.step_key}/${row.item_key}: ${row.item_text}`)
+      console.log(`  hash=${row.item_hash} accepted_at=${formatValue(row.accepted_at)} source=${formatValue(row.copy_source)}`)
+    }
   }
 
   printSection('Identidade visual')
@@ -206,15 +231,28 @@ async function main() {
     console.log(`updated_at: ${formatValue(identity.updated_at)}`)
   }
 
+  printSection('Submissoes de identidade')
+  if (submissionRows[0]?._error) {
+    console.log(`Nao foi possivel ler onboarding_identity_submissions: ${submissionRows[0]._error}`)
+  } else if (!submissionRows.length) {
+    console.log('Nenhuma submissao em onboarding_identity_submissions.')
+  } else {
+    for (const row of submissionRows) {
+      console.log(`${row.submitted_at}: choice=${formatValue(row.choice)} source=${formatValue(row.source)}`)
+      console.log(`  site=${formatValue(row.site_url)} instagram=${formatValue(row.instagram_handle)}`)
+      console.log(`  logo=${formatValue(row.logo_path)} (${formatValue(row.logo_mime_type)}, ${formatValue(row.logo_size_bytes)} bytes)`)
+      console.log(`  palette=${formatValue(row.brand_palette)} notes=${formatValue(row.campaign_notes)}`)
+    }
+  }
+
   printSection('Historico de logo')
   if (logoHistoryRows[0]?._error) {
     console.log(`Nao foi possivel ler onboarding_logo_history: ${logoHistoryRows[0]._error}`)
   } else if (!logoHistoryRows.length) {
     console.log('Nenhum registro em onboarding_logo_history.')
-    console.log('Observacao: o upload publico da Etapa 6.2 grava onboarding_identity.logo_path; historico e usado pelos edges admin/backfill.')
   } else {
     for (const row of logoHistoryRows) {
-      console.log(`${row.is_active ? 'ATIVO' : 'historico'}: ${row.logo_path} (${formatValue(row.mime_type)}, ${formatValue(row.size_bytes)} bytes, ${formatValue(row.uploaded_at)})`)
+      console.log(`${row.is_active ? 'ATIVO' : 'historico'} [${formatValue(row.source)}]: ${row.logo_path} (${formatValue(row.mime_type)}, ${formatValue(row.size_bytes)} bytes, ${formatValue(row.uploaded_at)})`)
     }
   }
 

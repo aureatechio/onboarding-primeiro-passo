@@ -9,13 +9,23 @@ import NavButtons from "../components/NavButtons"
 import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import StickyFooter from "../components/StickyFooter"
+import { createAcceptance, getCopySource } from "../lib/onboarding-audit"
 
 export default function Etapa6() {
   const { userData, goNext } = useOnboarding()
-  const { ETAPA6 } = useCopy()
+  const { ETAPA6, version: copyVersion } = useCopy()
 
   const [acknowledged, setAcknowledged] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const copySource = getCopySource(copyVersion)
+  const acceptancePayload = {
+    acceptances: [
+      createAcceptance('etapa6_1.identidade_visual_materiais', ETAPA6.acknowledgement, {
+        step: 'etapa6_1',
+        title: ETAPA6.header.title,
+      }, copySource),
+    ],
+  }
 
   // ── Completed ──
   if (completed) {
@@ -24,6 +34,7 @@ export default function Etapa6() {
         icon="palette"
         title={ETAPA6.completionTitle}
         description={ETAPA6.completionDescription(userData.atendente)}
+        onContinue={() => goNext(acceptancePayload)}
       />
     )
   }

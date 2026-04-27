@@ -18,7 +18,7 @@ Sobe um novo logo para uma compra, registra em `onboarding_logo_history` como at
 ## Regras
 - Storage path: `{compra_id}/logos/{uuid}.{ext}` no bucket `onboarding-identity`.
 - Zera `is_active` dos registros atuais da mesma compra antes de inserir o novo (libera o unique index parcial `onboarding_logo_history_one_active_per_compra`).
-- Insere nova linha em `onboarding_logo_history` com `is_active=true`, `uploaded_by_user_id = auth.user.id`.
+- Insere nova linha em `onboarding_logo_history` com `is_active=true`, `uploaded_by_user_id = auth.user.id` e `source='admin'`.
 - Atualiza `onboarding_identity.logo_path` para o novo path.
 - Em erro apos upload, tenta remover o arquivo do storage (best-effort).
 

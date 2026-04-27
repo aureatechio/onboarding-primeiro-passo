@@ -14,10 +14,17 @@ import Icon from "../components/Icon";
 import BulletList from "../components/BulletList";
 import StickyFooter from "../components/StickyFooter";
 import ProcessingOverlay from "../components/ProcessingOverlay";
+import { createAcceptances, getCopySource } from "../lib/onboarding-audit";
+
+const ACCEPTANCE_KEYS = [
+  'etapa3.prazo_contrato_agilidade',
+  'etapa3.preparacao_15_dias',
+  'etapa3.atrasos_reduzem_tempo',
+];
 
 export default function Etapa3() {
   const { userData, goNext, totalSteps } = useOnboarding();
-  const { ETAPA3 } = useCopy();
+  const { ETAPA3, version: copyVersion } = useCopy();
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -27,6 +34,13 @@ export default function Etapa3() {
   const [quizReady, setQuizReady] = useState(false);
 
   const totalSlides = 5;
+  const copySource = getCopySource(copyVersion);
+  const acceptancePayload = {
+    acceptances: createAcceptances(ACCEPTANCE_KEYS, ETAPA3.quizQuestions, {
+      step: 'etapa3',
+      title: ETAPA3.quizTitle,
+    }, copySource),
+  };
 
   const goToSlide = (index) => {
     setSlideDirection(index > currentSlide ? 1 : -1);
@@ -257,7 +271,7 @@ export default function Etapa3() {
             variants={item}
             whileHover={{ translateY: -1 }}
             whileTap={{ scale: 0.98 }}
-            onClick={goNext}
+            onClick={() => goNext(acceptancePayload)}
             style={{
               width: "100%",
               padding: 16,

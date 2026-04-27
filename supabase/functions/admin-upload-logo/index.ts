@@ -104,8 +104,9 @@ Deno.serve(async (req) => {
       size_bytes: file.size || null,
       uploaded_by_user_id: user.id,
       is_active: true,
+      source: 'admin',
     })
-    .select('id, compra_id, logo_path, original_filename, mime_type, size_bytes, uploaded_at, uploaded_by_user_id, is_active')
+    .select('id, compra_id, logo_path, original_filename, mime_type, size_bytes, uploaded_at, uploaded_by_user_id, is_active, source')
     .single()
 
   if (insertError) {

@@ -14,12 +14,18 @@ import Icon from "../components/Icon"
 import BulletList from "../components/BulletList"
 import StickyFooter from "../components/StickyFooter"
 import ProcessingOverlay from "../components/ProcessingOverlay"
+import { createAcceptances, getCopySource } from "../lib/onboarding-audit"
 
 const TOTAL_SLIDES = 4
+const ACCEPTANCE_KEYS = [
+  'etapa2.responsabilidade_divulgacao',
+  'etapa2.gravacoes_pre_realizadas',
+  'etapa2.pacote_contratado',
+]
 
 export default function Etapa2() {
   const { userData, goNext } = useOnboarding()
-  const { ETAPA2 } = useCopy()
+  const { ETAPA2, version: copyVersion } = useCopy()
 
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showQuiz, setShowQuiz] = useState(false)
@@ -29,6 +35,13 @@ export default function Etapa2() {
   const [processing, setProcessing] = useState(false)
 
   const celebName = userData.celebName
+  const copySource = getCopySource(copyVersion)
+  const acceptancePayload = {
+    acceptances: createAcceptances(ACCEPTANCE_KEYS, ETAPA2.quizQuestions, {
+      step: 'etapa2',
+      title: ETAPA2.quizTitle,
+    }, copySource),
+  }
 
   const goToSlide = useCallback((index) => {
     setSlideDirection(index > currentSlide ? 1 : -1)
@@ -71,6 +84,7 @@ export default function Etapa2() {
         icon="check"
         title={ETAPA2.completionTitle}
         description={ETAPA2.completionDescription}
+        onContinue={() => goNext(acceptancePayload)}
       />
     )
   }

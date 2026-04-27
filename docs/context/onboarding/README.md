@@ -39,7 +39,11 @@ No `App.jsx`, o indice de passo 7 renderiza `Etapa62` (nao existe mais `Etapa7.j
 
 | Tabela | Relacao | Escrita por |
 |--------|---------|-------------|
+| `onboarding_progress` | 1:1 por `compra_id` (UNIQUE) | `save-onboarding-progress` |
+| `onboarding_acceptances` | N:1 por `compra_id` | `save-onboarding-progress` |
 | `onboarding_identity` | 1:1 por `compra_id` (UNIQUE) | `save-onboarding-identity` |
+| `onboarding_identity_submissions` | N:1 por `compra_id` | `save-onboarding-identity` |
+| `onboarding_logo_history` | N:1 por `compra_id` | `save-onboarding-identity`, funcoes admin de logo |
 | `onboarding_briefings` | 1:1 por `compra_id` (UNIQUE) | `generate-campaign-briefing` (pipeline enrichment) ou `save-campaign-briefing` (legado) |
 | `onboarding_enrichment_jobs` | 1:1 por `compra_id` (UNIQUE) | `onboarding-enrichment` |
 | `enrichment_config` | Singleton (1 row) | `update-enrichment-config` / migration |
@@ -51,6 +55,7 @@ No `App.jsx`, o indice de passo 7 renderiza `Etapa62` (nao existe mais `Etapa7.j
 | Funcao | Tipo | JWT |
 |--------|------|-----|
 | `get-onboarding-data` | Leitura (hidratacao) | `--no-verify-jwt` (publico) |
+| `save-onboarding-progress` | Escrita de progresso + aceites auditaveis | `--no-verify-jwt` (publico) |
 | `save-onboarding-identity` | Escrita identidade + disparo enrichment condicional | `--no-verify-jwt` (publico) |
 | `onboarding-enrichment` | Pipeline 4 fases (service role) | `--no-verify-jwt` + auth interna service role |
 | `get-enrichment-status` | Leitura status job | `--no-verify-jwt` (publico) |
@@ -64,7 +69,7 @@ Todas as funcoes consumidas pelo SPA de onboarding sao **publicas** no gateway (
 ## Storage
 
 Bucket `onboarding-identity` (privado). Paths:
-- `{compra_id}/logo.{ext}` — logo da marca
+- `{compra_id}/logos/{uuid}.{ext}` — logo da marca versionado no historico
 - `{compra_id}/img_{N}.{ext}` — imagens de campanha
 
 ## Pipeline pos-onboarding (enrichment)

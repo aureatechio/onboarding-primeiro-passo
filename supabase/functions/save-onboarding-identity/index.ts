@@ -87,6 +87,10 @@ function getFileExtension(file: File): string {
   return 'jpg'
 }
 
+function genUuid(): string {
+  return crypto.randomUUID()
+}
+
 Deno.serve(async (req) => {
   const corsResponse = handleCors(req)
   if (corsResponse) return corsResponse
@@ -206,24 +210,99 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     let logoPath: string | null = null
+    let logoHistoryId: string | null = null
+    let logoOriginalFilename: string | null = null
+    let logoMimeType: string | null = null
+    let logoSizeBytes: number | null = null
+    let previousActiveLogoId: string | null = null
     const imagesPaths: string[] = []
 
     if (choice === 'add_now' && logoFile) {
       const ext = getFileExtension(logoFile)
-      const filePath = `${compraId}/logo.${ext}`
+      const filePath = `${compraId}/logos/${genUuid()}.${ext}`
+
+      const { data: previousActiveLogo, error: previousActiveLogoError } = await supabase
+        .from('onboarding_logo_history')
+        .select('id')
+        .eq('compra_id', compraId)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (previousActiveLogoError) {
+        console.error('[save-onboarding-identity] logo history lookup error:', previousActiveLogoError)
+        return json({ success: false, code: 'LOGO_HISTORY_ERROR', message: 'Falha ao consultar historico de logos.' }, 500)
+      }
+      previousActiveLogoId = previousActiveLogo?.id ?? null
 
       const { error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
         .upload(filePath, logoFile, {
           contentType: logoFile.type,
-          upsert: true,
+          upsert: false,
         })
 
       if (uploadError) {
         console.error('[save-onboarding-identity] logo upload error:', uploadError)
         return json({ success: false, code: 'UPLOAD_ERROR', message: 'Falha no upload do logo.' }, 500)
       }
+
+      const { data: historyRow, error: historyError } = await supabase
+        .from('onboarding_logo_history')
+        .insert({
+          compra_id: compraId,
+          logo_path: filePath,
+          original_filename: logoFile.name || null,
+          mime_type: logoFile.type || null,
+          size_bytes: logoFile.size || null,
+          uploaded_by_user_id: null,
+          is_active: false,
+          source: 'public_onboarding',
+        })
+        .select('id')
+        .single()
+
+      if (historyError) {
+        await supabase.storage.from(BUCKET_NAME).remove([filePath])
+        console.error('[save-onboarding-identity] logo history insert error:', historyError)
+        return json({ success: false, code: 'LOGO_HISTORY_ERROR', message: 'Falha ao registrar historico do logo.' }, 500)
+      }
+
+      const { error: deactivateError } = await supabase
+        .from('onboarding_logo_history')
+        .update({ is_active: false })
+        .eq('compra_id', compraId)
+        .eq('is_active', true)
+
+      if (deactivateError) {
+        await supabase.storage.from(BUCKET_NAME).remove([filePath])
+        await supabase.from('onboarding_logo_history').delete().eq('id', historyRow.id)
+        console.error('[save-onboarding-identity] logo history deactivate error:', deactivateError)
+        return json({ success: false, code: 'LOGO_HISTORY_ERROR', message: 'Falha ao atualizar historico de logos.' }, 500)
+      }
+
+      const { error: activateError } = await supabase
+        .from('onboarding_logo_history')
+        .update({ is_active: true })
+        .eq('id', historyRow.id)
+
+      if (activateError) {
+        await supabase.storage.from(BUCKET_NAME).remove([filePath])
+        await supabase.from('onboarding_logo_history').delete().eq('id', historyRow.id)
+        if (previousActiveLogoId) {
+          await supabase
+            .from('onboarding_logo_history')
+            .update({ is_active: true })
+            .eq('id', previousActiveLogoId)
+        }
+        console.error('[save-onboarding-identity] logo history activate error:', activateError)
+        return json({ success: false, code: 'LOGO_HISTORY_ERROR', message: 'Falha ao ativar historico do logo.' }, 500)
+      }
+
       logoPath = filePath
+      logoHistoryId = historyRow.id
+      logoOriginalFilename = logoFile.name || null
+      logoMimeType = logoFile.type || null
+      logoSizeBytes = logoFile.size || null
     }
 
     if (choice === 'add_now' && campaignImages.length > 0) {
@@ -274,7 +353,47 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('[save-onboarding-identity] db error:', error)
+      if (logoHistoryId && logoPath) {
+        await supabase.from('onboarding_logo_history').delete().eq('id', logoHistoryId)
+        if (previousActiveLogoId) {
+          await supabase
+            .from('onboarding_logo_history')
+            .update({ is_active: true })
+            .eq('id', previousActiveLogoId)
+        }
+        await supabase.storage.from(BUCKET_NAME).remove([logoPath])
+      }
       return json({ success: false, code: 'DB_ERROR', message: 'Falha ao salvar identidade visual.' }, 500)
+    }
+
+    const { data: submission, error: submissionError } = await supabase
+      .from('onboarding_identity_submissions')
+      .insert({
+        compra_id: compraId,
+        identity_id: data.id,
+        logo_history_id: logoHistoryId,
+        source: 'public_onboarding',
+        choice,
+        site_url: siteUrl || null,
+        instagram_handle: instagramHandle || null,
+        campaign_notes: campaignNotes || null,
+        brand_palette: brandPalette,
+        production_path: (upsertData.production_path as string | undefined) ?? productionPath,
+        logo_path: logoPath,
+        logo_original_filename: logoOriginalFilename,
+        logo_mime_type: logoMimeType,
+        logo_size_bytes: logoSizeBytes,
+        metadata: {
+          campaign_images_count: imagesPaths.length,
+          campaign_images_paths: imagesPaths,
+        },
+      })
+      .select('id')
+      .single()
+
+    if (submissionError) {
+      console.error('[save-onboarding-identity] submission audit error:', submissionError)
+      return json({ success: false, code: 'SUBMISSION_AUDIT_ERROR', message: 'Falha ao registrar auditoria da identidade visual.' }, 500)
     }
 
     if (siteUrl || instagramHandle) {
@@ -289,6 +408,8 @@ Deno.serve(async (req) => {
       success: true,
       data: {
         identity_id: data.id,
+        submission_id: submission.id,
+        logo_history_id: logoHistoryId,
         logo_path: logoPath,
         campaign_images_count: imagesPaths.length,
       },

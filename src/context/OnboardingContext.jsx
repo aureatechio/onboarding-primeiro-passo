@@ -192,7 +192,7 @@ export function OnboardingProvider({ children }) {
     }
   }, []);
 
-  const goNext = useCallback(() => {
+  const goNext = useCallback((extraDataOverride = {}) => {
     const step = currentStepRef.current;
     completeStep(step);
     const next = step === 'final' ? 'done' : step === 7 ? 'final' : step + 1;
@@ -201,7 +201,7 @@ export function OnboardingProvider({ children }) {
     window.scrollTo({ top: 0 });
 
     // Fire-and-forget backend save
-    const extraData = {};
+    const extraData = { ...extraDataOverride };
     if (step === 5 && userDataRef.current.trafficChoice) {
       extraData.traffic_choice = userDataRef.current.trafficChoice;
     }

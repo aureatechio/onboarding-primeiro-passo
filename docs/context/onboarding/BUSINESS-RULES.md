@@ -37,15 +37,15 @@ Toda liberacao manual e rastreada em `onboarding_access_events` (append-only aud
 
 ## 7. Storage: bucket privado, paths por compra_id
 
-O bucket `onboarding-identity` e privado. Todos os uploads usam o padrao `{compra_id}/logo.{ext}` ou `{compra_id}/img_{N}.{ext}`. O campo `logo_path` no banco armazena o path relativo, nao a URL completa.
+O bucket `onboarding-identity` e privado. Uploads publicos de logo usam o padrao `{compra_id}/logos/{uuid}.{ext}` para preservar historico. Imagens legadas de campanha usam `{compra_id}/img_{N}.{ext}`. O campo `logo_path` no banco armazena o path relativo, nao a URL completa.
 
 ## 8. Site e Instagram: colunas dedicadas + campaign_notes legado
 
 `onboarding_identity.site_url` e `onboarding_identity.instagram_handle` sao a fonte de verdade para o backend e enrichment. O frontend pode ainda enviar `campaign_notes` com texto concatenado por compatibilidade; a hidratacao usa as colunas `site_url` / `instagram_handle` quando presentes.
 
-## 9. Quiz checkboxes nao persistem no banco
+## 9. Aceites dos checkboxes persistem no banco
 
-Os quizzes das Etapas 2, 3 e 4 sao apenas validacao local. Nao ha registro no banco de que o usuario respondeu. O progresso e armazenado em `localStorage`.
+Os quizzes das Etapas 2, 3 e 4 e o checkbox da Etapa 6.1 continuam sendo validacao local para liberar o avanco, mas tambem sao persistidos em `onboarding_acceptances` quando a etapa e concluida. A tabela salva `item_key`, texto final exibido ao cliente, hash e timestamp. O progresso tambem e salvo em `onboarding_progress`; `localStorage` e apenas cache local/resume imediato.
 
 ## 10. Hidratacao usa 5 tabelas em paralelo
 
@@ -61,7 +61,7 @@ O SPA nao usa autenticacao JWT. Todas as Edge Functions de onboarding sao public
 
 ## 13. Copy centralizada em copy.js
 
-Todos os textos do formulario vem de `src/copy.js`. Nunca hardcode textos diretamente nos componentes JSX.
+Todos os textos base do formulario vem de `src/copy.js`, com overrides publicados pelo CMS `onboarding_copy` quando existirem. Nunca hardcode textos diretamente nos componentes JSX.
 
 ## 14. Nunca editar migrations existentes
 
@@ -90,8 +90,12 @@ O campo e editavel no painel Monitor (aba `onboarding-data`) via edge `admin-upd
 
 ## 19. Historico de logos: 1 ativo por compra
 
-`onboarding_logo_history` mantem todos os logos enviados por compra. Unique partial index garante exatamente 1 linha com `is_active = true` por `compra_id`. Ao deletar, o logo ativo e protegido (edge retorna 409 `ACTIVE_LOGO_PROTECTED`) — trocar ativo primeiro. `onboarding_identity.logo_path` sempre reflete o logo ativo atual.
+`onboarding_logo_history` mantem todos os logos enviados por compra, incluindo upload publico da Etapa 6.2 (`source = public_onboarding`) e uploads admin (`source = admin`). Unique partial index garante exatamente 1 linha com `is_active = true` por `compra_id`. Ao deletar, o logo ativo e protegido (edge retorna 409 `ACTIVE_LOGO_PROTECTED`) — trocar ativo primeiro. `onboarding_identity.logo_path` sempre reflete o logo ativo atual.
 
-## 20. Edits admin usam JWT
+## 20. Submissoes de identidade sao historicas
+
+`onboarding_identity` representa o estado atual 1:1 por compra. Toda submissao da Etapa 6.2 tambem gera uma linha imutavel em `onboarding_identity_submissions`, inclusive `choice = later`, para auditoria do que foi enviado em cada tentativa.
+
+## 21. Edits admin usam JWT
 
 As 4 edges `admin-update-onboarding-identity`, `admin-upload-logo`, `admin-set-active-logo`, `admin-delete-logo-from-history` sao **protegidas** (verify_jwt habilitado). Frontend passa `Authorization: Bearer <access_token>` via helper `src/lib/admin-edge.js`, que tenta `refreshSession()` automaticamente em 401. `get-ai-campaign-monitor` e `save-onboarding-identity` permanecem publicas.

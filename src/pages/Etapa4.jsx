@@ -13,10 +13,19 @@ import CompletionScreen from "../components/CompletionScreen"
 import Icon from "../components/Icon"
 import StickyFooter from "../components/StickyFooter"
 import ProcessingOverlay from "../components/ProcessingOverlay"
+import { createAcceptances, getCopySource } from "../lib/onboarding-audit"
+
+const ACCEPTANCE_KEYS = [
+  'etapa4.exclusividade_praca_segmento',
+  'etapa4.aprovacao_celebridade_ajustes',
+  'etapa4.nao_marcar_whatsapp_email',
+  'etapa4.excluir_pecas_fim_contrato',
+  'etapa4.multa_uso_indevido',
+]
 
 export default function Etapa4() {
   const { userData, goNext } = useOnboarding()
-  const { ETAPA4 } = useCopy()
+  const { ETAPA4, version: copyVersion } = useCopy()
   const { celebName, praca, segmento } = userData
 
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -27,6 +36,19 @@ export default function Etapa4() {
   const [processing, setProcessing] = useState(false)
 
   const totalSlides = 4
+  const quizQuestions = ETAPA4.quizQuestions.map((q) =>
+    q.replace('${celebName}', celebName).replace('${praca}', praca).replace('${segmento}', segmento)
+  )
+  const copySource = getCopySource(copyVersion)
+  const acceptancePayload = {
+    acceptances: createAcceptances(ACCEPTANCE_KEYS, quizQuestions, {
+      step: 'etapa4',
+      title: ETAPA4.quizTitle,
+      celebName,
+      praca,
+      segmento,
+    }, copySource),
+  }
 
   const goToSlide = (index) => {
     setSlideDirection(index > currentSlide ? 1 : -1)
@@ -71,6 +93,7 @@ export default function Etapa4() {
         title={ETAPA4.completionTitle}
         description={ETAPA4.completionDescription.replace('${celebName}', celebName)}
         summaryItems={ETAPA4.completionSummary(celebName, praca, segmento)}
+        onContinue={() => goNext(acceptancePayload)}
       />
     )
   }
@@ -573,9 +596,7 @@ export default function Etapa4() {
         {ETAPA4.quizIntro.replace('${celebName}', celebName)}
       </p>
       <QuizConfirmation
-        questions={ETAPA4.quizQuestions.map((q) =>
-          q.replace('${celebName}', celebName).replace('${praca}', praca).replace('${segmento}', segmento)
-        )}
+        questions={quizQuestions}
         icon="star"
         title={ETAPA4.quizTitle}
         subtitle={ETAPA4.quizSubtitle}

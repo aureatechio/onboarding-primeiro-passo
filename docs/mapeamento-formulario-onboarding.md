@@ -422,12 +422,12 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 
 | Etapa | Campo | Tipo | Obrigatório | Persiste no backend |
 |-------|-------|------|-------------|---------------------|
-| 2 | Quiz (3 checkboxes) | Confirmação | Sim | Não (apenas progresso) |
-| 3 | Quiz (3 checkboxes) | Confirmação | Sim | Não (apenas progresso) |
-| 4 | Quiz (5 checkboxes) | Confirmação | Sim | Não (apenas progresso) |
+| 2 | Quiz (3 checkboxes) | Confirmação | Sim | `onboarding_acceptances` + `onboarding_progress` |
+| 3 | Quiz (3 checkboxes) | Confirmação | Sim | `onboarding_acceptances` + `onboarding_progress` |
+| 4 | Quiz (5 checkboxes) | Confirmação | Sim | `onboarding_acceptances` + `onboarding_progress` |
 | 5 | Tráfego pago (radio) | Seleção | Sim | Webhook externo |
-| 6.1 | Checkbox de entendimento | Confirmação | Sim | Não |
-| 6.2 | Logo | File upload | Opcional | `save-onboarding-identity` |
+| 6.1 | Checkbox de entendimento | Confirmação | Sim | `onboarding_acceptances` + `onboarding_progress` |
+| 6.2 | Logo | File upload | Opcional | `save-onboarding-identity` → Storage + `onboarding_logo_history` + `onboarding_identity_submissions` |
 | 6.2 | Site | URL input | Opcional | `save-onboarding-identity` → coluna `site_url` (+ enrichment se houver site ou IG) |
 | 6.2 | Instagram | Text input | Opcional | `save-onboarding-identity` → coluna `instagram_handle` |
 | Final | Botão "Concluir" | Click | Sim | Não |
@@ -439,7 +439,8 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 | Endpoint | Método | Etapa | Payload |
 |----------|--------|-------|---------|
 | `get-onboarding-data` | GET | Inicialização | `?compra_id={uuid}` |
-| `save-onboarding-identity` | POST | 6.2 | FormData ou JSON |
+| `save-onboarding-progress` | POST | 1–Final | JSON com progresso, `traffic_choice` e `acceptances` quando houver checkboxes |
+| `save-onboarding-identity` | POST | 6.2 | FormData ou JSON; grava identidade atual, submissão histórica e histórico de logo |
 | `get-enrichment-status` | GET | Final / monitor (opcional) | `?compra_id={uuid}` |
 | `save-campaign-briefing` | POST | Legado / fluxos especiais | FormData |
 | `generate-campaign-briefing` | POST | Chamado pelo `onboarding-enrichment` (fase briefing) | JSON (service role) |
@@ -456,6 +457,9 @@ Exibe praticamente os mesmos dados que a tela de parabéns do `EtapaFinal`, mas 
 ```
 compras (1) ──── (0..1) onboarding_identity       [UNIQUE compra_id]
    │
+   ├──── (0..N) onboarding_acceptances            [UNIQUE compra_id + item_key + item_hash]
+   ├──── (0..N) onboarding_identity_submissions   [historico imutavel]
+   ├──── (0..N) onboarding_logo_history           [1 ativo por compra]
    ├──── (0..1) onboarding_briefings             [UNIQUE compra_id]
    │
    ├──── (0..1) onboarding_enrichment_jobs       [UNIQUE compra_id]
@@ -471,7 +475,7 @@ enrichment_config (singleton, 1 row) — prompts/timeouts do pipeline enrichment
 
 | Bucket | Público | Uso |
 |--------|---------|-----|
-| `onboarding-identity` | Privado | Logo, imagens de campanha (path: `{compra_id}/logo.{ext}`, `{compra_id}/img_{N}.{ext}`) |
+| `onboarding-identity` | Privado | Logo, imagens de campanha (path: `{compra_id}/logos/{uuid}.{ext}`, `{compra_id}/img_{N}.{ext}` legado) |
 
 ---
 
@@ -486,7 +490,7 @@ enrichment_config (singleton, 1 row) — prompts/timeouts do pipeline enrichment
 | `id` | uuid | NO | `gen_random_uuid()` | — | — | PK gerada automaticamente |
 | `compra_id` | uuid | NO | — | `compra_id` (query param) | Init | FK → `compras.id` (UNIQUE) |
 | `choice` | text | NO | — | Escolha de identidade (`'add_now'` / `'later'`) | 6.2 | Se o cliente enviou material agora ou depois |
-| `logo_path` | text | YES | null | Upload de logo (file, opcional) | 6.2 | Path no storage: `{compra_id}/logo.{ext}` |
+| `logo_path` | text | YES | null | Upload de logo (file, opcional) | 6.2 | Path no storage: `{compra_id}/logos/{uuid}.{ext}` |
 | `brand_palette` | text[] | NO | `'{}'` | Preenchido pelo enrichment (fase cores) ou AiStep2Monitor | — | Array de hex colors |
 | `font_choice` | text | YES | null | Preenchido pelo enrichment (fase fonte) ou AiStep2Monitor | — | Nome da fonte |
 | `campaign_images_paths` | text[] | YES | `'{}'` | Não coletado pelo onboarding — pode ser gravado pelo AiStep2Monitor | — | Paths no storage |
@@ -511,7 +515,53 @@ enrichment_config (singleton, 1 row) — prompts/timeouts do pipeline enrichment
 | Choice: valores aceitos | `add_now`, `later` |
 | Production path: valores | `standard`, `hybrid` |
 
-**Efeito colateral:** Quando `site_url` ou `instagram_handle` está preenchido após o upsert, o backend dispara **`onboarding-enrichment`** (não dispara mais `create-ai-campaign-job` diretamente a partir deste endpoint).
+**Efeitos colaterais:** Quando `site_url` ou `instagram_handle` está preenchido após o upsert, o backend dispara **`onboarding-enrichment`** (não dispara mais `create-ai-campaign-job` diretamente a partir deste endpoint). Toda submissão da Etapa 6.2 grava uma linha em `onboarding_identity_submissions`; se houver logo, grava também `onboarding_logo_history` com `source = public_onboarding` e mantém exatamente um logo ativo por compra.
+
+---
+
+### Tabela: `onboarding_acceptances`
+
+**Relação:** N linhas por compra, idempotente por `(compra_id, item_key, item_hash)`
+**Escrita:** Edge Function `save-onboarding-progress`
+**Etapas do formulário que alimentam:** Etapas 2, 3, 4 e 6.1
+
+| Coluna DB | Tipo | Campo do Formulário | Descrição |
+|-----------|------|---------------------|-----------|
+| `compra_id` | uuid | `compra_id` | FK → `compras.id` |
+| `step_key` | text | Etapa atual | `etapa2`, `etapa3`, `etapa4`, `etapa6_1` |
+| `item_key` | text | Chave do checkbox | Allowlist por etapa |
+| `item_text` | text | Texto final exibido | Snapshot do texto aceito, com variáveis já interpoladas |
+| `item_hash` | text | Gerado no backend | SHA-256 de `item_key + item_text` |
+| `accepted` | boolean | Checkbox marcado | Default `true` |
+| `accepted_at` | timestamptz | Confirmação da etapa | Timestamp do aceite |
+| `copy_source` | text | Fonte da copy | `copy.js` ou `onboarding_copy:<version>` quando houver copy publicada |
+| `metadata` | jsonb | Contexto opcional | Título da etapa, ordem, celebridade/praça/segmento quando aplicável |
+
+---
+
+### Tabela: `onboarding_identity_submissions`
+
+**Relação:** N linhas por compra (histórico imutável)
+**Escrita:** Edge Function `save-onboarding-identity`
+**Etapas do formulário que alimentam:** Etapa 6.2
+
+| Coluna DB | Tipo | Campo do Formulário | Descrição |
+|-----------|------|---------------------|-----------|
+| `compra_id` | uuid | `compra_id` | FK → `compras.id` |
+| `identity_id` | uuid | — | Registro atual em `onboarding_identity` |
+| `logo_history_id` | uuid | Upload de logo | Registro em `onboarding_logo_history` quando houver logo |
+| `source` | text | — | `public_onboarding` |
+| `choice` | text | `add_now` / `later` | Escolha de bonificação |
+| `site_url` | text | Site | Snapshot da submissão |
+| `instagram_handle` | text | Instagram | Snapshot da submissão |
+| `campaign_notes` | text | Notas legado | Snapshot da submissão |
+| `brand_palette` | text[] | Paleta | Snapshot da submissão |
+| `production_path` | text | Backend | `standard` se houver site/Instagram |
+| `logo_path` | text | Upload de logo | Path salvo no Storage |
+| `logo_original_filename` | text | Upload de logo | Nome original do arquivo |
+| `logo_mime_type` | text | Upload de logo | MIME recebido |
+| `logo_size_bytes` | bigint | Upload de logo | Tamanho recebido |
+| `submitted_at` | timestamptz | Confirmação da Etapa 6.2 | Timestamp da submissão |
 
 ---
 
@@ -696,13 +746,13 @@ Tabelas de rastreabilidade: `onboarding_access` (estado atual) + `onboarding_acc
 | Init | — | `vigencia` | `compras` | `tempoocomprado` / `vigencia_meses` | Leitura |
 | Init | — | `atendente` | `atendentes` | `nome` | Leitura |
 | Init | — | `atendenteGenero` | `atendentes` | `genero` | Leitura |
-| 2,3,4 | Quiz checkboxes | — | — | — | Nenhum (só progresso local) |
+| 2,3,4 | Quiz checkboxes | — | `onboarding_acceptances` | `item_key`, `item_text`, `item_hash`, `accepted`, `accepted_at` | Escrita |
 | 5 | Tráfego radio (yes/no) | `trafficChoice` | — | — | Webhook externo |
-| 6.1 | Checkbox entendimento | — | — | — | Nenhum (só progresso local) |
-| 6.2 | Upload de logo (opcional) | `logoFile` (local) | `onboarding_identity` | `logo_path` | Escrita (Storage) |
-| 6.2 | Site da empresa (URL) | `siteUrl` | `onboarding_identity` | `site_url` (+ opcional `campaign_notes`) | Escrita |
-| 6.2 | Perfil Instagram | `instagramHandle` | `onboarding_identity` | `instagram_handle` (+ opcional `campaign_notes`) | Escrita |
-| 6.2 | Escolha add_now/later | `identityBonusChoice` | `onboarding_identity` | `choice` | Escrita |
+| 6.1 | Checkbox entendimento | — | `onboarding_acceptances` | `item_key`, `item_text`, `item_hash`, `accepted`, `accepted_at` | Escrita |
+| 6.2 | Upload de logo (opcional) | `logoFile` (local) | `onboarding_identity` + `onboarding_logo_history` + Storage | `logo_path` | Escrita |
+| 6.2 | Site da empresa (URL) | `siteUrl` | `onboarding_identity` + `onboarding_identity_submissions` | `site_url` (+ opcional `campaign_notes`) | Escrita |
+| 6.2 | Perfil Instagram | `instagramHandle` | `onboarding_identity` + `onboarding_identity_submissions` | `instagram_handle` (+ opcional `campaign_notes`) | Escrita |
+| 6.2 | Escolha add_now/later | `identityBonusChoice` | `onboarding_identity` + `onboarding_identity_submissions` | `choice` | Escrita |
 | — | (pipeline enrichment) | — | `onboarding_enrichment_jobs` | várias | Escrita (`onboarding-enrichment`) |
 | — | Briefing IA automático | — | `onboarding_briefings` | `briefing_json`, `status`, etc. | Escrita (`generate-campaign-briefing` via enrichment) |
 | — | Campanha 12 criativos | — | `ai_campaign_jobs` + `ai_campaign_assets` | — | Escrita (`create-ai-campaign-job`) |
@@ -713,12 +763,10 @@ Tabelas de rastreabilidade: `onboarding_access` (estado atual) + `onboarding_acc
 
 | Etapa | Campo | Motivo |
 |-------|-------|--------|
-| 2 | Quiz (3 checkboxes) | Apenas progresso local (`localStorage`) |
-| 3 | Quiz (3 checkboxes) | Apenas progresso local |
-| 4 | Quiz (5 checkboxes) | Apenas progresso local |
 | 5 | Escolha tráfego (`yes`/`no`) | Persiste via webhook externo, não no banco |
-| 6.1 | Checkbox entendimento | Apenas progresso local |
 | Final | Botão "Concluir" | Apenas transição de tela |
+
+Os checkboxes das Etapas 2, 3, 4 e 6.1 persistem em `onboarding_acceptances` quando a etapa e concluída. O progresso por etapa persiste em `onboarding_progress`.
 
 ---
 
