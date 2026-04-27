@@ -297,9 +297,22 @@ export default function MonitorLayout({ children }) {
 
   return (
     <div style={{ minHeight: '100vh', background: monitorTheme.layoutBg, color: monitorTheme.textPrimary }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '280px minmax(0,1fr)', minHeight: '100vh' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '280px minmax(0,1fr)',
+          minHeight: '100vh',
+          alignItems: 'start',
+        }}
+      >
         <aside
           style={{
+            position: 'sticky',
+            top: 0,
+            height: '100dvh',
+            maxHeight: '100dvh',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
             background: monitorTheme.sidebarBg,
             borderRight: `1px solid ${monitorTheme.sidebarBorder}`,
             padding: designTokens.space[9],
@@ -316,12 +329,26 @@ export default function MonitorLayout({ children }) {
             <TopBarLogo height={24} maxWidth={156} />
           </Link>
 
-          <NavSections mainNav={mainNav} isAdmin={isAdmin} />
+          <nav
+            aria-label="Navegação do dashboard"
+            style={{
+              display: 'flex',
+              flex: 1,
+              minHeight: 0,
+              flexDirection: 'column',
+              gap: designTokens.space[8],
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              paddingRight: 2,
+            }}
+          >
+            <NavSections mainNav={mainNav} isAdmin={isAdmin} />
+          </nav>
 
           <SidebarFooter />
         </aside>
 
-        <main style={{ background: monitorTheme.pageBg, padding: designTokens.space[11] }}>
+        <main style={{ minWidth: 0, background: monitorTheme.pageBg, padding: designTokens.space[11] }}>
           <div style={{ maxWidth: 1280, margin: '0 auto' }}>
             <SessionBanner />
             {children}
