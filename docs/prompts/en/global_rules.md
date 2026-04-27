@@ -6,10 +6,10 @@
 
 ## 🚨 RULE #1: THE SACRED FACE (CELEBRITY PROTECTION)
 If a PNG/Photo of a person is provided, it is a **PHOTOGRAPH**, not a prompt.
-- **ZERO MODIFICATION:** Never alter pixels, expressions, skin, or features. 
+- **ZERO MODIFICATION:** Never alter pixels, expressions, skin, or features.
 - **LOCKED ASSETS:** Pose and clothing must remain IDENTICAL to the source.
 - **COLLAGE TECHNIQUE:** Treat the person as a "cut and paste" element.
-- **ALLOWED:** Proportional resizing, repositioning, and global lighting match. 
+- **ALLOWED:** Proportional resizing, repositioning, and global lighting match.
 
 ---
 
@@ -23,7 +23,7 @@ If a PNG/Photo of a person is provided, it is a **PHOTOGRAPH**, not a prompt.
 ## 🎨 VISUAL STYLE & REFERENCE POLICY
 - **Style Imitation:** When a reference is provided, mimic its **technique** (vector, 3D, glow, collage) exactly.
 - **The "Monochromatic" Color Rule:** - NEVER use colors from the reference image.
-    - Use ONLY the Client’s Primary Brand Color + its luminance variations (tints/shades).
+    - Use ONLY the Client's Primary Brand Color + its luminance variations (tints/shades).
     - Gradients must be [Brand Color] to [Darker/Lighter Brand Color].
     - White/Black allowed only for contrast/legibility.
 
