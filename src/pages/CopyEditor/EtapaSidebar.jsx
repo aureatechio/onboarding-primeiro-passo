@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { COLORS } from '../../theme/colors'
 import { monitorTheme, monitorRadius } from '../AiStep2Monitor/theme'
 
@@ -12,7 +13,7 @@ const ETAPA_SHORT_LABELS = {
   etapaFinal: { num: '★', name: 'Final' },
 }
 
-export default function EtapaSidebar({ etapas, activeEtapaId, dirtyEtapas, onSelect }) {
+export default function EtapaSidebar({ etapas, activeEtapaId, dirtyEtapas }) {
   return (
     <nav
       style={{
@@ -48,10 +49,9 @@ export default function EtapaSidebar({ etapas, activeEtapaId, dirtyEtapas, onSel
         const meta = ETAPA_SHORT_LABELS[id] || { num: '?', name: id }
 
         return (
-          <button
+          <Link
             key={id}
-            type="button"
-            onClick={() => onSelect(id)}
+            to={`/copy-editor?etapa=${encodeURIComponent(id)}`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -64,6 +64,7 @@ export default function EtapaSidebar({ etapas, activeEtapaId, dirtyEtapas, onSel
               background: isActive ? monitorTheme.sidebarItemActiveBg : 'transparent',
               cursor: 'pointer',
               textAlign: 'left',
+              textDecoration: 'none',
               transition: 'background 0.15s, border-color 0.15s',
             }}
             onMouseEnter={(e) => {
@@ -117,7 +118,7 @@ export default function EtapaSidebar({ etapas, activeEtapaId, dirtyEtapas, onSel
                 }}
               />
             )}
-          </button>
+          </Link>
         )
       })}
     </nav>

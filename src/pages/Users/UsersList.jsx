@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Edit3, Plus, RefreshCw, Search, Users } from 'lucide-react'
 import { DashboardButton, DashboardField, InlineNotice } from '../../components/dashboard'
 import { adminFetch } from '../../lib/admin-edge'
@@ -11,24 +12,40 @@ import InviteUserModal from './InviteUserModal'
 const ROLE_LABELS = { admin: 'Admin', operator: 'Operator', viewer: 'Viewer' }
 const STATUS_LABELS = { active: 'Ativo', disabled: 'Desativado' }
 
+function toPage(value) {
+  return Math.max(parseInt(value || '1', 10) || 1, 1)
+}
+
+function toLimit(value) {
+  return Math.min(Math.max(parseInt(value || '20', 10) || 20, 1), 100)
+}
+
 export default function UsersList() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [users, setUsers] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, total_pages: 1 })
-  const [filters, setFilters] = useState({ search: '', role: '', status: '' })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
 
+  const filters = {
+    search: searchParams.get('search') || '',
+    role: searchParams.get('role') || '',
+    status: searchParams.get('status') || '',
+  }
+  const currentPage = toPage(searchParams.get('page'))
+  const currentLimit = toLimit(searchParams.get('limit'))
+
   const query = useMemo(() => {
     const params = new URLSearchParams()
-    params.set('page', String(pagination.page))
-    params.set('limit', String(pagination.limit))
+    params.set('page', String(currentPage))
+    params.set('limit', String(currentLimit))
     if (filters.search.trim()) params.set('search', filters.search.trim())
     if (filters.role) params.set('role', filters.role)
     if (filters.status) params.set('status', filters.status)
     return params.toString()
-  }, [filters, pagination.page, pagination.limit])
+  }, [currentLimit, currentPage, filters.role, filters.search, filters.status])
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -49,8 +66,12 @@ export default function UsersList() {
   }, [fetchUsers])
 
   function updateFilter(key, value) {
-    setPagination((prev) => ({ ...prev, page: 1 }))
-    setFilters((prev) => ({ ...prev, [key]: value }))
+    const next = new URLSearchParams(searchParams)
+    next.set('page', '1')
+    next.set('limit', String(currentLimit))
+    if (value) next.set(key, value)
+    else next.delete(key)
+    setSearchParams(next)
   }
 
   return (

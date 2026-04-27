@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { DashboardButton, InlineNotice } from '../../components/dashboard'
 import { TYPE, designTokens } from '../../theme/design-tokens'
@@ -15,6 +16,7 @@ import { useAuth } from '../../context/AuthContext'
 
 export default function AiStep2Monitor() {
   const { isAdmin, isOperator } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const canOperate = isAdmin || isOperator
   const canAdminMutate = isAdmin
   const {
@@ -39,7 +41,6 @@ export default function AiStep2Monitor() {
     availablePurchases,
     releaseOnboarding,
     updateListFilters,
-    openJobDetail,
     backToList,
     goHome,
     reload,
@@ -53,8 +54,12 @@ export default function AiStep2Monitor() {
 
   const [viewerIndex, setViewerIndex] = useState(-1)
   const [zoom, setZoom] = useState(1)
-  const [activeTab, setActiveTab] = useState(DETAIL_TABS[0].id)
-  const [activeGalleryCategory, setActiveGalleryCategory] = useState(GALLERY_CATEGORY_TABS[0].id)
+  const activeTab = DETAIL_TABS.some((tab) => tab.id === searchParams.get('tab'))
+    ? searchParams.get('tab')
+    : DETAIL_TABS[0].id
+  const activeGalleryCategory = GALLERY_CATEGORY_TABS.some((tab) => tab.id === searchParams.get('gallery'))
+    ? searchParams.get('gallery')
+    : GALLERY_CATEGORY_TABS[0].id
 
   const assets = data?.assets || []
   const listItems = data?.items || []
@@ -81,13 +86,14 @@ export default function AiStep2Monitor() {
 
   const currentAsset = viewerIndex >= 0 ? assets[viewerIndex] : null
 
-  useEffect(() => {
-    if (isListMode) setActiveTab(DETAIL_TABS[0].id)
-  }, [isListMode])
-
-  useEffect(() => {
-    if (isListMode) setActiveGalleryCategory(GALLERY_CATEGORY_TABS[0].id)
-  }, [isListMode])
+  const updateDetailSearch = (key, value) => {
+    const next = new URLSearchParams(searchParams)
+    next.set(key, value)
+    if (key === 'tab' && value !== 'gallery') {
+      next.delete('gallery')
+    }
+    setSearchParams(next)
+  }
 
   useEffect(() => {
     if (!isListMode || loading) return
@@ -195,7 +201,6 @@ export default function AiStep2Monitor() {
                 listCompra={listCompra}
                 availablePurchases={availablePurchases}
                 releaseOnboarding={canAdminMutate ? releaseOnboarding : null}
-                openJobDetail={openJobDetail}
                 updateListFilters={updateListFilters}
                 canMutate={canAdminMutate}
               />
@@ -208,9 +213,9 @@ export default function AiStep2Monitor() {
                 briefing={briefing}
                 progress={progress}
                 activeTab={activeTab}
-                onTabChange={setActiveTab}
+                onTabChange={(tabId) => updateDetailSearch('tab', tabId)}
                 activeGalleryCategory={activeGalleryCategory}
-                onGalleryCategoryChange={setActiveGalleryCategory}
+                onGalleryCategoryChange={(categoryId) => updateDetailSearch('gallery', categoryId)}
                 onOpenViewer={openViewerByAsset}
                 onRetrySingleAsset={canOperate ? retrySingleAsset : null}
                 onRetryFailedAssets={canOperate ? retryFailedAssets : null}

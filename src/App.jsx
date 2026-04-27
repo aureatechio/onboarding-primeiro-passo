@@ -1,4 +1,5 @@
-import { Component, useEffect, useRef, useState } from 'react';
+import { Component } from 'react';
+import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router';
 import { OnboardingProvider, useOnboarding } from './context/OnboardingContext';
 import { CopyProvider } from './context/CopyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -22,12 +23,6 @@ import RequireRole from './components/RequireRole';
 import UsersList from './pages/Users/UsersList';
 import Profile from './pages/Profile';
 
-const PROTECTED_PREFIXES = ['/ai-step2/', '/copy-editor', '/users', '/profile'];
-
-function isProtectedPath(pathname) {
-  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
 function AuthSplash() {
   return (
     <div
@@ -45,6 +40,31 @@ function AuthSplash() {
       Carregando sessao...
     </div>
   );
+}
+
+function RequireAuthRoute({ children }) {
+  const location = useLocation()
+  const { isAuthenticated, isAuthLoading } = useAuth()
+
+  if (isAuthLoading) {
+    return <AuthSplash />
+  }
+
+  if (!isAuthenticated) {
+    const fullPath = `${location.pathname}${location.search}`
+    return <Navigate to={`/login?next=${encodeURIComponent(fullPath)}`} replace />
+  }
+
+  return children
+}
+
+function RequireRoleRoute({ roles, children }) {
+  return <RequireRole roles={roles}>{children}</RequireRole>
+}
+
+function DashboardRoute({ children, roles }) {
+  const content = roles ? <RequireRoleRoute roles={roles}>{children}</RequireRoleRoute> : children
+  return <RequireAuthRoute>{content}</RequireAuthRoute>
 }
 
 // Error boundary pra pegar crashes silenciosos
@@ -158,131 +178,7 @@ function OnboardingFlow() {
   );
 }
 
-function AppRoutes() {
-  const [currentLocation, setCurrentLocation] = useState(() => ({
-    pathname: window.location.pathname || '/',
-    search: window.location.search || '',
-  }))
-  const { isAuthenticated, isAuthLoading } = useAuth()
-  const redirectedRef = useRef(null)
-
-  useEffect(() => {
-    const syncLocation = () => {
-      setCurrentLocation({
-        pathname: window.location.pathname || '/',
-        search: window.location.search || '',
-      })
-      redirectedRef.current = null
-    }
-
-    window.addEventListener('popstate', syncLocation)
-    window.addEventListener('aurea:location-change', syncLocation)
-
-    return () => {
-      window.removeEventListener('popstate', syncLocation)
-      window.removeEventListener('aurea:location-change', syncLocation)
-    }
-  }, [])
-
-  const pathname = currentLocation.pathname
-  const search = currentLocation.search
-
-  if (pathname === '/' && !search) {
-    const target = '/ai-step2/monitor'
-    if (redirectedRef.current !== target) {
-      redirectedRef.current = target
-      window.history.replaceState({}, '', target)
-      window.dispatchEvent(new Event('aurea:location-change'))
-    }
-    return null
-  }
-
-  if (pathname.startsWith('/login')) {
-    return <Login />
-  }
-
-  if (pathname.startsWith('/forgot-password')) {
-    return <ForgotPassword />
-  }
-
-  if (pathname.startsWith('/reset-password')) {
-    return <ResetPassword />
-  }
-
-  if (isProtectedPath(pathname)) {
-    if (isAuthLoading) {
-      return <AuthSplash />
-    }
-    if (!isAuthenticated) {
-      const fullPath = `${pathname}${search}`
-      const target = `/login?next=${encodeURIComponent(fullPath)}`
-      if (redirectedRef.current !== target) {
-        redirectedRef.current = target
-        window.history.replaceState({}, '', target)
-        window.dispatchEvent(new Event('aurea:location-change'))
-      }
-      return null
-    }
-  }
-
-  if (pathname.startsWith('/ai-step2/perplexity-config')) {
-    return (
-      <RequireRole roles={['admin']}>
-        <ErrorBoundary>
-          <PerplexityConfigPage />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
-  if (pathname.startsWith('/ai-step2/nanobanana-config')) {
-    return (
-      <RequireRole roles={['admin']}>
-        <ErrorBoundary>
-          <NanoBananaConfigPage />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
-  if (pathname.startsWith('/ai-step2/monitor')) {
-    return (
-      <ErrorBoundary>
-        <AiStep2Monitor />
-      </ErrorBoundary>
-    );
-  }
-
-  if (pathname.startsWith('/copy-editor')) {
-    return (
-      <RequireRole roles={['admin']}>
-        <ErrorBoundary>
-          <CopyEditor />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
-  if (pathname.startsWith('/users')) {
-    return (
-      <RequireRole roles={['admin']}>
-        <ErrorBoundary>
-          <UsersList />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
-  if (pathname.startsWith('/profile')) {
-    return (
-      <RequireRole roles={['admin', 'operator', 'viewer']}>
-        <ErrorBoundary>
-          <Profile />
-        </ErrorBoundary>
-      </RequireRole>
-    );
-  }
-
+function OnboardingRoute() {
   return (
     <CopyProvider>
       <OnboardingProvider>
@@ -292,6 +188,109 @@ function AppRoutes() {
       </OnboardingProvider>
     </CopyProvider>
   );
+}
+
+function RootRoute() {
+  const [searchParams] = useSearchParams()
+  if (searchParams.has('compra_id')) {
+    return <OnboardingRoute />
+  }
+  return <Navigate to="/ai-step2/monitor" replace />
+}
+
+function LegacyMonitorRoute() {
+  const [searchParams] = useSearchParams()
+  const jobId = searchParams.get('job_id')
+
+  if (jobId) {
+    const next = new URLSearchParams(searchParams)
+    next.delete('job_id')
+    next.delete('mode')
+    const query = next.toString()
+    return <Navigate to={`/ai-step2/monitor/jobs/${encodeURIComponent(jobId)}${query ? `?${query}` : ''}`} replace />
+  }
+
+  return (
+    <DashboardRoute>
+      <ErrorBoundary>
+        <AiStep2Monitor />
+      </ErrorBoundary>
+    </DashboardRoute>
+  )
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<RootRoute />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      <Route path="/ai-step2/monitor" element={<LegacyMonitorRoute />} />
+      <Route
+        path="/ai-step2/monitor/jobs/:jobId"
+        element={(
+          <DashboardRoute>
+            <ErrorBoundary>
+              <AiStep2Monitor />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route
+        path="/ai-step2/perplexity-config"
+        element={(
+          <DashboardRoute roles={['admin']}>
+            <ErrorBoundary>
+              <PerplexityConfigPage />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route
+        path="/ai-step2/nanobanana-config"
+        element={(
+          <DashboardRoute roles={['admin']}>
+            <ErrorBoundary>
+              <NanoBananaConfigPage />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route
+        path="/copy-editor"
+        element={(
+          <DashboardRoute roles={['admin']}>
+            <ErrorBoundary>
+              <CopyEditor />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route
+        path="/users"
+        element={(
+          <DashboardRoute roles={['admin']}>
+            <ErrorBoundary>
+              <UsersList />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route
+        path="/profile"
+        element={(
+          <DashboardRoute roles={['admin', 'operator', 'viewer']}>
+            <ErrorBoundary>
+              <Profile />
+            </ErrorBoundary>
+          </DashboardRoute>
+        )}
+      />
+      <Route path="*" element={<OnboardingRoute />} />
+    </Routes>
+  )
 }
 
 export default function App() {

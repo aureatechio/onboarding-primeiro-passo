@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router'
 import { Brain, Palette, BarChart3, FileText, LogOut, UserCircle, Users } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
@@ -7,7 +8,7 @@ import { useAuth } from '../../context/AuthContext'
 import { focusVisibleStyle } from '../../theme/dashboard-tokens'
 
 const MAIN_NAV = [
-  { id: 'monitor', label: 'Visão Geral', icon: BarChart3, path: '/ai-step2/monitor?mode=list' },
+  { id: 'monitor', label: 'Visão Geral', icon: BarChart3, path: '/ai-step2/monitor' },
   { id: 'perplexity', label: 'Perplexity IA', icon: Brain, path: '/ai-step2/perplexity-config' },
   { id: 'nanobanana', label: 'NanoBanana IA', icon: Palette, path: '/ai-step2/nanobanana-config' },
   { id: 'copy-editor', label: 'Copy Editor', icon: FileText, path: '/copy-editor' },
@@ -21,49 +22,15 @@ const ACCOUNT_NAV = [
   { id: 'profile', label: 'Meu Perfil', icon: UserCircle, path: '/profile' },
 ]
 
-function getActiveId() {
-  const pathname = window.location.pathname || '/'
-  if (pathname.includes('perplexity-config')) return 'perplexity'
-  if (pathname.includes('nanobanana-config')) return 'nanobanana'
-  if (pathname.startsWith('/copy-editor')) return 'copy-editor'
-  if (pathname.startsWith('/users')) return 'users'
-  if (pathname.startsWith('/profile')) return 'profile'
-  return 'monitor'
-}
-
-function navigateTo(path) {
-  const target = new URL(path, window.location.origin)
-  const next = `${target.pathname}${target.search}`
-  const current = `${window.location.pathname}${window.location.search}`
-  if (next === current) return
-
-  if (typeof performance !== 'undefined') {
-    performance.mark('ai-step2-nav-start')
-  }
-
-  window.history.pushState({}, '', next)
-  window.dispatchEvent(new Event('aurea:location-change'))
-}
-
-function handleNavClick(item) {
-  if (item.newTab) {
-    window.open(item.path, '_blank')
-  } else {
-    navigateTo(item.path)
-  }
-}
-
-function NavButton({ item, isActive }) {
+function NavButton({ item }) {
   const Icon = item.icon
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   return (
-    <button
+    <NavLink
       key={item.id}
-      type="button"
-      onClick={() => handleNavClick(item)}
-      aria-current={isActive ? 'page' : undefined}
-      style={{
+      to={item.path}
+      style={({ isActive }) => ({
         borderRadius: monitorRadius.md,
         padding: '10px 12px',
         background: isActive ? monitorTheme.sidebarItemActiveBg : hovered ? monitorTheme.sidebarItemBg : 'transparent',
@@ -78,22 +45,28 @@ function NavButton({ item, isActive }) {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
+        textDecoration: 'none',
         transition: 'background 0.15s, border-color 0.15s',
         ...(focused ? focusVisibleStyle : null),
-      }}
+      })}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
     >
-      <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
-      {item.label}
-    </button>
+      {({ isActive }) => (
+        <>
+          <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
+          {item.label}
+        </>
+      )}
+    </NavLink>
   )
 }
 
 function SessionBanner() {
   const { isAuthenticated, isAuthLoading } = useAuth()
+  const navigate = useNavigate()
   const wasAuthRef = useRef(false)
   const [expired, setExpired] = useState(false)
 
@@ -130,7 +103,7 @@ function SessionBanner() {
       <span>Sua sessão expirou. Faça login novamente para continuar.</span>
       <button
         type="button"
-        onClick={() => navigateTo('/login')}
+        onClick={() => navigate('/login')}
         style={{
           background: 'transparent',
           border: `1px solid ${monitorTheme.dangerBorder}`,
@@ -150,13 +123,13 @@ function SessionBanner() {
 
 function SidebarFooter() {
   const { user, signOut } = useAuth()
+  const navigate = useNavigate()
   const [focused, setFocused] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   async function handleLogout() {
     await signOut()
-    window.history.replaceState({}, '', '/login')
-    window.dispatchEvent(new Event('aurea:location-change'))
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -239,7 +212,7 @@ function NavSections({ mainNav, isAdmin, compact = false }) {
     <>
       <div style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: 6 }}>
         {mainNav.map((item) => (
-          <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+          <NavButton key={item.id} item={item} />
         ))}
       </div>
 
@@ -257,14 +230,14 @@ function NavSections({ mainNav, isAdmin, compact = false }) {
             </p>
           ) : null}
           {USERS_NAV.map((item) => (
-            <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+            <NavButton key={item.id} item={item} />
           ))}
         </div>
       )}
 
       <div style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: 6 }}>
         {ACCOUNT_NAV.map((item) => (
-          <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+          <NavButton key={item.id} item={item} />
         ))}
       </div>
     </>
@@ -289,14 +262,13 @@ export default function MonitorLayout({ children }) {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center' }}>
-            <button
-              type="button"
-              onClick={() => navigateTo('/ai-step2/monitor?mode=list')}
+            <Link
+              to="/ai-step2/monitor"
               style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
               aria-label="Ir para home do monitor"
             >
               <TopBarLogo height={24} maxWidth={156} />
-            </button>
+            </Link>
             <div style={{ minWidth: 180 }}>
               <SidebarFooter />
             </div>
@@ -336,14 +308,13 @@ export default function MonitorLayout({ children }) {
             gap: designTokens.space[8],
           }}
         >
-          <button
-            type="button"
-            onClick={() => navigateTo('/ai-step2/monitor?mode=list')}
+          <Link
+            to="/ai-step2/monitor"
             style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
             aria-label="Ir para home do monitor"
           >
             <TopBarLogo height={24} maxWidth={156} />
-          </button>
+          </Link>
 
           <NavSections mainNav={mainNav} isAdmin={isAdmin} />
 

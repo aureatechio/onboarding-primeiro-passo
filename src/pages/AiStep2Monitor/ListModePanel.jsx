@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { Link } from 'react-router'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { STATUS_OPTIONS } from './constants'
 import StatusBadge from './components/StatusBadge'
@@ -15,7 +16,6 @@ export default function ListModePanel({
   listCompra,
   availablePurchases,
   releaseOnboarding,
-  openJobDetail,
   updateListFilters,
   canMutate = false,
 }) {
@@ -472,10 +472,9 @@ export default function ListModePanel({
           <div style={{ padding: 16, color: monitorTheme.textMuted }}>Nenhum job encontrado.</div>
         ) : (
           filteredItems.map((item) => (
-            <button
+            <Link
               key={item.job_id}
-              type="button"
-              onClick={() => openJobDetail(item.job_id)}
+              to={`/ai-step2/monitor/jobs/${encodeURIComponent(item.job_id)}`}
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, minmax(132px, 1fr))',
@@ -487,6 +486,7 @@ export default function ListModePanel({
                 alignItems: 'center',
                 gap: 12,
                 textAlign: 'left',
+                textDecoration: 'none',
                 cursor: 'pointer',
                 background: monitorTheme.pageBg,
                 transition: designTokens.motion.transitionFast,
@@ -518,7 +518,7 @@ export default function ListModePanel({
               <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, margin: 0, ...truncateStyles }}>
                 {formatDate(item.updated_at)}
               </p>
-            </button>
+            </Link>
           ))
         )}
       </section>

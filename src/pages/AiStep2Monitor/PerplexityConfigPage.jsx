@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router'
 import {
   Loader2,
   Brain,
@@ -143,6 +144,7 @@ function Field({ label, hint, children }) {
 }
 
 export default function PerplexityConfigPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [form, setForm] = useState(null)
   const [original, setOriginal] = useState(null)
   const [apiKeyInput, setApiKeyInput] = useState('')
@@ -152,7 +154,9 @@ export default function PerplexityConfigPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  const [activeTab, setActiveTab] = useState('provider')
+  const activeTab = TABS.some((tab) => tab.id === searchParams.get('tab'))
+    ? searchParams.get('tab')
+    : 'provider'
   const [eligiblePurchases, setEligiblePurchases] = useState([])
   const [loadingEligible, setLoadingEligible] = useState(false)
   const [testRunning, setTestRunning] = useState(false)
@@ -568,7 +572,13 @@ export default function PerplexityConfigPage() {
         </div>
       )}
 
-      <DashboardTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} ariaLabel="Configurações do Perplexity" />
+      <DashboardTabs
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={(tabId) => setSearchParams({ tab: tabId })}
+        getHref={(tab) => `/ai-step2/perplexity-config?tab=${encodeURIComponent(tab.id)}`}
+        ariaLabel="Configurações do Perplexity"
+      />
 
       {activeTab === 'provider' && (
         <>

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { useAuth } from '../context/AuthContext'
 
-const DEFAULT_NEXT = '/ai-step2/monitor?mode=list'
+const DEFAULT_NEXT = '/ai-step2/monitor'
 const RATE_LIMIT_COOLDOWN_SECONDS = 60
 const RATE_LIMIT_MESSAGE = 'Muitas tentativas de login. Aguarde alguns instantes e tente novamente.'
 
@@ -23,19 +24,15 @@ function isRateLimitError(err) {
   )
 }
 
-function readNext() {
-  const params = new URLSearchParams(window.location.search)
-  const next = params.get('next')
+function readNext(searchParams) {
+  const next = searchParams.get('next')
   if (!next || !next.startsWith('/')) return DEFAULT_NEXT
   return next
 }
 
-function navigateReplace(path) {
-  window.history.replaceState({}, '', path)
-  window.dispatchEvent(new Event('aurea:location-change'))
-}
-
 export default function Login() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { isAuthenticated, isAuthLoading, envError, signInWithPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,16 +42,16 @@ export default function Login() {
   const redirectedRef = useRef(false)
   const submitInFlightRef = useRef(false)
 
-  const next = useMemo(() => readNext(), [])
+  const next = useMemo(() => readNext(searchParams), [searchParams])
   const isCoolingDown = cooldownSeconds > 0
 
   useEffect(() => {
     if (redirectedRef.current) return
     if (!isAuthLoading && isAuthenticated) {
       redirectedRef.current = true
-      navigateReplace(next)
+      navigate(next, { replace: true })
     }
-  }, [isAuthenticated, isAuthLoading, next])
+  }, [isAuthenticated, isAuthLoading, navigate, next])
 
   useEffect(() => {
     if (cooldownSeconds <= 0) return undefined
@@ -73,7 +70,7 @@ export default function Login() {
     try {
       await signInWithPassword({ email: email.trim(), password })
       redirectedRef.current = true
-      navigateReplace(next)
+      navigate(next, { replace: true })
     } catch (err) {
       const message = err?.message || ''
       if (isRateLimitError(err)) {
@@ -172,8 +169,7 @@ export default function Login() {
           <DashboardButton
             type="button"
             onClick={() => {
-              window.history.pushState({}, '', '/forgot-password')
-              window.dispatchEvent(new Event('aurea:location-change'))
+              navigate('/forgot-password')
             }}
             variant="ghost"
             size="sm"

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router'
 import {
   Loader2,
   Palette,
@@ -451,13 +452,16 @@ function ReferenceImageUpload({
 }
 
 export default function NanoBananaConfigPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [form, setForm] = useState(null)
   const [original, setOriginal] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  const [activeTab, setActiveTab] = useState('provider')
+  const activeTab = TABS.some((tab) => tab.id === searchParams.get('tab'))
+    ? searchParams.get('tab')
+    : 'provider'
   const [referenceFiles, setReferenceFiles] = useState({})
   const [removeReferenceImage, setRemoveReferenceImage] = useState({})
   const [readingByCategory, setReadingByCategory] = useState({})
@@ -651,7 +655,13 @@ export default function NanoBananaConfigPage() {
         </div>
       )}
 
-      <DashboardTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} ariaLabel="Configurações do NanoBanana" />
+      <DashboardTabs
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={(tabId) => setSearchParams({ tab: tabId })}
+        getHref={(tab) => `/ai-step2/nanobanana-config?tab=${encodeURIComponent(tab.id)}`}
+        ariaLabel="Configurações do NanoBanana"
+      />
 
       {activeTab === 'provider' && (
         <div style={cardStyle}>

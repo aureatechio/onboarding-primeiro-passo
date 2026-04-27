@@ -6,7 +6,7 @@ SPA do onboarding **Primeiro Passo**, servido em `https://onboarding-primeiro-pa
 
 ```
 src/
-├── App.jsx (222)              Router caseiro por state + ErrorBoundary + CopyProvider
+├── App.jsx                    Rotas declarativas com React Router + ErrorBoundary
 ├── main.jsx                   Bootstrap Vite
 ├── copy.js (620)              Fallback de copy (singleton também em Supabase)
 ├── pages/                     Telas principais (onboarding + painéis internos)
@@ -73,7 +73,7 @@ CMS interno da tabela singleton `onboarding_copy`:
 
 ## Observações arquiteturais
 
-- **Roteamento manual**: `App.jsx` alterna views por state + parsing de URL, sem `react-router`. Simples, mas custa ~200 linhas de boilerplate.
+- **Roteamento**: `App.jsx` usa `react-router` para auth, dashboard e redirects; o onboarding público segue controlado por `OnboardingContext`.
 - **Arquivos enormes**: `Etapa3.jsx` (1156) e `Etapa62.jsx` (738) violam qualquer limite razoável — bons alvos de refactor quando aparecer bug nelas.
 - **Sem auth no onboarding**: consistente com o `CLAUDE.md`. As páginas `AiStep2Monitor` e `CopyEditor` compartilham bundle mas dependem do plano de auth ativo (`plan/2026-04-19-fase1-fundacao-auth-frontend-dashboard.md`) para virarem restritas.
 - **`copy.js` como fallback**: 620 linhas de copy hardcoded, espelhando a tabela singleton `onboarding_copy`. Vive junto ao `CopyContext.jsx` e é sobrescrito pelo conteúdo do Supabase quando disponível.

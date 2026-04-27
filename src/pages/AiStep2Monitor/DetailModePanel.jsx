@@ -1,4 +1,5 @@
 import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, RotateCcw } from 'lucide-react'
+import { useLocation } from 'react-router'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import DataRow from './components/DataRow'
@@ -37,6 +38,16 @@ export default function DetailModePanel({
   canMutate = false,
   canOperate = canMutate,
 }) {
+  const location = useLocation()
+  const hrefWithParam = (key, value) => {
+    const next = new URLSearchParams(location.search)
+    next.set(key, value)
+    if (key === 'tab' && value !== 'gallery') {
+      next.delete('gallery')
+    }
+    const query = next.toString()
+    return `${location.pathname}${query ? `?${query}` : ''}`
+  }
   const groupedAssets = ASSET_GROUPS.map((group) => ({
     ...group,
     items: assets.filter((asset) => normalizeGroupName(asset.group_name) === group.key),
@@ -50,7 +61,12 @@ export default function DetailModePanel({
 
   return (
     <>
-      <TabBar tabs={DETAIL_TABS} activeTab={activeTab} onTabChange={onTabChange} />
+      <TabBar
+        tabs={DETAIL_TABS}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        getHref={(tab) => hrefWithParam('tab', tab.id)}
+      />
 
       {/* ── GALLERY ──────────────────────────────────────────────────────────── */}
       {activeTab === 'gallery' ? (
@@ -172,6 +188,7 @@ export default function DetailModePanel({
             tabs={GALLERY_CATEGORY_TABS}
             activeTab={activeGalleryCategory}
             onTabChange={onGalleryCategoryChange}
+            getHref={(tab) => hrefWithParam('gallery', tab.id)}
           />
 
           {assets.length === 0 ? (

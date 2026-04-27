@@ -1,16 +1,13 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
-function navigatePush(path) {
-  window.history.pushState({}, '', path)
-  window.dispatchEvent(new Event('aurea:location-change'))
-}
-
 export default function ForgotPassword() {
+  const navigate = useNavigate()
   const envError = !hasAuthEnv()
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -114,7 +111,7 @@ export default function ForgotPassword() {
 
         <DashboardButton
           type="button"
-          onClick={() => navigatePush('/login')}
+          onClick={() => navigate('/login')}
           variant="ghost"
           size="sm"
           style={{

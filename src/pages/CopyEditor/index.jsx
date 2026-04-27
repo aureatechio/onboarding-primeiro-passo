@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { ETAPAS_META } from './constants'
 import { useCopyEditor } from './useCopyEditor'
 import PreviewEditorLayout from './PreviewEditorLayout'
@@ -7,8 +8,15 @@ import PublishDialog from './PublishDialog'
 import { getPreviewComponent } from './previews/previewRegistry'
 
 export default function CopyEditor() {
-  const [activeEtapaId, setActiveEtapaId] = useState(ETAPAS_META[0].id)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
+  const requestedEtapaId = searchParams.get('etapa')
+  const activeEtapaId = ETAPAS_META.some((etapa) => etapa.id === requestedEtapaId)
+    ? requestedEtapaId
+    : ETAPAS_META[0].id
+  const selectEtapa = (etapaId) => {
+    setSearchParams({ etapa: etapaId })
+  }
 
   const {
     sections,
@@ -37,7 +45,7 @@ export default function CopyEditor() {
     <MonitorLayout>
       <PreviewEditorLayout
         activeEtapaId={activeEtapaId}
-        onSelectEtapa={setActiveEtapaId}
+        onSelectEtapa={selectEtapa}
         sections={sections}
         originalSections={originalSections}
         dirtyEtapas={dirtyEtapas}

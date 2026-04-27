@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
@@ -6,11 +7,6 @@ import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
 const MIN_PASSWORD = 6
-
-function navigateReplace(path) {
-  window.history.replaceState({}, '', path)
-  window.dispatchEvent(new Event('aurea:location-change'))
-}
 
 function extractTokensFromHash() {
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
@@ -26,8 +22,9 @@ function extractTokensFromHash() {
 }
 
 export default function ResetPassword() {
-  const params = new URLSearchParams(window.location.search)
-  const requestedType = params.get('type')
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const requestedType = searchParams.get('type')
   const isInvite = requestedType === 'invite'
   const envError = !hasAuthEnv()
   const [status, setStatus] = useState(envError ? 'invalid' : 'loading')
@@ -58,14 +55,14 @@ export default function ResetPassword() {
       .setSession({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken })
       .then(({ error }) => {
         if (error) throw error
-        window.history.replaceState({}, '', isInvite ? '/reset-password?type=invite' : '/reset-password')
+        navigate(isInvite ? '/reset-password?type=invite' : '/reset-password', { replace: true })
         setStatus('ready')
       })
       .catch((err) => {
         setStatus('invalid')
         setErrorMessage(err?.message || 'Não foi possível validar o link. Solicite um novo e-mail.')
       })
-  }, [envError])
+  }, [envError, isInvite, navigate])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -147,7 +144,7 @@ export default function ResetPassword() {
             </InlineNotice>
             <DashboardButton
               type="button"
-              onClick={() => navigateReplace('/forgot-password')}
+              onClick={() => navigate('/forgot-password', { replace: true })}
               variant="primary"
               size="lg"
             >
@@ -205,7 +202,7 @@ export default function ResetPassword() {
             </InlineNotice>
             <DashboardButton
               type="button"
-              onClick={() => navigateReplace('/login')}
+              onClick={() => navigate('/login', { replace: true })}
               variant="primary"
               size="lg"
             >

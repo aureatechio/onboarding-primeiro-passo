@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { adminFetch } from '../../lib/admin-edge'
 
 function toPage(value, fallback) {
@@ -49,13 +50,15 @@ function isAbortError(error) {
 }
 
 export function useAiCampaignMonitor() {
-  const [locationSearch, setLocationSearch] = useState(window.location.search)
-  const params = useMemo(() => new URLSearchParams(locationSearch), [locationSearch])
+  const navigate = useNavigate()
+  const routeParams = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const params = searchParams
 
   const compraId = params.get('compra_id') || ''
-  const jobId = params.get('job_id') || ''
+  const jobId = routeParams.jobId || params.get('job_id') || ''
   const modeParam = (params.get('mode') || '').toLowerCase()
-  const isListMode = (!compraId && !jobId && modeParam !== 'detail') || modeParam === 'list'
+  const isListMode = !jobId && ((!compraId && modeParam !== 'detail') || modeParam === 'list')
   const listPage = toPage(params.get('page'), 1)
   const listLimit = toLimit(params.get('limit'), 20)
   const listStatus = params.get('status') || ''
@@ -87,25 +90,11 @@ export function useAiCampaignMonitor() {
     return `detail|compra=${compraId}|job=${jobId}`
   }, [compraId, isListMode, jobId, listLimit, listPage, listQuery, listStatus])
 
-  const setSearchParams = useCallback((updater) => {
-    const nextParams = new URLSearchParams(window.location.search)
+  const updateSearchParams = useCallback((updater) => {
+    const nextParams = new URLSearchParams(searchParams)
     updater(nextParams)
-    const nextSearch = nextParams.toString()
-    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}`
-    window.history.pushState({}, '', nextUrl)
-    window.dispatchEvent(new Event('aurea:location-change'))
-    setLocationSearch(window.location.search)
-  }, [])
-
-  useEffect(() => {
-    const onPopState = () => setLocationSearch(window.location.search)
-    window.addEventListener('popstate', onPopState)
-    window.addEventListener('aurea:location-change', onPopState)
-    return () => {
-      window.removeEventListener('popstate', onPopState)
-      window.removeEventListener('aurea:location-change', onPopState)
-    }
-  }, [])
+    setSearchParams(nextParams)
+  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     dataRef.current = data
@@ -242,7 +231,7 @@ export function useAiCampaignMonitor() {
 
   const updateListFilters = useCallback(
     (patch) => {
-      setSearchParams((next) => {
+      updateSearchParams((next) => {
         next.set('mode', 'list')
         if (patch.page !== undefined) next.set('page', String(Math.max(1, patch.page)))
         if (patch.limit !== undefined) next.set('limit', String(toLimit(String(patch.limit), 20)))
@@ -268,49 +257,23 @@ export function useAiCampaignMonitor() {
         }
       })
     },
-    [setSearchParams]
+    [updateSearchParams]
   )
 
   const openJobDetail = useCallback(
     (selectedJobId) => {
-      setSearchParams((next) => {
-        next.set('job_id', selectedJobId)
-        next.delete('compra_id')
-        next.delete('mode')
-        next.delete('page')
-        next.delete('limit')
-        next.delete('status')
-        next.delete('q')
-        next.delete('compra')
-        next.delete('celebrity')
-      })
+      navigate(`/ai-step2/monitor/jobs/${encodeURIComponent(selectedJobId)}`)
     },
-    [setSearchParams]
+    [navigate]
   )
 
   const backToList = useCallback(() => {
-    setSearchParams((next) => {
-      next.delete('job_id')
-      next.delete('compra_id')
-      next.set('mode', 'list')
-      if (!next.get('page')) next.set('page', '1')
-      if (!next.get('limit')) next.set('limit', '20')
-    })
-  }, [setSearchParams])
+    navigate('/ai-step2/monitor?mode=list&page=1&limit=20')
+  }, [navigate])
 
   const goHome = useCallback(() => {
-    setSearchParams((next) => {
-      next.delete('job_id')
-      next.delete('compra_id')
-      next.delete('page')
-      next.delete('limit')
-      next.delete('status')
-      next.delete('q')
-      next.delete('compra')
-      next.delete('celebrity')
-      next.set('mode', 'list')
-    })
-  }, [setSearchParams])
+    navigate('/ai-step2/monitor')
+  }, [navigate])
 
   const retryRequest = useCallback(
     async (payload) => {
