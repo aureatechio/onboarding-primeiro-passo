@@ -6,6 +6,22 @@ import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { useAuth } from '../context/AuthContext'
 
 const DEFAULT_NEXT = '/ai-step2/monitor?mode=list'
+const RATE_LIMIT_COOLDOWN_SECONDS = 60
+const RATE_LIMIT_MESSAGE = 'Muitas tentativas de login. Aguarde alguns instantes e tente novamente.'
+
+function isRateLimitError(err) {
+  const status = Number(err?.status ?? err?.statusCode ?? 0)
+  const code = String(err?.code ?? err?.error_code ?? '').toLowerCase()
+  const message = String(err?.message ?? '').toLowerCase()
+
+  return (
+    status === 429 ||
+    code.includes('rate') ||
+    code.includes('too_many') ||
+    message.includes('too many') ||
+    message.includes('rate limit')
+  )
+}
 
 function readNext() {
   const params = new URLSearchParams(window.location.search)
@@ -25,9 +41,12 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const redirectedRef = useRef(false)
+  const submitInFlightRef = useRef(false)
 
   const next = useMemo(() => readNext(), [])
+  const isCoolingDown = cooldownSeconds > 0
 
   useEffect(() => {
     if (redirectedRef.current) return
@@ -37,9 +56,18 @@ export default function Login() {
     }
   }, [isAuthenticated, isAuthLoading, next])
 
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return undefined
+    const timer = window.setTimeout(() => {
+      setCooldownSeconds((current) => Math.max(0, current - 1))
+    }, 1000)
+    return () => window.clearTimeout(timer)
+  }, [cooldownSeconds])
+
   async function handleSubmit(event) {
     event.preventDefault()
-    if (submitting || envError) return
+    if (submitInFlightRef.current || submitting || envError || isCoolingDown) return
+    submitInFlightRef.current = true
     setSubmitting(true)
     setError(null)
     try {
@@ -48,17 +76,21 @@ export default function Login() {
       navigateReplace(next)
     } catch (err) {
       const message = err?.message || ''
-      if (message.toLowerCase().includes('invalid')) {
+      if (isRateLimitError(err)) {
+        setError(RATE_LIMIT_MESSAGE)
+        setCooldownSeconds(RATE_LIMIT_COOLDOWN_SECONDS)
+      } else if (message.toLowerCase().includes('invalid')) {
         setError('E-mail ou senha invalidos.')
       } else {
         setError(message || 'Nao foi possivel entrar. Tente novamente.')
       }
     } finally {
+      submitInFlightRef.current = false
       setSubmitting(false)
     }
   }
 
-  const disabled = submitting || envError || !email || !password
+  const disabled = submitting || envError || isCoolingDown || !email || !password
 
   return (
     <div
@@ -107,7 +139,7 @@ export default function Login() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={submitting || envError}
+            disabled={submitting || envError || isCoolingDown}
             required
           />
 
@@ -117,7 +149,7 @@ export default function Login() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={submitting || envError}
+            disabled={submitting || envError || isCoolingDown}
             required
           />
 
@@ -134,7 +166,7 @@ export default function Login() {
             size="lg"
             style={{ marginTop: 4 }}
           >
-            {submitting ? 'Entrando…' : 'Entrar'}
+            {submitting ? 'Entrando…' : isCoolingDown ? `Aguarde ${cooldownSeconds}s` : 'Entrar'}
           </DashboardButton>
 
           <DashboardButton
