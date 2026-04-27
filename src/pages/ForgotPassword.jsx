@@ -6,7 +6,7 @@ import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
-const DEFAULT_DASHBOARD_URL = 'https://onboarding-primeiro-passo.vercel.app'
+const DEFAULT_DASHBOARD_URL = 'https://acelerai-primeiro-passo.vercel.app'
 
 function normalizeBaseUrl(value) {
   const raw = String(value || '').trim()

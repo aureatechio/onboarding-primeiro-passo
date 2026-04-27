@@ -77,7 +77,7 @@ deno test supabase/functions/_shared/ --allow-env --allow-net --allow-read
 
 ## Frontend App
 
-React 19 + Vite SPA deployed on Vercel at `https://onboarding-primeiro-passo.vercel.app`.
+React 19 + Vite SPA deployed on Vercel at `https://acelerai-primeiro-passo.vercel.app`.
 
 Public onboarding flow:
 
@@ -99,7 +99,7 @@ Important frontend facts:
 - `App.jsx` uses manual route handling, not `react-router`
 - Design tokens live in `src/theme/design-tokens.js`
 - Password recovery callbacks must use `VITE_DASHBOARD_URL` as the canonical base for `/reset-password`; do not rely only on `window.location.origin`, because local requests can generate `localhost` recovery links.
-- Supabase Auth URL Configuration for production must allow `https://onboarding-primeiro-passo.vercel.app/reset-password` and must not use `localhost` as the production Site URL. Localhost redirect URLs are only acceptable for intentional local development.
+- Supabase Auth URL Configuration for production must allow `https://acelerai-primeiro-passo.vercel.app/reset-password` and must not use `localhost` as the production Site URL. Localhost redirect URLs are only acceptable for intentional local development.
 
 ## Supabase Critical Rules
 

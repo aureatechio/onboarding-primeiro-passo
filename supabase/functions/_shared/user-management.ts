@@ -14,6 +14,7 @@ export type InvitationAuthFields = {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const DEFAULT_DASHBOARD_URL = 'https://acelerai-primeiro-passo.vercel.app'
 
 export function json(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -90,9 +91,7 @@ export async function isOnlyAdmin(
 
 export function inviteRedirectTo(req: Request): string | undefined {
   const configured = Deno.env.get('DASHBOARD_URL') || Deno.env.get('SITE_URL')
-  if (configured) return `${configured.replace(/\/$/, '')}/reset-password?type=invite`
+  const baseUrl = configured || DEFAULT_DASHBOARD_URL
 
-  const origin = req.headers.get('origin')
-  if (!origin) return undefined
-  return `${origin.replace(/\/$/, '')}/reset-password?type=invite`
+  return `${baseUrl.replace(/\/$/, '')}/reset-password?type=invite`
 }

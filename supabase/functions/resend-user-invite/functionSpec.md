@@ -20,7 +20,7 @@ Reenvia convite Supabase Auth para usuarios convidados que ainda nao aceitaram o
 - So permite reenviar quando `auth.users.invited_at` existe e o usuario ainda nao tem `email_confirmed_at`, `confirmed_at` ou `last_sign_in_at`.
 - Bloqueia usuario com `profiles.status = disabled`.
 - Reenvia pelo Supabase Auth com `serviceClient.auth.admin.inviteUserByEmail`.
-- `redirectTo` usa `DASHBOARD_URL`, `SITE_URL` ou `Origin` + `/reset-password?type=invite`.
+- `redirectTo` usa `DASHBOARD_URL`, `SITE_URL` ou o dominio canonico de producao + `/reset-password?type=invite`.
 - Nao altera role nem status.
 
 ## Response

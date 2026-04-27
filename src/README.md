@@ -1,6 +1,6 @@
 # `src/` — Onboarding SPA (React 19 + Vite)
 
-SPA do onboarding **Primeiro Passo**, servido em `https://onboarding-primeiro-passo.vercel.app`. Sem TypeScript (exceto 1 arquivo de teste).
+SPA do onboarding **Primeiro Passo**, servido em `https://acelerai-primeiro-passo.vercel.app`. Sem TypeScript (exceto 1 arquivo de teste).
 
 ## Estrutura
 

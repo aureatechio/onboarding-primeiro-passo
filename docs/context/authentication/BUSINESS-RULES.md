@@ -96,7 +96,7 @@ Links de recovery usam `/reset-password`. Convites usam `/reset-password?type=in
 
 O redirect de recovery nao deve depender cegamente de `window.location.origin`, porque links disparados em ambiente local acabam redirecionando para `localhost`. Use `VITE_DASHBOARD_URL` como base canonica; fallback para origin so e aceitavel quando nao for host local.
 
-A configuracao de URL do Supabase Auth em producao tambem deve apontar para o dominio real do dashboard e permitir `https://onboarding-primeiro-passo.vercel.app/reset-password`. `localhost` deve ficar restrito a desenvolvimento local intencional.
+A configuracao de URL do Supabase Auth em producao tambem deve apontar para o dominio real do dashboard e permitir `https://acelerai-primeiro-passo.vercel.app/reset-password`. `localhost` deve ficar restrito a desenvolvimento local intencional.
 
 ## 18. Nao remover `detectSessionInUrl: false` sem revisar `/reset-password`
 

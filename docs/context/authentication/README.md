@@ -92,14 +92,14 @@ Edge Functions:
 | `SUPABASE_URL` | URL do projeto Supabase no runtime Deno |
 | `SUPABASE_ANON_KEY` | Usada por `_shared/auth.ts` para validar token com `auth.getUser()` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Usada somente no backend para operacoes privilegiadas |
-| `DASHBOARD_URL` ou `SITE_URL` | Base preferencial do redirect de convite para `/reset-password?type=invite` |
+| `DASHBOARD_URL` ou `SITE_URL` | Base preferencial do redirect de convite para `/reset-password?type=invite`; se ausentes, as funcoes usam o dominio canonico de producao |
 
 `SUPABASE_SERVICE_ROLE_KEY` nunca pode ir para o frontend.
 
 Configuracao externa no Supabase Auth:
 
 - Production Site URL nao deve ser `localhost`.
-- Redirect URLs permitidas devem incluir `https://onboarding-primeiro-passo.vercel.app/reset-password`.
+- Redirect URLs permitidas devem incluir `https://acelerai-primeiro-passo.vercel.app/reset-password`.
 - URLs `http://localhost:*` so devem existir para desenvolvimento local intencional.
 
 ## Fluxos de autenticacao
@@ -145,7 +145,7 @@ Configuracao externa no Supabase Auth:
 
 1. Admin usa `/users` para convidar.
 2. `invite-user` chama `serviceClient.auth.admin.inviteUserByEmail`.
-3. Redirect usa `DASHBOARD_URL`, `SITE_URL` ou `Origin` + `/reset-password?type=invite`.
+3. Redirect usa `DASHBOARD_URL`, `SITE_URL` ou o dominio canonico de producao + `/reset-password?type=invite`.
 4. A funcao faz upsert em `profiles` com `status = active`.
 5. A funcao faz upsert em `user_roles` com role inicial.
 6. Usuario convidado define senha em `/reset-password?type=invite`.

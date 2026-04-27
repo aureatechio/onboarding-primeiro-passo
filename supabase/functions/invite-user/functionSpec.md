@@ -18,7 +18,7 @@ Envia convite Supabase Auth e atribui profile/role inicial.
 
 ## Regras
 - Usa `serviceClient.auth.admin.inviteUserByEmail`.
-- `redirectTo` usa `DASHBOARD_URL`, `SITE_URL` ou `Origin` + `/reset-password?type=invite`.
+- `redirectTo` usa `DASHBOARD_URL`, `SITE_URL` ou o dominio canonico de producao + `/reset-password?type=invite`.
 - Upsert em `profiles` com `status='active'`.
 - Upsert em `user_roles` com `assigned_by` e `assigned_at`.
 
