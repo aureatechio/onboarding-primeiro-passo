@@ -106,6 +106,10 @@ Functions e grava apenas nas tabelas `onboarding_*`, `ai_campaign_*` ou configs.
 - Policies RLS nao devem consultar diretamente tabelas protegidas; usar helpers
   `SECURITY DEFINER`.
 - Migrations existentes sao imutaveis.
+- Se o historico remoto tiver migrations ausentes localmente, nao usar
+  `supabase db push`; aplicar somente a migration nova com
+  `supabase db query --linked -f` e registrar a versao com
+  `supabase migration repair --linked --status applied <version>`.
 
 ## Como atualizar este mapeamento
 

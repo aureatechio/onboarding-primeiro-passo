@@ -116,6 +116,19 @@ Important frontend facts:
 
 Never edit an existing migration. Always create a new migration file.
 
+Remote migration history for project `awqtzoefutnfmnbomujt` is intentionally
+not assumed to match the local `supabase/migrations/` directory. If
+`supabase db push --dry-run` reports remote versions missing locally, do not
+run broad `migration repair --status reverted` and do not use `db push`.
+Apply only the new migration file with:
+
+```bash
+supabase db query --linked -f supabase/migrations/<new_migration>.sql
+supabase migration repair --linked --status applied <version>
+```
+
+Afterward, verify the created objects with targeted read-only queries.
+
 ### RLS
 
 Never query RLS-protected tables directly inside policy definitions. Use `SECURITY DEFINER` helpers such as:

@@ -185,6 +185,19 @@ supabase functions deploy <name> --project-ref awqtzoefutnfmnbomujt --no-verify-
 supabase db reset   # aplica todas as migrations em ordem
 ```
 
+Para aplicar schema no remoto, primeiro rode `supabase db push --dry-run`.
+Se o dry-run reportar migrations remotas que nao existem no repo local, **nao**
+use `supabase db push` e **nao** faca `migration repair --status reverted` em
+massa. Esse projeto pode ter historico remoto compartilhado com outros fluxos.
+Nesse caso, aplique somente a migration nova:
+
+```bash
+supabase db query --linked -f supabase/migrations/<new_migration>.sql
+supabase migration repair --linked --status applied <version>
+```
+
+Depois confirme os objetos criados com consultas read-only direcionadas.
+
 ### Testes Deno
 
 ```bash

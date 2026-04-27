@@ -10,21 +10,12 @@ import { useAuth } from '../context/AuthContext'
 import { recordDashboardActivity } from '../lib/dashboard-activity'
 
 const DEFAULT_NEXT = '/ai-step2/monitor'
-const RATE_LIMIT_COOLDOWN_SECONDS = 60
+const RATE_LIMIT_COOLDOWN_SECONDS = 15
 const RATE_LIMIT_MESSAGE = 'Muitas tentativas de login. Aguarde alguns instantes e tente novamente.'
 
 function isRateLimitError(err) {
   const status = Number(err?.status ?? err?.statusCode ?? 0)
-  const code = String(err?.code ?? err?.error_code ?? '').toLowerCase()
-  const message = String(err?.message ?? '').toLowerCase()
-
-  return (
-    status === 429 ||
-    code.includes('rate') ||
-    code.includes('too_many') ||
-    message.includes('too many') ||
-    message.includes('rate limit')
-  )
+  return status === 429
 }
 
 function readNext(searchParams) {

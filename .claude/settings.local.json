@@ -83,7 +83,9 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(echo \"EXIT=$? \\(should be 0, no side effect\\)\")",
       "Bash(cp /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/sdd-spec-creator/SKILL.md /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/sdd-spec-creator/SKILL.md)",
-      "Bash(cp /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/task-enricher/SKILL.md /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/task-enricher/SKILL.md)"
+      "Bash(cp /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/task-enricher/SKILL.md /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/task-enricher/SKILL.md)",
+      "mcp__77f38189-d575-4ae0-8f53-8e8227b51237__list_migrations",
+      "mcp__77f38189-d575-4ae0-8f53-8e8227b51237__list_edge_functions"
     ]
   },
   "enableAllProjectMcpServers": true,

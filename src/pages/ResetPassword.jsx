@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
+import { Eye, EyeOff } from 'lucide-react'
 import TopBarLogo from '../components/TopBarLogo'
-import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
+import { DashboardButton, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
+import { dashboardMotion, focusVisibleStyle } from '../theme/dashboard-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
@@ -32,10 +34,16 @@ export default function ResetPassword() {
   const [errorMessage, setErrorMessage] = useState(null)
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [passwordFocused, setPasswordFocused] = useState(false)
+  const [confirmFocused, setConfirmFocused] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
   const processedUrlRef = useRef(null)
   const validatedLinkRef = useRef(false)
+  const passwordFieldId = useId()
+  const confirmFieldId = useId()
 
   useEffect(() => {
     if (envError || !authClient) return
@@ -167,27 +175,131 @@ export default function ResetPassword() {
 
         {status === 'ready' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <DashboardField
-              label="Nova senha"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={submitting}
-              required
-              minLength={MIN_PASSWORD}
-            />
+            <div style={{ display: 'grid', gap: 6 }}>
+              <label
+                htmlFor={passwordFieldId}
+                style={{
+                  color: monitorTheme.textSecondary,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Nova senha
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id={passwordFieldId}
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={submitting}
+                  required
+                  minLength={MIN_PASSWORD}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
+                  style={{
+                    width: '100%',
+                    background: monitorTheme.controlBg,
+                    border: `1px solid ${monitorTheme.controlBorder}`,
+                    borderRadius: monitorRadius.md,
+                    color: monitorTheme.controlText,
+                    font: 'inherit',
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    padding: '10px 44px 10px 12px',
+                    transition: dashboardMotion.fast,
+                    boxSizing: 'border-box',
+                    ...(passwordFocused ? focusVisibleStyle : null),
+                  }}
+                />
+                <DashboardButton
+                  type="button"
+                  variant="icon"
+                  size="sm"
+                  icon={showPassword ? EyeOff : Eye}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((current) => !current)}
+                  disabled={submitting || !password}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: 6,
+                    width: 32,
+                    minHeight: 32,
+                    height: 32,
+                    transform: 'translateY(-50%)',
+                    color: monitorTheme.textSecondary,
+                  }}
+                />
+              </div>
+            </div>
 
-            <DashboardField
-              label="Confirmar senha"
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              disabled={submitting}
-              required
-              minLength={MIN_PASSWORD}
-            />
+            <div style={{ display: 'grid', gap: 6 }}>
+              <label
+                htmlFor={confirmFieldId}
+                style={{
+                  color: monitorTheme.textSecondary,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Confirmar senha
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id={confirmFieldId}
+                  type={showConfirm ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  disabled={submitting}
+                  required
+                  minLength={MIN_PASSWORD}
+                  onFocus={() => setConfirmFocused(true)}
+                  onBlur={() => setConfirmFocused(false)}
+                  style={{
+                    width: '100%',
+                    background: monitorTheme.controlBg,
+                    border: `1px solid ${monitorTheme.controlBorder}`,
+                    borderRadius: monitorRadius.md,
+                    color: monitorTheme.controlText,
+                    font: 'inherit',
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    padding: '10px 44px 10px 12px',
+                    transition: dashboardMotion.fast,
+                    boxSizing: 'border-box',
+                    ...(confirmFocused ? focusVisibleStyle : null),
+                  }}
+                />
+                <DashboardButton
+                  type="button"
+                  variant="icon"
+                  size="sm"
+                  icon={showConfirm ? EyeOff : Eye}
+                  aria-label={showConfirm ? 'Ocultar confirmação' : 'Mostrar confirmação'}
+                  aria-pressed={showConfirm}
+                  onClick={() => setShowConfirm((current) => !current)}
+                  disabled={submitting || !confirm}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: 6,
+                    width: 32,
+                    minHeight: 32,
+                    height: 32,
+                    transform: 'translateY(-50%)',
+                    color: monitorTheme.textSecondary,
+                  }}
+                />
+              </div>
+            </div>
 
             {formError && (
               <InlineNotice tone="error">
