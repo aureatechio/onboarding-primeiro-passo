@@ -6,9 +6,9 @@ Regras criticas extraidas do codigo, migrations e functionSpecs. Violar qualquer
 
 Credenciais, convites, recuperacao de senha, access token e refresh token pertencem ao Supabase Auth. Nao criar mecanismo paralelo de senha ou token no frontend.
 
-## 2. `profiles` e `user_roles` sao obrigatorios para todo usuario interno
+## 2. `profiles` e `user_roles` sao obrigatorios para todo usuario com acesso interno
 
-Todo usuario autenticado deve ter uma linha em `public.profiles` e uma linha em `public.user_roles`. O trigger `handle_new_user` cria ambas as linhas para novos usuarios.
+Todo usuario com acesso ao dashboard deve ter uma linha em `public.profiles` e uma linha em `public.user_roles`. O trigger `handle_new_user` cria ambas as linhas para novos usuarios.
 
 ## 3. Role default e `viewer`
 
@@ -102,13 +102,17 @@ O app trata manualmente os tokens de recovery/invite em `ResetPassword.jsx`. Alt
 
 `Login.jsx` so aceita `next` iniciado por `/`. Qualquer mudanca no redirect pos-login deve manter essa protecao contra URL externa.
 
+## 19.1. Remocao de acesso ao app nao apaga Auth
+
+Excluir usuario na tela `/users` significa remover acesso deste app: apagar registros em `public.profiles`, `public.user_roles` e `public.dashboard_user_activity`, sem apagar a conta em `auth.users`. Usuarios sem `profiles` + `user_roles` nao devem aparecer na lista de usuarios nem acessar o dashboard.
+
 ## 20. Nao bloquear o ultimo admin
 
-Nao e permitido rebaixar, desativar ou excluir o unico admin. As Edge Functions de user management devem manter a checagem `LAST_ADMIN`.
+Nao e permitido rebaixar, desativar ou remover acesso do unico admin. As Edge Functions de user management devem manter a checagem `LAST_ADMIN`.
 
 ## 21. Admin nao pode excluir a propria conta
 
-`delete-user` deve manter bloqueio de auto-delete (`SELF_DELETE`) para evitar perda acidental de acesso durante operacao administrativa.
+`delete-user` deve manter bloqueio de auto-delete (`SELF_DELETE`) para evitar perda acidental do proprio acesso durante operacao administrativa.
 
 ## 22. Usuario comum so edita campos permitidos do proprio perfil
 
@@ -137,6 +141,10 @@ Cada usuario tem exatamente uma role ativa. Nao modelar multiplas roles por usua
 ## 28. Convite deve criar profile e role
 
 `invite-user` deve enviar convite pelo Supabase Auth e fazer upsert em `profiles` e `user_roles`. Usuario convidado sem role cai em comportamento inconsistente.
+
+## 28.1. Reenvio de convite nao altera permissao
+
+`resend-user-invite` deve aceitar apenas usuarios convidados com convite pendente. Nao deve alterar `profiles.status`, `user_roles.role` ou recriar usuarios ja confirmados.
 
 ## 29. CORS deve aceitar headers de auth
 

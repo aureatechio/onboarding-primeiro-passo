@@ -1,13 +1,17 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { handleCors } from '../_shared/cors.ts'
 import { isRbacError, requireAdmin, type AppRole } from '../_shared/rbac.ts'
-import { json, parseRole, parseStatus } from '../_shared/user-management.ts'
+import { isPendingInvite, json, parseRole, parseStatus, resolveInvitationStatus } from '../_shared/user-management.ts'
 
 type AuthUser = {
   id: string
   email?: string | null
   created_at?: string | null
   last_sign_in_at?: string | null
+  invited_at?: string | null
+  confirmation_sent_at?: string | null
+  confirmed_at?: string | null
+  email_confirmed_at?: string | null
 }
 
 function readPositiveInt(value: string | null, fallback: number, max: number): number {
@@ -67,33 +71,54 @@ Deno.serve(async (req) => {
         : Promise.resolve({ data: [], error: null }),
     ])
 
-  if (profileError || roleError) {
+  const { data: activities, error: activityError } = ids.length
+    ? await serviceClient
+      .from('dashboard_user_activity')
+      .select('user_id, last_login_at, last_seen_at, login_count')
+      .in('user_id', ids)
+    : { data: [], error: null }
+
+  if (profileError || roleError || activityError) {
     return json({
       success: false,
       code: 'DB_ERROR',
-      message: profileError?.message || roleError?.message || 'Erro ao listar usuarios.',
+      message: profileError?.message || roleError?.message || activityError?.message || 'Erro ao listar usuarios.',
     }, 500)
   }
 
   const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile]))
   const roleById = new Map((roles ?? []).map((role) => [role.user_id, role]))
+  const activityById = new Map((activities ?? []).map((activity) => [activity.user_id, activity]))
 
   const allUsers = authUsers
+    .filter((authUser) => profileById.has(authUser.id) && roleById.has(authUser.id))
     .map((authUser) => {
       const profile = profileById.get(authUser.id)
       const role = roleById.get(authUser.id)
+      const activity = activityById.get(authUser.id)
+      const status = profile?.status || 'active'
       return {
         id: authUser.id,
         email: profile?.email || authUser.email || null,
         full_name: profile?.full_name || '',
         avatar_url: profile?.avatar_url || null,
         role: (role?.role || 'viewer') as AppRole,
-        status: profile?.status || 'active',
+        status,
         assigned_by: role?.assigned_by || null,
         assigned_at: role?.assigned_at || null,
         created_at: profile?.created_at || authUser.created_at || null,
         updated_at: profile?.updated_at || null,
+        invited_at: authUser.invited_at || null,
+        confirmation_sent_at: authUser.confirmation_sent_at || null,
+        confirmed_at: authUser.confirmed_at || null,
+        email_confirmed_at: authUser.email_confirmed_at || null,
+        invite_status: resolveInvitationStatus(authUser),
+        can_resend_invite: status !== 'disabled' && isPendingInvite(authUser),
         last_sign_in_at: authUser.last_sign_in_at || null,
+        auth_last_sign_in_at: authUser.last_sign_in_at || null,
+        app_last_login_at: activity?.last_login_at || null,
+        app_last_seen_at: activity?.last_seen_at || null,
+        app_login_count: activity?.login_count ?? 0,
       }
     })
     .filter((user) => {

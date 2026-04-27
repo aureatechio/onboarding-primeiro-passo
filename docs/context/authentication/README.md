@@ -20,6 +20,7 @@ Contrato atual implementado:
 | Status validos | `active`, `disabled` |
 | Tabela de perfil | `public.profiles` |
 | Tabela de RBAC | `public.user_roles` |
+| Tabela de atividade no dashboard | `public.dashboard_user_activity` |
 | Cliente frontend | `src/lib/auth-client.js` |
 | Estado global | `src/context/AuthContext.jsx` |
 | Fetch admin | `src/lib/admin-edge.js` |
@@ -105,8 +106,10 @@ Edge Functions:
 5. `Login.jsx` chama `signInWithPassword({ email, password })`.
 6. `AuthContext` usa `authClient.auth.signInWithPassword`.
 7. `AuthContext` busca `profiles` e `user_roles`.
-8. Se `profiles.status = disabled`, faz `signOut()` e bloqueia o login.
-9. Em sucesso, volta para `next` ou `/ai-step2/monitor?mode=list`.
+8. Se nao existir `profiles` + `user_roles`, faz `signOut()` e bloqueia o acesso ao app.
+9. Se `profiles.status = disabled`, faz `signOut()` e bloqueia o login.
+10. `Login.jsx` chama `record-dashboard-activity` com `event = login`.
+11. Em sucesso, volta para `next` ou `/ai-step2/monitor?mode=list`.
 
 ### Reidratacao de sessao
 
@@ -139,6 +142,7 @@ Edge Functions:
 4. A funcao faz upsert em `profiles` com `status = active`.
 5. A funcao faz upsert em `user_roles` com role inicial.
 6. Usuario convidado define senha em `/reset-password?type=invite`.
+7. Enquanto o convite estiver pendente, `/users` pode chamar `resend-user-invite` para reenviar o e-mail sem alterar role/status.
 
 ## Rotas do dashboard
 
@@ -198,6 +202,8 @@ RLS:
 
 As policies nao devem consultar diretamente tabelas protegidas; use helpers `SECURITY DEFINER`.
 
+Remover acesso ao app pela funcao `delete-user` apaga `profiles`, `user_roles` e `dashboard_user_activity`, mas preserva `auth.users`.
+
 ## Edge Functions protegidas
 
 Padrao de backend:
@@ -213,6 +219,7 @@ Funcoes de gestao de usuarios:
 | --- | --- |
 | `list-users` | `admin` |
 | `invite-user` | `admin` |
+| `resend-user-invite` | `admin` |
 | `update-user-role` | `admin` |
 | `set-user-status` | `admin` |
 | `delete-user` | `admin` |

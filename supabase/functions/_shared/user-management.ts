@@ -3,6 +3,13 @@ import { type AppRole, assertValidRole } from './rbac.ts'
 
 export const VALID_STATUSES = ['active', 'disabled'] as const
 export type UserStatus = (typeof VALID_STATUSES)[number]
+export type InvitationStatus = 'pending' | 'accepted' | 'not_invited'
+export type InvitationAuthFields = {
+  invited_at?: string | null
+  email_confirmed_at?: string | null
+  confirmed_at?: string | null
+  last_sign_in_at?: string | null
+}
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -44,6 +51,16 @@ export function parseFullName(value: unknown): string | null {
   const normalized = String(value ?? '').trim().replace(/\s+/g, ' ')
   if (!normalized) return null
   return normalized.slice(0, 160)
+}
+
+export function resolveInvitationStatus(user: InvitationAuthFields): InvitationStatus {
+  if (!user.invited_at) return 'not_invited'
+  if (user.email_confirmed_at || user.confirmed_at || user.last_sign_in_at) return 'accepted'
+  return 'pending'
+}
+
+export function isPendingInvite(user: InvitationAuthFields): boolean {
+  return resolveInvitationStatus(user) === 'pending'
 }
 
 export async function countAdmins(serviceClient: SupabaseClient): Promise<number> {

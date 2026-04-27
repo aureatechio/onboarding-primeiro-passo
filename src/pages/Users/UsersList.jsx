@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Edit3, Plus, RefreshCw, Search, Users } from 'lucide-react'
+import { Edit3, MailPlus, Plus, RefreshCw, Search, Users } from 'lucide-react'
 import { DashboardButton, DashboardField, InlineNotice } from '../../components/dashboard'
 import { adminFetch } from '../../lib/admin-edge'
 import { TYPE, designTokens } from '../../theme/design-tokens'
@@ -13,6 +13,8 @@ const ROLE_LABELS = { admin: 'Admin', operator: 'Operator', viewer: 'Viewer' }
 const STATUS_LABELS = { active: 'Ativo', disabled: 'Desativado' }
 const ROLE_BADGE_TONES = { admin: 'warning', operator: 'info', viewer: 'neutral' }
 const STATUS_BADGE_TONES = { active: 'success', disabled: 'danger' }
+const INVITE_STATUS_LABELS = { pending: 'Pendente', accepted: 'Aceito', not_invited: 'N/A' }
+const INVITE_STATUS_TONES = { pending: 'warning', accepted: 'success', not_invited: 'neutral' }
 const EMPTY_SUMMARY = {
   total: 0,
   roles: { admin: 0, operator: 0, viewer: 0 },
@@ -34,8 +36,10 @@ export default function UsersList() {
   const [summary, setSummary] = useState(EMPTY_SUMMARY)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
+  const [resendingUserId, setResendingUserId] = useState(null)
 
   const filters = {
     search: searchParams.get('search') || '',
@@ -81,6 +85,22 @@ export default function UsersList() {
     if (value) next.set(key, value)
     else next.delete(key)
     setSearchParams(next)
+  }
+
+  async function resendInvite(user) {
+    if (!user?.can_resend_invite || resendingUserId) return
+    setResendingUserId(user.id)
+    setError('')
+    setNotice('')
+    try {
+      await adminFetch('resend-user-invite', { method: 'POST', body: { user_id: user.id } })
+      setNotice(`Convite reenviado para ${user.email}.`)
+      await fetchUsers()
+    } catch (err) {
+      setError(err?.message || 'Nao foi possivel reenviar o convite.')
+    } finally {
+      setResendingUserId(null)
+    }
   }
 
   return (
@@ -150,22 +170,23 @@ export default function UsersList() {
           <SummaryItem label="Viewers" value={summary.roles.viewer} tone="neutral" />
         </section>
 
+        {notice && <InlineNotice tone="success">{notice}</InlineNotice>}
         {error && <InlineNotice tone="error">{error}</InlineNotice>}
 
         <section style={tableWrapStyle}>
           <table style={tableStyle}>
             <thead>
               <tr>
-                {['Nome', 'Email', 'Role', 'Status', 'Ultimo login', ''].map((heading) => (
+                {['Nome', 'Email', 'Role', 'Status', 'Convite', 'Último login no app', 'Última atividade', ''].map((heading) => (
                   <th key={heading} style={thStyle}>{heading}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="6" style={emptyStyle}>Carregando usuarios...</td></tr>
+                <tr><td colSpan="8" style={emptyStyle}>Carregando usuarios...</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan="6" style={emptyStyle}>Nenhum usuario encontrado.</td></tr>
+                <tr><td colSpan="8" style={emptyStyle}>Nenhum usuario encontrado.</td></tr>
               ) : users.map((user) => (
                 <tr key={user.id}>
                   <td style={tdStyle}>{user.full_name || '-'}</td>
@@ -180,11 +201,32 @@ export default function UsersList() {
                       {STATUS_LABELS[user.status] || user.status}
                     </Badge>
                   </td>
-                  <td style={tdStyle}>{formatDate(user.last_sign_in_at)}</td>
+                  <td style={tdStyle}>
+                    <Badge tone={INVITE_STATUS_TONES[user.invite_status]}>
+                      {INVITE_STATUS_LABELS[user.invite_status] || '-'}
+                    </Badge>
+                  </td>
+                  <td style={tdStyle}>{formatDate(user.app_last_login_at)}</td>
+                  <td style={tdStyle}>{formatDate(user.app_last_seen_at)}</td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    <DashboardButton type="button" onClick={() => setEditingUser(user)} variant="icon" size="sm" aria-label="Editar usuário">
-                      <Edit3 size={14} />
-                    </DashboardButton>
+                    <div style={actionsStyle}>
+                      {user.can_resend_invite && (
+                        <DashboardButton
+                          type="button"
+                          onClick={() => resendInvite(user)}
+                          disabled={Boolean(resendingUserId)}
+                          variant="icon"
+                          size="sm"
+                          aria-label={`Reenviar convite para ${user.email}`}
+                          title="Reenviar convite"
+                        >
+                          <MailPlus size={14} />
+                        </DashboardButton>
+                      )}
+                      <DashboardButton type="button" onClick={() => setEditingUser(user)} variant="icon" size="sm" aria-label="Editar usuário">
+                        <Edit3 size={14} />
+                      </DashboardButton>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -329,7 +371,7 @@ const tableWrapStyle = {
   overflowY: 'hidden',
   background: monitorTheme.cardMutedBg,
 }
-const tableStyle = { width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13 }
+const tableStyle = { width: '100%', minWidth: 1060, borderCollapse: 'collapse', fontSize: 13 }
 const thStyle = {
   color: monitorTheme.textMuted,
   fontSize: 11,
@@ -346,3 +388,4 @@ const tdStyle = {
   borderBottom: `1px solid ${monitorTheme.borderSoft}`,
 }
 const emptyStyle = { ...tdStyle, color: monitorTheme.textSecondary, textAlign: 'center', padding: 30 }
+const actionsStyle = { display: 'inline-flex', justifyContent: 'flex-end', gap: 8 }
