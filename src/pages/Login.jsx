@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { Eye, EyeOff } from 'lucide-react'
 import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
+import { dashboardMotion, focusVisibleStyle } from '../theme/dashboard-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { useAuth } from '../context/AuthContext'
 
@@ -39,11 +41,15 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordFocused, setPasswordFocused] = useState(false)
   const redirectedRef = useRef(false)
   const submitInFlightRef = useRef(false)
+  const passwordFieldId = useId()
 
   const next = useMemo(() => readNext(searchParams), [searchParams])
   const isCoolingDown = cooldownSeconds > 0
+  const authControlsDisabled = submitting || envError || isCoolingDown
 
   useEffect(() => {
     if (redirectedRef.current) return
@@ -117,16 +123,16 @@ export default function Login() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <TopBarLogo height={22} maxWidth={140} />
-            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Acesso ao painel</h1>
-            <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
-              Entre com sua conta para continuar.
-            </p>
-          </div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Acesso ao painel</h1>
+          <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
+            Entre com sua conta para continuar.
+          </p>
+        </div>
 
-          {envError && (
-            <InlineNotice tone="error">
-              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
-            </InlineNotice>
+        {envError && (
+          <InlineNotice tone="error">
+            Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+          </InlineNotice>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -136,19 +142,71 @@ export default function Login() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={submitting || envError || isCoolingDown}
+            disabled={authControlsDisabled}
             required
           />
 
-          <DashboardField
-            label="Senha"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={submitting || envError || isCoolingDown}
-            required
-          />
+          <div style={{ display: 'grid', gap: 6 }}>
+            <label
+              htmlFor={passwordFieldId}
+              style={{
+                color: monitorTheme.textSecondary,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Senha
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id={passwordFieldId}
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={authControlsDisabled}
+                required
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
+                style={{
+                  width: '100%',
+                  background: monitorTheme.controlBg,
+                  border: `1px solid ${monitorTheme.controlBorder}`,
+                  borderRadius: monitorRadius.md,
+                  color: monitorTheme.controlText,
+                  font: 'inherit',
+                  fontSize: 13,
+                  lineHeight: 1.45,
+                  padding: '10px 44px 10px 12px',
+                  transition: dashboardMotion.fast,
+                  boxSizing: 'border-box',
+                  ...(passwordFocused ? focusVisibleStyle : null),
+                }}
+              />
+              <DashboardButton
+                type="button"
+                variant="icon"
+                size="sm"
+                icon={showPassword ? EyeOff : Eye}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((current) => !current)}
+                disabled={authControlsDisabled || !password}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: 6,
+                  width: 32,
+                  minHeight: 32,
+                  height: 32,
+                  transform: 'translateY(-50%)',
+                  color: monitorTheme.textSecondary,
+                }}
+              />
+            </div>
+          </div>
 
           {error && (
             <InlineNotice tone="error">
