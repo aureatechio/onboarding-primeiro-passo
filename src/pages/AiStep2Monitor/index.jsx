@@ -7,7 +7,7 @@ import ImageViewer from './components/ImageViewer'
 import StatusBadge from './components/StatusBadge'
 import { DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import { useAiCampaignMonitor } from './useAiCampaignMonitor'
-import { formatDate } from './utils'
+import { formatDate, resolveDetailCompraId } from './utils'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
 import { useAuth } from '../../context/AuthContext'
@@ -70,6 +70,12 @@ export default function AiStep2Monitor() {
   const identity = onboarding?.identity || null
   const briefing = onboarding?.briefing || null
   const job = data?.job || null
+  const effectiveCompraId = resolveDetailCompraId({
+    urlCompraId: compraId,
+    data,
+    job,
+    onboarding,
+  })
   const progress = data?.progress || { total_expected: 12, total_generated: 0, percent: 0 }
 
   const currentAsset = viewerIndex >= 0 ? assets[viewerIndex] : null
@@ -241,7 +247,7 @@ export default function AiStep2Monitor() {
                 savingEdits={savingEdits}
                 onSaveEdits={saveOnboardingEdits}
                 onRerunAll={rerunAllAssets}
-                compraId={compraId}
+                compraId={effectiveCompraId}
                 jobId={jobId}
                 reload={reload}
                 canMutate={canAdminMutate}

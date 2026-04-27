@@ -105,7 +105,12 @@ export default function OnboardingDataTab({
   const handlePaletteSave = async (colors) => {
     if (readOnly) return { ok: false, message: 'Somente admins podem editar dados do onboarding.' }
     const res = await saveIdentityField('brand_palette', colors)
-    if (res.ok) markBanner(true)
+    if (res.ok) {
+      setFieldErrors((prev) => ({ ...prev, brand_palette: null }))
+      markBanner(true)
+    } else {
+      setFieldErrors((prev) => ({ ...prev, brand_palette: res.message }))
+    }
     return res
   }
 

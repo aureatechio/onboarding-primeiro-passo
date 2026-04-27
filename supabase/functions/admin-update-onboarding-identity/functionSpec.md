@@ -15,6 +15,7 @@ Atualiza campos editaveis de `onboarding_identity` a partir do painel admin (Mon
   "compra_id": "uuid",
   "changes": {
     "brand_display_name": "string | null",
+    "font_choice": "string | null",
     "instagram_handle": "string | null",
     "site_url": "string | null",
     "campaign_notes": "string | null",
@@ -30,6 +31,7 @@ Apenas campos presentes em `changes` sao atualizados. Valor `null` ou string vaz
 Reusa `_shared/onboarding-validation.ts`:
 - `validateUuid(compra_id)`
 - `validateBrandDisplayName` (max 120 chars)
+- `validateFontChoice` (max 100 chars)
 - `validateInstagramHandle` (sem @, regex `^[a-zA-Z0-9._]{1,30}$`)
 - `validateSiteUrl` (http/https, max 500)
 - `validateCampaignNotes` (max 2000)
@@ -43,7 +45,7 @@ Reusa `_shared/onboarding-validation.ts`:
 
 ## Respostas
 - 200: `{ success, identity, reenrich_triggered, updated_by }`
-- 400: `INVALID_UUID` | `INVALID_JSON` | `NO_CHANGES` | validacoes por campo (`BRAND_NAME_EMPTY`, `BRAND_NAME_TOO_LONG`, `INVALID_HANDLE`, `URL_TOO_LONG`, `INVALID_URL`, `NOTES_TOO_LONG`, `INVALID_PALETTE`, `TOO_MANY_COLORS`, `INVALID_COLOR`)
+- 400: `INVALID_UUID` | `INVALID_JSON` | `NO_CHANGES` | validacoes por campo (`BRAND_NAME_EMPTY`, `BRAND_NAME_TOO_LONG`, `FONT_TOO_LONG`, `INVALID_HANDLE`, `URL_TOO_LONG`, `INVALID_URL`, `NOTES_TOO_LONG`, `INVALID_PALETTE`, `TOO_MANY_COLORS`, `INVALID_COLOR`)
 - 401: sem JWT / JWT invalido
 - 404: `NOT_FOUND`
 - 500: `DB_ERROR` | `CONFIG_ERROR`

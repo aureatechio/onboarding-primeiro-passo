@@ -5,22 +5,8 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { corsHeaders, handleCors } from '../_shared/cors.ts'
 import { isRbacError, requireRole } from '../_shared/rbac.ts'
-import {
-  validateBrandDisplayName,
-  validateBrandPalette,
-  validateCampaignNotes,
-  validateInstagramHandle,
-  validateSiteUrl,
-  validateUuid,
-} from '../_shared/onboarding-validation.ts'
-
-type Changes = {
-  brand_display_name?: string | null
-  instagram_handle?: string | null
-  site_url?: string | null
-  campaign_notes?: string | null
-  brand_palette?: string[] | null
-}
+import { validateUuid } from '../_shared/onboarding-validation.ts'
+import { buildIdentityUpdate, type IdentityChanges } from './update-builder.ts'
 
 function json(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -41,7 +27,7 @@ Deno.serve(async (req) => {
   if (isRbacError(authResult)) return authResult.error
   const { user, serviceClient } = authResult
 
-  let body: { compra_id?: string; changes?: Changes; reenrich?: boolean }
+  let body: { compra_id?: string; changes?: IdentityChanges; reenrich?: boolean }
   try {
     body = await req.json()
   } catch {
@@ -53,61 +39,9 @@ Deno.serve(async (req) => {
   const compraId = compraIdCheck.value
 
   const changes = body.changes || {}
-  const update: Record<string, unknown> = {}
-
-  if (changes.brand_display_name !== undefined) {
-    if (changes.brand_display_name === null || changes.brand_display_name === '') {
-      update.brand_display_name = null
-    } else {
-      const v = validateBrandDisplayName(changes.brand_display_name)
-      if (!v.ok) return json({ success: false, ...v.error }, 400)
-      update.brand_display_name = v.value
-    }
-  }
-
-  let siteOrHandleChanged = false
-
-  if (changes.instagram_handle !== undefined) {
-    if (changes.instagram_handle === null || changes.instagram_handle === '') {
-      update.instagram_handle = null
-    } else {
-      const v = validateInstagramHandle(changes.instagram_handle)
-      if (!v.ok) return json({ success: false, ...v.error }, 400)
-      update.instagram_handle = v.value || null
-    }
-    siteOrHandleChanged = true
-  }
-
-  if (changes.site_url !== undefined) {
-    if (changes.site_url === null || changes.site_url === '') {
-      update.site_url = null
-    } else {
-      const v = validateSiteUrl(changes.site_url)
-      if (!v.ok) return json({ success: false, ...v.error }, 400)
-      update.site_url = v.value || null
-    }
-    siteOrHandleChanged = true
-  }
-
-  if (changes.campaign_notes !== undefined) {
-    if (changes.campaign_notes === null) {
-      update.campaign_notes = null
-    } else {
-      const v = validateCampaignNotes(changes.campaign_notes)
-      if (!v.ok) return json({ success: false, ...v.error }, 400)
-      update.campaign_notes = v.value || null
-    }
-  }
-
-  if (changes.brand_palette !== undefined) {
-    if (changes.brand_palette === null) {
-      update.brand_palette = []
-    } else {
-      const v = validateBrandPalette(changes.brand_palette)
-      if (!v.ok) return json({ success: false, ...v.error }, 400)
-      update.brand_palette = v.value
-    }
-  }
+  const updateResult = buildIdentityUpdate(changes)
+  if (!updateResult.ok) return json({ success: false, ...updateResult.error }, 400)
+  const { update, siteOrHandleChanged } = updateResult
 
   if (Object.keys(update).length === 0) {
     return json({ success: false, code: 'NO_CHANGES', message: 'Nenhum campo informado.' }, 400)
@@ -120,7 +54,7 @@ Deno.serve(async (req) => {
     .update(update)
     .eq('compra_id', compraId)
     .select(
-      'id, choice, brand_display_name, instagram_handle, site_url, brand_palette, campaign_notes, production_path, updated_at',
+      'id, choice, brand_display_name, font_choice, instagram_handle, site_url, brand_palette, campaign_notes, production_path, updated_at',
     )
     .maybeSingle()
 

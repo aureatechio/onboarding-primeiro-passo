@@ -17,6 +17,16 @@ export function uniqueNonEmpty(values) {
   )
 }
 
+export function resolveDetailCompraId({ urlCompraId, data, job, onboarding } = {}) {
+  return (
+    urlCompraId ||
+    data?.input?.compra_id ||
+    job?.compra_id ||
+    onboarding?.compra?.id ||
+    ''
+  )
+}
+
 export function downloadImage(url, fallbackName) {
   if (!url) return
   const link = document.createElement('a')

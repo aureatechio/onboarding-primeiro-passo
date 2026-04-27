@@ -2,6 +2,10 @@
 
 This file provides guidance to Codex when working with code in this repository.
 
+## Communication
+
+- Always respond to the user in Brazilian Portuguese (`pt-BR`), unless the user explicitly requests another language.
+
 ## Repository Structure
 
 `primeiro-passo-app` is a standalone React + Vite SPA for onboarding, backed by Supabase Edge Functions and internal admin tooling.

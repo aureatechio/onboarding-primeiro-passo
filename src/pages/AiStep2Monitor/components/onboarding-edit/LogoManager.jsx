@@ -35,6 +35,7 @@ export default function LogoManager({
   const fileRef = useRef(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [localFile, setLocalFile] = useState(null)
+  const [localError, setLocalError] = useState(null)
 
   function pick() {
     fileRef.current?.click()
@@ -46,6 +47,7 @@ export default function LogoManager({
     const url = URL.createObjectURL(file)
     setPreviewUrl(url)
     setLocalFile(file)
+    setLocalError(null)
   }
 
   async function confirmUpload() {
@@ -54,13 +56,19 @@ export default function LogoManager({
     if (res?.ok) {
       setPreviewUrl(null)
       setLocalFile(null)
+      setLocalError(null)
       if (fileRef.current) fileRef.current.value = ''
+    } else if (res?.message) {
+      setLocalError(res.message)
+    } else {
+      setLocalError('Falha ao enviar logo.')
     }
   }
 
   function cancelPick() {
     setPreviewUrl(null)
     setLocalFile(null)
+    setLocalError(null)
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -135,8 +143,10 @@ export default function LogoManager({
             </div>
           ) : null}
 
-          {error && (
-            <div style={{ marginTop: 8, fontSize: 11, color: DESTRUCTIVE }}>{error}</div>
+          {(error || localError) && (
+            <div style={{ marginTop: 8, fontSize: 11, color: DESTRUCTIVE }}>
+              {error || localError}
+            </div>
           )}
           {!readOnly && (
             <div style={{ marginTop: 8, fontSize: 11, color: monitorTheme.textMuted }}>
