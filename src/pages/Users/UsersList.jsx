@@ -11,6 +11,13 @@ import InviteUserModal from './InviteUserModal'
 
 const ROLE_LABELS = { admin: 'Admin', operator: 'Operator', viewer: 'Viewer' }
 const STATUS_LABELS = { active: 'Ativo', disabled: 'Desativado' }
+const ROLE_BADGE_TONES = { admin: 'warning', operator: 'info', viewer: 'neutral' }
+const STATUS_BADGE_TONES = { active: 'success', disabled: 'danger' }
+const EMPTY_SUMMARY = {
+  total: 0,
+  roles: { admin: 0, operator: 0, viewer: 0 },
+  status: { active: 0, disabled: 0 },
+}
 
 function toPage(value) {
   return Math.max(parseInt(value || '1', 10) || 1, 1)
@@ -24,6 +31,7 @@ export default function UsersList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [users, setUsers] = useState([])
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, total_pages: 1 })
+  const [summary, setSummary] = useState(EMPTY_SUMMARY)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [inviteOpen, setInviteOpen] = useState(false)
@@ -54,6 +62,7 @@ export default function UsersList() {
       const data = await adminFetch(`list-users?${query}`, { method: 'GET' })
       setUsers(data.users || [])
       setPagination((prev) => ({ ...prev, ...(data.pagination || {}) }))
+      setSummary(normalizeSummary(data.summary, data.pagination?.total))
     } catch (err) {
       setError(err?.message || 'Nao foi possivel listar usuarios.')
     } finally {
@@ -132,6 +141,15 @@ export default function UsersList() {
           />
         </section>
 
+        <section aria-label="Contadores de usuarios" style={summaryGridStyle}>
+          <SummaryItem label="Total" value={summary.total || pagination.total} tone="neutral" />
+          <SummaryItem label="Ativos" value={summary.status.active} tone="success" />
+          <SummaryItem label="Desativados" value={summary.status.disabled} tone="danger" />
+          <SummaryItem label="Admins" value={summary.roles.admin} tone="warning" />
+          <SummaryItem label="Operadores" value={summary.roles.operator} tone="info" />
+          <SummaryItem label="Viewers" value={summary.roles.viewer} tone="neutral" />
+        </section>
+
         {error && <InlineNotice tone="error">{error}</InlineNotice>}
 
         <section style={tableWrapStyle}>
@@ -152,8 +170,16 @@ export default function UsersList() {
                 <tr key={user.id}>
                   <td style={tdStyle}>{user.full_name || '-'}</td>
                   <td style={tdStyle}>{user.email}</td>
-                  <td style={tdStyle}><Badge tone="role">{ROLE_LABELS[user.role] || user.role}</Badge></td>
-                  <td style={tdStyle}><Badge tone={user.status}>{STATUS_LABELS[user.status] || user.status}</Badge></td>
+                  <td style={tdStyle}>
+                    <Badge tone={ROLE_BADGE_TONES[user.role]}>
+                      {ROLE_LABELS[user.role] || user.role}
+                    </Badge>
+                  </td>
+                  <td style={tdStyle}>
+                    <Badge tone={STATUS_BADGE_TONES[user.status]}>
+                      {STATUS_LABELS[user.status] || user.status}
+                    </Badge>
+                  </td>
                   <td style={tdStyle}>{formatDate(user.last_sign_in_at)}</td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
                     <DashboardButton type="button" onClick={() => setEditingUser(user)} variant="icon" size="sm" aria-label="Editar usuário">
@@ -173,17 +199,101 @@ export default function UsersList() {
   )
 }
 
+function normalizeSummary(summary, fallbackTotal = 0) {
+  return {
+    total: Number(summary?.total ?? fallbackTotal ?? 0),
+    roles: {
+      admin: Number(summary?.roles?.admin ?? 0),
+      operator: Number(summary?.roles?.operator ?? 0),
+      viewer: Number(summary?.roles?.viewer ?? 0),
+    },
+    status: {
+      active: Number(summary?.status?.active ?? 0),
+      disabled: Number(summary?.status?.disabled ?? 0),
+    },
+  }
+}
+
+function SummaryItem({ label, value, tone }) {
+  const palette = getBadgePalette(tone)
+
+  return (
+    <div style={{
+      background: monitorTheme.surfaceSubtle,
+      border: `1px solid ${monitorTheme.border}`,
+      borderRadius: monitorRadius.md,
+      padding: '12px 14px',
+      minWidth: 0,
+    }}>
+      <p style={{
+        ...TYPE.caption,
+        color: monitorTheme.textMuted,
+        margin: 0,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+      }}>
+        {label}
+      </p>
+      <strong style={{
+        color: palette.color,
+        display: 'block',
+        fontSize: 22,
+        lineHeight: 1.1,
+        marginTop: 6,
+      }}>
+        {value}
+      </strong>
+    </div>
+  )
+}
+
+function getBadgePalette(tone) {
+  const paletteByTone = {
+    success: {
+      bg: monitorTheme.successBg,
+      border: monitorTheme.successBorder,
+      color: monitorTheme.successText,
+    },
+    warning: {
+      bg: monitorTheme.warningBg,
+      border: monitorTheme.warningBorder,
+      color: monitorTheme.warningText,
+    },
+    info: {
+      bg: monitorTheme.infoBg,
+      border: monitorTheme.infoBorder,
+      color: monitorTheme.infoText,
+    },
+    danger: {
+      bg: monitorTheme.dangerBg,
+      border: monitorTheme.dangerBorder,
+      color: monitorTheme.dangerTextStrong,
+    },
+    neutral: {
+      bg: monitorTheme.neutralBadgeBg,
+      border: monitorTheme.borderStrong,
+      color: monitorTheme.neutralBadgeText,
+    },
+  }
+  return paletteByTone[tone] || paletteByTone.neutral
+}
+
 function Badge({ children, tone }) {
-  const isDanger = tone === 'disabled'
+  const palette = getBadgePalette(tone)
+
   return (
     <span style={{
       display: 'inline-flex',
+      alignItems: 'center',
       borderRadius: monitorRadius.pill,
       padding: '4px 8px',
-      background: isDanger ? monitorTheme.dangerBg : monitorTheme.neutralBadgeBg,
-      color: isDanger ? monitorTheme.dangerTextStrong : monitorTheme.textSecondary,
+      background: palette.bg,
+      border: `1px solid ${palette.border}`,
+      color: palette.color,
       fontSize: 11,
       fontWeight: 700,
+      lineHeight: 1.2,
+      whiteSpace: 'nowrap',
     }}>
       {children}
     </span>
@@ -206,6 +316,11 @@ const toolbarStyle = {
   gridTemplateColumns: 'minmax(240px, 1fr) 180px 180px',
   gap: 10,
   position: 'relative',
+}
+const summaryGridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+  gap: 10,
 }
 const tableWrapStyle = {
   border: `1px solid ${monitorTheme.border}`,

@@ -104,12 +104,23 @@ Deno.serve(async (req) => {
     })
 
   const total = allUsers.length
+  const summary = allUsers.reduce((acc, user) => {
+    acc.roles[user.role] += 1
+    if (user.status === 'disabled') acc.status.disabled += 1
+    else acc.status.active += 1
+    return acc
+  }, {
+    total,
+    roles: { admin: 0, operator: 0, viewer: 0 },
+    status: { active: 0, disabled: 0 },
+  })
   const from = (page - 1) * limit
   const users = allUsers.slice(from, from + limit)
 
   return json({
     success: true,
     users,
+    summary,
     pagination: {
       page,
       limit,

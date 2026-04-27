@@ -16,9 +16,15 @@ Filtros opcionais:
 - `status`: `active | disabled`.
 
 ## Response
-200 `{ success, users, pagination }`.
+200 `{ success, users, summary, pagination }`.
 
 Cada usuario retorna `id`, `email`, `full_name`, `avatar_url`, `role`, `status`, `assigned_by`, `assigned_at`, `created_at`, `updated_at`, `last_sign_in_at`.
+
+`summary` retorna contadores totais da lista filtrada antes da paginacao:
+
+- `total`
+- `roles.admin | roles.operator | roles.viewer`
+- `status.active | status.disabled`
 
 ## Erros
 - 400 `INVALID_ROLE | INVALID_STATUS`
