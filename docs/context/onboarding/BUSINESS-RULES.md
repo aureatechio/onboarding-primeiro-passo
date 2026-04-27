@@ -55,9 +55,11 @@ Os quizzes das Etapas 2, 3 e 4 e o checkbox da Etapa 6.1 continuam sendo validac
 
 O atendente e selecionado automaticamente pela faixa de `valor_total` da compra na tabela `atendentes` (filtro por `valor_min`/`valor_max` + `ativo = true`). Nao e um campo editavel no formulario.
 
-## 12. Frontend sem JWT
+## 12. Fluxo publico sem JWT
 
-O SPA nao usa autenticacao JWT. Todas as Edge Functions de onboarding sao publicas (`--no-verify-jwt`). A seguranca depende do UUID da compra ser nao-adivinhavel.
+O fluxo publico do cliente final nao usa autenticacao JWT. As Edge Functions usadas diretamente pelo formulario publico (`get-onboarding-data`, `save-onboarding-progress`, `save-onboarding-identity` e leituras/status publicos relacionados) sao publicas (`--no-verify-jwt`). A seguranca desse fluxo depende do UUID da compra ser nao-adivinhavel.
+
+Funcoes administrativas ou operacionais no mesmo dominio de onboarding/dashboard podem exigir JWT + RBAC ou bearer service role, conforme a `functionSpec.md` de cada funcao.
 
 ## 13. Copy centralizada em copy.js
 
@@ -98,4 +100,6 @@ O campo e editavel no painel Monitor (aba `onboarding-data`) via edge `admin-upd
 
 ## 21. Edits admin usam JWT
 
-As 4 edges `admin-update-onboarding-identity`, `admin-upload-logo`, `admin-set-active-logo`, `admin-delete-logo-from-history` sao **protegidas** (verify_jwt habilitado). Frontend passa `Authorization: Bearer <access_token>` via helper `src/lib/admin-edge.js`, que tenta `refreshSession()` automaticamente em 401. `get-ai-campaign-monitor` e `save-onboarding-identity` permanecem publicas.
+As 4 edges `admin-update-onboarding-identity`, `admin-upload-logo`, `admin-set-active-logo`, `admin-delete-logo-from-history` sao **protegidas** (verify_jwt habilitado). Frontend passa `Authorization: Bearer <access_token>` via helper `src/lib/admin-edge.js`, que tenta `refreshSession()` automaticamente em 401.
+
+Outras funcoes administrativas de configuracao tambem usam JWT + RBAC, como `update-enrichment-config`. `get-ai-campaign-monitor` e `save-onboarding-identity` permanecem publicas no estado atual.

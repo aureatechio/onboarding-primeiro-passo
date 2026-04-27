@@ -96,7 +96,7 @@ Important frontend facts:
 - `src/copy.js` is the static fallback copy source
 - `src/context/CopyContext.jsx` merges Supabase copy overrides over `copy.js`
 - `src/context/AuthContext.jsx` powers internal dashboard auth
-- `App.jsx` uses manual route handling, not `react-router`
+- `App.jsx` uses `react-router` (`Routes`, `Route`, `Navigate`) with `DashboardRoute` and `RequireRole` wrappers for protected dashboard routes
 - Design tokens live in `src/theme/design-tokens.js`
 - Password recovery callbacks must use `VITE_DASHBOARD_URL` as the canonical base for `/reset-password`; do not rely only on `window.location.origin`, because local requests can generate `localhost` recovery links.
 - Supabase Auth URL Configuration for production must allow `https://acelerai-primeiro-passo.vercel.app/reset-password` and must not use `localhost` as the production Site URL. Localhost redirect URLs are only acceptable for intentional local development.
@@ -183,26 +183,26 @@ This function is JWT-protected via RBAC and must not be deployed with `--no-veri
 
 ### AI campaign pipeline
 
-- `create-ai-campaign-job` — public
+- `create-ai-campaign-job` — public gateway, protected in code by service-role bearer
 - `get-ai-campaign-status` — public
-- `get-ai-campaign-monitor` — protected
-- `generate-ai-campaign-image` — protected
-- `retry-ai-campaign-assets` — protected
-- `generate-campaign-briefing` — protected
-- `save-campaign-briefing` — protected
-- `suggest-briefing-seed` — protected
-- `test-perplexity-briefing` — protected
-- `discover-company-sources` — protected
-- `get-perplexity-config` — protected
-- `update-perplexity-config` — protected
+- `get-ai-campaign-monitor` — public gateway, no RBAC in code
+- `generate-ai-campaign-image` — public gateway, protected in code by service-role bearer
+- `retry-ai-campaign-assets` — protected via JWT + RBAC (`admin`, `operator`)
+- `generate-campaign-briefing` — public
+- `save-campaign-briefing` — public
+- `suggest-briefing-seed` — public
+- `test-perplexity-briefing` — public
+- `discover-company-sources` — public
+- `get-perplexity-config` — public
+- `update-perplexity-config` — protected via JWT + RBAC admin
 
 ### NanoBanana
 
 Singleton config for creative direction categories `moderna`, `clean`, and `retail`.
 
 - `get-nanobanana-config` — public, deploy with `--no-verify-jwt`
-- `update-nanobanana-config` — protected in code by `x-admin-password`, deploy with `--no-verify-jwt`
-- `read-nanobanana-reference` — protected in code by `x-admin-password`, deploy with `--no-verify-jwt`
+- `update-nanobanana-config` — protected via JWT + RBAC admin, deploy without `--no-verify-jwt`
+- `read-nanobanana-reference` — protected via JWT + RBAC admin, deploy without `--no-verify-jwt`
 
 Source of truth: `supabase/functions/_shared/nanobanana/config.ts`
 
@@ -239,7 +239,7 @@ When working on NanoBanana:
 
 1. `supabase/functions/<function>/functionSpec.md`
 2. `supabase/functions/_shared/nanobanana/config.ts`
-3. `supabase/functions/_shared/admin-auth.ts`
+3. `supabase/functions/_shared/rbac.ts`
 
 ## Repo Conventions
 

@@ -107,7 +107,7 @@ Configuracao externa no Supabase Auth:
 ### Login
 
 1. Usuario acessa rota protegida.
-2. `App.jsx` detecta prefixo protegido.
+2. `App.jsx` renderiza a rota explicita com `DashboardRoute`.
 3. Se `isAuthLoading`, renderiza splash.
 4. Se nao autenticado, redireciona para `/login?next=<rota atual>`.
 5. `Login.jsx` chama `signInWithPassword({ email, password })`.
@@ -116,7 +116,7 @@ Configuracao externa no Supabase Auth:
 8. Se nao existir `profiles` + `user_roles`, faz `signOut()` e bloqueia o acesso ao app.
 9. Se `profiles.status = disabled`, faz `signOut()` e bloqueia o login.
 10. `Login.jsx` chama `record-dashboard-activity` com `event = login`.
-11. Em sucesso, volta para `next` ou `/ai-step2/monitor?mode=list`.
+11. Em sucesso, volta para `next` ou `/ai-step2/monitor`.
 
 ### Reidratacao de sessao
 
@@ -165,11 +165,13 @@ Configuracao externa no Supabase Auth:
 | `/users` | Requer sessao | `admin` |
 | `/profile` | Requer sessao | `admin`, `operator`, `viewer` |
 
-Prefixos protegidos em `App.jsx`:
+Rotas protegidas sao declaradas explicitamente em `App.jsx` com `DashboardRoute` e, quando aplicavel, `RequireRole`:
 
 ```js
-['/ai-step2/', '/copy-editor', '/users', '/profile']
+['/ai-step2/monitor', '/ai-step2/monitor/jobs/:jobId', '/ai-step2/perplexity-config', '/ai-step2/nanobanana-config', '/copy-editor', '/users', '/profile']
 ```
+
+O app nao aplica guard por prefixo generico. Uma nova rota `/ai-step2/*` so fica protegida se for adicionada explicitamente em `App.jsx` com `DashboardRoute`.
 
 ## Roles e permissoes
 

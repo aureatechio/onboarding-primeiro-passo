@@ -60,11 +60,11 @@ No `App.jsx`, o indice de passo 7 renderiza `Etapa62` (nao existe mais `Etapa7.j
 | `onboarding-enrichment` | Pipeline 4 fases (service role) | `--no-verify-jwt` + auth interna service role |
 | `get-enrichment-status` | Leitura status job | `--no-verify-jwt` (publico) |
 | `get-enrichment-config` | Leitura config singleton | `--no-verify-jwt` (publico) |
-| `update-enrichment-config` | Escrita config | `--no-verify-jwt` + `x-admin-password` |
+| `update-enrichment-config` | Escrita config | JWT + RBAC admin (sem `--no-verify-jwt`) |
 | `generate-campaign-briefing` | Briefing IA (Perplexity), chamado pelo enrichment | `--no-verify-jwt` (publico) |
 | `save-campaign-briefing` | Legado / fluxos operacionais | `--no-verify-jwt` (publico) |
 
-Todas as funcoes consumidas pelo SPA de onboarding sao **publicas** no gateway (`--no-verify-jwt`); `onboarding-enrichment` so aceita bearer **service role**.
+As funcoes consumidas pelo fluxo publico do cliente no SPA de onboarding sao **publicas** no gateway (`--no-verify-jwt`). Funcoes administrativas de configuracao, como `update-enrichment-config`, usam JWT + RBAC admin; `onboarding-enrichment` e funcoes worker internas aceitam bearer **service role** quando indicado na `functionSpec.md`.
 
 ## Storage
 
