@@ -98,8 +98,19 @@ Important frontend facts:
 - `src/context/AuthContext.jsx` powers internal dashboard auth
 - `App.jsx` uses manual route handling, not `react-router`
 - Design tokens live in `src/theme/design-tokens.js`
+- Password recovery callbacks must use `VITE_DASHBOARD_URL` as the canonical base for `/reset-password`; do not rely only on `window.location.origin`, because local requests can generate `localhost` recovery links.
+- Supabase Auth URL Configuration for production must allow `https://onboarding-primeiro-passo.vercel.app/reset-password` and must not use `localhost` as the production Site URL. Localhost redirect URLs are only acceptable for intentional local development.
 
 ## Supabase Critical Rules
+
+### Supabase Auth Email Templates
+
+- Auth email templates live in `supabase/templates/*.html`.
+- All Supabase Auth email templates must be light-first: light page background, white content card, dark body text, light informational/warning panels, and magenta `#E8356D` only for the primary CTA/link accent.
+- Do not create dark email templates. The only allowed dark block is the compact black logo header required to display the official white/transparent Acelerai logo with enough contrast.
+- For the Acelerai logo inside these templates, use the public Supabase Storage URL for `public/logo_acelerai_white_transp.png` in the `<img src>`: `https://awqtzoefutnfmnbomujt.supabase.co/storage/v1/object/public/cdn-assets/acelerai/logo_acelerai_white_transp.png`.
+- Do not use relative paths like `../../public/...` or `data:image/png;base64,...` URIs for the email logo; relative paths break in Supabase email rendering, and Gmail does not reliably render `data:` images in HTML email.
+- Keep `alt="Acelerai"` and a fixed visual width around `156px` unless the design spec changes.
 
 ### Migrations
 
@@ -228,9 +239,23 @@ When working on NanoBanana:
 
 ## Agent Resources In Repo
 
-This repository keeps agent-oriented resources in `.claude/`:
+This repository keeps agent-oriented resources in two parallel locations:
 
-- `.claude/commands/` — reusable command prompts
-- `.claude/skills/` — local skills and playbooks
+- `.claude/commands/`, `.claude/skills/` — consumed by Claude Code
+- `.agents/skills/` — consumed by Codex
 
 They are useful as repo documentation assets, but the current source of truth for product behavior remains the code and the `docs/` directory.
+
+### Skills mirror: `.claude/skills/` ↔ `.agents/skills/`
+
+Both folders must contain the same set of skills. A Claude Code PostToolUse hook (configured in `.claude/settings.json`) runs `scripts/mirror-skills.sh` after every Write/Edit/MultiEdit and rsyncs the source tree to the mirror folder (no `--delete`, so deletions never propagate automatically).
+
+- When editing a skill via Claude Code, the mirror is automatic.
+- When editing a skill via Codex (or any other tool that does not run Claude Code's hooks), run `bash scripts/mirror-skills.sh < /dev/null` is NOT enough — the script reads `tool_input.file_path` from stdin. Instead, run rsync manually:
+
+  ```bash
+  # propagate any pending change from Codex side to Claude side
+  rsync -a .agents/skills/ .claude/skills/
+  ```
+
+- To rename or remove a skill, perform the operation in BOTH folders manually.

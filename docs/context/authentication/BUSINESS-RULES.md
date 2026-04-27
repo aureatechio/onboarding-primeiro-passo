@@ -94,6 +94,10 @@ Chamadas do dashboard para Edge Functions protegidas devem usar `src/lib/admin-e
 
 Links de recovery usam `/reset-password`. Convites usam `/reset-password?type=invite`. A pagina le tokens no hash, chama `setSession()`, atualiza senha e faz `signOut()` ao concluir.
 
+O redirect de recovery nao deve depender cegamente de `window.location.origin`, porque links disparados em ambiente local acabam redirecionando para `localhost`. Use `VITE_DASHBOARD_URL` como base canonica; fallback para origin so e aceitavel quando nao for host local.
+
+A configuracao de URL do Supabase Auth em producao tambem deve apontar para o dominio real do dashboard e permitir `https://onboarding-primeiro-passo.vercel.app/reset-password`. `localhost` deve ficar restrito a desenvolvimento local intencional.
+
 ## 18. Nao remover `detectSessionInUrl: false` sem revisar `/reset-password`
 
 O app trata manualmente os tokens de recovery/invite em `ResetPassword.jsx`. Alterar `detectSessionInUrl` pode mudar esse fluxo e causar efeitos colaterais de sessao.

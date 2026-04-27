@@ -32,17 +32,18 @@ export function AuthProvider({ children }) {
     if (profileError) throw profileError
     if (roleError) throw roleError
 
-    const nextProfile = profileData ?? {
-      id: userId,
-      email: nextSession.user.email ?? null,
-      full_name: nextSession.user.user_metadata?.full_name ?? '',
-      status: 'active',
+    if (!profileData || !roleData?.role) {
+      setProfile(null)
+      setRole(null)
+      return { profile: null, role: null, accessRevoked: true }
     }
-    const nextRole = roleData?.role ?? 'viewer'
+
+    const nextProfile = profileData
+    const nextRole = roleData.role
 
     setProfile(nextProfile)
     setRole(nextRole)
-    return { profile: nextProfile, role: nextRole }
+    return { profile: nextProfile, role: nextRole, accessRevoked: false }
   }, [])
 
   useEffect(() => {
@@ -53,8 +54,13 @@ export function AuthProvider({ children }) {
     authClient.auth.getSession().then(async ({ data }) => {
       if (cancelled) return
       const nextSession = data?.session ?? null
-      setSession(nextSession)
-      await loadUserAccess(nextSession)
+      const access = await loadUserAccess(nextSession)
+      if (nextSession && access.accessRevoked) {
+        await authClient.auth.signOut()
+        setSession(null)
+      } else {
+        setSession(nextSession)
+      }
       setIsAuthLoading(false)
     }).catch((err) => {
       console.warn('[AuthProvider] getSession failed:', err?.message)
@@ -62,10 +68,26 @@ export function AuthProvider({ children }) {
     })
 
     const { data: sub } = authClient.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession ?? null)
+      if (!nextSession) {
+        setSession(null)
+        setProfile(null)
+        setRole(null)
+        setIsAuthLoading(false)
+        return
+      }
+
       loadUserAccess(nextSession)
+        .then(async (access) => {
+          if (access.accessRevoked) {
+            await authClient.auth.signOut()
+            setSession(null)
+          } else {
+            setSession(nextSession)
+          }
+        })
         .catch((err) => {
           console.warn('[AuthProvider] load access failed:', err?.message)
+          setSession(null)
           setProfile(null)
           setRole(null)
         })
@@ -84,6 +106,13 @@ export function AuthProvider({ children }) {
     if (error) throw error
     const nextSession = data?.session ?? null
     const access = await loadUserAccess(nextSession)
+    if (access.accessRevoked) {
+      await authClient.auth.signOut()
+      setSession(null)
+      setProfile(null)
+      setRole(null)
+      throw new Error('Seu acesso a este app foi removido. Fale com um administrador.')
+    }
     if (access.profile?.status === 'disabled') {
       await authClient.auth.signOut()
       setSession(null)
@@ -116,8 +145,16 @@ export function AuthProvider({ children }) {
     try {
       const { data, error } = await authClient.auth.refreshSession()
       if (error) throw error
-      setSession(data?.session ?? null)
-      await loadUserAccess(data?.session ?? null)
+      const nextSession = data?.session ?? null
+      const access = await loadUserAccess(nextSession)
+      if (nextSession && access.accessRevoked) {
+        await authClient.auth.signOut()
+        setSession(null)
+        setProfile(null)
+        setRole(null)
+        return null
+      }
+      setSession(nextSession)
       return data?.session ?? null
     } catch (err) {
       console.warn('[AuthProvider] refreshSession failed, signing out:', err?.message)
@@ -131,7 +168,14 @@ export function AuthProvider({ children }) {
   }, [session, loadUserAccess])
 
   const refreshProfile = useCallback(async () => {
-    return loadUserAccess(session)
+    const access = await loadUserAccess(session)
+    if (session && access.accessRevoked) {
+      await authClient.auth.signOut()
+      setSession(null)
+      setProfile(null)
+      setRole(null)
+    }
+    return access
   }, [loadUserAccess, session])
 
   const hasRole = useCallback((allowedRoles) => {

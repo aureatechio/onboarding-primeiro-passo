@@ -25,19 +25,37 @@ Deno.serve(async (req) => {
   const userId = parseUuid(body.user_id)
   if (!userId) return json({ success: false, code: 'INVALID_USER_ID', message: 'user_id invalido.' }, 400)
   if (userId === user.id) {
-    return json({ success: false, code: 'SELF_DELETE', message: 'Voce nao pode excluir a propria conta.' }, 409)
+    return json({ success: false, code: 'SELF_DELETE', message: 'Voce nao pode remover o proprio acesso.' }, 409)
   }
 
   try {
     if (await isOnlyAdmin(serviceClient, userId)) {
-      return json({ success: false, code: 'LAST_ADMIN', message: 'Nao e possivel excluir o unico admin.' }, 409)
+      return json({ success: false, code: 'LAST_ADMIN', message: 'Nao e possivel remover acesso do unico admin.' }, 409)
     }
   } catch (err) {
     return json({ success: false, code: 'LOCKOUT_CHECK_FAILED', message: String(err) }, 500)
   }
 
-  const { error } = await serviceClient.auth.admin.deleteUser(userId)
-  if (error) return json({ success: false, code: 'DELETE_FAILED', message: error.message }, 500)
+  const { error: activityError } = await serviceClient
+    .from('dashboard_user_activity')
+    .delete()
+    .eq('user_id', userId)
 
-  return json({ success: true, deleted_user_id: userId })
+  if (activityError) return json({ success: false, code: 'ACTIVITY_DELETE_FAILED', message: activityError.message }, 500)
+
+  const { error: roleError } = await serviceClient
+    .from('user_roles')
+    .delete()
+    .eq('user_id', userId)
+
+  if (roleError) return json({ success: false, code: 'ROLE_DELETE_FAILED', message: roleError.message }, 500)
+
+  const { error: profileError } = await serviceClient
+    .from('profiles')
+    .delete()
+    .eq('id', userId)
+
+  if (profileError) return json({ success: false, code: 'PROFILE_DELETE_FAILED', message: profileError.message }, 500)
+
+  return json({ success: true, revoked_user_id: userId })
 })

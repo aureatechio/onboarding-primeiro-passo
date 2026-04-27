@@ -230,3 +230,11 @@ This repository keeps Claude-oriented resources in `.claude/`:
 - `.claude/skills/` — local skills and playbooks
 
 They are useful as repo documentation assets, but the current source of truth for product behavior remains the code and the `docs/` directory.
+
+### Skills mirror: `.claude/skills/` ↔ `.agents/skills/`
+
+Skills must stay in sync between Claude Code (`.claude/skills/`) and Codex (`.agents/skills/`). A PostToolUse hook configured in `.claude/settings.json` runs `scripts/mirror-skills.sh` after every Write/Edit/MultiEdit and rsyncs the source tree to the mirror folder (no `--delete`, so deletions never propagate automatically).
+
+- Edit a skill in either folder — the mirror updates on save.
+- To rename or remove a skill, perform the operation in BOTH folders manually (the hook does not propagate deletions).
+- If you bypass Claude Code/Codex (manual rsync, git operations, IDE save), run `bash scripts/mirror-skills.sh` manually or just edit one file via the agent to re-trigger the mirror.

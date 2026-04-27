@@ -32,6 +32,14 @@ Princípios:
 | `brandGradientEnd` | `#9E2645` | Fim escuro de gradientes de CTA |
 | `logoWhite` | asset `public/logo_acelerai_white_transp.png` | Marca em sidebar/topbar sobre fundo escuro |
 
+Regra para e-mails transacionais:
+
+- Templates em `supabase/templates/*.html` devem ser light-first: fundo externo claro, card branco, texto escuro, painéis informativos claros e CTA/link em magenta `#E8356D`.
+- Não criar templates de e-mail em tema dark. A única exceção permitida é a faixa preta compacta do topo para dar contraste ao logo oficial branco/transparente.
+- Em `supabase/templates/*.html`, o logo oficial deve usar a URL pública do Supabase Storage no `<img src>` apontando para `public/logo_acelerai_white_transp.png`: `https://awqtzoefutnfmnbomujt.supabase.co/storage/v1/object/public/cdn-assets/acelerai/logo_acelerai_white_transp.png`.
+- Não usar caminho relativo nem `data:image/png;base64,...` para esse logo em templates de e-mail; caminhos relativos quebram no envio do Supabase, e Gmail não renderiza `data:` de forma confiável em HTML de email.
+- Manter `alt="Acelerai"` e largura visual próxima de `156px`.
+
 Origem atual:
 
 ```js

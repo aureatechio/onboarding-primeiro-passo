@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router'
 import { Brain, Palette, BarChart3, FileText, LogOut, UserCircle, Users } from 'lucide-react'
 import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import { useAuth } from '../../context/AuthContext'
 import { focusVisibleStyle } from '../../theme/dashboard-tokens'
+import { recordDashboardActivity } from '../../lib/dashboard-activity'
 
 const MAIN_NAV = [
   { id: 'monitor', label: 'Visão Geral', icon: BarChart3, path: '/ai-step2/monitor' },
@@ -245,9 +246,17 @@ function NavSections({ mainNav, isAdmin, compact = false }) {
 }
 
 export default function MonitorLayout({ children }) {
-  const { isAdmin } = useAuth()
+  const { isAdmin, isAuthenticated } = useAuth()
+  const location = useLocation()
   const compact = useCompactDashboard()
   const mainNav = isAdmin ? MAIN_NAV : MAIN_NAV.filter((item) => item.id === 'monitor')
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    recordDashboardActivity('activity', {
+      path: `${location.pathname}${location.search}`,
+    })
+  }, [isAuthenticated, location.pathname, location.search])
 
   if (compact) {
     return (

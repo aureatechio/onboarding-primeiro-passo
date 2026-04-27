@@ -72,7 +72,18 @@
       "mcp__679204a2-261e-4438-810f-43d31d049430__list_issue_labels",
       "mcp__679204a2-261e-4438-810f-43d31d049430__get_issue",
       "Bash(git checkout *)",
-      "Bash(awk *)"
+      "Bash(awk *)",
+      "Bash(cp -R /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/authentication /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/authentication)",
+      "Bash(cp -R /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/onboarding /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/onboarding)",
+      "Bash(cp -R /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/user-management /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/user-management)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(chmod +x /Users/mac/Documents/Projetos/onboarding-primeiro-passo/scripts/mirror-skills.sh)",
+      "Bash(./scripts/mirror-skills.sh)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(echo \"EXIT=$? \\(should be 0, no side effect\\)\")",
+      "Bash(cp /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/sdd-spec-creator/SKILL.md /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/sdd-spec-creator/SKILL.md)",
+      "Bash(cp /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.agents/skills/task-enricher/SKILL.md /Users/mac/Documents/Projetos/onboarding-primeiro-passo/.claude/skills/task-enricher/SKILL.md)"
     ]
   },
   "enableAllProjectMcpServers": true,

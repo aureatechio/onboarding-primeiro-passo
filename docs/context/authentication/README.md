@@ -83,6 +83,7 @@ Frontend:
 | --- | --- |
 | `VITE_SUPABASE_URL` | URL do projeto Supabase; tambem usada para montar chamadas de Edge Functions |
 | `VITE_SUPABASE_ANON_KEY` | Chave anon/publishable usada pelo browser para Supabase Auth e Data API sob RLS |
+| `VITE_DASHBOARD_URL` | Base canonica do dashboard para callbacks de Auth, especialmente recuperacao de senha em `/reset-password` |
 
 Edge Functions:
 
@@ -94,6 +95,12 @@ Edge Functions:
 | `DASHBOARD_URL` ou `SITE_URL` | Base preferencial do redirect de convite para `/reset-password?type=invite` |
 
 `SUPABASE_SERVICE_ROLE_KEY` nunca pode ir para o frontend.
+
+Configuracao externa no Supabase Auth:
+
+- Production Site URL nao deve ser `localhost`.
+- Redirect URLs permitidas devem incluir `https://onboarding-primeiro-passo.vercel.app/reset-password`.
+- URLs `http://localhost:*` so devem existir para desenvolvimento local intencional.
 
 ## Fluxos de autenticacao
 
@@ -128,7 +135,7 @@ Edge Functions:
 ### Recuperacao de senha
 
 1. `/forgot-password` chama `authClient.auth.resetPasswordForEmail(email, { redirectTo })`.
-2. `redirectTo` aponta para `${origin}/reset-password`.
+2. `redirectTo` aponta para `${VITE_DASHBOARD_URL}/reset-password`; se a env nao existir, usa `VITE_SITE_URL`, `VITE_ONBOARDING_BASE_URL`, origin nao-local ou fallback de producao.
 3. `/reset-password` le tokens no hash da URL.
 4. `authClient.auth.setSession({ access_token, refresh_token })` valida o link.
 5. Usuario define nova senha via `authClient.auth.updateUser({ password })`.

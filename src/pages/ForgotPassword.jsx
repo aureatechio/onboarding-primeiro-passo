@@ -6,6 +6,41 @@ import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
+const DEFAULT_DASHBOARD_URL = 'https://onboarding-primeiro-passo.vercel.app'
+
+function normalizeBaseUrl(value) {
+  const raw = String(value || '').trim()
+  if (!raw) return null
+  try {
+    return new URL(raw).origin
+  } catch {
+    return null
+  }
+}
+
+function isLocalOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin)
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1'
+  } catch {
+    return false
+  }
+}
+
+function getPasswordResetRedirectTo() {
+  const configuredBaseUrl = normalizeBaseUrl(
+    import.meta.env.VITE_DASHBOARD_URL ||
+    import.meta.env.VITE_SITE_URL ||
+    import.meta.env.VITE_ONBOARDING_BASE_URL
+  )
+  if (configuredBaseUrl) return `${configuredBaseUrl}/reset-password`
+
+  const currentOrigin = window.location.origin
+  if (!isLocalOrigin(currentOrigin)) return `${currentOrigin}/reset-password`
+
+  return `${DEFAULT_DASHBOARD_URL}/reset-password`
+}
+
 export default function ForgotPassword() {
   const navigate = useNavigate()
   const envError = !hasAuthEnv()
@@ -20,7 +55,7 @@ export default function ForgotPassword() {
     setSubmitting(true)
     setError(null)
     try {
-      const redirectTo = `${window.location.origin}/reset-password`
+      const redirectTo = getPasswordResetRedirectTo()
       const { error: apiError } = await authClient.auth.resetPasswordForEmail(email.trim(), {
         redirectTo,
       })

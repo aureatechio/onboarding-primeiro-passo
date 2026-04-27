@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Convite para acessar a Acelerai</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>Convite para acessar o dashboard da Acelerai</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F6F8FB;font-family:Inter,Arial,sans-serif;">
 
   <span style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
-    Você recebeu um convite para acessar o dashboard da Acelerai.
+    Você recebeu um convite para criar sua senha e acessar o dashboard da Acelerai.
   </span>
 
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
@@ -17,13 +19,13 @@
       <td align="center" style="padding:40px 16px;">
 
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-          style="max-width:560px;background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;overflow:hidden;">
+          style="max-width:584px;background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;overflow:hidden;">
 
           <tr>
-            <td style="background-color:#000000;padding:28px 36px;border-bottom:1px solid #E2E8F0;">
+            <td style="background-color:#000000;padding:26px 34px;border-bottom:1px solid #E2E8F0;">
               <a href="https://onboarding-primeiro-passo.vercel.app" style="text-decoration:none;display:inline-block;">
                 <img
-                  src="../../public/logo_acelerai_white_transp.png"
+                  src="https://awqtzoefutnfmnbomujt.supabase.co/storage/v1/object/public/cdn-assets/acelerai/logo_acelerai_white_transp.png"
                   alt="Acelerai"
                   width="156"
                   style="display:block;height:auto;border:0;max-width:156px;"
@@ -33,41 +35,55 @@
           </tr>
 
           <tr>
-            <td style="padding:34px 36px 32px;">
+            <td style="padding:34px 34px 30px;">
 
-              <p style="margin:0 0 14px;font-size:11px;line-height:1.4;color:#64748B;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-                Acesso ao dashboard
+              <p style="margin:0 0 14px;font-size:11px;line-height:1.4;color:#64748B;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-family:'JetBrains Mono','Courier New',monospace;">
+                Acesso interno
               </p>
 
-              <h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:800;color:#0F172A;letter-spacing:0;">
-                Convite para acessar a Acelerai
+              <h1 style="margin:0 0 14px;font-size:26px;line-height:1.22;font-weight:800;color:#0F172A;letter-spacing:0;">
+                Convite para o dashboard da Acelerai
               </h1>
 
-              <p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:#334155;">
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:#334155;">
                 Olá{{ if .Data.full_name }}, {{ .Data.full_name }}{{ end }}.
               </p>
 
-              <p style="margin:0 0 26px;font-size:14px;line-height:1.65;color:#64748B;">
-                Você foi convidado para criar sua senha e acessar o dashboard da Acelerai.
-                Use o botão abaixo para aceitar o convite e finalizar seu primeiro acesso.
+              <p style="margin:0 0 26px;font-size:14px;line-height:1.7;color:#64748B;">
+                Um administrador criou seu acesso ao cockpit operacional da Acelerai.
+                Para começar, aceite o convite e defina sua senha de entrada.
               </p>
+
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:26px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <p style="margin:0 0 6px;font-size:11px;line-height:1.4;color:#64748B;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;font-family:'JetBrains Mono','Courier New',monospace;">
+                      Próximo passo
+                    </p>
+                    <p style="margin:0;font-size:13px;line-height:1.6;color:#334155;">
+                      O link abre a tela segura de primeiro acesso para você criar sua senha.
+                    </p>
+                  </td>
+                </tr>
+              </table>
 
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px;">
                 <tr>
                   <td style="border-radius:10px;background-color:#E8356D;">
                     <a href="{{ .ConfirmationURL }}"
-                      style="display:inline-block;padding:14px 28px;font-size:14px;line-height:1.2;font-weight:800;color:#ffffff;text-decoration:none;letter-spacing:0.01em;border-radius:10px;">
-                      Aceitar convite
+                      style="display:inline-block;padding:15px 28px;font-size:14px;line-height:1.2;font-weight:800;color:#FFFFFF;text-decoration:none;letter-spacing:0.01em;border-radius:10px;">
+                      Aceitar convite e criar senha
                     </a>
                   </td>
                 </tr>
               </table>
 
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                style="background-color:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:24px;">
+                style="background-color:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;margin-bottom:24px;">
                 <tr>
-                  <td style="padding:14px 16px;font-size:12px;color:#475569;line-height:1.55;">
-                    Por segurança, o link pode expirar. Se isso acontecer, solicite um novo convite ao administrador.
+                  <td style="padding:14px 16px;font-size:12px;color:#92400E;line-height:1.55;">
+                    Por segurança, este link pode expirar. Se isso acontecer, solicite um novo convite ao administrador.
                   </td>
                 </tr>
               </table>
@@ -85,12 +101,12 @@
           </tr>
 
           <tr>
-            <td style="padding:20px 36px 28px;border-top:1px solid #E2E8F0;background-color:#F8FAFC;">
+            <td style="padding:20px 34px 28px;border-top:1px solid #E2E8F0;background-color:#F8FAFC;">
               <p style="margin:0;font-size:11px;color:#64748B;line-height:1.6;">
                 Este convite foi enviado porque um administrador cadastrou este e-mail no dashboard da Acelerai.
                 Se você não esperava este convite, ignore este e-mail.
               </p>
-              <p style="margin:10px 0 0;font-size:11px;color:#64748B;">
+              <p style="margin:10px 0 0;font-size:11px;color:#94A3B8;">
                 &copy; 2026 Acelerai. Todos os direitos reservados.
               </p>
             </td>

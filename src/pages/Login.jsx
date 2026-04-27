@@ -7,6 +7,7 @@ import { designTokens } from '../theme/design-tokens'
 import { dashboardMotion, focusVisibleStyle } from '../theme/dashboard-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { useAuth } from '../context/AuthContext'
+import { recordDashboardActivity } from '../lib/dashboard-activity'
 
 const DEFAULT_NEXT = '/ai-step2/monitor'
 const RATE_LIMIT_COOLDOWN_SECONDS = 60
@@ -75,6 +76,7 @@ export default function Login() {
     setError(null)
     try {
       await signInWithPassword({ email: email.trim(), password })
+      await recordDashboardActivity('login', { path: next, force: true })
       redirectedRef.current = true
       navigate(next, { replace: true })
     } catch (err) {

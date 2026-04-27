@@ -44,7 +44,7 @@ export default function EditUserModal({ user, onClose, onSaved }) {
       await onSaved?.()
       onClose()
     } catch (err) {
-      setError(err?.message || 'Nao foi possivel excluir.')
+      setError(err?.message || 'Nao foi possivel remover o acesso.')
     } finally {
       setSaving(false)
     }
@@ -76,8 +76,8 @@ export default function EditUserModal({ user, onClose, onSaved }) {
 
         <section style={dangerZoneStyle}>
           <div>
-            <strong style={{ color: monitorTheme.dangerTextStrong, fontSize: 13 }}>Excluir usuário</strong>
-            <p style={subtitleStyle}>Digite o e-mail para confirmar. Esta ação remove a conta do Auth.</p>
+            <strong style={{ color: monitorTheme.dangerTextStrong, fontSize: 13 }}>Remover acesso ao app</strong>
+            <p style={subtitleStyle}>Digite o e-mail para confirmar. A conta do Auth será mantida.</p>
           </div>
           <DashboardField
             value={confirmText}
@@ -92,7 +92,7 @@ export default function EditUserModal({ user, onClose, onSaved }) {
             variant="danger"
             icon={Trash2}
           >
-            Excluir
+            Remover acesso
           </DashboardButton>
         </section>
 
