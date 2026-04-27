@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Download, Minus, Plus, X } from 'lucide-react'
 import { TYPE } from '../../../theme/design-tokens'
 import { downloadImage } from '../utils'
@@ -14,6 +15,17 @@ export default function ImageViewer({
   onNext,
 }) {
   const currentAsset = viewerIndex >= 0 ? assets[viewerIndex] : null
+  useEffect(() => {
+    if (!currentAsset) return undefined
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') onClose()
+      if (event.key === 'ArrowLeft') onPrevious()
+      if (event.key === 'ArrowRight') onNext()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [currentAsset, onClose, onNext, onPrevious])
+
   if (!currentAsset) return null
 
   return (
@@ -47,10 +59,10 @@ export default function ImageViewer({
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button type="button" onClick={onZoomOut} style={controlButtonStyles}>
+          <button type="button" onClick={onZoomOut} style={controlButtonStyles} aria-label="Diminuir zoom">
             <Minus size={16} />
           </button>
-          <button type="button" onClick={onZoomIn} style={controlButtonStyles}>
+          <button type="button" onClick={onZoomIn} style={controlButtonStyles} aria-label="Aumentar zoom">
             <Plus size={16} />
           </button>
           <button
@@ -62,10 +74,11 @@ export default function ImageViewer({
               )
             }
             style={controlButtonStyles}
+            aria-label="Baixar imagem"
           >
             <Download size={16} />
           </button>
-          <button type="button" onClick={onClose} style={controlButtonStyles}>
+          <button type="button" onClick={onClose} style={controlButtonStyles} aria-label="Fechar visualizador">
             <X size={16} />
           </button>
         </div>
@@ -92,11 +105,11 @@ export default function ImageViewer({
           }}
         />
 
-        <button type="button" onClick={onPrevious} style={{ ...navButtonStyles, left: 14 }}>
+        <button type="button" onClick={onPrevious} style={{ ...navButtonStyles, left: 14 }} aria-label="Imagem anterior">
           <ChevronLeft size={18} />
         </button>
 
-        <button type="button" onClick={onNext} style={{ ...navButtonStyles, right: 14 }}>
+        <button type="button" onClick={onNext} style={{ ...navButtonStyles, right: 14 }} aria-label="Próxima imagem">
           <ChevronRight size={18} />
         </button>
       </div>

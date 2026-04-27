@@ -156,7 +156,6 @@ export default function PublishDialog({
                 borderRadius: 8,
                 border: `1px solid ${monitorTheme.border}`,
                 fontSize: 13,
-                outline: 'none',
                 resize: 'vertical',
                 background: monitorTheme.pageBg,
                 color: monitorTheme.textPrimary,

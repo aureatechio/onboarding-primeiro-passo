@@ -52,7 +52,7 @@ function TabButton({ active, icon, label, onClick }) {
         fontSize: 13,
         fontWeight: active ? 700 : 500,
         cursor: "pointer",
-        transition: "all 0.2s ease",
+        transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
       }}
     >
       <Icon name={icon} size={16} color={active ? COLORS.accent : COLORS.textDim} />
@@ -83,7 +83,7 @@ function TextTab({ value, onChange, onChipClick }) {
               fontSize: 11,
               fontWeight: 600,
               cursor: "pointer",
-              transition: "all 0.15s ease",
+              transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease",
             }}
           >
             {chip}
@@ -110,7 +110,6 @@ function TextTab({ value, onChange, onChipClick }) {
             lineHeight: 1.7,
             resize: "vertical",
             fontFamily: "'Inter', system-ui, sans-serif",
-            outline: "none",
             transition: "border-color 0.2s ease",
             boxSizing: "border-box",
           }}
@@ -168,7 +167,7 @@ function AudioTab({ audioBlob, audioDuration, onRecord, onStop, onReset, onPlay,
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 16px",
-              transition: "all 0.2s ease",
+              transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
             }}
           >
             <Icon name="mic" size={32} color={COLORS.red} />
@@ -668,7 +667,6 @@ export default function CampaignBriefing({
                 color: COLORS.text,
                 padding: "10px 12px",
                 fontSize: 12,
-                outline: "none",
                 boxSizing: "border-box",
               }}
             />

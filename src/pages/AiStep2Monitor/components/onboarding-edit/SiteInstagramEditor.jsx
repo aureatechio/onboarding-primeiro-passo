@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { monitorTheme } from '../../theme'
 import EditableField from './EditableField'
 
-const ACELERAI_BLUE = '#384ffe'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
 const SANS = "'Inter', system-ui, sans-serif"
 
 export default function SiteInstagramEditor({
@@ -44,7 +44,7 @@ export default function SiteInstagramEditor({
         placeholder="usuario (sem @)"
         saving={saving}
         error={fieldErrors.instagram_handle}
-        help="Letras, numeros, ponto e underline"
+        help="Letras, números, ponto e underline"
         maxLength={30}
       />
 
@@ -70,7 +70,7 @@ export default function SiteInstagramEditor({
           style={{ marginTop: 2, accentColor: ACELERAI_BLUE }}
         />
         <span>
-          Re-enriquecer briefing apos salvar
+          Re-enriquecer briefing após salvar
           <span style={{ display: 'block', color: monitorTheme.textMuted, marginTop: 2, fontSize: 11 }}>
             Dispara onboarding-enrichment em background quando site/instagram mudarem.
           </span>

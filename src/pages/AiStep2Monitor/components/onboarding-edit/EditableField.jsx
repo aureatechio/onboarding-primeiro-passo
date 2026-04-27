@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { monitorTheme } from '../../theme'
 
-const ACELERAI_BLUE = '#384ffe'
-const DESTRUCTIVE = '#ff0058'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
+const DESTRUCTIVE = monitorTheme.dangerTextStrong
 const SANS = "'Inter', system-ui, sans-serif"
 
 export default function EditableField({
@@ -76,7 +76,7 @@ export default function EditableField({
   const borderColor = error
     ? DESTRUCTIVE
     : justSaved
-    ? '#3FB950'
+    ? monitorTheme.successText
     : editing
     ? ACELERAI_BLUE
     : monitorTheme.borderStrong
@@ -91,7 +91,6 @@ export default function EditableField({
     width: '100%',
     fontFamily: SANS,
     boxSizing: 'border-box',
-    outline: 'none',
     transition: 'border-color 0.15s',
   }
 
@@ -118,7 +117,7 @@ export default function EditableField({
             </span>
           )}
           {justSaved && !saving && (
-            <span style={{ fontSize: 10, color: '#3FB950', textTransform: 'none', letterSpacing: 0 }}>
+            <span style={{ fontSize: 10, color: monitorTheme.successText, textTransform: 'none', letterSpacing: 0 }}>
               ✓ salvo
             </span>
           )}

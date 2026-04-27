@@ -14,6 +14,7 @@ import {
   ScanText,
   HelpCircle,
 } from 'lucide-react'
+import { DashboardTabs } from '../../components/dashboard'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
@@ -51,7 +52,6 @@ const inputStyle = {
   background: monitorTheme.controlBg,
   fontSize: 13,
   color: monitorTheme.controlText,
-  outline: 'none',
   boxSizing: 'border-box',
 }
 
@@ -305,29 +305,6 @@ const outlineButton = {
   color: monitorTheme.buttonSecondaryText,
   border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
 }
-
-const tabBarStyle = {
-  display: 'flex',
-  gap: 0,
-  borderBottom: `2px solid ${monitorTheme.border}`,
-  marginBottom: 24,
-}
-
-const tabStyle = (active) => ({
-  padding: '10px 20px',
-  cursor: 'pointer',
-  border: 'none',
-  background: 'transparent',
-  fontSize: 13,
-  fontWeight: active ? 700 : 500,
-  color: active ? monitorTheme.textPrimary : monitorTheme.textMuted,
-  borderBottom: active ? `2px solid ${monitorTheme.buttonDarkBg}` : '2px solid transparent',
-  marginBottom: -2,
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  transition: 'color 0.15s, border-color 0.15s',
-})
 
 const TABS = [
   { id: 'provider', label: 'Provider', icon: Settings },
@@ -669,22 +646,12 @@ export default function NanoBananaConfigPage() {
       )}
 
       {success && (
-        <div style={{ background: monitorTheme.completedBg, border: `1px solid #A7F3D0`, borderRadius: monitorRadius.md, padding: 12, marginBottom: 16, fontSize: 13, color: monitorTheme.completedText }}>
+        <div role="status" aria-live="polite" style={{ background: monitorTheme.completedBg, border: `1px solid ${monitorTheme.successBorder}`, borderRadius: monitorRadius.md, padding: 12, marginBottom: 16, fontSize: 13, color: monitorTheme.completedText }}>
           {success}
         </div>
       )}
 
-      <div style={tabBarStyle}>
-        {TABS.map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} style={tabStyle(activeTab === tab.id)}>
-              <Icon size={14} />
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
+      <DashboardTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} ariaLabel="Configurações do NanoBanana" />
 
       {activeTab === 'provider' && (
         <div style={cardStyle}>
@@ -849,7 +816,7 @@ export default function NanoBananaConfigPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${monitorTheme.border}`, paddingTop: 16, marginTop: 8 }}>
         <p style={{ ...TYPE.caption, color: monitorTheme.textMuted }}>
-          Ultima atualizacao: {form.updated_at ? new Date(form.updated_at).toLocaleString('pt-BR') : '—'}
+          Última atualização: {form.updated_at ? new Date(form.updated_at).toLocaleString('pt-BR') : '—'}
         </p>
         <div style={{ display: 'flex', gap: 10 }}>
           <button type="button" onClick={handleReload} disabled={loading || saving} style={{ ...outlineButton, opacity: (loading || saving) ? 0.5 : 1 }}>

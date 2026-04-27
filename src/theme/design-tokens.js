@@ -134,9 +134,9 @@ export const designTokens = {
   },
 
   motion: {
-    transitionFast: "all 0.2s ease",
-    transitionMedium: "all 0.3s ease",
-    transitionSlow: "all 0.4s ease",
+    transitionFast: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+    transitionMedium: "background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
+    transitionSlow: "background 0.4s ease, border-color 0.4s ease, color 0.4s ease, opacity 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease",
   },
 
   /** Pontos de cor em hex usados em gradientes de CTA (NavButtons, Etapa3) */

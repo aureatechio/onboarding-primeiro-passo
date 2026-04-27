@@ -217,7 +217,6 @@ export default function ColorSwatch({
                   color: COLORS.text,
                   fontSize: 13,
                   fontFamily: "'JetBrains Mono', monospace",
-                  outline: 'none',
                 }}
               />
               <div

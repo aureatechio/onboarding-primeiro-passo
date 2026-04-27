@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { monitorTheme } from '../../theme'
 
-const ACELERAI_BLUE = '#384ffe'
-const DESTRUCTIVE = '#ff0058'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
+const DESTRUCTIVE = monitorTheme.dangerTextStrong
 const SANS = "'Inter', system-ui, sans-serif"
 const HEX_RE = /^#[0-9a-f]{6}$/i
 const MAX_COLORS = 8
@@ -19,7 +19,7 @@ function normalizeHex(value) {
 
 export default function PaletteEditor({ value = [], onSave, saving = false, error = null }) {
   const [colors, setColors] = useState(value)
-  const [draftColor, setDraftColor] = useState('#384ffe')
+  const [draftColor, setDraftColor] = useState(ACELERAI_BLUE)
   const [localError, setLocalError] = useState(null)
   const dragIndex = useRef(null)
   const initial = useRef(JSON.stringify(value))
@@ -34,11 +34,11 @@ export default function PaletteEditor({ value = [], onSave, saving = false, erro
   function addColor() {
     const hex = normalizeHex(draftColor)
     if (!HEX_RE.test(hex)) {
-      setLocalError('Hex invalido. Use #RRGGBB.')
+      setLocalError('Hex inválido. Use #RRGGBB.')
       return
     }
     if (colors.length >= MAX_COLORS) {
-      setLocalError(`Maximo ${MAX_COLORS} cores.`)
+      setLocalError(`Máximo ${MAX_COLORS} cores.`)
       return
     }
     setLocalError(null)
@@ -77,7 +77,7 @@ export default function PaletteEditor({ value = [], onSave, saving = false, erro
   async function commit() {
     for (const c of colors) {
       if (!HEX_RE.test(c)) {
-        setLocalError(`Cor invalida: ${c}`)
+        setLocalError(`Cor inválida: ${c}`)
         return
       }
     }
@@ -149,7 +149,6 @@ export default function PaletteEditor({ value = [], onSave, saving = false, erro
                 border: `1px solid ${HEX_RE.test(hex) ? monitorTheme.borderStrong : DESTRUCTIVE}`,
                 borderRadius: 6,
                 padding: '4px 6px',
-                outline: 'none',
               }}
             />
             <button
@@ -195,7 +194,6 @@ export default function PaletteEditor({ value = [], onSave, saving = false, erro
             border: `1px solid ${monitorTheme.borderStrong}`,
             borderRadius: 6,
             padding: '6px 8px',
-            outline: 'none',
           }}
         />
         <button

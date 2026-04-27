@@ -18,7 +18,6 @@ function inputStyle(isDirty, extra = {}) {
     ...TYPE.body,
     color: monitorTheme.textPrimary,
     fontFamily: "'Inter', sans-serif",
-    outline: 'none',
     boxSizing: 'border-box',
     resize: 'vertical',
     transition: 'border-color 0.15s, box-shadow 0.15s',

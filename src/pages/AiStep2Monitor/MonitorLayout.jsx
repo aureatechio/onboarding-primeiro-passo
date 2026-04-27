@@ -4,16 +4,17 @@ import TopBarLogo from '../../components/TopBarLogo'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { monitorRadius, monitorTheme } from './theme'
 import { useAuth } from '../../context/AuthContext'
+import { focusVisibleStyle } from '../../theme/dashboard-tokens'
 
 const MAIN_NAV = [
-  { id: 'monitor', label: 'Visao Geral', icon: BarChart3, path: '/ai-step2/monitor?mode=list' },
+  { id: 'monitor', label: 'Visão Geral', icon: BarChart3, path: '/ai-step2/monitor?mode=list' },
   { id: 'perplexity', label: 'Perplexity IA', icon: Brain, path: '/ai-step2/perplexity-config' },
   { id: 'nanobanana', label: 'NanoBanana IA', icon: Palette, path: '/ai-step2/nanobanana-config' },
   { id: 'copy-editor', label: 'Copy Editor', icon: FileText, path: '/copy-editor' },
 ]
 
 const USERS_NAV = [
-  { id: 'users', label: 'Usuarios', icon: Users, path: '/users' },
+  { id: 'users', label: 'Usuários', icon: Users, path: '/users' },
 ]
 
 const ACCOUNT_NAV = [
@@ -54,15 +55,18 @@ function handleNavClick(item) {
 
 function NavButton({ item, isActive }) {
   const Icon = item.icon
+  const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
   return (
     <button
       key={item.id}
       type="button"
       onClick={() => handleNavClick(item)}
+      aria-current={isActive ? 'page' : undefined}
       style={{
         borderRadius: monitorRadius.md,
         padding: '10px 12px',
-        background: isActive ? monitorTheme.sidebarItemActiveBg : 'transparent',
+        background: isActive ? monitorTheme.sidebarItemActiveBg : hovered ? monitorTheme.sidebarItemBg : 'transparent',
         border: isActive
           ? `1px solid ${monitorTheme.sidebarItemActiveBorder}`
           : '1px solid transparent',
@@ -75,13 +79,12 @@ function NavButton({ item, isActive }) {
         alignItems: 'center',
         gap: 8,
         transition: 'background 0.15s, border-color 0.15s',
+        ...(focused ? focusVisibleStyle : null),
       }}
-      onMouseEnter={(e) => {
-        if (!isActive) e.currentTarget.style.background = monitorTheme.sidebarItemBg
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive) e.currentTarget.style.background = 'transparent'
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
     >
       <Icon size={15} style={{ opacity: isActive ? 1 : 0.6 }} />
       {item.label}
@@ -124,7 +127,7 @@ function SessionBanner() {
         gap: 12,
       }}
     >
-      <span>Sua sessao expirou. Faca login novamente para continuar.</span>
+      <span>Sua sessão expirou. Faça login novamente para continuar.</span>
       <button
         type="button"
         onClick={() => navigateTo('/login')}
@@ -147,6 +150,8 @@ function SessionBanner() {
 
 function SidebarFooter() {
   const { user, signOut } = useAuth()
+  const [focused, setFocused] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   async function handleLogout() {
     await signOut()
@@ -197,9 +202,12 @@ function SidebarFooter() {
           fontWeight: 600,
           cursor: 'pointer',
           transition: 'background 0.15s, border-color 0.15s',
+          ...(focused ? focusVisibleStyle : null),
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = monitorTheme.sidebarItemBg }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
       >
         <LogOut size={14} />
         Sair
@@ -208,10 +216,112 @@ function SidebarFooter() {
   )
 }
 
+function useCompactDashboard() {
+  const [compact, setCompact] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(max-width: 1023px)').matches
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const media = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setCompact(media.matches)
+    sync()
+    media.addEventListener?.('change', sync)
+    return () => media.removeEventListener?.('change', sync)
+  }, [])
+
+  return compact
+}
+
+function NavSections({ mainNav, isAdmin, compact = false }) {
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: 6 }}>
+        {mainNav.map((item) => (
+          <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+        ))}
+      </div>
+
+      {isAdmin && (
+        <div style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: 6 }}>
+          {!compact ? (
+            <p style={{
+              ...TYPE.caption,
+              color: monitorTheme.sidebarTextMuted,
+              padding: '4px 12px 2px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}>
+              Acesso
+            </p>
+          ) : null}
+          {USERS_NAV.map((item) => (
+            <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: 6 }}>
+        {ACCOUNT_NAV.map((item) => (
+          <NavButton key={item.id} item={item} isActive={item.id === getActiveId()} />
+        ))}
+      </div>
+    </>
+  )
+}
+
 export default function MonitorLayout({ children }) {
-  const activeId = getActiveId()
   const { isAdmin } = useAuth()
+  const compact = useCompactDashboard()
   const mainNav = isAdmin ? MAIN_NAV : MAIN_NAV.filter((item) => item.id === 'monitor')
+
+  if (compact) {
+    return (
+      <div style={{ minHeight: '100vh', background: monitorTheme.layoutBg, color: monitorTheme.textPrimary }}>
+        <header
+          style={{
+            background: monitorTheme.sidebarBg,
+            borderBottom: `1px solid ${monitorTheme.sidebarBorder}`,
+            padding: designTokens.space[7],
+            display: 'grid',
+            gap: 14,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => navigateTo('/ai-step2/monitor?mode=list')}
+              style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+              aria-label="Ir para home do monitor"
+            >
+              <TopBarLogo height={24} maxWidth={156} />
+            </button>
+            <div style={{ minWidth: 180 }}>
+              <SidebarFooter />
+            </div>
+          </div>
+          <nav
+            aria-label="Navegação do dashboard"
+            style={{
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 2,
+            }}
+          >
+            <NavSections mainNav={mainNav} isAdmin={isAdmin} compact />
+          </nav>
+        </header>
+        <main style={{ background: monitorTheme.pageBg, padding: designTokens.space[8] }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+            <SessionBanner />
+            {children}
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: monitorTheme.layoutBg, color: monitorTheme.textPrimary }}>
@@ -235,34 +345,7 @@ export default function MonitorLayout({ children }) {
             <TopBarLogo height={24} maxWidth={156} />
           </button>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {mainNav.map((item) => (
-              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
-            ))}
-          </div>
-
-          {isAdmin && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <p style={{
-                ...TYPE.caption,
-                color: monitorTheme.sidebarTextMuted,
-                padding: '4px 12px 2px',
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-              }}>
-                Acesso
-              </p>
-              {USERS_NAV.map((item) => (
-                <NavButton key={item.id} item={item} isActive={item.id === activeId} />
-              ))}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {ACCOUNT_NAV.map((item) => (
-              <NavButton key={item.id} item={item} isActive={item.id === activeId} />
-            ))}
-          </div>
+          <NavSections mainNav={mainNav} isAdmin={isAdmin} />
 
           <SidebarFooter />
         </aside>

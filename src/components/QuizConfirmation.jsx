@@ -107,7 +107,7 @@ export default function QuizConfirmation({
                 ? `${COLORS.success}06`
                 : COLORS.inputBg,
               cursor: "pointer",
-              transition: "all 0.2s ease",
+              transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
             }}
           >
             <motion.div

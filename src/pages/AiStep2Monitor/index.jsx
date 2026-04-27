@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Loader2, RefreshCw } from 'lucide-react'
+import { DashboardButton, InlineNotice } from '../../components/dashboard'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import DetailModePanel from './DetailModePanel'
 import ListModePanel from './ListModePanel'
@@ -135,75 +136,48 @@ export default function AiStep2Monitor() {
               }}
             >
               <div>
-                <h1 style={{ ...TYPE.h2, color: monitorTheme.textPrimary }}>Geracao de imagens IA</h1>
+                <h1 style={{ ...TYPE.h2, color: monitorTheme.textPrimary }}>Geração de imagens IA</h1>
                 <p style={{ ...TYPE.bodySmall, color: monitorTheme.textMuted, marginTop: 4 }}>
                   {isListMode
-                    ? 'Painel de controle com visao geral de todos os jobs.'
+                    ? 'Painel de controle com visão geral de todos os jobs.'
                     : 'Acompanhe status, previews, downloads e dados coletados no onboarding.'}
                 </p>
                 {lastUpdatedAt ? (
                   <p style={{ ...TYPE.caption, color: monitorTheme.textMuted, marginTop: 8 }}>
-                    Ultima atualizacao: {formatDate(lastUpdatedAt)}
+                    Última atualização: {formatDate(lastUpdatedAt)}
                   </p>
                 ) : null}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {!isListMode ? <StatusBadge status={job?.status} /> : null}
                 {!isListMode ? (
-                  <button type="button" onClick={backToList} style={topButtonStyles}>
+                  <DashboardButton type="button" onClick={backToList} variant="secondary">
                     Voltar para lista
-                  </button>
+                  </DashboardButton>
                 ) : null}
-                <button type="button" onClick={() => reload({ silent: true })} style={topButtonStyles}>
+                <DashboardButton type="button" onClick={() => reload({ silent: true })} variant="secondary">
                   {refreshing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                   Atualizar
-                </button>
+                </DashboardButton>
               </div>
             </section>
 
             {error ? (
-              <div
-                style={{
-                  border: `1px solid ${monitorTheme.dangerBorder}`,
-                  background: monitorTheme.dangerBg,
-                  color: monitorTheme.dangerTextStrong,
-                  borderRadius: monitorRadius.xl,
-                  padding: 14,
-                  marginBottom: 16,
-                }}
-              >
+              <InlineNotice tone="error" style={{ marginBottom: 16 }}>
                 <strong>Erro:</strong> {error}
-              </div>
+              </InlineNotice>
             ) : null}
 
             {actionError ? (
-              <div
-                style={{
-                  border: `1px solid ${monitorTheme.dangerBorder}`,
-                  background: monitorTheme.dangerBg,
-                  color: monitorTheme.dangerTextStrong,
-                  borderRadius: monitorRadius.xl,
-                  padding: 14,
-                  marginBottom: 16,
-                }}
-              >
+              <InlineNotice tone="error" style={{ marginBottom: 16 }}>
                 <strong>Falha no reprocessamento:</strong> {actionError}
-              </div>
+              </InlineNotice>
             ) : null}
 
             {actionSuccess ? (
-              <div
-                style={{
-                  border: `1px solid ${monitorTheme.borderStrong}`,
-                  background: monitorTheme.completedBg,
-                  color: monitorTheme.completedText,
-                  borderRadius: monitorRadius.xl,
-                  padding: 14,
-                  marginBottom: 16,
-                }}
-              >
+              <InlineNotice tone="success" style={{ marginBottom: 16 }}>
                 {actionSuccess}
-              </div>
+              </InlineNotice>
             ) : null}
 
             {loading ? (
@@ -268,17 +242,4 @@ export default function AiStep2Monitor() {
       ) : null}
     </MonitorLayout>
   )
-}
-
-const topButtonStyles = {
-  border: `1px solid ${monitorTheme.borderStrong}`,
-  background: monitorTheme.pageBg,
-  color: monitorTheme.textPrimary,
-  borderRadius: monitorRadius.md,
-  padding: '8px 12px',
-  cursor: 'pointer',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 8,
-  fontWeight: 600,
 }

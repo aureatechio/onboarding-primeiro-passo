@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Trash2, X } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
+import { DashboardButton, DashboardField, DashboardModal, InlineNotice } from '../../components/dashboard'
 import { adminFetch } from '../../lib/admin-edge'
 import { useAuth } from '../../context/AuthContext'
 import { monitorRadius, monitorTheme } from '../AiStep2Monitor/theme'
@@ -50,102 +51,70 @@ export default function EditUserModal({ user, onClose, onSaved }) {
   }
 
   return (
-    <div style={overlayStyle} role="dialog" aria-modal="true">
+    <DashboardModal isOpen title={user.full_name || user.email} onClose={onClose} closeDisabled={saving} maxWidth={480}>
       <div style={modalStyle}>
-        <header style={headerStyle}>
-          <div>
-            <h2 style={titleStyle}>{user.full_name || user.email}</h2>
-            <p style={subtitleStyle}>{user.email}</p>
-          </div>
-          <button type="button" onClick={onClose} style={iconButtonStyle} aria-label="Fechar">
-            <X size={16} />
-          </button>
-        </header>
+        <p style={subtitleStyle}>{user.email}</p>
 
-        <label style={fieldStyle}>
-          <span style={labelStyle}>Role</span>
-          <select value={role} onChange={(e) => setRole(e.target.value)} style={inputStyle}>
-            {ROLES.map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
-        </label>
+        <DashboardField
+          as="select"
+          label="Role"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          options={ROLES.map((item) => ({ value: item, label: item }))}
+        />
 
-        <label style={fieldStyle}>
-          <span style={labelStyle}>Status</span>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle}>
-            <option value="active">active</option>
-            <option value="disabled">disabled</option>
-          </select>
-        </label>
+        <DashboardField
+          as="select"
+          label="Status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          options={[
+            { value: 'active', label: 'active' },
+            { value: 'disabled', label: 'disabled' },
+          ]}
+        />
 
         <section style={dangerZoneStyle}>
           <div>
-            <strong style={{ color: monitorTheme.dangerTextStrong, fontSize: 13 }}>Excluir usuario</strong>
-            <p style={subtitleStyle}>Digite o email para confirmar. Esta acao remove a conta do Auth.</p>
+            <strong style={{ color: monitorTheme.dangerTextStrong, fontSize: 13 }}>Excluir usuário</strong>
+            <p style={subtitleStyle}>Digite o e-mail para confirmar. Esta ação remove a conta do Auth.</p>
           </div>
-          <input
+          <DashboardField
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             disabled={isSelf}
-            placeholder={isSelf ? 'Auto-exclusao bloqueada' : user.email}
-            style={inputStyle}
+            placeholder={isSelf ? 'Autoexclusão bloqueada' : user.email}
           />
-          <button
+          <DashboardButton
             type="button"
             onClick={deleteUser}
             disabled={isSelf || confirmText !== user.email || saving}
-            style={dangerButtonStyle}
+            variant="danger"
+            icon={Trash2}
           >
-            <Trash2 size={14} />
             Excluir
-          </button>
+          </DashboardButton>
         </section>
 
-        {error && <div style={errorStyle}>{error}</div>}
+        {error && <InlineNotice tone="error">{error}</InlineNotice>}
 
         <div style={footerStyle}>
-          <button type="button" onClick={onClose} style={secondaryButtonStyle}>Cancelar</button>
-          <button type="button" onClick={saveChanges} disabled={saving} style={primaryButtonStyle}>
-            {saving ? 'Salvando...' : 'Salvar alteracoes'}
-          </button>
+          <DashboardButton type="button" onClick={onClose} disabled={saving} variant="secondary">Cancelar</DashboardButton>
+          <DashboardButton type="button" onClick={saveChanges} disabled={saving} variant="primary">
+            {saving ? 'Salvando…' : 'Salvar alterações'}
+          </DashboardButton>
         </div>
       </div>
-    </div>
+    </DashboardModal>
   )
 }
 
-const overlayStyle = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(1,4,9,0.78)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 20,
-  zIndex: 100,
-}
 const modalStyle = {
-  width: '100%',
-  maxWidth: 480,
-  background: monitorTheme.cardMutedBg,
-  border: `1px solid ${monitorTheme.border}`,
-  borderRadius: monitorRadius.xl,
   padding: 22,
   display: 'grid',
   gap: 16,
 }
-const headerStyle = { display: 'flex', justifyContent: 'space-between', gap: 16 }
-const titleStyle = { margin: 0, color: monitorTheme.textPrimary, fontSize: 18 }
-const subtitleStyle = { margin: '4px 0 0', color: monitorTheme.textSecondary, fontSize: 12 }
-const fieldStyle = { display: 'grid', gap: 6 }
-const labelStyle = { color: monitorTheme.textSecondary, fontSize: 11, textTransform: 'uppercase' }
-const inputStyle = {
-  background: monitorTheme.controlBg,
-  border: `1px solid ${monitorTheme.controlBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.controlText,
-  padding: '10px 12px',
-  font: 'inherit',
-}
+const subtitleStyle = { margin: '0', color: monitorTheme.textSecondary, fontSize: 12 }
 const dangerZoneStyle = {
   border: `1px solid ${monitorTheme.dangerBorder}`,
   borderRadius: monitorRadius.lg,
@@ -153,40 +122,4 @@ const dangerZoneStyle = {
   display: 'grid',
   gap: 10,
 }
-const errorStyle = {
-  background: monitorTheme.dangerBg,
-  border: `1px solid ${monitorTheme.dangerBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.dangerTextStrong,
-  padding: 10,
-  fontSize: 12,
-}
 const footerStyle = { display: 'flex', justifyContent: 'flex-end', gap: 10 }
-const primaryButtonStyle = {
-  background: '#384ffe',
-  border: 'none',
-  borderRadius: monitorRadius.md,
-  color: '#fff',
-  cursor: 'pointer',
-  fontWeight: 700,
-  padding: '10px 14px',
-}
-const secondaryButtonStyle = {
-  background: 'transparent',
-  border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.buttonSecondaryText,
-  cursor: 'pointer',
-  fontWeight: 700,
-  padding: '10px 14px',
-}
-const dangerButtonStyle = {
-  ...secondaryButtonStyle,
-  borderColor: monitorTheme.dangerBorder,
-  color: monitorTheme.dangerTextStrong,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 8,
-}
-const iconButtonStyle = { ...secondaryButtonStyle, padding: 8, height: 34, width: 34 }

@@ -77,7 +77,6 @@ export default function DataRow({
                 fontFamily,
                 resize: 'vertical',
                 boxSizing: 'border-box',
-                outline: 'none',
                 lineHeight: 1.55,
                 transition: 'border-color 0.15s',
               }}
@@ -99,7 +98,6 @@ export default function DataRow({
                 width: '100%',
                 fontFamily,
                 boxSizing: 'border-box',
-                outline: 'none',
                 transition: 'border-color 0.15s',
               }}
               onFocus={(e) => (e.target.style.borderColor = monitorTheme.brand)}

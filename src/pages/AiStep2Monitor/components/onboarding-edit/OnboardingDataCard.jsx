@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { monitorTheme } from '../../theme'
 
-const ACELERAI_BLUE = '#384ffe'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
 
 export default function OnboardingDataCard({ title, description, children, actions }) {
   const [hover, setHover] = useState(false)

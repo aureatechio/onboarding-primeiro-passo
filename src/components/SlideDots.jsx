@@ -32,7 +32,7 @@ export default function SlideDots({ total, current, onSelect }) {
                   : i < current
                     ? COLORS.success
                     : COLORS.border,
-              transition: "all 0.3s ease",
+              transition: "background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
             }}
           />
         </button>

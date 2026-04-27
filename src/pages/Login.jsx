@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import TopBarLogo from '../components/TopBarLogo'
+import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { useAuth } from '../context/AuthContext'
 
 const DEFAULT_NEXT = '/ai-step2/monitor?mode=list'
-const PRIMARY = '#384ffe'
 
 function readNext() {
   const params = new URLSearchParams(window.location.search)
@@ -88,134 +88,71 @@ export default function Login() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <TopBarLogo height={22} maxWidth={140} />
-          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Acesso ao painel</h1>
-          <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
-            Entre com sua conta para continuar.
-          </p>
-        </div>
-
-        {envError && (
-          <div
-            role="alert"
-            style={{
-              background: monitorTheme.dangerBg,
-              border: `1px solid ${monitorTheme.dangerBorder}`,
-              color: monitorTheme.dangerTextStrong,
-              borderRadius: monitorRadius.md,
-              padding: 12,
-              fontSize: 12,
-              lineHeight: 1.5,
-            }}
-          >
-            Configuracao de autenticacao ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Acesso ao painel</h1>
+            <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
+              Entre com sua conta para continuar.
+            </p>
           </div>
+
+          {envError && (
+            <InlineNotice tone="error">
+              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+            </InlineNotice>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ fontSize: 11, color: monitorTheme.textSecondary, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              E-mail
-            </span>
-            <input
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={submitting || envError}
-              required
-              style={{
-                background: monitorTheme.controlBg,
-                border: `1px solid ${monitorTheme.controlBorder}`,
-                borderRadius: monitorRadius.md,
-                padding: '10px 12px',
-                color: monitorTheme.controlText,
-                fontSize: 13,
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
-            />
-          </label>
+          <DashboardField
+            label="E-mail"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={submitting || envError}
+            required
+          />
 
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={{ fontSize: 11, color: monitorTheme.textSecondary, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              Senha
-            </span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={submitting || envError}
-              required
-              style={{
-                background: monitorTheme.controlBg,
-                border: `1px solid ${monitorTheme.controlBorder}`,
-                borderRadius: monitorRadius.md,
-                padding: '10px 12px',
-                color: monitorTheme.controlText,
-                fontSize: 13,
-                fontFamily: 'inherit',
-                outline: 'none',
-              }}
-            />
-          </label>
+          <DashboardField
+            label="Senha"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting || envError}
+            required
+          />
 
           {error && (
-            <div
-              role="alert"
-              style={{
-                background: monitorTheme.dangerBg,
-                border: `1px solid ${monitorTheme.dangerBorder}`,
-                color: monitorTheme.dangerTextStrong,
-                borderRadius: monitorRadius.md,
-                padding: 10,
-                fontSize: 12,
-              }}
-            >
+            <InlineNotice tone="error">
               {error}
-            </div>
+            </InlineNotice>
           )}
 
-          <button
+          <DashboardButton
             type="submit"
             disabled={disabled}
-            style={{
-              marginTop: 4,
-              padding: '11px 14px',
-              borderRadius: monitorRadius.md,
-              border: 'none',
-              background: disabled ? 'rgba(56,79,254,0.4)' : PRIMARY,
-              color: '#fff',
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: '0.02em',
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              transition: 'background 0.15s',
-            }}
+            variant="primary"
+            size="lg"
+            style={{ marginTop: 4 }}
           >
-            {submitting ? 'Entrando...' : 'Entrar'}
-          </button>
+            {submitting ? 'Entrando…' : 'Entrar'}
+          </DashboardButton>
 
-          <button
+          <DashboardButton
             type="button"
             onClick={() => {
               window.history.pushState({}, '', '/forgot-password')
               window.dispatchEvent(new Event('aurea:location-change'))
             }}
+            variant="ghost"
+            size="sm"
             style={{
               marginTop: 2,
-              background: 'transparent',
-              border: 'none',
-              color: monitorTheme.textSecondary,
-              fontSize: 12,
               textDecoration: 'underline',
-              cursor: 'pointer',
-              padding: 4,
               alignSelf: 'center',
             }}
           >
             Esqueci minha senha
-          </button>
+          </DashboardButton>
         </form>
       </div>
     </div>

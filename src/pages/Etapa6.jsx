@@ -159,7 +159,7 @@ export default function Etapa6() {
             alignItems: "center",
             gap: 12,
             textAlign: "left",
-            transition: "all 0.2s ease",
+            transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
           }}
         >
           <div
@@ -175,7 +175,7 @@ export default function Etapa6() {
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
-              transition: "all 0.2s ease",
+              transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
             }}
           >
             {acknowledged && (

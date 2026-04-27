@@ -122,7 +122,6 @@ export default function PreviewPanel({ sections, activeEtapaId }) {
                     padding: '4px 8px',
                     fontSize: 12,
                     fontFamily: "'JetBrains Mono', monospace",
-                    outline: 'none',
                     boxSizing: 'border-box',
                   }}
                   onFocus={(e) => { e.target.style.borderColor = brand }}

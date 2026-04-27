@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { monitorTheme } from '../../theme'
 
-const ACELERAI_BLUE = '#384ffe'
-const DESTRUCTIVE = '#ff0058'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
+const DESTRUCTIVE = monitorTheme.dangerTextStrong
 const SANS = "'Inter', system-ui, sans-serif"
 
 function formatBytes(bytes) {
@@ -150,7 +150,7 @@ export default function LogoManager({
           )}
           {!readOnly && (
             <div style={{ marginTop: 8, fontSize: 11, color: monitorTheme.textMuted }}>
-              Maximo 5 MB. Formatos: PNG, JPG, WebP, SVG, PDF, HEIC/HEIF.
+              Máximo 5 MB. Formatos: PNG, JPG, WebP, SVG, PDF, HEIC/HEIF.
             </div>
           )}
         </div>
@@ -171,7 +171,7 @@ function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId, readOn
   if (!entries || entries.length === 0) {
     return (
       <div style={{ fontSize: 12, color: monitorTheme.textMuted, fontFamily: SANS }}>
-        Sem historico de logos ainda.
+        Sem histórico de logos ainda.
       </div>
     )
   }
@@ -188,7 +188,7 @@ function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId, readOn
           marginBottom: 10,
         }}
       >
-        Historico ({entries.length})
+        Histórico ({entries.length})
       </div>
       <div
         style={{
@@ -297,7 +297,7 @@ function LogoHistoryGallery({ entries, onSetActive, onDelete, busyLogoId, readOn
                   type="button"
                   onClick={() => onDelete?.(entry.id)}
                   disabled={entry.is_active || busy}
-                  title={entry.is_active ? 'Nao e possivel deletar o logo ativo' : 'Deletar'}
+                  title={entry.is_active ? 'Não é possível deletar o logo ativo' : 'Deletar'}
                   style={{
                     background: 'transparent',
                     color: entry.is_active ? monitorTheme.textMuted : DESTRUCTIVE,

@@ -1,5 +1,6 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { RotateCcw, Download, Search, GitCompare, Upload, FileUp } from 'lucide-react'
+import { InlineNotice } from '../../components/dashboard'
 import { COLORS } from '../../theme/colors'
 import { monitorTheme, monitorRadius } from '../AiStep2Monitor/theme'
 
@@ -59,6 +60,7 @@ export default function EditorToolbar({
   publishStatus,
 }) {
   const fileInputRef = useRef(null)
+  const [importNotice, setImportNotice] = useState(null)
 
   const handleImportClick = () => {
     fileInputRef.current?.click()
@@ -80,12 +82,12 @@ export default function EditorToolbar({
             : result?.reason === 'invalid-json'
               ? 'JSON inválido.'
               : 'Falha ao importar.'
-        window.alert(reason)
+        setImportNotice({ tone: 'error', message: reason })
       } else {
-        window.alert(`Importado: ${result.imported.join(', ')}. Revise e clique em Publicar.`)
+        setImportNotice({ tone: 'success', message: `Importado: ${result.imported.join(', ')}. Revise e clique em Publicar.` })
       }
     } catch (err) {
-      window.alert(`Erro ao ler arquivo: ${err.message}`)
+      setImportNotice({ tone: 'error', message: `Erro ao ler arquivo: ${err.message}` })
     } finally {
       // Reset so selecting the same file again re-triggers
       e.target.value = ''
@@ -93,88 +95,91 @@ export default function EditorToolbar({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '12px 0',
-        marginBottom: 8,
-        borderBottom: `1px solid ${monitorTheme.border}`,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h1
-          style={{
-            fontSize: 18,
-            fontWeight: 800,
-            color: monitorTheme.textPrimary,
-            margin: 0,
-          }}
-        >
-          Copy Editor
-        </h1>
-        {dirtyCount > 0 && (
-          <span
+    <div style={{ display: 'grid', gap: 8, marginBottom: 8 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 0',
+          borderBottom: `1px solid ${monitorTheme.border}`,
+          gap: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h1
             style={{
-              fontSize: 10,
-              fontWeight: 700,
-              fontFamily: "'JetBrains Mono', monospace",
-              background: `${COLORS.accent}18`,
-              color: COLORS.accent,
-              border: `1px solid ${COLORS.accent}30`,
-              borderRadius: 100,
-              padding: '2px 10px',
+              fontSize: 18,
+              fontWeight: 800,
+              color: monitorTheme.textPrimary,
+              margin: 0,
             }}
           >
-            {dirtyCount} editado{dirtyCount > 1 ? 's' : ''}
-          </span>
-        )}
-      </div>
+            Copy Editor
+          </h1>
+          {dirtyCount > 0 && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                fontFamily: "'JetBrains Mono', monospace",
+                background: `${COLORS.accent}18`,
+                color: COLORS.accent,
+                border: `1px solid ${COLORS.accent}30`,
+                borderRadius: 100,
+                padding: '2px 10px',
+              }}
+            >
+              {dirtyCount} editado{dirtyCount > 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <ToolbarButton
-          icon={Search}
-          label="Buscar"
-          onClick={onSearch}
-        />
-        <ToolbarButton
-          icon={GitCompare}
-          label="Comparar"
-          onClick={onToggleDiff}
-          variant={diffActive ? 'primary' : 'ghost'}
-        />
-        <ToolbarButton
-          icon={RotateCcw}
-          label="Resetar"
-          onClick={onReset}
-          disabled={!isDirty}
-        />
-        <ToolbarButton
-          icon={Download}
-          label="Exportar"
-          onClick={onExport}
-        />
-        <ToolbarButton
-          icon={FileUp}
-          label="Importar"
-          onClick={handleImportClick}
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json,.json"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
-        <ToolbarButton
-          icon={Upload}
-          label={publishStatus === 'publishing' ? 'Publicando...' : publishStatus === 'success' ? 'Publicado!' : 'Publicar'}
-          onClick={onPublish}
-          disabled={!isDirty || publishStatus === 'publishing'}
-          variant="primary"
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <ToolbarButton
+            icon={Search}
+            label="Buscar"
+            onClick={onSearch}
+          />
+          <ToolbarButton
+            icon={GitCompare}
+            label="Comparar"
+            onClick={onToggleDiff}
+            variant={diffActive ? 'primary' : 'ghost'}
+          />
+          <ToolbarButton
+            icon={RotateCcw}
+            label="Resetar"
+            onClick={onReset}
+            disabled={!isDirty}
+          />
+          <ToolbarButton
+            icon={Download}
+            label="Exportar"
+            onClick={onExport}
+          />
+          <ToolbarButton
+            icon={FileUp}
+            label="Importar"
+            onClick={handleImportClick}
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+          <ToolbarButton
+            icon={Upload}
+            label={publishStatus === 'publishing' ? 'Publicando…' : publishStatus === 'success' ? 'Publicado!' : 'Publicar'}
+            onClick={onPublish}
+            disabled={!isDirty || publishStatus === 'publishing'}
+            variant="primary"
+          />
+        </div>
       </div>
+      {importNotice ? <InlineNotice tone={importNotice.tone}>{importNotice.message}</InlineNotice> : null}
     </div>
   )
 }

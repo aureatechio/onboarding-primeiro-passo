@@ -615,7 +615,7 @@ export default function Etapa62() {
                 style={{
                   flex: 1, padding: "12px 14px 12px 8px", border: "none",
                   background: "transparent", color: COLORS.text,
-                  fontSize: 13, fontFamily: "inherit", outline: "none", minWidth: 0,
+                  fontSize: 13, fontFamily: "inherit", minWidth: 0,
                 }}
               />
             </div>
@@ -681,7 +681,7 @@ export default function Etapa62() {
                 style={{
                   flex: 1, padding: "12px 14px 12px 8px", border: "none",
                   background: "transparent", color: COLORS.text,
-                  fontSize: 13, fontFamily: "inherit", outline: "none", minWidth: 0,
+                  fontSize: 13, fontFamily: "inherit", minWidth: 0,
                 }}
               />
             </div>

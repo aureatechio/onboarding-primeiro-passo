@@ -596,7 +596,6 @@ export default function EditableText({
       padding: '6px 8px',
       color: COLORS.text,
       ...editTypography,
-      outline: 'none',
       boxShadow: `0 0 0 3px ${COLORS.accent}20`,
       display: 'block',
       margin: 0,

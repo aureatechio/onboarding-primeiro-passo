@@ -1,6 +1,6 @@
 import { monitorTheme } from '../../theme'
 
-const ACELERAI_BLUE = '#384ffe'
+const ACELERAI_BLUE = monitorTheme.actionPrimaryBg
 const SANS = "'Inter', system-ui, sans-serif"
 
 const KEY_PREFIX = 'onb23_regen_banner:'
@@ -46,7 +46,7 @@ export default function ChangeBanner({ active, onRegenerate, onDismiss, regenera
       }}
     >
       <span style={{ fontSize: 13, flex: 1 }}>
-        Alteracoes foram salvas. Os jobs IA atuais podem nao refletir os novos dados.
+        Alterações foram salvas. Os jobs IA atuais podem não refletir os novos dados.
       </span>
       <button
         type="button"

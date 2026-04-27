@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Edit3, Plus, RefreshCw, Search, Users } from 'lucide-react'
+import { DashboardButton, DashboardField, InlineNotice } from '../../components/dashboard'
 import { adminFetch } from '../../lib/admin-edge'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import MonitorLayout from '../AiStep2Monitor/MonitorLayout'
@@ -66,41 +67,51 @@ export default function UsersList() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="button" onClick={fetchUsers} style={secondaryButtonStyle}>
-              <RefreshCw size={15} />
+            <DashboardButton type="button" onClick={fetchUsers} icon={RefreshCw} variant="secondary" size="lg">
               Atualizar
-            </button>
-            <button type="button" onClick={() => setInviteOpen(true)} style={primaryButtonStyle}>
-              <Plus size={15} />
+            </DashboardButton>
+            <DashboardButton type="button" onClick={() => setInviteOpen(true)} icon={Plus} variant="primary" size="lg">
               Convidar
-            </button>
+            </DashboardButton>
           </div>
         </header>
 
         <section style={toolbarStyle}>
-          <label style={searchStyle}>
-            <Search size={15} color={monitorTheme.textMuted} />
-            <input
-              value={filters.search}
-              onChange={(e) => updateFilter('search', e.target.value)}
-              placeholder="Buscar por nome ou email"
-              style={bareInputStyle}
-            />
-          </label>
-          <select value={filters.role} onChange={(e) => updateFilter('role', e.target.value)} style={selectStyle}>
-            <option value="">Todos os roles</option>
-            <option value="admin">Admin</option>
-            <option value="operator">Operator</option>
-            <option value="viewer">Viewer</option>
-          </select>
-          <select value={filters.status} onChange={(e) => updateFilter('status', e.target.value)} style={selectStyle}>
-            <option value="">Todos os status</option>
-            <option value="active">Ativos</option>
-            <option value="disabled">Desativados</option>
-          </select>
+          <DashboardField
+            label="Buscar"
+            value={filters.search}
+            onChange={(e) => updateFilter('search', e.target.value)}
+            placeholder="Buscar por nome ou e-mail"
+            style={{ paddingLeft: 34 }}
+            containerStyle={{ position: 'relative' }}
+          />
+          <Search size={15} color={monitorTheme.textMuted} style={{ position: 'absolute', marginTop: 33, marginLeft: 12 }} />
+          <DashboardField
+            as="select"
+            label="Role"
+            value={filters.role}
+            onChange={(e) => updateFilter('role', e.target.value)}
+            options={[
+              { value: '', label: 'Todos os roles' },
+              { value: 'admin', label: 'Admin' },
+              { value: 'operator', label: 'Operator' },
+              { value: 'viewer', label: 'Viewer' },
+            ]}
+          />
+          <DashboardField
+            as="select"
+            label="Status"
+            value={filters.status}
+            onChange={(e) => updateFilter('status', e.target.value)}
+            options={[
+              { value: '', label: 'Todos os status' },
+              { value: 'active', label: 'Ativos' },
+              { value: 'disabled', label: 'Desativados' },
+            ]}
+          />
         </section>
 
-        {error && <div style={errorStyle}>{error}</div>}
+        {error && <InlineNotice tone="error">{error}</InlineNotice>}
 
         <section style={tableWrapStyle}>
           <table style={tableStyle}>
@@ -124,9 +135,9 @@ export default function UsersList() {
                   <td style={tdStyle}><Badge tone={user.status}>{STATUS_LABELS[user.status] || user.status}</Badge></td>
                   <td style={tdStyle}>{formatDate(user.last_sign_in_at)}</td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    <button type="button" onClick={() => setEditingUser(user)} style={iconButtonStyle} aria-label="Editar usuario">
+                    <DashboardButton type="button" onClick={() => setEditingUser(user)} variant="icon" size="sm" aria-label="Editar usuário">
                       <Edit3 size={14} />
-                    </button>
+                    </DashboardButton>
                   </td>
                 </tr>
               ))}
@@ -173,40 +184,16 @@ const toolbarStyle = {
   display: 'grid',
   gridTemplateColumns: 'minmax(240px, 1fr) 180px 180px',
   gap: 10,
-}
-const searchStyle = {
-  background: monitorTheme.controlBg,
-  border: `1px solid ${monitorTheme.controlBorder}`,
-  borderRadius: monitorRadius.md,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  padding: '0 12px',
-}
-const bareInputStyle = {
-  width: '100%',
-  background: 'transparent',
-  border: 'none',
-  color: monitorTheme.controlText,
-  font: 'inherit',
-  outline: 'none',
-  padding: '10px 0',
-}
-const selectStyle = {
-  background: monitorTheme.controlBg,
-  border: `1px solid ${monitorTheme.controlBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.controlText,
-  font: 'inherit',
-  padding: '10px 12px',
+  position: 'relative',
 }
 const tableWrapStyle = {
   border: `1px solid ${monitorTheme.border}`,
   borderRadius: monitorRadius.xl,
-  overflow: 'hidden',
+  overflowX: 'auto',
+  overflowY: 'hidden',
   background: monitorTheme.cardMutedBg,
 }
-const tableStyle = { width: '100%', borderCollapse: 'collapse', fontSize: 13 }
+const tableStyle = { width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13 }
 const thStyle = {
   color: monitorTheme.textMuted,
   fontSize: 11,
@@ -223,36 +210,3 @@ const tdStyle = {
   borderBottom: `1px solid ${monitorTheme.borderSoft}`,
 }
 const emptyStyle = { ...tdStyle, color: monitorTheme.textSecondary, textAlign: 'center', padding: 30 }
-const primaryButtonStyle = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 8,
-  background: '#384ffe',
-  border: 'none',
-  borderRadius: monitorRadius.md,
-  color: '#fff',
-  cursor: 'pointer',
-  fontWeight: 700,
-  padding: '10px 14px',
-}
-const secondaryButtonStyle = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 8,
-  background: 'transparent',
-  border: `1px solid ${monitorTheme.buttonSecondaryBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.buttonSecondaryText,
-  cursor: 'pointer',
-  fontWeight: 700,
-  padding: '10px 14px',
-}
-const iconButtonStyle = { ...secondaryButtonStyle, padding: 8 }
-const errorStyle = {
-  background: monitorTheme.dangerBg,
-  border: `1px solid ${monitorTheme.dangerBorder}`,
-  borderRadius: monitorRadius.md,
-  color: monitorTheme.dangerTextStrong,
-  padding: 12,
-  fontSize: 12,
-}

@@ -39,7 +39,7 @@ export default function NavButtons({
             fontSize: 14,
             fontWeight: 600,
             cursor: "pointer",
-            transition: "all 0.2s ease",
+            transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
           }}
         >
           <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -64,7 +64,7 @@ export default function NavButtons({
           fontWeight: nextDisabled ? 700 : 800,
           cursor: nextDisabled ? "not-allowed" : "pointer",
           boxShadow: nextDisabled ? "none" : `0 4px 16px ${bgColor}25`,
-          transition: "all 0.3s ease",
+          transition: "background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
           letterSpacing: "0.01em",
           opacity: nextDisabled ? 0.6 : 1,
         }}

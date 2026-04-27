@@ -176,10 +176,10 @@ export default function OnboardingDataTab({
         <div
           style={{
             padding: '10px 14px',
-            background: 'rgba(255,0,88,0.1)',
-            border: '1px solid #ff0058',
+            background: monitorTheme.dangerBg,
+            border: `1px solid ${monitorTheme.dangerBorder}`,
             borderRadius: 10,
-            color: '#ff0058',
+            color: monitorTheme.dangerTextStrong,
             fontSize: 12,
             marginBottom: 16,
           }}

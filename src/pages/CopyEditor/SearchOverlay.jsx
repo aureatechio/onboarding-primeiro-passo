@@ -137,7 +137,6 @@ export default function SearchOverlay({ sections, isOpen, onClose, onSelectResul
             style={{
               flex: 1,
               border: 'none',
-              outline: 'none',
               fontSize: 15,
               background: 'transparent',
               color: monitorTheme.textPrimary,

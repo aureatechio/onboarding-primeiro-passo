@@ -448,11 +448,12 @@ export default function ListModePanel({
         </div>
       )}
 
-      <section style={{ border: `1px solid ${monitorTheme.border}`, borderRadius: monitorRadius.xl, overflow: 'hidden', width: '100%' }}>
+          <section style={{ border: `1px solid ${monitorTheme.border}`, borderRadius: monitorRadius.xl, overflowX: 'auto', overflowY: 'hidden', width: '100%' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
+              gridTemplateColumns: 'repeat(7, minmax(132px, 1fr))',
+              minWidth: 960,
             background: monitorTheme.cardMutedBg,
             padding: '10px 16px',
             borderBottom: `1px solid ${monitorTheme.border}`,
@@ -477,7 +478,8 @@ export default function ListModePanel({
               onClick={() => openJobDetail(item.job_id)}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(7, 1fr)',
+                gridTemplateColumns: 'repeat(7, minmax(132px, 1fr))',
+                minWidth: 960,
                 padding: '12px 16px',
                 width: '100%',
                 border: 'none',
@@ -588,8 +590,8 @@ const highlightActionButtonStyles = {
 
 const releaseButtonStyles = {
   border: 'none',
-  background: '#f59e0b',
-  color: '#1a1a1a',
+  background: monitorTheme.warningActionBg,
+  color: monitorTheme.warningActionText,
   borderRadius: monitorRadius.sm,
   padding: '8px 12px',
   fontWeight: 700,

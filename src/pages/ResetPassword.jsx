@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import TopBarLogo from '../components/TopBarLogo'
+import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
 import { authClient, hasAuthEnv } from '../lib/auth-client'
 
-const PRIMARY = '#384ffe'
 const MIN_PASSWORD = 6
 
 function navigateReplace(path) {
@@ -45,7 +45,7 @@ export default function ResetPassword() {
     const tokens = extractTokensFromHash()
     if (!tokens) {
       setStatus('invalid')
-      setErrorMessage('Link invalido ou ja utilizado. Solicite um novo e-mail de redefinicao.')
+      setErrorMessage('Link inválido ou já utilizado. Solicite um novo e-mail de redefinição.')
       return
     }
     if (tokens.errorDescription) {
@@ -63,7 +63,7 @@ export default function ResetPassword() {
       })
       .catch((err) => {
         setStatus('invalid')
-        setErrorMessage(err?.message || 'Nao foi possivel validar o link. Solicite um novo e-mail.')
+        setErrorMessage(err?.message || 'Não foi possível validar o link. Solicite um novo e-mail.')
       })
   }, [envError])
 
@@ -75,7 +75,7 @@ export default function ResetPassword() {
       return
     }
     if (password !== confirm) {
-      setFormError('As senhas nao conferem.')
+      setFormError('As senhas não conferem.')
       return
     }
     setSubmitting(true)
@@ -86,7 +86,7 @@ export default function ResetPassword() {
       await authClient.auth.signOut()
       setStatus('done')
     } catch (err) {
-      setFormError(err?.message || 'Nao foi possivel atualizar a senha. Tente novamente.')
+      setFormError(err?.message || 'Não foi possível atualizar a senha. Tente novamente.')
     } finally {
       setSubmitting(false)
     }
@@ -128,186 +128,89 @@ export default function ResetPassword() {
           </p>
         </div>
 
-        {envError && (
-          <div
-            role="alert"
-            style={{
-              background: monitorTheme.dangerBg,
-              border: `1px solid ${monitorTheme.dangerBorder}`,
-              color: monitorTheme.dangerTextStrong,
-              borderRadius: monitorRadius.md,
-              padding: 12,
-              fontSize: 12,
-              lineHeight: 1.5,
-            }}
-          >
-            Configuracao de autenticacao ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
-          </div>
+          {envError && (
+            <InlineNotice tone="error">
+              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+            </InlineNotice>
         )}
 
         {status === 'loading' && (
           <p style={{ fontSize: 13, color: monitorTheme.textSecondary, margin: 0 }}>
-            Validando link...
+            Validando link…
           </p>
         )}
 
         {status === 'invalid' && (
           <>
-            <div
-              role="alert"
-              style={{
-                background: monitorTheme.dangerBg,
-                border: `1px solid ${monitorTheme.dangerBorder}`,
-                color: monitorTheme.dangerTextStrong,
-                borderRadius: monitorRadius.md,
-                padding: 12,
-                fontSize: 12,
-                lineHeight: 1.5,
-              }}
-            >
-              {errorMessage || 'Link invalido ou expirado.'}
-            </div>
-            <button
+            <InlineNotice tone="error">
+              {errorMessage || 'Link inválido ou expirado.'}
+            </InlineNotice>
+            <DashboardButton
               type="button"
               onClick={() => navigateReplace('/forgot-password')}
-              style={{
-                padding: '11px 14px',
-                borderRadius: monitorRadius.md,
-                border: 'none',
-                background: PRIMARY,
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
+              variant="primary"
+              size="lg"
             >
               Solicitar novo link
-            </button>
+            </DashboardButton>
           </>
         )}
 
         {status === 'ready' && (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 11, color: monitorTheme.textSecondary, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                Nova senha
-              </span>
-              <input
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={submitting}
-                required
-                minLength={MIN_PASSWORD}
-                style={{
-                  background: monitorTheme.controlBg,
-                  border: `1px solid ${monitorTheme.controlBorder}`,
-                  borderRadius: monitorRadius.md,
-                  padding: '10px 12px',
-                  color: monitorTheme.controlText,
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                }}
-              />
-            </label>
+            <DashboardField
+              label="Nova senha"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={submitting}
+              required
+              minLength={MIN_PASSWORD}
+            />
 
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 11, color: monitorTheme.textSecondary, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                Confirmar senha
-              </span>
-              <input
-                type="password"
-                autoComplete="new-password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                disabled={submitting}
-                required
-                minLength={MIN_PASSWORD}
-                style={{
-                  background: monitorTheme.controlBg,
-                  border: `1px solid ${monitorTheme.controlBorder}`,
-                  borderRadius: monitorRadius.md,
-                  padding: '10px 12px',
-                  color: monitorTheme.controlText,
-                  fontSize: 13,
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                }}
-              />
-            </label>
+            <DashboardField
+              label="Confirmar senha"
+              type="password"
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              disabled={submitting}
+              required
+              minLength={MIN_PASSWORD}
+            />
 
             {formError && (
-              <div
-                role="alert"
-                style={{
-                  background: monitorTheme.dangerBg,
-                  border: `1px solid ${monitorTheme.dangerBorder}`,
-                  color: monitorTheme.dangerTextStrong,
-                  borderRadius: monitorRadius.md,
-                  padding: 10,
-                  fontSize: 12,
-                }}
-              >
+              <InlineNotice tone="error">
                 {formError}
-              </div>
+              </InlineNotice>
             )}
 
-            <button
+            <DashboardButton
               type="submit"
               disabled={submitting}
-              style={{
-                marginTop: 4,
-                padding: '11px 14px',
-                borderRadius: monitorRadius.md,
-                border: 'none',
-                background: submitting ? 'rgba(56,79,254,0.4)' : PRIMARY,
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 700,
-                letterSpacing: '0.02em',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                transition: 'background 0.15s',
-              }}
+              variant="primary"
+              size="lg"
+              style={{ marginTop: 4 }}
             >
-              {submitting ? 'Salvando...' : 'Salvar nova senha'}
-            </button>
+              {submitting ? 'Salvando…' : 'Salvar nova senha'}
+            </DashboardButton>
           </form>
         )}
 
         {status === 'done' && (
           <>
-            <div
-              role="status"
-              style={{
-                background: 'rgba(63,185,80,0.08)',
-                border: '1px solid rgba(63,185,80,0.22)',
-                color: '#3FB950',
-                borderRadius: monitorRadius.md,
-                padding: 12,
-                fontSize: 12,
-                lineHeight: 1.5,
-              }}
-            >
-              Senha atualizada com sucesso. Voce ja pode entrar com a nova senha.
-            </div>
-            <button
+            <InlineNotice tone="success">
+              Senha atualizada com sucesso. Você já pode entrar com a nova senha.
+            </InlineNotice>
+            <DashboardButton
               type="button"
               onClick={() => navigateReplace('/login')}
-              style={{
-                padding: '11px 14px',
-                borderRadius: monitorRadius.md,
-                border: 'none',
-                background: PRIMARY,
-                color: '#fff',
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
+              variant="primary"
+              size="lg"
             >
               Ir para login
-            </button>
+            </DashboardButton>
           </>
         )}
       </div>

@@ -298,7 +298,7 @@ export default function Etapa3() {
                   height: 4,
                   borderRadius: 2,
                   background: i <= 2 ? COLORS.success : COLORS.border,
-                  transition: "all 0.3s ease",
+                  transition: "background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
                 }}
               />
             ))}
