@@ -36,7 +36,7 @@ Consultar `CONTEXT-MAP.md` na raiz do projeto para determinar qual módulo é af
 | OMIE, ordem de serviço, OS, ERP, nota fiscal, NFS-e | `omie` | `.context/modules/omie/README.md` |
 | onboarding, primeiro passo, cadastro inicial, etapa, fluxo | `onboarding` | `src/` |
 | campanha AI, perplexity, nanobanana, briefing, imagem AI | `ai-campaign` | `ai-step2/PRD.md` |
-| deploy, edge function, supabase function | `shared` | `CLAUDE.md` → seção Edge Functions Registry |
+| deploy, edge function, supabase function | `shared` | `AGENTS.md` → seção Edge Functions Registry |
 
 ### Step 3: Carregar contexto do módulo
 

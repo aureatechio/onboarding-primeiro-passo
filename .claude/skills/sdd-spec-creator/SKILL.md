@@ -263,6 +263,6 @@ Apos gerar a spec de um componente existente, validar:
 ## Referencias
 
 - Specs existentes: `supabase/functions/*/functionSpec.md` (22 specs)
-- Convencao SDD: `CLAUDE.md` secao "SDD Convention"
+- Convencao SDD: `AGENTS.md` secao "SDD Convention"
 - Context docs por modulo: `.context/modules/{modulo}/README.md`
 - Regras de negocio: `.context/modules/{modulo}/BUSINESS-RULES.md`
