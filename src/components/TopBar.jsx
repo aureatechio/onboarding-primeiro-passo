@@ -100,7 +100,7 @@ export default function TopBar({ showCompleted = false }) {
             <button
               type="button"
               onClick={handleLogoTap}
-              aria-label="Logo Acelerai (triplo clique para reset de teste)"
+              aria-label="Logo Aceleraí (triplo clique para reset de teste)"
               style={{
                 background: "none",
                 border: "none",

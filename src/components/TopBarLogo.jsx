@@ -5,7 +5,7 @@ export default function TopBarLogo({ height = 22, maxWidth = 140, style: stylePr
   return (
     <img
       src={LOGO_SRC}
-      alt="Acelerai"
+      alt="Aceleraí"
       style={{
         height,
         width: "auto",

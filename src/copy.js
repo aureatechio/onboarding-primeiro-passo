@@ -52,7 +52,7 @@ export const ETAPA2 = {
 
   // ── Slide 2.1 ──
   slide1: {
-    body: 'A Aceleraí não é uma agência de publicidade tradicional. Nós produzimos os criativos com a celebridade, mas a divulgação, o planejamento e o tráfego pago ficam por sua conta (ou da sua agência/equipe de marketing).',
+    body: 'O Aceleraí não é uma agência de publicidade tradicional. Nós produzimos os criativos com a celebridade, mas a divulgação, o planejamento e o tráfego pago ficam por sua conta (ou da sua agência/equipe de marketing).',
     cardLabel: 'PENSE ASSIM',
     aceleraiLabel: 'ACELERAÍ',
     aceleraiDesc: 'Entrega a munição',
@@ -80,7 +80,7 @@ export const ETAPA2 = {
 
   // ── Slide 2.4 ──
   slide4: {
-    body: 'O sucesso da sua campanha é uma parceria entre a Aceleraí e a sua empresa. Cada lado tem um papel fundamental.',
+    body: 'O sucesso da sua campanha é uma parceria entre o Aceleraí e a sua empresa. Cada lado tem um papel fundamental.',
     nossaParte: {
       label: 'Da nossa parte',
       items: [
@@ -104,7 +104,7 @@ export const ETAPA2 = {
 
   // ── Quiz ──
   quizQuestions: [
-    'Entendi que a Aceleraí produz os criativos com a celebridade e que a divulgação e o tráfego são de minha responsabilidade.',
+    'Entendi que o Aceleraí produz os criativos com a celebridade e que a divulgação e o tráfego são de minha responsabilidade.',
     'Entendi que os criativos são produzidos a partir de gravações pré-realizadas pela celebridade, combinadas com o briefing da minha empresa.',
     'Entendi o que vou receber no meu pacote de campanha.',
   ],
@@ -139,7 +139,7 @@ export const ETAPA3 = {
   slideTitles: [
     'A linha do tempo da sua campanha',
     'Prazos reais de cada fase',
-    'Preparação: 15 dias pra tudo acontecer',
+    'Preparação: 15 dias para tudo acontecer',
     'O tempo é seu aliado (se você for rápido)',
     'Onde a gente se fala',
   ],
@@ -152,7 +152,7 @@ export const ETAPA3 = {
     { label: 'Briefing criativo', status: 'future' },
     { label: 'Produção das peças', status: 'future' },
     { label: 'Aprovação do cliente', status: 'future' },
-    { label: 'Aprovação com a Celebridade', status: 'future' },
+    { label: 'Aprovação da celebridade', status: 'future' },
     { label: 'Entrega final', status: 'future' },
     { label: 'Uso da campanha', status: 'future' },
   ],
@@ -184,7 +184,7 @@ export const ETAPA3 = {
     ],
   },
   nossaParte: {
-    label: 'A parte da Aceleraí',
+    label: 'A parte do Aceleraí',
     items: [
       'Criar o roteiro e direção criativa',
       'Produzir as peças com a celebridade',
@@ -200,7 +200,7 @@ export const ETAPA3 = {
   },
   clienteDemorou: {
     label: 'CLIENTE QUE DEMOROU',
-    desc: 'Demora pra responder, atrasa envio de materiais, pede muitas alterações fora do escopo. Resultado: prazo do contrato corre, e o tempo de uso da campanha diminui.',
+    desc: 'Demora para responder, atrasa o envio de materiais e pede muitas alterações fora do escopo. Resultado: o prazo do contrato corre, e o tempo de uso da campanha diminui.',
   },
   agilidadeTip: 'Sua agilidade é o que garante o melhor resultado. O tempo é seu aliado — use-o bem.',
 
@@ -251,7 +251,7 @@ export const ETAPA3 = {
     ],
     nextStepText: 'Na próxima etapa, você conhecerá as regras de uso da imagem da celebridade.',
     ctaButton: 'Continuar para Etapa 4',
-    stepLabel: (totalSteps) => `ETAPA 3 DE ${totalSteps} CONCLUIDA`,
+    stepLabel: (totalSteps) => `ETAPA 3 DE ${totalSteps} CONCLUÍDA`,
   },
 }
 
@@ -264,128 +264,128 @@ export const ETAPA4 = {
   },
 
   slideHeaders: [
-    { tag: 'SLIDE 4.1', title: 'Onde e como voce pode usar sua celebridade', readTime: '4 minutos' },
-    { tag: 'SLIDE 4.3', title: 'Como funciona a aprovacao das pecas' },
-    { tag: 'SLIDE 4.4', title: 'Franquias, filiais e outras midias' },
+    { tag: 'SLIDE 4.1', title: 'Onde e como você pode usar sua celebridade', readTime: '4 minutos' },
+    { tag: 'SLIDE 4.3', title: 'Como funciona a aprovação das peças' },
+    { tag: 'SLIDE 4.4', title: 'Franquias, filiais e outras mídias' },
     { tag: 'SLIDE 4.5', title: 'Prazo de uso e o que acontece no fim do contrato' },
     { tag: 'SLIDE 4.6', title: 'Quiz — Regras de uso da celebridade' },
   ],
 
   // ── Slide 4.1 — Exclusividade ──
   slide1: {
-    body: 'A imagem de ${celebName} e um ativo valioso. Seu contrato garante exclusividade dentro de regras bem definidas de praca e segmento. Veja exatamente o que esta no seu contrato:',
+    body: 'A imagem de ${celebName} é um ativo valioso. Seu contrato garante exclusividade dentro de regras bem definidas de praça e segmento. Veja exatamente o que está no seu contrato:',
     contractLabel: 'SEU CONTRATO',
-    exclusivityTitle: 'Exclusividade geografica e de segmento',
-    exclusivityBody: 'Dentro da sua praca e segmento, nenhum concorrente pode usar ${celebName}. Essa exclusividade e garantida pelo contrato e protege o investimento da sua campanha.',
-    exampleTitle: 'Exemplo pratico do seu contrato',
-    exampleBody: 'Voce contratou ${celebName} para a praca ${praca} no segmento ${segmento}. Isso significa que somente voce pode veicular pecas com essa celebridade nessa regiao e nesse ramo de atuacao.',
+    exclusivityTitle: 'Exclusividade geográfica e de segmento',
+    exclusivityBody: 'Dentro da sua praça e segmento, nenhum concorrente pode usar ${celebName}. Essa exclusividade é garantida pelo contrato e protege o investimento da sua campanha.',
+    exampleTitle: 'Exemplo prático do seu contrato',
+    exampleBody: 'Você contratou ${celebName} para a praça ${praca} no segmento ${segmento}. Isso significa que somente você pode veicular peças com essa celebridade nessa região e nesse ramo de atuação.',
   },
 
   // ── Slide 4.3 — Aprovação ──
   slide2: {
-    body: 'Toda peca que usa a imagem da celebridade precisa passar por um fluxo de aprovacao. Entenda cada etapa:',
-    flowLabel: 'FLUXO DE APROVACAO',
+    body: 'Toda peça que usa a imagem da celebridade precisa passar por um fluxo de aprovação. Entenda cada etapa:',
+    flowLabel: 'FLUXO DE APROVAÇÃO',
     steps: [
-      { icon: 'clapperboard', label: 'Producao cria a peca', desc: 'Nossa equipe desenvolve o material criativo.' },
-      { icon: 'eye', label: 'Voce revisa e aprova', desc: 'Voce analisa e pede ajustes se necessario.' },
+      { icon: 'clapperboard', label: 'Produção cria a peça', desc: 'Nossa equipe desenvolve o material criativo.' },
+      { icon: 'eye', label: 'Você revisa e aprova', desc: 'Você analisa e pede ajustes, se necessário.' },
       { icon: 'star', label: 'Celebridade aprova', desc: 'A celebridade valida o uso da sua imagem.' },
-      { icon: 'circleCheck', label: 'Entrega liberada', desc: 'Peca aprovada e liberada para veiculacao.' },
+      { icon: 'circleCheck', label: 'Entrega liberada', desc: 'Peça aprovada e liberada para veiculação.' },
     ],
-    ajustesTitle: '2 rodadas de ajustes por peca',
-    ajustesBody: 'Cada peca tem direito a ate 2 rodadas de ajustes inclusos no contrato. Ajustes adicionais podem gerar custos extras.',
+    ajustesTitle: '2 rodadas de ajustes por peça',
+    ajustesBody: 'Cada peça tem direito a até 2 rodadas de ajustes incluídas no contrato. Ajustes adicionais podem gerar custos extras.',
     celebAjustesTitle: 'Celebridade pode pedir ajustes',
-    celebAjustesBody: 'A celebridade tem o direito contratual de solicitar alteracoes na peca antes de aprovar. O prazo de aprovacao pela celebridade e de ate 3 dias uteis.',
+    celebAjustesBody: 'A celebridade tem o direito contratual de solicitar alterações na peça antes de aprovar. O prazo de aprovação pela celebridade é de até 3 dias úteis.',
     regraOuroTitle: 'Regra de ouro',
-    regraOuroBody: 'Nenhuma peca pode ser veiculada sem a aprovacao final da celebridade. Veicular sem aprovacao pode gerar penalidades contratuais.',
+    regraOuroBody: 'Nenhuma peça pode ser veiculada sem a aprovação final da celebridade. Veicular sem aprovação pode gerar penalidades contratuais.',
   },
 
   // ── Slide 4.4 — Franquias e mídias ──
   slide3: {
-    body: 'Se voce tem mais de uma unidade ou usa diferentes canais, veja o que pode e o que nao pode:',
+    body: 'Se você tem mais de uma unidade ou usa diferentes canais, veja o que pode e o que não pode:',
     franquias: {
       title: 'Franquias e filiais',
-      allowed: 'Unidades na mesma regiao da praca contratada podem usar as pecas normalmente.',
-      forbidden: 'Unidades em outras regioes precisam de contrato proprio para usar a celebridade.',
+      allowed: 'Unidades na mesma região da praça contratada podem usar as peças normalmente.',
+      forbidden: 'Unidades em outras regiões precisam de contrato próprio para usar a celebridade.',
     },
     canaisDigitais: {
       title: 'Canais digitais',
-      allowed: 'Instagram, Facebook, Tiktok, Youtube, Linkedin, Google, Site e Tráfego Pago - Uso liberado com peças aprovadas;',
-      forbidden: 'WhatsApp e E-mail marketing — nao e permitido usar a imagem da celebridade nesses canais.',
+      allowed: 'Instagram, Facebook, TikTok, YouTube, LinkedIn, Google, site e tráfego pago — uso liberado com peças aprovadas.',
+      forbidden: 'WhatsApp e e-mail marketing — não é permitido usar a imagem da celebridade nesses canais.',
     },
     regrasPublicacao: {
       title: 'Regras de publicação',
-      noTag: 'Não é permitido marcar a Celebridade nas publicações em redes sociais.',
-      canaisOficiais: 'Só é permitida a veiculação da celebridade nos canais oficiais da marca.\n\nColaboradores podem republicar o conteúdo mas não podem publicar em suas redes sociais pessoais.',
+      noTag: 'Não é permitido marcar a celebridade nas publicações em redes sociais.',
+      canaisOficiais: 'Só é permitida a veiculação da celebridade nos canais oficiais da marca.\n\nColaboradores podem republicar o conteúdo, mas não podem publicar em suas redes sociais pessoais.',
     },
     tvRadioOutdoor: {
-      title: 'TV, Radio e Outdoor',
-      warning: 'Consulte a equipe antes de veicular nesses meios. Cada formato pode ter regras especificas.',
-      tags: ['TV aberta', 'TV fechada', 'Radio', 'Outdoor', 'Busdoor', 'Painel LED'],
+      title: 'TV, rádio e outdoor',
+      warning: 'Consulte a equipe antes de veicular nesses meios. Cada formato pode ter regras específicas.',
+      tags: ['TV aberta', 'TV fechada', 'Rádio', 'Outdoor', 'Busdoor', 'Painel LED'],
     },
   },
 
   // ── Slide 4.5 — Prazo e encerramento ──
   slide4: {
-    body: 'Seu contrato tem prazo definido. Saiba o que acontece na renovacao e no encerramento:',
+    body: 'Seu contrato tem prazo definido. Saiba o que acontece na renovação e no encerramento:',
     renovacao: {
-      title: 'Renovacao do contrato',
+      title: 'Renovação do contrato',
       steps: [
-        'A equipe entra em contato antes do vencimento para negociar a renovacao.',
-        'Voce pode manter a mesma celebridade ou trocar por outra disponivel para sua praca e segmento.',
+        'A equipe entra em contato antes do vencimento para negociar a renovação.',
+        'Você pode manter a mesma celebridade ou trocar por outra disponível para sua praça e segmento.',
       ],
     },
     naoDisponivel: {
-      title: 'Celebridade nao disponivel',
+      title: 'Celebridade não disponível',
       opcaoA: {
-        title: 'Opcao A — Trocar de celebridade',
-        desc: 'Voce pode escolher outra celebridade disponivel sem custo adicional de troca.',
+        title: 'Opção A — Trocar de celebridade',
+        desc: 'Você pode escolher outra celebridade disponível sem custo adicional de troca.',
       },
       opcaoB: {
-        title: 'Opcao B — Creditos',
-        desc: 'Se preferir, voce pode converter o valor restante em creditos para uso futuro.',
+        title: 'Opção B — Créditos',
+        desc: 'Se preferir, você pode converter o valor restante em créditos para uso futuro.',
       },
     },
     encerramento: {
-      title: 'Fim do contrato — obrigacoes',
+      title: 'Fim do contrato — obrigações',
       items: [
-        'Todas as pecas com a imagem da celebridade devem ser excluidas.',
-        'Remover de redes sociais, site, trafego pago e qualquer midia ativa.',
-        'O uso apos o vencimento configura violacao contratual.',
+        'Todas as peças com a imagem da celebridade devem ser excluídas.',
+        'Remover de redes sociais, site, tráfego pago e qualquer mídia ativa.',
+        'O uso após o vencimento configura violação contratual.',
       ],
     },
     multa: {
-      title: 'Multa de ate 10x',
-      desc: 'O uso indevido da imagem apos o fim do contrato pode gerar multa de ate 10 vezes o valor contratual.',
+      title: 'Multa de até 10x',
+      desc: 'O uso indevido da imagem após o fim do contrato pode gerar multa de até 10 vezes o valor contratual.',
     },
   },
 
   // ── Quiz ──
-  quizIntro: 'Confirme que voce entendeu as regras de uso da imagem de ${celebName}:',
+  quizIntro: 'Confirme que você entendeu as regras de uso da imagem de ${celebName}:',
   quizTitle: 'Confirme o entendimento',
   quizSubtitle: 'Marque todos os itens para concluir',
   quizQuestions: [
-    'Entendo que a exclusividade de ${celebName} e valida para minha praca (${praca}) e meu segmento (${segmento}).',
-    'Sei que toda peca precisa de aprovacao da celebridade e que tenho ate 2 rodadas de ajustes por peca.',
-    'Nao vou marcar a celebridade nas redes sociais nem usar sua imagem por WhatsApp ou e-mail marketing.',
-    'Ao encerrar o contrato, vou excluir todas as pecas com a imagem da celebridade de todos os canais.',
-    'Estou ciente de que o uso indevido pode gerar multa de ate 10x o valor contratual.',
+    'Entendo que a exclusividade de ${celebName} é válida para minha praça (${praca}) e meu segmento (${segmento}).',
+    'Sei que toda peça precisa de aprovação da celebridade e que tenho até 2 rodadas de ajustes por peça.',
+    'Não vou marcar a celebridade nas redes sociais nem usar sua imagem por WhatsApp ou e-mail marketing.',
+    'Ao encerrar o contrato, vou excluir todas as peças com a imagem da celebridade de todos os canais.',
+    'Estou ciente de que o uso indevido pode gerar multa de até 10x o valor contratual.',
   ],
-  quizConfirmMessage: 'Tudo certo! Voce pode concluir esta etapa.',
+  quizConfirmMessage: 'Tudo certo! Você pode concluir esta etapa.',
 
   // ── Completion ──
-  completionTitle: 'Etapa 4 concluida!',
+  completionTitle: 'Etapa 4 concluída!',
   completionDescription:
-    'Agora voce conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento e essencial para uma campanha de sucesso.',
+    'Agora você conhece todas as regras de uso da imagem de ${celebName}. Esse conhecimento é essencial para uma campanha de sucesso.',
   completionSummary: (celebName, praca, segmento) => [
     { icon: 'clapperboard', label: 'Celebridade', value: celebName },
-    { icon: 'mapPin', label: 'Praca', value: praca },
+    { icon: 'mapPin', label: 'Praça', value: praca },
     { icon: 'tag', label: 'Segmento', value: segmento },
-    { icon: 'penLine', label: 'Ajustes', value: '2 rodadas por peca' },
-    { icon: 'clock', label: 'Aprovacao celebridade', value: 'Ate 3 dias uteis' },
+    { icon: 'penLine', label: 'Ajustes', value: '2 rodadas por peça' },
+    { icon: 'clock', label: 'Aprovação da celebridade', value: 'Até 3 dias úteis' },
   ],
 
   // ── Navigation ──
-  navNextSlide: 'Proximo',
+  navNextSlide: 'Próximo',
   navGoToQuiz: 'Ir para o quiz',
   navConfirmAll: 'Confirme todos os itens',
   navConcluir: 'Concluir etapa',
@@ -505,21 +505,21 @@ export const ETAPA62 = {
 
   // ── Bonificação intro ──
   bonificacaoTitle: 'GANHE UMA BONIFICAÇÃO DE PRAZO DE VEICULAÇÃO DA SUA CAMPANHA',
-  bonificacaoBody: 'O QUE VC PRECISA CONCLUIR? Adicione os arquivos nos campos abaixo e agilize o atendimento.',
-  startKitInfo: 'O QUE VOCÊ VAI RECEBER? Em até 24h, você receberá o START KIT com 4 peças estáticas com conteúdo da sua campanha gerado por IA.',
+  bonificacaoBody: 'O QUE VOCÊ PRECISA CONCLUIR? Adicione os arquivos nos campos abaixo e agilize o atendimento.',
+  startKitInfo: 'O QUE VOCÊ VAI RECEBER? Em até 24 horas, você receberá o START KIT com 4 peças estáticas com conteúdo da sua campanha gerado por IA.',
 
   // ── Como funciona ──
   comoFunciona: {
     title: 'Como funciona',
     body: 'Dentro do prazo de 15 dias após a assinatura do seu contrato, você recebe, ao final dos três meses de contrato, os dias que você conseguiu antecipar de prazo.',
-    exemploA: 'Exemplo A): Preenchendo ainda hoje (DIA DO PRIMEIRO PASSO) você ganha + 15 dias de bonificação.',
-    exemploB: 'Exemplo B): Preenchendo 5 dias corridos a partir da data do contrato, você ganha + 10 dias de bonificação.',
+    exemploA: 'Exemplo A: preenchendo ainda hoje (dia do Primeiro Passo), você ganha +15 dias de bonificação.',
+    exemploB: 'Exemplo B: preenchendo 5 dias corridos a partir da data do contrato, você ganha +10 dias de bonificação.',
   },
 
   // ── Logo (modo simplificado) ──
   logoLabel: 'Logo da sua marca',
   logoPlaceholder: 'Selecionar logo',
-  logoHint: 'PNG, JPG, PDF, WebP, SVG, HEIC ou HEIF (max. 5 MB)',
+  logoHint: 'PNG, JPG, PDF, WebP, SVG, HEIC ou HEIF (máx. 5 MB)',
   logoChangeButton: 'Trocar arquivo',
 
   // ── Paleta de cores ──
@@ -585,17 +585,17 @@ export const ETAPA_FINAL = {
     {
       num: '1',
       title: `${genero === 'm' ? 'Seu atendente' : 'Sua atendente'} ${atendente} vai entrar em contato`,
-      desc: 'Em até 1 dia útil pra iniciar a produção da sua campanha',
+      desc: 'Em até 1 dia útil para iniciar a produção da sua campanha.',
     },
     {
       num: '2',
       title: 'START KIT em personalização',
-      desc: 'Em breve você receberá exemplos de peças para aumentar a eficiencia da sua campanha com ajuda de Agentes de IA desenvolvidos pelo nosso time.',
+      desc: 'Em breve, você receberá exemplos de peças para aumentar a eficiência da sua campanha com ajuda de agentes de IA desenvolvidos pelo nosso time.',
     },
     {
       num: '3',
       title: 'Responda rápido',
-      desc: 'Quanto mais ágil for a comunicação, mais rápido suas peças ficam prontas',
+      desc: 'Quanto mais ágil for a comunicação, mais rápido suas peças ficam prontas.',
     },
   ],
 
@@ -613,8 +613,8 @@ export const ETAPA_FINAL = {
     title: 'Parabéns!',
     body: 'Você está entre os poucos empresários do Brasil que contam com uma celebridade na sua comunicação.',
     cta: 'Agora é hora de fazer esse investimento virar resultado.',
-    stepLabel: 'PRIMEIRO PASSO CONCLUIDO',
-    atendenteContact: 'Vai entrar em contato em até 1 dia útil pra iniciar a produção da sua campanha.',
+    stepLabel: 'PRIMEIRO PASSO CONCLUÍDO',
+    atendenteContact: 'Vai entrar em contato em até 1 dia útil para iniciar a produção da sua campanha.',
     closing: 'A gente está junto com você. Boa campanha!',
   },
 }
