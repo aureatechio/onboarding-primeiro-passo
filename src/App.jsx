@@ -77,7 +77,20 @@ class ErrorBoundary extends Component {
     return { hasError: true, error };
   }
   componentDidCatch(error, info) {
-    console.error('[CRASH]', error, info);
+    const crashContext = typeof window !== 'undefined'
+      ? {
+          href: window.location.href,
+          aiStep2Monitor: window.__AI_STEP2_MONITOR_CONTEXT__ || null,
+        }
+      : {}
+
+    console.error('[CRASH]', {
+      error,
+      message: error?.message,
+      stack: error?.stack,
+      componentStack: info?.componentStack,
+      ...crashContext,
+    });
   }
   render() {
     if (this.state.hasError) {

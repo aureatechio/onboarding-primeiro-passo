@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { DashboardButton, InlineNotice } from '../../components/dashboard'
@@ -9,7 +9,7 @@ import ImageViewer from './components/ImageViewer'
 import StatusBadge from './components/StatusBadge'
 import { DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import { useAiCampaignMonitor } from './useAiCampaignMonitor'
-import { formatDate, resolveDetailCompraId } from './utils'
+import { formatDate, getAssetStableKey, normalizeMonitorAssets, resolveDetailCompraId } from './utils'
 import { monitorRadius, monitorTheme } from './theme'
 import MonitorLayout from './MonitorLayout'
 import { useAuth } from '../../context/AuthContext'
@@ -52,7 +52,7 @@ export default function AiStep2Monitor() {
     rerunAllAssets,
   } = useAiCampaignMonitor()
 
-  const [viewerIndex, setViewerIndex] = useState(-1)
+  const [viewerAssetKey, setViewerAssetKey] = useState('')
   const [zoom, setZoom] = useState(1)
   const activeTab = DETAIL_TABS.some((tab) => tab.id === searchParams.get('tab'))
     ? searchParams.get('tab')
@@ -61,7 +61,8 @@ export default function AiStep2Monitor() {
     ? searchParams.get('gallery')
     : GALLERY_CATEGORY_TABS[0].id
 
-  const assets = data?.assets || []
+  const rawAssets = data?.assets
+  const assets = useMemo(() => normalizeMonitorAssets(rawAssets || []), [rawAssets])
   const listItems = data?.items || []
   const listSummary = data?.summary || {
     total: 0,
@@ -84,7 +85,12 @@ export default function AiStep2Monitor() {
   })
   const progress = data?.progress || { total_expected: 12, total_generated: 0, percent: 0 }
 
-  const currentAsset = viewerIndex >= 0 ? assets[viewerIndex] : null
+  const currentAsset = viewerAssetKey
+    ? assets.find((asset) => getAssetStableKey(asset) === viewerAssetKey) || null
+    : null
+  const viewerIndex = currentAsset
+    ? assets.findIndex((asset) => getAssetStableKey(asset) === viewerAssetKey)
+    : -1
 
   const updateDetailSearch = (key, value) => {
     const next = new URLSearchParams(searchParams)
@@ -114,16 +120,68 @@ export default function AiStep2Monitor() {
     })
   }, [isListMode, loading, listItems.length])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+
+    window.__AI_STEP2_MONITOR_CONTEXT__ = {
+      route: window.location.href,
+      mode: isListMode ? 'list' : 'detail',
+      activeTab,
+      activeGalleryCategory,
+      assetsCount: assets.length,
+      viewerAssetKey: viewerAssetKey || null,
+      jobId: jobId || job?.id || null,
+      compraId: effectiveCompraId || null,
+      refreshing,
+    }
+
+    return () => {
+      if (window.__AI_STEP2_MONITOR_CONTEXT__?.viewerAssetKey === (viewerAssetKey || null)) {
+        delete window.__AI_STEP2_MONITOR_CONTEXT__
+      }
+    }
+  }, [
+    activeGalleryCategory,
+    activeTab,
+    assets.length,
+    effectiveCompraId,
+    isListMode,
+    job?.id,
+    jobId,
+    refreshing,
+    viewerAssetKey,
+  ])
+
+  useEffect(() => {
+    if (!viewerAssetKey) return
+    if (isListMode || !currentAsset) {
+      setViewerAssetKey('')
+      setZoom(1)
+    }
+  }, [currentAsset, isListMode, viewerAssetKey])
+
   const openViewerByAsset = (asset) => {
-    const nextIndex = assets.findIndex((candidate) => candidate.id === asset.id)
-    if (nextIndex < 0) return
-    setViewerIndex(nextIndex)
+    const nextKey = getAssetStableKey(asset)
+    if (!nextKey || !assets.some((candidate) => getAssetStableKey(candidate) === nextKey)) return
+    setViewerAssetKey(nextKey)
     setZoom(1)
   }
 
   const closeViewer = () => {
-    setViewerIndex(-1)
+    setViewerAssetKey('')
     setZoom(1)
+  }
+
+  const showPreviousAsset = () => {
+    if (assets.length === 0) return
+    const nextIndex = viewerIndex <= 0 ? assets.length - 1 : viewerIndex - 1
+    setViewerAssetKey(getAssetStableKey(assets[nextIndex]))
+  }
+
+  const showNextAsset = () => {
+    if (assets.length === 0) return
+    const nextIndex = viewerIndex >= assets.length - 1 ? 0 : viewerIndex + 1
+    setViewerAssetKey(getAssetStableKey(assets[nextIndex]))
   }
 
   return (
@@ -241,8 +299,8 @@ export default function AiStep2Monitor() {
           onZoomIn={() => setZoom((value) => Math.min(3, Number((value + 0.2).toFixed(2))))}
           onZoomOut={() => setZoom((value) => Math.max(0.6, Number((value - 0.2).toFixed(2))))}
           onClose={closeViewer}
-          onPrevious={() => setViewerIndex((index) => (index <= 0 ? assets.length - 1 : index - 1))}
-          onNext={() => setViewerIndex((index) => (index >= assets.length - 1 ? 0 : index + 1))}
+          onPrevious={showPreviousAsset}
+          onNext={showNextAsset}
         />
       ) : null}
     </MonitorLayout>

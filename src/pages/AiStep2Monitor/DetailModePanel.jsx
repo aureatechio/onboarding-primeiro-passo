@@ -7,7 +7,7 @@ import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from 
 import DataRow from './components/DataRow'
 import ProgressBar from './components/ProgressBar'
 import TabBar from './components/TabBar'
-import { normalizeGroupName } from './utils'
+import { getAssetStableKey, normalizeGroupName } from './utils'
 import { monitorRadius, monitorTheme } from './theme'
 import OnboardingDataTab from './components/onboarding-edit/OnboardingDataTab'
 
@@ -374,7 +374,7 @@ export default function DetailModePanel({
                     gap: 12,
                   }}
                 >
-                  {currentGroup.items.map((asset, index) => {
+                  {currentGroup.items.map((asset) => {
                     const ratio = ASPECT_RATIOS[asset.format] || ASPECT_RATIOS['1:1']
                     const isFailed = asset.status === 'failed'
                     const isPendingOrProcessing =
@@ -383,7 +383,7 @@ export default function DetailModePanel({
 
                     return (
                       <AssetCard
-                        key={asset.id || `${asset.group_name}-${asset.format}-${index}`}
+                        key={getAssetStableKey(asset)}
                         asset={asset}
                         ratio={ratio}
                         isFailed={isFailed}
@@ -768,7 +768,9 @@ async function copyTextToClipboard(text) {
     const copied = document.execCommand('copy')
     if (!copied) throw new Error('copy failed')
   } finally {
-    document.body.removeChild(textarea)
+    if (textarea.parentNode === document.body) {
+      document.body.removeChild(textarea)
+    }
   }
 }
 
