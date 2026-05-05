@@ -564,6 +564,10 @@ export const ETAPA62 = {
     description: 'Você decidiu continuar depois. O prazo do contrato segue correndo e você pode completar os itens de identidade visual na sequência com seu atendente.',
     badge: 'PENDENTE',
   },
+  reviewMode: {
+    statusLabel: 'STATUS DA IDENTIDADE VISUAL',
+    cta: 'Continuar releitura',
+  },
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

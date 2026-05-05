@@ -148,6 +148,16 @@ function saveState(compraId, currentStep, completedSteps, userData) {
   }
 }
 
+function isCompletedProgress(progress) {
+  if (!progress) return false;
+  return (
+    progress.currentStep === 'final' ||
+    progress.currentStep === 'done' ||
+    Boolean(progress.completedAt) ||
+    Boolean(progress.stepTimestamps?.final)
+  );
+}
+
 export function OnboardingProvider({ children }) {
   const initialCompraId = getValidCompraIdFromQuery();
   const saved = loadSavedState(initialCompraId);
@@ -160,6 +170,7 @@ export function OnboardingProvider({ children }) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [hydrationError, setHydrationError] = useState(null);
   const [hydrationCompraId, setHydrationCompraId] = useState(null);
+  const [isReviewMode, setIsReviewMode] = useState(false);
 
   // Use ref to always have latest currentStep in callbacks
   const currentStepRef = useRef(currentStep);
@@ -168,6 +179,8 @@ export function OnboardingProvider({ children }) {
   storageCompraIdRef.current = storageCompraId;
   const userDataRef = useRef(userData);
   userDataRef.current = userData;
+  const isReviewModeRef = useRef(isReviewMode);
+  isReviewModeRef.current = isReviewMode;
 
   const completeStep = useCallback((step) => {
     setCompletedSteps((prev) => new Set([...prev, step]));
@@ -200,12 +213,15 @@ export function OnboardingProvider({ children }) {
     setCurrentStep(next);
     window.scrollTo({ top: 0 });
 
-    // Fire-and-forget backend save
-    const extraData = { ...extraDataOverride };
-    if (step === 5 && userDataRef.current.trafficChoice) {
-      extraData.traffic_choice = userDataRef.current.trafficChoice;
+    if (!isReviewModeRef.current) {
+      // Fire-and-forget backend save. Review mode must not move a completed
+      // onboarding back to intermediate steps in the persisted progress row.
+      const extraData = { ...extraDataOverride };
+      if (step === 5 && userDataRef.current.trafficChoice) {
+        extraData.traffic_choice = userDataRef.current.trafficChoice;
+      }
+      saveProgressToBackend(storageCompraIdRef.current, step, next, extraData);
     }
-    saveProgressToBackend(storageCompraIdRef.current, step, next, extraData);
   }, [completeStep, saveProgressToBackend]);
 
   const goToStep = useCallback((step) => {
@@ -249,6 +265,7 @@ export function OnboardingProvider({ children }) {
       setCurrentStep(nextSaved?.currentStep || 1);
       setCompletedSteps(nextSaved?.completedSteps || new Set());
       setUserData(nextSaved?.userData || INITIAL_USER_DATA);
+      setIsReviewMode(false);
     }
 
     const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || '').trim();
@@ -274,12 +291,18 @@ export function OnboardingProvider({ children }) {
 
       // Hydrate progress from backend (cross-device resume)
       const progress = payload.data?.progress;
+      const nextReviewMode = isCompletedProgress(progress);
+      setIsReviewMode(nextReviewMode);
+
       if (progress) {
         const backendSteps = new Set(progress.completedSteps || []);
         setCompletedSteps((prev) => new Set([...prev, ...backendSteps]));
 
-        // Advance currentStep if backend is ahead (never regress)
-        if (progress.currentStep) {
+        if (nextReviewMode) {
+          setDirection(1);
+          setCurrentStep(1);
+        } else if (progress.currentStep) {
+          // Advance currentStep if backend is ahead (never regress)
           const stepOrder = [1, 2, 3, 4, 5, 6, 7, 'final', 'done'];
           const localIdx = stepOrder.indexOf(currentStepRef.current);
           const backendVal = progress.currentStep === 'final' || progress.currentStep === 'done'
@@ -290,6 +313,8 @@ export function OnboardingProvider({ children }) {
             setCurrentStep(backendVal);
           }
         }
+      } else {
+        setIsReviewMode(false);
       }
 
       setUserData((prev) => {
@@ -342,6 +367,7 @@ export function OnboardingProvider({ children }) {
       isHydrating,
       hydrationError,
       hydrationCompraId,
+      isReviewMode,
       retryHydration: hydrateFromQueryParam,
       resetOnboarding,
     }),
@@ -357,6 +383,7 @@ export function OnboardingProvider({ children }) {
       isHydrating,
       hydrationError,
       hydrationCompraId,
+      isReviewMode,
       hydrateFromQueryParam,
       resetOnboarding,
     ]

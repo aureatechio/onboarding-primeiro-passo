@@ -102,10 +102,11 @@ function validateLogoFile(file) {
 }
 
 export default function Etapa62() {
-  const { userData, updateUserData, hydrationCompraId } = useOnboarding()
+  const { userData, updateUserData, hydrationCompraId, isReviewMode, goNext } = useOnboarding()
   const { ETAPA62 } = useCopy()
 
   const alreadyDone = Boolean(userData.identityBonusChoice)
+  const showReadOnlyReview = isReviewMode && alreadyDone
   const [completed, setCompleted] = useState(alreadyDone)
   const [pendingMode, setPendingMode] = useState(alreadyDone ? userData.identityBonusPending : false)
 
@@ -247,7 +248,151 @@ export default function Etapa62() {
     } finally {
       setIsSaving(false)
     }
-  }, [hydrationCompraId, logoFile, siteUrl, instagramHandle, brandColors, updateUserData])
+  }, [
+    hydrationCompraId,
+    logoFile,
+    siteUrl,
+    instagramHandle,
+    brandColors,
+    updateUserData,
+    ETAPA62.modoSimplificado.siteError,
+    ETAPA62.modoSimplificado.instagramError,
+  ])
+
+  if (showReadOnlyReview) {
+    const statusCopy = pendingMode ? ETAPA62.completionPending : ETAPA62.completionDone
+    const statusColor = pendingMode ? COLORS.warning : COLORS.success
+
+    return (
+      <PageLayout>
+        <StepHeader
+          title={ETAPA62.header.title}
+          readTime={ETAPA62.header.readTime}
+          showPersonalized={true}
+          stepLabel={ETAPA62.header.stepLabel}
+        />
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          style={{
+            background: `linear-gradient(135deg, ${COLORS.accent}12, ${COLORS.accent}05)`,
+            border: `1px solid ${COLORS.accent}25`,
+            borderRadius: 16, padding: 22, marginBottom: 16,
+          }}
+        >
+          <p style={{ color: COLORS.text, fontSize: 18, fontWeight: 900, margin: "0 0 10px 0" }}>
+            {ETAPA62.bonificacaoTitle}
+          </p>
+          <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+            {ETAPA62.bonificacaoBody}
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          style={{
+            background: COLORS.card, border: `1px solid ${COLORS.border}`,
+            borderRadius: 14, padding: 20, marginBottom: 16,
+          }}
+        >
+          <p style={{ color: COLORS.text, fontSize: 14, fontWeight: 800, margin: "0 0 8px 0" }}>
+            {ETAPA62.comoFunciona.title}
+          </p>
+          <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 10px 0" }}>
+            {ETAPA62.comoFunciona.body}
+          </p>
+          <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: "0 0 6px 0" }}>
+            {ETAPA62.comoFunciona.exemploA}
+          </p>
+          <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+            {ETAPA62.comoFunciona.exemploB}
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          style={{
+            background: COLORS.card,
+            border: `1px solid ${statusColor}30`,
+            borderRadius: 14, padding: 20, marginBottom: 16,
+          }}
+        >
+          <p style={{
+            color: COLORS.textDim,
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            margin: "0 0 12px 0",
+          }}>
+            {ETAPA62.reviewMode.statusLabel}
+          </p>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: `${statusColor}14`,
+              border: `1px solid ${statusColor}30`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <Icon name={pendingMode ? "clock" : "circleCheck"} size={18} color={statusColor} />
+            </div>
+            <div>
+              <p style={{ color: COLORS.text, fontSize: 15, fontWeight: 800, margin: "0 0 6px 0" }}>
+                {statusCopy.title}
+              </p>
+              <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.6, margin: "0 0 10px 0" }}>
+                {statusCopy.description}
+              </p>
+              <span style={{
+                display: "inline-flex",
+                color: statusColor,
+                background: `${statusColor}10`,
+                border: `1px solid ${statusColor}25`,
+                borderRadius: 100,
+                padding: "5px 10px",
+                fontSize: 11,
+                fontWeight: 800,
+              }}>
+                {statusCopy.badge}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          style={{
+            background: `${COLORS.success}10`,
+            border: `1px solid ${COLORS.success}25`,
+            borderRadius: 14, padding: 16, marginBottom: 16,
+          }}
+        >
+          <p style={{ color: COLORS.success, fontSize: 13, fontWeight: 700, lineHeight: 1.6, margin: 0 }}>
+            {ETAPA62.startKitInfo}
+          </p>
+        </motion.div>
+
+        <StickyFooter>
+          <NavButtons
+            onNext={goNext}
+            nextLabel={ETAPA62.reviewMode.cta}
+          />
+        </StickyFooter>
+      </PageLayout>
+    )
+  }
 
   if (completed) {
     return (
