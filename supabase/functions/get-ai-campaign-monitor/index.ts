@@ -31,7 +31,7 @@ function json(body: Record<string, unknown>, status = 200): Response {
 }
 
 async function createSignedUrlIfPath(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   bucket: string,
   pathOrUrl: string | null | undefined,
   expiresInSec: number
@@ -63,37 +63,67 @@ function getFailureSource(errorType: string | null): string {
   return 'unknown'
 }
 
+function firstNonEmpty(...values: Array<string | null | undefined>): string | null {
+  for (const value of values) {
+    const normalized = value?.trim()
+    if (normalized) return normalized
+  }
+  return null
+}
+
 async function resolveNamesByCompraIds(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   compraIds: string[]
 ): Promise<{
-  compraMap: Record<string, { cliente_id: string | null; celebridade: string | null }>
-  clientNameMap: Record<string, string>
+  compraMap: Record<string, {
+    cliente_id: string | null
+    celebridade: string | null
+    leadid: string | null
+    imagemproposta_id: string | null
+  }>
+  clientNameByCompraId: Record<string, string>
+  legalClientNameByCompraId: Record<string, string>
   celebrityNameMap: Record<string, string>
 }> {
   if (compraIds.length === 0) {
-    return { compraMap: {}, clientNameMap: {}, celebrityNameMap: {} }
+    return {
+      compraMap: {},
+      clientNameByCompraId: {},
+      legalClientNameByCompraId: {},
+      celebrityNameMap: {},
+    }
   }
 
   const { data: comprasRows } = await supabase
     .from('compras')
-    .select('id, cliente_id, celebridade')
+    .select('id, cliente_id, celebridade, leadid, imagemproposta_id')
     .in('id', compraIds)
 
-  const compraMap: Record<string, { cliente_id: string | null; celebridade: string | null }> = {}
+  const compraMap: Record<string, {
+    cliente_id: string | null
+    celebridade: string | null
+    leadid: string | null
+    imagemproposta_id: string | null
+  }> = {}
   const clientIds = new Set<string>()
   const celebrityIds = new Set<string>()
+  const leadIds = new Set<string>()
+  const propostaIds = new Set<string>()
 
   for (const row of comprasRows || []) {
     compraMap[row.id] = {
       cliente_id: row.cliente_id ?? null,
       celebridade: row.celebridade ?? null,
+      leadid: row.leadid ?? null,
+      imagemproposta_id: row.imagemproposta_id ?? null,
     }
     if (row.cliente_id) clientIds.add(row.cliente_id)
     if (row.celebridade) celebrityIds.add(row.celebridade)
+    if (row.leadid) leadIds.add(row.leadid)
+    if (row.imagemproposta_id) propostaIds.add(row.imagemproposta_id)
   }
 
-  const [clientsRes, celebsRes] = await Promise.all([
+  const [clientsRes, celebsRes, leadsRes, propostasRes, identitiesRes] = await Promise.all([
     clientIds.size > 0
       ? supabase
         .from('clientes')
@@ -106,12 +136,66 @@ async function resolveNamesByCompraIds(
         .select('id, nome')
         .in('id', Array.from(celebrityIds))
       : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+    leadIds.size > 0
+      ? supabase
+        .from('leads')
+        .select('lead_id, empresa')
+        .in('lead_id', Array.from(leadIds))
+      : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+    propostaIds.size > 0
+      ? supabase
+        .from('imagemProposta')
+        .select('idproposta, nome_empresa')
+        .in('idproposta', Array.from(propostaIds))
+      : Promise.resolve({ data: [] as Array<Record<string, string>>, error: null }),
+    supabase
+      .from('onboarding_identity')
+      .select('compra_id, brand_display_name')
+      .in('compra_id', compraIds),
   ])
 
-  const clientNameMap: Record<string, string> = {}
+  const clientFallbackByClientId: Record<string, string> = {}
+  const legalClientNameByClientId: Record<string, string> = {}
   for (const client of clientsRes.data || []) {
-    clientNameMap[client.id] =
-      client.nome || client.nome_fantasia || client.razaosocial || 'Cliente'
+    clientFallbackByClientId[client.id] =
+      firstNonEmpty(client.nome_fantasia, client.nome, client.razaosocial) || 'Cliente'
+    legalClientNameByClientId[client.id] =
+      firstNonEmpty(client.razaosocial, client.nome, client.nome_fantasia) || 'Cliente'
+  }
+
+  const companyNameByLeadId: Record<string, string> = {}
+  for (const lead of leadsRes.data || []) {
+    const companyName = firstNonEmpty(lead.empresa)
+    if (lead.lead_id && companyName) companyNameByLeadId[lead.lead_id] = companyName
+  }
+
+  const companyNameByPropostaId: Record<string, string> = {}
+  for (const proposta of propostasRes.data || []) {
+    const companyName = firstNonEmpty(proposta.nome_empresa)
+    if (proposta.idproposta && companyName) companyNameByPropostaId[proposta.idproposta] = companyName
+  }
+
+  const brandNameByCompraId: Record<string, string> = {}
+  for (const identity of identitiesRes.data || []) {
+    const brandName = firstNonEmpty(identity.brand_display_name)
+    if (identity.compra_id && brandName) brandNameByCompraId[identity.compra_id] = brandName
+  }
+
+  const clientNameByCompraId: Record<string, string> = {}
+  const legalClientNameByCompraId: Record<string, string> = {}
+  for (const [compraId, compraInfo] of Object.entries(compraMap)) {
+    clientNameByCompraId[compraId] =
+      firstNonEmpty(
+        brandNameByCompraId[compraId],
+        compraInfo.leadid ? companyNameByLeadId[compraInfo.leadid] : null,
+        compraInfo.imagemproposta_id ? companyNameByPropostaId[compraInfo.imagemproposta_id] : null,
+        compraInfo.cliente_id ? clientFallbackByClientId[compraInfo.cliente_id] : null,
+      ) || 'Cliente'
+    legalClientNameByCompraId[compraId] =
+      firstNonEmpty(
+        compraInfo.cliente_id ? legalClientNameByClientId[compraInfo.cliente_id] : null,
+        clientNameByCompraId[compraId],
+      ) || 'Cliente'
   }
 
   const celebrityNameMap: Record<string, string> = {}
@@ -119,7 +203,7 @@ async function resolveNamesByCompraIds(
     celebrityNameMap[celeb.id] = celeb.nome || 'Celebridade'
   }
 
-  return { compraMap, clientNameMap, celebrityNameMap }
+  return { compraMap, clientNameByCompraId, legalClientNameByCompraId, celebrityNameMap }
 }
 
 interface AvailablePurchase {
@@ -136,7 +220,7 @@ interface AvailablePurchase {
 }
 
 async function resolveAvailablePurchases(
-  supabase: ReturnType<typeof createClient>
+  supabase: any
 ): Promise<AvailablePurchase[]> {
   const { data: comprasRows, error: comprasError } = await supabase
     .from('compras')
@@ -147,7 +231,7 @@ async function resolveAvailablePurchases(
 
   if (comprasError || !comprasRows || comprasRows.length === 0) return []
 
-  const compraIds = comprasRows.map((row) => row.id)
+  const compraIds = comprasRows.map((row: any) => row.id)
 
   const [namesResult, accessResult] = await Promise.all([
     resolveNamesByCompraIds(supabase, compraIds),
@@ -157,17 +241,15 @@ async function resolveAvailablePurchases(
       .in('compra_id', compraIds),
   ])
 
-  const { compraMap, clientNameMap, celebrityNameMap } = namesResult
+  const { compraMap, clientNameByCompraId, celebrityNameMap } = namesResult
   const accessByCompra: Record<string, { status: string; allowed_until: string | null }> = {}
   for (const row of accessResult.data || []) {
     accessByCompra[row.compra_id] = { status: row.status, allowed_until: row.allowed_until }
   }
 
-  return comprasRows.map((row) => {
+  return comprasRows.map((row: any) => {
     const compraInfo = compraMap[row.id] || { cliente_id: null, celebridade: null }
-    const clientName = compraInfo.cliente_id
-      ? (clientNameMap[compraInfo.cliente_id] || 'Cliente')
-      : 'Cliente'
+    const clientName = clientNameByCompraId[row.id] || 'Cliente'
     const celebName = compraInfo.celebridade
       ? (celebrityNameMap[compraInfo.celebridade] || 'Celebridade contratada')
       : 'Celebridade contratada'
@@ -201,7 +283,7 @@ async function resolveAvailablePurchases(
 }
 
 async function resolveEligibleOnboardingPurchases(
-  supabase: ReturnType<typeof createClient>
+  supabase: any
 ): Promise<
   Array<{
     compra_id: string
@@ -222,7 +304,7 @@ async function resolveEligibleOnboardingPurchases(
 }
 
 async function resolvePerplexityBriefingCompraIds(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   compraIds: string[]
 ): Promise<Set<string>> {
   if (compraIds.length === 0) return new Set<string>()
@@ -238,8 +320,8 @@ async function resolvePerplexityBriefingCompraIds(
 
   return new Set(
     data
-      .map((row) => row.compra_id)
-      .filter((compraId): compraId is string => Boolean(compraId))
+      .map((row: any) => row.compra_id)
+      .filter((compraId: unknown): compraId is string => Boolean(compraId))
   )
 }
 
@@ -412,7 +494,7 @@ Deno.serve(async (req) => {
     const compraIds = Array.from(
       new Set((listedJobs || []).map((job) => String(job.compra_id)))
     ) as string[]
-    const [{ compraMap, clientNameMap, celebrityNameMap }, briefingCompraIds, availablePurchases] =
+    const [{ compraMap, clientNameByCompraId, celebrityNameMap }, briefingCompraIds, availablePurchases] =
       await Promise.all([
         resolveNamesByCompraIds(supabase, compraIds),
         resolvePerplexityBriefingCompraIds(supabase, compraIds),
@@ -466,9 +548,7 @@ Deno.serve(async (req) => {
         percent,
         created_at: job.created_at,
         updated_at: job.updated_at,
-        client_name: compraInfo.cliente_id
-          ? (clientNameMap[compraInfo.cliente_id] || null)
-          : null,
+        client_name: clientNameByCompraId[String(job.compra_id)] || null,
         celebrity_name: compraInfo.celebridade
           ? (celebrityNameMap[compraInfo.celebridade] || null)
           : null,
@@ -542,7 +622,7 @@ Deno.serve(async (req) => {
     job = foundJob || null
   }
 
-  const [comprasRes, identityRes, briefingRes] = await Promise.all([
+  const [comprasRes, identityRes, briefingRes, namesResult] = await Promise.all([
     supabase
       .from('compras')
       .select('id, cliente_id, celebridade, checkout_status, clicksign_status, vendaaprovada')
@@ -562,6 +642,7 @@ Deno.serve(async (req) => {
       )
       .eq('compra_id', compraId)
       .maybeSingle(),
+    resolveNamesByCompraIds(supabase, [compraId]),
   ])
 
   if (comprasRes.error || identityRes.error || briefingRes.error) {
@@ -576,15 +657,8 @@ Deno.serve(async (req) => {
   const identity = identityRes.data
   const briefing = briefingRes.data
 
-  let clientName: string | null = null
-  if (compra?.cliente_id) {
-    const { data: cliente } = await supabase
-      .from('clientes')
-      .select('nome, nome_fantasia')
-      .eq('id', compra.cliente_id)
-      .maybeSingle()
-    if (cliente) clientName = cliente.nome || cliente.nome_fantasia || null
-  }
+  const clientName = namesResult.clientNameByCompraId[compraId] || null
+  const legalClientName = namesResult.legalClientNameByCompraId[compraId] || null
 
   let celebrityName: string | null = null
   let celebrityImageUrl: string | null = null
@@ -889,6 +963,7 @@ Deno.serve(async (req) => {
         : null,
       client: {
         name: clientName,
+        legal_name: legalClientName,
       },
       celebrity: {
         name: celebrityName,

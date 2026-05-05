@@ -1,5 +1,7 @@
-import { AlertTriangle, Image as ImageIcon, Loader2, RefreshCw, RotateCcw } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, Check, Copy, Image as ImageIcon, Loader2, RefreshCw, RotateCcw } from 'lucide-react'
 import { useLocation } from 'react-router'
+import { DashboardButton } from '../../components/dashboard'
 import { TYPE, designTokens } from '../../theme/design-tokens'
 import { ASPECT_RATIOS, ASSET_GROUPS, DETAIL_TABS, GALLERY_CATEGORY_TABS } from './constants'
 import DataRow from './components/DataRow'
@@ -39,6 +41,10 @@ export default function DetailModePanel({
   canOperate = canMutate,
 }) {
   const location = useLocation()
+  const toastTimerRef = useRef(null)
+  const [copyState, setCopyState] = useState('idle')
+  const onboardingLink = useMemo(() => buildOnboardingFormUrl(compraId), [compraId])
+
   const hrefWithParam = (key, value) => {
     const next = new URLSearchParams(location.search)
     next.set(key, value)
@@ -59,14 +65,121 @@ export default function DetailModePanel({
   const diagnosticFlags = diagnostics?.inconsistency_flags || []
   const lastError = diagnostics?.last_error || null
 
+  useEffect(() => () => {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+  }, [])
+
+  async function handleCopyOnboardingLink() {
+    if (!onboardingLink) return
+    try {
+      await copyTextToClipboard(onboardingLink)
+      setCopyState('copied')
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+      toastTimerRef.current = window.setTimeout(() => setCopyState('idle'), 2200)
+    } catch {
+      setCopyState('error')
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current)
+      toastTimerRef.current = window.setTimeout(() => setCopyState('idle'), 2600)
+    }
+  }
+
   return (
     <>
-      <TabBar
-        tabs={DETAIL_TABS}
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        getHref={(tab) => hrefWithParam('tab', tab.id)}
-      />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 16,
+          flexWrap: 'wrap',
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ flex: '1 1 420px', minWidth: 0 }}>
+          <TabBar
+            tabs={DETAIL_TABS}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            getHref={(tab) => hrefWithParam('tab', tab.id)}
+          />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            minWidth: 0,
+            maxWidth: '100%',
+            padding: '7px 8px 7px 12px',
+            borderRadius: monitorRadius.md,
+            border: `1px solid ${monitorTheme.border}`,
+            background: monitorTheme.surfaceSubtle,
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <p
+              style={{
+                ...TYPE.caption,
+                color: monitorTheme.textMuted,
+                margin: '0 0 3px',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Link do onboarding
+            </p>
+            <p
+              title={onboardingLink || 'compra_id ausente'}
+              style={{
+                color: onboardingLink ? monitorTheme.textSecondary : monitorTheme.warningText,
+                fontFamily: MONO,
+                fontSize: 11,
+                lineHeight: 1.35,
+                margin: 0,
+                maxWidth: 360,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {onboardingLink || 'compra_id ausente'}
+            </p>
+          </div>
+          <DashboardButton
+            type="button"
+            variant="icon"
+            size="sm"
+            onClick={handleCopyOnboardingLink}
+            disabled={!onboardingLink}
+            aria-label="Copiar link do onboarding"
+            title="Copiar link do onboarding"
+            style={{ width: 30, padding: 0 }}
+          >
+            {copyState === 'copied' ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+          </DashboardButton>
+        </div>
+      </div>
+
+      {copyState === 'copied' ? (
+        <div
+          role="status"
+          aria-live="polite"
+          style={copyToastStyle}
+        >
+          <Check size={14} aria-hidden="true" />
+          Link do onboarding copiado.
+        </div>
+      ) : null}
+
+      {copyState === 'error' ? (
+        <div
+          role="alert"
+          style={{ ...copyToastStyle, background: monitorTheme.dangerTextStrong, color: '#0D1117' }}
+        >
+          Não foi possível copiar o link.
+        </div>
+      ) : null}
 
       {/* ── GALLERY ──────────────────────────────────────────────────────────── */}
       {activeTab === 'gallery' ? (
@@ -623,6 +736,42 @@ function DiagRow({ label, value, danger = false }) {
   )
 }
 
+function buildOnboardingFormUrl(compraId) {
+  if (!compraId) return ''
+  const base =
+    import.meta.env.VITE_ONBOARDING_BASE_URL ||
+    import.meta.env.VITE_DASHBOARD_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : '')
+  if (!base) return ''
+  const url = new URL('/', base)
+  url.searchParams.set('compra_id', compraId)
+  return url.toString()
+}
+
+async function copyTextToClipboard(text) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
+  }
+
+  if (typeof document === 'undefined') throw new Error('clipboard unavailable')
+
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.left = '-9999px'
+  document.body.appendChild(textarea)
+  textarea.select()
+
+  try {
+    const copied = document.execCommand('copy')
+    if (!copied) throw new Error('copy failed')
+  } finally {
+    document.body.removeChild(textarea)
+  }
+}
+
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const statCardStyle = {
@@ -630,6 +779,24 @@ const statCardStyle = {
   borderRadius: monitorRadius.xl,
   padding: '16px 18px',
   background: monitorTheme.cardMutedBg,
+}
+
+const copyToastStyle = {
+  position: 'fixed',
+  right: 24,
+  bottom: 24,
+  zIndex: 80,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 8,
+  background: monitorTheme.successText,
+  color: '#0D1117',
+  border: `1px solid ${monitorTheme.successBorder}`,
+  borderRadius: monitorRadius.md,
+  padding: '10px 14px',
+  fontSize: 13,
+  fontWeight: 800,
+  boxShadow: '0 10px 32px rgba(0,0,0,0.35)',
 }
 
 const retryAllBtnStyle = (disabled) => ({

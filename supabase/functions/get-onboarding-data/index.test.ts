@@ -92,6 +92,7 @@ Deno.test('handleRequest returns payload when compra is eligible and identity is
         atendente: 'Yasmin',
         atendenteGenero: 'f',
         identity: null,
+        progress: null,
       },
     }),
   })
@@ -134,8 +135,11 @@ Deno.test('handleRequest returns payload with identity when already saved', asyn
           campaign_images_paths: [],
           campaign_notes: 'Site: https://maria.com.br | Instagram: https://www.instagram.com/maria',
           production_path: 'standard',
+          site_url: 'https://maria.com.br',
+          instagram_handle: 'maria',
           updated_at: '2026-04-06T17:38:02.696Z',
         },
+        progress: null,
       },
     }),
   })

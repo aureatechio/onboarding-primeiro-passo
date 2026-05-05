@@ -5,6 +5,8 @@ import { corsHeaders, handleCors } from '../_shared/cors.ts'
 interface CompraRow {
   id: string
   cliente_id: string | null
+  leadid: string | null
+  imagemproposta_id: string | null
   celebridade: string | null
   segmento: string | null
   descricao: string | null
@@ -21,6 +23,14 @@ interface ClienteRow {
   nome: string | null
   nome_fantasia: string | null
   razaosocial: string | null
+}
+
+interface LeadRow {
+  empresa: string | null
+}
+
+interface ImagemPropostaRow {
+  nome_empresa: string | null
 }
 
 interface NomeRow {
@@ -118,6 +128,14 @@ export function isValidUuid(value: string): boolean {
   return UUID_REGEX.test(value.trim())
 }
 
+function firstNonEmpty(...values: Array<string | null | undefined>): string | null {
+  for (const value of values) {
+    const normalized = value?.trim()
+    if (normalized) return normalized
+  }
+  return null
+}
+
 export function formatVigencia(
   tempoocomprado: string | null,
   vigenciaMeses: number | null
@@ -142,7 +160,7 @@ export function createDependencies(): Dependencies {
       const { data: compra, error: compraError } = await supabase
         .from('compras')
         .select(
-          'id, cliente_id, celebridade, segmento, descricao, tempoocomprado, vigencia_meses, regiaocomprada, checkout_status, clicksign_status, vendaaprovada, valor_total'
+          'id, cliente_id, leadid, imagemproposta_id, celebridade, segmento, descricao, tempoocomprado, vigencia_meses, regiaocomprada, checkout_status, clicksign_status, vendaaprovada, valor_total'
         )
         .eq('id', compraId)
         .maybeSingle()
@@ -178,13 +196,27 @@ export function createDependencies(): Dependencies {
 
       const valorTotal = Number(compraRow.valor_total ?? 0)
 
-      const [clienteRes, atendenteRes, celebridadeRes, segmentoRes, identityRes, progressRes] =
+      const [clienteRes, leadRes, imagemPropostaRes, atendenteRes, celebridadeRes, segmentoRes, identityRes, progressRes] =
         await Promise.all([
           compraRow.cliente_id
             ? supabase
                 .from('clientes')
                 .select('nome, nome_fantasia, razaosocial')
                 .eq('id', compraRow.cliente_id)
+                .maybeSingle()
+            : Promise.resolve({ data: null, error: null }),
+          compraRow.leadid
+            ? supabase
+                .from('leads')
+                .select('empresa')
+                .eq('lead_id', compraRow.leadid)
+                .maybeSingle()
+            : Promise.resolve({ data: null, error: null }),
+          compraRow.imagemproposta_id
+            ? supabase
+                .from('imagemProposta')
+                .select('nome_empresa')
+                .eq('idproposta', compraRow.imagemproposta_id)
                 .maybeSingle()
             : Promise.resolve({ data: null, error: null }),
           supabase
@@ -227,6 +259,8 @@ export function createDependencies(): Dependencies {
         ])
 
       const cliente = (clienteRes.data as ClienteRow | null) ?? null
+      const lead = (leadRes.data as LeadRow | null) ?? null
+      const imagemProposta = (imagemPropostaRes.data as ImagemPropostaRow | null) ?? null
       const atendente = (atendenteRes.data as AtendenteRow | null) ?? null
       const celebridade = (celebridadeRes.data as NomeRow | null) ?? null
       const segmento = (segmentoRes.data as NomeRow | null) ?? null
@@ -285,9 +319,13 @@ export function createDependencies(): Dependencies {
       const data: OnboardingDataPayload = {
         compra_id: compraRow.id,
         clientName:
-          cliente?.nome?.trim() ||
-          cliente?.nome_fantasia?.trim() ||
-          cliente?.razaosocial?.trim() ||
+          firstNonEmpty(
+            lead?.empresa,
+            imagemProposta?.nome_empresa,
+            cliente?.nome_fantasia,
+            cliente?.nome,
+            cliente?.razaosocial,
+          ) ||
           'Cliente',
         celebName: celebridade?.nome?.trim() || 'Celebridade contratada',
         praca: compraRow.regiaocomprada?.trim() || 'Praca contratada',

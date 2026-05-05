@@ -223,6 +223,9 @@ export default function OnboardingDataTab({
             actions={<ReadOnlyBadge reason="Gerenciado pelo fluxo de checkout e assinatura." />}
           >
             <FieldRow label="Cliente" value={onboarding?.client?.name} />
+            {onboarding?.client?.legal_name && onboarding.client.legal_name !== onboarding?.client?.name ? (
+              <FieldRow label="Razao social" value={onboarding.client.legal_name} />
+            ) : null}
             <FieldRow label="Celebridade" value={onboarding?.celebrity?.name} />
             <FieldRow label="Pagamento" value={onboarding?.compra?.checkout_status} />
             <FieldRow label="Contrato" value={onboarding?.compra?.clicksign_status} />
