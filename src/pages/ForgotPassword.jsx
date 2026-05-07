@@ -4,7 +4,7 @@ import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
-import { authClient, hasAuthEnv } from '../lib/auth-client'
+import { getAuthClient, hasAuthEnv } from '../lib/auth-client'
 
 const DEFAULT_DASHBOARD_URL = 'https://acelerai-primeiro-passo.vercel.app'
 
@@ -51,6 +51,7 @@ export default function ForgotPassword() {
 
   async function handleSubmit(event) {
     event.preventDefault()
+    const authClient = getAuthClient()
     if (submitting || envError || !authClient) return
     setSubmitting(true)
     setError(null)
@@ -100,19 +101,19 @@ export default function ForgotPassword() {
             <TopBarLogo height={22} maxWidth={140} />
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Recuperar senha</h1>
             <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
-              Informe seu e-mail para receber o link de redefinição.
+              Informe seu e-mail para receber o link de redefinicao.
             </p>
           </div>
 
           {envError && (
             <InlineNotice tone="error">
-              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+              Configuracao de autenticacao ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
             </InlineNotice>
         )}
 
         {submitted ? (
           <InlineNotice tone="success">
-            Se este e-mail existir em nossa base, você receberá um link para redefinir a senha em instantes. Verifique também a caixa de spam.
+            Se este e-mail existir em nossa base, voce recebera um link para redefinir a senha em instantes. Verifique tambem a caixa de spam.
           </InlineNotice>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -139,7 +140,7 @@ export default function ForgotPassword() {
               size="lg"
               style={{ marginTop: 4 }}
             >
-              {submitting ? 'Enviando…' : 'Enviar link'}
+              {submitting ? 'Enviando...' : 'Enviar link'}
             </DashboardButton>
           </form>
         )}
