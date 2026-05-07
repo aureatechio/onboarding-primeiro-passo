@@ -1,18 +1,12 @@
-import { authClient } from './auth-client'
+import { getAuthClient } from './auth-client'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 async function getAccessToken() {
+  const authClient = getAuthClient()
   if (!authClient) return null
   const { data } = await authClient.auth.getSession()
-  return data?.session?.access_token ?? null
-}
-
-async function refreshToken() {
-  if (!authClient) return null
-  const { data, error } = await authClient.auth.refreshSession()
-  if (error) return null
   return data?.session?.access_token ?? null
 }
 
@@ -47,9 +41,10 @@ export async function adminFetch(path, { method = 'POST', body, isMultipart = fa
   let response = await doFetch(path, { method, body, isMultipart, token })
 
   if (response.status === 401) {
-    const refreshed = await refreshToken()
-    if (refreshed) {
-      response = await doFetch(path, { method, body, isMultipart, token: refreshed })
+    const retryToken = await getAccessToken()
+    if (retryToken && retryToken !== token) {
+      token = retryToken
+      response = await doFetch(path, { method, body, isMultipart, token })
     }
   }
 
