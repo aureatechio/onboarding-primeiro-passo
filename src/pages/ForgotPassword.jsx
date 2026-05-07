@@ -101,19 +101,19 @@ export default function ForgotPassword() {
             <TopBarLogo height={22} maxWidth={140} />
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Recuperar senha</h1>
             <p style={{ margin: 0, fontSize: 13, color: monitorTheme.textSecondary }}>
-              Informe seu e-mail para receber o link de redefinicao.
+              Informe seu e-mail para receber o link de redefinição.
             </p>
           </div>
 
           {envError && (
             <InlineNotice tone="error">
-              Configuracao de autenticacao ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
             </InlineNotice>
         )}
 
         {submitted ? (
           <InlineNotice tone="success">
-            Se este e-mail existir em nossa base, voce recebera um link para redefinir a senha em instantes. Verifique tambem a caixa de spam.
+            Se este e-mail existir em nossa base, você receberá um link para redefinir a senha em instantes. Verifique também a caixa de spam.
           </InlineNotice>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -140,7 +140,7 @@ export default function ForgotPassword() {
               size="lg"
               style={{ marginTop: 4 }}
             >
-              {submitting ? 'Enviando...' : 'Enviar link'}
+              {submitting ? 'Enviando…' : 'Enviar link'}
             </DashboardButton>
           </form>
         )}

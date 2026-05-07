@@ -45,7 +45,7 @@ export default function Profile() {
             Meu Perfil
           </h1>
           <p style={{ ...TYPE.bodySmall, color: monitorTheme.textSecondary, margin: '6px 0 0' }}>
-              Dados basicos da sua conta no dashboard.
+              Dados básicos da sua conta no dashboard.
           </p>
         </header>
 
@@ -56,7 +56,7 @@ export default function Profile() {
           {message && <InlineNotice tone="success">{message}</InlineNotice>}
           {error && <InlineNotice tone="error">{error}</InlineNotice>}
           <DashboardButton type="submit" disabled={saving} icon={Save} variant="primary" style={{ justifySelf: 'start' }}>
-            {saving ? 'Salvando...' : 'Salvar perfil'}
+            {saving ? 'Salvando…' : 'Salvar perfil'}
           </DashboardButton>
         </form>
       </div>

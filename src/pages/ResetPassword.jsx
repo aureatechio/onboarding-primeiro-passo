@@ -58,7 +58,7 @@ export default function ResetPassword() {
       if (validatedLinkRef.current && !location.hash) return
       validatedLinkRef.current = false
       setStatus('invalid')
-      setErrorMessage('Link invalido ou ja utilizado. Solicite um novo e-mail de redefinicao.')
+      setErrorMessage('Link inválido ou já utilizado. Solicite um novo e-mail de redefinição.')
       return
     }
     if (tokens.errorDescription) {
@@ -81,7 +81,7 @@ export default function ResetPassword() {
       .catch((err) => {
         validatedLinkRef.current = false
         setStatus('invalid')
-        setErrorMessage(err?.message || 'Nao foi possivel validar o link. Solicite um novo e-mail.')
+        setErrorMessage(err?.message || 'Não foi possível validar o link. Solicite um novo e-mail.')
       })
   }, [authClient, envError, isInvite, location.hash, location.search, navigate])
 
@@ -93,7 +93,7 @@ export default function ResetPassword() {
       return
     }
     if (password !== confirm) {
-      setFormError('As senhas nao conferem.')
+      setFormError('As senhas não conferem.')
       return
     }
     setSubmitting(true)
@@ -104,7 +104,7 @@ export default function ResetPassword() {
       await authClient.auth.signOut()
       setStatus('done')
     } catch (err) {
-      setFormError(err?.message || 'Nao foi possivel atualizar a senha. Tente novamente.')
+      setFormError(err?.message || 'Não foi possível atualizar a senha. Tente novamente.')
     } finally {
       setSubmitting(false)
     }
@@ -148,20 +148,20 @@ export default function ResetPassword() {
 
           {envError && (
             <InlineNotice tone="error">
-              Configuracao de autenticacao ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
+              Configuração de autenticação ausente. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.
             </InlineNotice>
         )}
 
         {status === 'loading' && (
           <p style={{ fontSize: 13, color: monitorTheme.textSecondary, margin: 0 }}>
-            Validando link...
+            Validando link…
           </p>
         )}
 
         {status === 'invalid' && (
           <>
             <InlineNotice tone="error">
-              {errorMessage || 'Link invalido ou expirado.'}
+              {errorMessage || 'Link inválido ou expirado.'}
             </InlineNotice>
             <DashboardButton
               type="button"
@@ -284,7 +284,7 @@ export default function ResetPassword() {
                   variant="icon"
                   size="sm"
                   icon={showConfirm ? EyeOff : Eye}
-                  aria-label={showConfirm ? 'Ocultar confirmacao' : 'Mostrar confirmacao'}
+                  aria-label={showConfirm ? 'Ocultar confirmação' : 'Mostrar confirmação'}
                   aria-pressed={showConfirm}
                   onClick={() => setShowConfirm((current) => !current)}
                   disabled={submitting || !confirm}
@@ -315,7 +315,7 @@ export default function ResetPassword() {
               size="lg"
               style={{ marginTop: 4 }}
             >
-              {submitting ? 'Salvando...' : 'Salvar nova senha'}
+              {submitting ? 'Salvando…' : 'Salvar nova senha'}
             </DashboardButton>
           </form>
         )}
@@ -323,7 +323,7 @@ export default function ResetPassword() {
         {status === 'done' && (
           <>
             <InlineNotice tone="success">
-              Senha atualizada com sucesso. Voce ja pode entrar com a nova senha.
+              Senha atualizada com sucesso. Você já pode entrar com a nova senha.
             </InlineNotice>
             <DashboardButton
               type="button"
