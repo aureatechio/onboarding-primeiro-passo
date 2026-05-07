@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Save, UserCircle } from 'lucide-react'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { useAuth } from '../context/AuthContext'
-import { authClient } from '../lib/auth-client'
+import { getAuthClient } from '../lib/auth-client'
 import { TYPE } from '../theme/design-tokens'
 import MonitorLayout from './AiStep2Monitor/MonitorLayout'
 import { monitorRadius, monitorTheme } from './AiStep2Monitor/theme'
@@ -20,6 +20,8 @@ export default function Profile() {
     setMessage('')
     setError('')
     try {
+      const authClient = getAuthClient()
+      if (!authClient) throw new Error('Autenticacao nao configurada')
       const { error: updateError } = await authClient
         .from('profiles')
         .update({ full_name: fullName.trim() })
@@ -43,7 +45,7 @@ export default function Profile() {
             Meu Perfil
           </h1>
           <p style={{ ...TYPE.bodySmall, color: monitorTheme.textSecondary, margin: '6px 0 0' }}>
-              Dados básicos da sua conta no dashboard.
+              Dados basicos da sua conta no dashboard.
           </p>
         </header>
 
@@ -54,7 +56,7 @@ export default function Profile() {
           {message && <InlineNotice tone="success">{message}</InlineNotice>}
           {error && <InlineNotice tone="error">{error}</InlineNotice>}
           <DashboardButton type="submit" disabled={saving} icon={Save} variant="primary" style={{ justifySelf: 'start' }}>
-            {saving ? 'Salvando…' : 'Salvar perfil'}
+            {saving ? 'Salvando...' : 'Salvar perfil'}
           </DashboardButton>
         </form>
       </div>
