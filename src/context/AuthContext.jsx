@@ -1,12 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { authClient, hasAuthEnv } from '../lib/auth-client'
+import { useLocation } from 'react-router'
+import { getAuthClient } from '../lib/auth-client'
 
 const AuthContext = createContext(null)
 
+function shouldLoadAuth(pathname) {
+  return (
+    pathname === '/login' ||
+    pathname.startsWith('/ai-step2') ||
+    pathname === '/copy-editor' ||
+    pathname === '/users' ||
+    pathname === '/profile'
+  )
+}
+
 export function AuthProvider({ children }) {
-  const envError = !hasAuthEnv()
+  const location = useLocation()
+  const authEnabled = shouldLoadAuth(location.pathname)
+  const authClient = useMemo(() => (authEnabled ? getAuthClient() : null), [authEnabled])
+  const envError = authEnabled && !authClient
   const [session, setSession] = useState(null)
-  const [isAuthLoading, setIsAuthLoading] = useState(!envError)
+  const [isAuthLoading, setIsAuthLoading] = useState(authEnabled && !envError)
   const [profile, setProfile] = useState(null)
   const [role, setRole] = useState(null)
   const refreshInFlight = useRef(false)
@@ -44,12 +58,24 @@ export function AuthProvider({ children }) {
     setProfile(nextProfile)
     setRole(nextRole)
     return { profile: nextProfile, role: nextRole, accessRevoked: false }
-  }, [])
+  }, [authClient])
 
   useEffect(() => {
-    if (envError || !authClient) return
+    if (!authEnabled) {
+      setSession(null)
+      setProfile(null)
+      setRole(null)
+      setIsAuthLoading(false)
+      return undefined
+    }
+
+    if (envError || !authClient) {
+      setIsAuthLoading(false)
+      return undefined
+    }
 
     let cancelled = false
+    setIsAuthLoading(true)
 
     authClient.auth.getSession().then(async ({ data }) => {
       if (cancelled) return
@@ -98,7 +124,7 @@ export function AuthProvider({ children }) {
       cancelled = true
       sub?.subscription?.unsubscribe?.()
     }
-  }, [envError, loadUserAccess])
+  }, [authClient, authEnabled, envError, loadUserAccess])
 
   const signInWithPassword = useCallback(async ({ email, password }) => {
     if (!authClient) throw new Error('Autenticacao nao configurada')
@@ -122,7 +148,7 @@ export function AuthProvider({ children }) {
     }
     setSession(nextSession)
     return data
-  }, [loadUserAccess])
+  }, [authClient, loadUserAccess])
 
   const signOut = useCallback(async () => {
     if (!authClient) {
@@ -136,14 +162,14 @@ export function AuthProvider({ children }) {
       setProfile(null)
       setRole(null)
     }
-  }, [])
+  }, [authClient])
 
   const refreshSession = useCallback(async () => {
     if (!authClient) return null
     if (refreshInFlight.current) return session
     refreshInFlight.current = true
     try {
-      const { data, error } = await authClient.auth.refreshSession()
+      const { data, error } = await authClient.auth.getSession()
       if (error) throw error
       const nextSession = data?.session ?? null
       const access = await loadUserAccess(nextSession)
@@ -155,9 +181,9 @@ export function AuthProvider({ children }) {
         return null
       }
       setSession(nextSession)
-      return data?.session ?? null
+      return nextSession
     } catch (err) {
-      console.warn('[AuthProvider] refreshSession failed, signing out:', err?.message)
+      console.warn('[AuthProvider] reload session failed, signing out:', err?.message)
       setSession(null)
       setProfile(null)
       setRole(null)
@@ -165,18 +191,18 @@ export function AuthProvider({ children }) {
     } finally {
       refreshInFlight.current = false
     }
-  }, [session, loadUserAccess])
+  }, [authClient, session, loadUserAccess])
 
   const refreshProfile = useCallback(async () => {
     const access = await loadUserAccess(session)
     if (session && access.accessRevoked) {
-      await authClient.auth.signOut()
+      await authClient?.auth.signOut()
       setSession(null)
       setProfile(null)
       setRole(null)
     }
     return access
-  }, [loadUserAccess, session])
+  }, [authClient, loadUserAccess, session])
 
   const hasRole = useCallback((allowedRoles) => {
     const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles]

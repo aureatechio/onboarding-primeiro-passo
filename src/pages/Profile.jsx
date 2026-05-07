@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Save, UserCircle } from 'lucide-react'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { useAuth } from '../context/AuthContext'
-import { authClient } from '../lib/auth-client'
+import { getAuthClient } from '../lib/auth-client'
 import { TYPE } from '../theme/design-tokens'
 import MonitorLayout from './AiStep2Monitor/MonitorLayout'
 import { monitorRadius, monitorTheme } from './AiStep2Monitor/theme'
@@ -20,6 +20,8 @@ export default function Profile() {
     setMessage('')
     setError('')
     try {
+      const authClient = getAuthClient()
+      if (!authClient) throw new Error('Autenticacao nao configurada')
       const { error: updateError } = await authClient
         .from('profiles')
         .update({ full_name: fullName.trim() })

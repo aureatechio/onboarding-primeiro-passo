@@ -4,7 +4,7 @@ import TopBarLogo from '../components/TopBarLogo'
 import { DashboardButton, DashboardField, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
-import { authClient, hasAuthEnv } from '../lib/auth-client'
+import { getAuthClient, hasAuthEnv } from '../lib/auth-client'
 
 const DEFAULT_DASHBOARD_URL = 'https://acelerai-primeiro-passo.vercel.app'
 
@@ -51,6 +51,7 @@ export default function ForgotPassword() {
 
   async function handleSubmit(event) {
     event.preventDefault()
+    const authClient = getAuthClient()
     if (submitting || envError || !authClient) return
     setSubmitting(true)
     setError(null)

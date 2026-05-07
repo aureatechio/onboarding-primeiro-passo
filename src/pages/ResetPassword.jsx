@@ -6,7 +6,7 @@ import { DashboardButton, InlineNotice } from '../components/dashboard'
 import { designTokens } from '../theme/design-tokens'
 import { dashboardMotion, focusVisibleStyle } from '../theme/dashboard-tokens'
 import { monitorTheme, monitorRadius } from './AiStep2Monitor/theme'
-import { authClient, hasAuthEnv } from '../lib/auth-client'
+import { getAuthClient, hasAuthEnv } from '../lib/auth-client'
 
 const MIN_PASSWORD = 6
 
@@ -30,6 +30,7 @@ export default function ResetPassword() {
   const requestedType = searchParams.get('type')
   const isInvite = requestedType === 'invite'
   const envError = !hasAuthEnv()
+  const authClient = envError ? null : getAuthClient()
   const [status, setStatus] = useState(envError ? 'invalid' : 'loading')
   const [errorMessage, setErrorMessage] = useState(null)
   const [password, setPassword] = useState('')
@@ -82,11 +83,11 @@ export default function ResetPassword() {
         setStatus('invalid')
         setErrorMessage(err?.message || 'Não foi possível validar o link. Solicite um novo e-mail.')
       })
-  }, [envError, isInvite, location.hash, location.search, navigate])
+  }, [authClient, envError, isInvite, location.hash, location.search, navigate])
 
   async function handleSubmit(event) {
     event.preventDefault()
-    if (submitting || status !== 'ready') return
+    if (submitting || status !== 'ready' || !authClient) return
     if (password.length < MIN_PASSWORD) {
       setFormError(`A senha precisa ter ao menos ${MIN_PASSWORD} caracteres.`)
       return
