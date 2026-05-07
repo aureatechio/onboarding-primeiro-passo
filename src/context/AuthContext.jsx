@@ -1,13 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation } from 'react-router'
 import { getAuthClient } from '../lib/auth-client'
 
 const AuthContext = createContext(null)
 
+function shouldLoadAuth(pathname) {
+  return (
+    pathname === '/login' ||
+    pathname.startsWith('/ai-step2') ||
+    pathname === '/copy-editor' ||
+    pathname === '/users' ||
+    pathname === '/profile'
+  )
+}
+
 export function AuthProvider({ children }) {
-  const authClient = useMemo(() => getAuthClient(), [])
-  const envError = !authClient
+  const location = useLocation()
+  const authEnabled = shouldLoadAuth(location.pathname)
+  const authClient = useMemo(() => (authEnabled ? getAuthClient() : null), [authEnabled])
+  const envError = authEnabled && !authClient
   const [session, setSession] = useState(null)
-  const [isAuthLoading, setIsAuthLoading] = useState(!envError)
+  const [isAuthLoading, setIsAuthLoading] = useState(authEnabled && !envError)
   const [profile, setProfile] = useState(null)
   const [role, setRole] = useState(null)
   const refreshInFlight = useRef(false)
@@ -48,9 +61,21 @@ export function AuthProvider({ children }) {
   }, [authClient])
 
   useEffect(() => {
-    if (envError || !authClient) return
+    if (!authEnabled) {
+      setSession(null)
+      setProfile(null)
+      setRole(null)
+      setIsAuthLoading(false)
+      return undefined
+    }
+
+    if (envError || !authClient) {
+      setIsAuthLoading(false)
+      return undefined
+    }
 
     let cancelled = false
+    setIsAuthLoading(true)
 
     authClient.auth.getSession().then(async ({ data }) => {
       if (cancelled) return
@@ -99,7 +124,7 @@ export function AuthProvider({ children }) {
       cancelled = true
       sub?.subscription?.unsubscribe?.()
     }
-  }, [authClient, envError, loadUserAccess])
+  }, [authClient, authEnabled, envError, loadUserAccess])
 
   const signInWithPassword = useCallback(async ({ email, password }) => {
     if (!authClient) throw new Error('Autenticacao nao configurada')
