@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test": "deno test --no-check --sloppy-imports --allow-env src/lib/admin-edge.test.js",
     "preview": "vite preview",
     "gate:lockfiles": "bash scripts/check-lockfiles.sh",
     "gate:deps": "npm ci",
