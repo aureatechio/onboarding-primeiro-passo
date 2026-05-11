@@ -1,12 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
-import { getAuthClient } from '../lib/auth-client'
+import { getAuthClient, hasAuthEnv } from '../lib/auth-client'
 
 const AuthContext = createContext(null)
 
 function shouldLoadAuth(pathname) {
   return (
-    pathname === '/login' ||
     pathname.startsWith('/ai-step2') ||
     pathname === '/copy-editor' ||
     pathname === '/users' ||
@@ -18,15 +17,15 @@ export function AuthProvider({ children }) {
   const location = useLocation()
   const authEnabled = shouldLoadAuth(location.pathname)
   const authClient = useMemo(() => (authEnabled ? getAuthClient() : null), [authEnabled])
-  const envError = authEnabled && !authClient
+  const envError = !hasAuthEnv()
   const [session, setSession] = useState(null)
   const [isAuthLoading, setIsAuthLoading] = useState(authEnabled && !envError)
   const [profile, setProfile] = useState(null)
   const [role, setRole] = useState(null)
   const refreshInFlight = useRef(false)
 
-  const loadUserAccess = useCallback(async (nextSession) => {
-    if (!authClient || !nextSession?.user?.id) {
+  const loadUserAccess = useCallback(async (nextSession, client = authClient) => {
+    if (!client || !nextSession?.user?.id) {
       setProfile(null)
       setRole(null)
       return { profile: null, role: null }
@@ -35,12 +34,12 @@ export function AuthProvider({ children }) {
     const userId = nextSession.user.id
     const [{ data: profileData, error: profileError }, { data: roleData, error: roleError }] =
       await Promise.all([
-        authClient
+        client
           .from('profiles')
           .select('id, email, full_name, avatar_url, status, created_at, updated_at')
           .eq('id', userId)
           .maybeSingle(),
-        authClient.from('user_roles').select('role, assigned_at').eq('user_id', userId).maybeSingle(),
+        client.from('user_roles').select('role, assigned_at').eq('user_id', userId).maybeSingle(),
       ])
 
     if (profileError) throw profileError
@@ -127,20 +126,21 @@ export function AuthProvider({ children }) {
   }, [authClient, authEnabled, envError, loadUserAccess])
 
   const signInWithPassword = useCallback(async ({ email, password }) => {
-    if (!authClient) throw new Error('Autenticacao nao configurada')
-    const { data, error } = await authClient.auth.signInWithPassword({ email, password })
+    const loginClient = getAuthClient()
+    if (!loginClient) throw new Error('Autenticacao nao configurada')
+    const { data, error } = await loginClient.auth.signInWithPassword({ email, password })
     if (error) throw error
     const nextSession = data?.session ?? null
-    const access = await loadUserAccess(nextSession)
+    const access = await loadUserAccess(nextSession, loginClient)
     if (access.accessRevoked) {
-      await authClient.auth.signOut()
+      await loginClient.auth.signOut()
       setSession(null)
       setProfile(null)
       setRole(null)
       throw new Error('Seu acesso a este app foi removido. Fale com um administrador.')
     }
     if (access.profile?.status === 'disabled') {
-      await authClient.auth.signOut()
+      await loginClient.auth.signOut()
       setSession(null)
       setProfile(null)
       setRole(null)
@@ -148,7 +148,7 @@ export function AuthProvider({ children }) {
     }
     setSession(nextSession)
     return data
-  }, [authClient, loadUserAccess])
+  }, [loadUserAccess])
 
   const signOut = useCallback(async () => {
     if (!authClient) {

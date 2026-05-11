@@ -27,7 +27,7 @@ function readNext(searchParams) {
 export default function Login() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { isAuthenticated, isAuthLoading, envError, signInWithPassword } = useAuth()
+  const { envError, signInWithPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -35,21 +35,12 @@ export default function Login() {
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const [showPassword, setShowPassword] = useState(false)
   const [passwordFocused, setPasswordFocused] = useState(false)
-  const redirectedRef = useRef(false)
   const submitInFlightRef = useRef(false)
   const passwordFieldId = useId()
 
   const next = useMemo(() => readNext(searchParams), [searchParams])
   const isCoolingDown = cooldownSeconds > 0
   const authControlsDisabled = submitting || envError || isCoolingDown
-
-  useEffect(() => {
-    if (redirectedRef.current) return
-    if (!isAuthLoading && isAuthenticated) {
-      redirectedRef.current = true
-      navigate(next, { replace: true })
-    }
-  }, [isAuthenticated, isAuthLoading, navigate, next])
 
   useEffect(() => {
     if (cooldownSeconds <= 0) return undefined
@@ -68,7 +59,6 @@ export default function Login() {
     try {
       await signInWithPassword({ email: email.trim(), password })
       await recordDashboardActivity('login', { path: next, force: true })
-      redirectedRef.current = true
       navigate(next, { replace: true })
     } catch (err) {
       const message = err?.message || ''
