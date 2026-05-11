@@ -1,4 +1,4 @@
-import { getAuthClient as defaultGetAuthClient } from './auth-client'
+import { getAuthClient as defaultGetAuthClient } from './auth-client.js'
 
 const defaultEnv = import.meta.env ?? {}
 

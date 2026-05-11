@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "deno test --no-check --sloppy-imports --allow-env src/lib/admin-edge.test.js",
+    "test": "deno test src/lib/admin-edge.test.js src/lib/ai-step2-validation.test.ts src/pages/AiStep2Monitor/utils.test.js --allow-env --allow-net",
     "preview": "vite preview",
     "gate:lockfiles": "bash scripts/check-lockfiles.sh",
     "gate:deps": "npm ci",

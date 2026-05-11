@@ -59,7 +59,9 @@ Deno.test('adminFetch succeeds without refreshing when the first request is OK',
   assertEquals(counters.getSession, 1)
   assertEquals(counters.refreshSession, 0)
   assertEquals(requests.length, 1)
+  assertEquals(requests[0].url, 'https://example.supabase.co/functions/v1/list-users')
   assertEquals(requests[0].init.headers.Authorization, 'Bearer old-token')
+  assertEquals(requests[0].init.headers.apikey, 'anon-key')
 })
 
 Deno.test('adminFetch refreshes once and retries once after a 401', async () => {
@@ -156,4 +158,32 @@ Deno.test('adminFetch preserves code, status, and payload for final non-OK respo
   assertEquals(error.status, 403)
   assertEquals(error.payload, payload)
   assertEquals(counters.refreshSession, 0)
+})
+
+Deno.test('adminFetch preserves the final non-OK response after a retry', async () => {
+  const counters = { getSession: 0, refreshSession: 0 }
+  const requests = []
+  const payload = { code: 'FORBIDDEN', message: 'Sem permissao.' }
+  const { adminFetch } = createAdminEdgeClient({
+    authClient: createAuthClient({ counters }),
+    env,
+    fetchImpl: async (url, init) => {
+      requests.push({ url, init })
+      return requests.length === 1
+        ? jsonResponse(401, { code: 'JWT_EXPIRED', message: 'Expired' })
+        : jsonResponse(403, payload)
+    },
+  })
+
+  const error = await assertRejects(
+    () => adminFetch('update-user-role', { body: { user_id: 'u1', role: 'admin' } }),
+    AdminEdgeError,
+    'Sem permissao.',
+  )
+
+  assertEquals(error.code, 'FORBIDDEN')
+  assertEquals(error.status, 403)
+  assertEquals(error.payload, payload)
+  assertEquals(counters.refreshSession, 1)
+  assertEquals(requests.length, 2)
 })
